@@ -7,7 +7,7 @@ export interface AuthGateway {
   subscribe(listener: AuthListener): () => void;
   signIn(email: string, password: string): Promise<void>;
   signUp(email: string, password: string, displayName: string, next?: string): Promise<{ confirmationRequired: boolean }>;
-  requestReset(email: string): Promise<void>;
+  requestReset(email: string, next?: string): Promise<void>;
   updatePassword(password: string): Promise<void>;
   signOut(): Promise<void>;
   completeCallback(code: string): Promise<void>;

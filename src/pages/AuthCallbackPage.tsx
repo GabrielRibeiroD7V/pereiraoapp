@@ -4,20 +4,24 @@ import { useAuth } from '../auth/AuthProvider';
 import { authErrorMessage } from '../auth/errors';
 import { PageHeader } from '../components/PageHeader';
 import { safeReturnPath } from '../auth/returnPath';
+import { clearAuthReturn, readAuthReturn } from '../auth/flowState';
 
 export function AuthCallbackPage() {
   const { gateway } = useAuth();
   const [params] = useSearchParams();
   const code = params.get('code');
   const recovery = params.get('flow') === 'recovery';
-  const next = safeReturnPath(params.get('next'));
+  const [next] = useState(() => params.has('next') ? safeReturnPath(params.get('next')) : readAuthReturn());
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   useEffect(() => {
     let live = true;
     if (!gateway || !code) return;
     void gateway.completeCallback(code).then(() => {
-      if (live) navigate(recovery ? '/redefinir-senha' : next, { replace: true });
+      if (live) {
+        clearAuthReturn();
+        navigate(recovery ? `/redefinir-senha?${new URLSearchParams({ next })}` : next, { replace: true });
+      }
     }).catch((cause: unknown) => { if (live) setError(authErrorMessage(cause)); });
     return () => { live = false; };
   }, [gateway, code, recovery, next, navigate]);

@@ -1,7 +1,7 @@
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { AuthGateway, AuthSession } from './types';
-import { safeReturnPath } from './returnPath';
+import { rememberAuthReturn } from './flowState';
 
 function mapSession(session: Session | null): AuthSession | null {
   if (!session) return null;
@@ -36,15 +36,15 @@ export function createAuthGateway(client: SupabaseClient<Database>, origin: () =
       if (error) throw error;
     },
     async signUp(email, password, displayName, next) {
-      const confirmationUrl = new URL(callbackUrl(origin()));
-      confirmationUrl.searchParams.set('next', safeReturnPath(next ?? null));
+      rememberAuthReturn(next);
       const { data, error } = await client.auth.signUp({ email, password, options: {
-        emailRedirectTo: confirmationUrl.href, data: { display_name: displayName },
+        emailRedirectTo: callbackUrl(origin()), data: { display_name: displayName },
       } });
       if (error) throw error;
       return { confirmationRequired: !data.session };
     },
-    async requestReset(email) {
+    async requestReset(email, next) {
+      rememberAuthReturn(next);
       const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: callbackUrl(origin(), true) });
       if (error) throw error;
     },

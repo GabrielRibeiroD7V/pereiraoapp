@@ -1,5 +1,7 @@
 # PR #4 — Cadastro de autônomos e empresas
 
+> Registro histórico do PR #4. As duas migrações foram aplicadas posteriormente com autorização. O estado atual da conexão e as pendências estão em [Autenticação e Vercel](auth-vercel-validation.md).
+
 ## Fluxo implementado
 
 Uma única conta Supabase Auth acessa os perfis profissionais. Início e Buscar continuam públicos; Conta e a chamada da Home oferecem “Anunciar meus serviços”. O destino `/conta/profissional/cadastro` é privado. Login/cadastro e confirmação por e-mail preservam o retorno ao formulário por uma lista fechada de destinos locais.
