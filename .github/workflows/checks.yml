@@ -17,14 +17,22 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:migrations
       - run: npm run build
   sql-rls:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: PostgreSQL 17 isolado, sem rede
-        run: >-
-          docker run --rm --network none --user postgres
-          --mount type=bind,source="$PWD/supabase",target=/tests,readonly
-          --mount type=bind,source="$PWD/scripts/test-sql-container.sh",target=/runner.sh,readonly
-          --entrypoint bash postgres:17 /runner.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Instalar PostgreSQL 17 nativo no runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-17
+      - name: PostgreSQL 17 nativo e isolado, sem Docker
+        env:
+          PG_BIN: /usr/lib/postgresql/17/bin
+        run: node scripts/test-sql.mjs

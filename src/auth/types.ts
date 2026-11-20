@@ -6,7 +6,7 @@ export interface AuthGateway {
   getSession(): Promise<AuthSession | null>;
   subscribe(listener: AuthListener): () => void;
   signIn(email: string, password: string): Promise<void>;
-  signUp(email: string, password: string, displayName: string): Promise<{ confirmationRequired: boolean }>;
+  signUp(email: string, password: string, displayName: string, next?: string): Promise<{ confirmationRequired: boolean }>;
   requestReset(email: string): Promise<void>;
   updatePassword(password: string): Promise<void>;
   signOut(): Promise<void>;

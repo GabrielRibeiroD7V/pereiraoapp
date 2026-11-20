@@ -4,7 +4,7 @@
 
 Projeto inspecionado: `yazdjiwaksamizrbqewq`, `ACTIVE_HEALTHY`, PostgreSQL 17.12. O schema público estava vazio. Nenhuma escrita, migração, configuração de Auth, envio de e-mail, bucket ou usuário foi criado no projeto remoto.
 
-Migração para revisão: [`20261120213346_backend_auth_foundation.sql`](../supabase/migrations/20261120213346_backend_auth_foundation.sql), criada com `supabase migration new backend_auth_foundation` usando CLI 3.2.0. Não houve `link`, `db push` ou `migration up` remoto.
+Migração da fundação: [`20261120214652_backend_auth_foundation.sql`](../supabase/migrations/20261120214652_backend_auth_foundation.sql). Criada originalmente com versão `20261120213346` pelo CLI 3.2.0; aplicada posteriormente pelo MCP com versão remota `20261120214652`. O PR #4 reconcilia somente o nome do arquivo local, com conteúdo intacto. O restante deste documento registra a entrega original do PR #3; a situação atual está no [relatório do PR #4](professional-registration.md).
 
 A futura aplicação cria nove tabelas, índices, constraints, RLS, funções e um trigger em `auth.users`. Os únicos dados de catálogo são Mundo Novo/MS e as seis categorias aprovadas. Para contas já existentes em Auth, há um backfill de `profiles` com nome de apresentação, sem copiar e-mail, senha ou tokens. A migração é transacional e não altera ou remove tabelas existentes; conflitos de nomes devem ser inspecionados antes de aplicá-la. Um erro no trigger poderá impedir novos cadastros: o trigger precisa ser validado no ambiente Supabase de desenvolvimento após autorização.
 

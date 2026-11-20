@@ -1,0 +1,10 @@
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+const canonical = 'supabase/migrations/20261120214652_backend_auth_foundation.sql';
+const legacy = 'supabase/migrations/20261120213346_backend_auth_foundation.sql';
+const expectedMd5 = '96f8b9b08666aaac9be47ea809fea081';
+if (existsSync(legacy)) throw new Error('A migração inicial ainda está duplicada com a versão antiga.');
+const actualMd5 = createHash('md5').update(readFileSync(canonical)).digest('hex');
+if (actualMd5 !== expectedMd5) throw new Error('O conteúdo da fundação difere do SQL remoto conferido.');
+console.log('Histórico local reconciliado: versão 20261120214652, SQL intacto e sem arquivo inicial duplicado.');
+console.log('Comparação com o snapshot remoto conferido em 20/11/2026; este comando não acessa nem altera bancos.');

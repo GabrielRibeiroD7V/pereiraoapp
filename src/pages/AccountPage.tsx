@@ -34,6 +34,10 @@ export function AccountPage() {
         <div className="account-actions"><LinkButton to="/entrar">Entrar</LinkButton><LinkButton to="/criar-conta" variant="secondary">Criar conta</LinkButton></div>
       </>}
       {(error || sessionError) && <p className="form-error" role="alert">{error || sessionError}</p>}
+      <div className="account-actions">
+        <LinkButton to="/conta/profissional/cadastro">Anunciar meus serviços</LinkButton>
+        {session && <LinkButton to="/conta/profissional" variant="secondary">Espaço profissional</LinkButton>}
+      </div>
       <LinkButton to={routes.home} variant="secondary">Continuar explorando</LinkButton>
     </>
   );

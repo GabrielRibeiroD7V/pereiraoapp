@@ -1,9 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
-export function safeReturnPath(value: string | null) {
-  return value && ['/conta', '/conta/dados'].includes(value) ? value : '/conta';
-}
+import { safeReturnPath } from './returnPath';
+export { safeReturnPath } from './returnPath';
 
 export function RequireAuth() {
   const { session, loading, error } = useAuth();
