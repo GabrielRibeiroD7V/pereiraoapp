@@ -58,8 +58,10 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('heading', { name: second.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Meus serviços|Portfólio|Minha assinatura|Mensagens/ })).not.toBeInTheDocument();
-    expect(screen.getAllByText('Em breve')).toHaveLength(4);
+    expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
+    expect(screen.getByRole('link', { name: /Meus trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+    expect(screen.queryByRole('link', { name: /Minha assinatura|Mensagens/ })).not.toBeInTheDocument();
+    expect(screen.getAllByText('Em breve')).toHaveLength(2);
   });
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {

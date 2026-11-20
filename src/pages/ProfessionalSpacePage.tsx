@@ -57,12 +57,12 @@ export function ProfessionalSpacePage() {
       </section>
       <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Seu negócio</h2>
         <MenuRow icon={UserRound} title="Meu perfil" description="Apresentação, localização e contatos" />
-        <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" soon />
-        <MenuRow icon={Image} title="Portfólio" description="Fotografias dos seus trabalhos" soon />
+        <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
+        <MenuRow icon={Image} title="Meus trabalhos" description="Fotografias dos seus trabalhos" to={`/conta/profissional/${business.id}/trabalhos`} />
         <MenuRow icon={CreditCard} title="Minha assinatura" description="Plano e cobrança" soon />
         <MenuRow icon={MessageSquare} title="Mensagens e orçamentos" description="Conversas com seus clientes" soon />
       </section>
-      <p className="field-help professional-footnote">A prévia pública e as imagens de apresentação serão disponibilizadas em uma próxima etapa.</p>
+      <p className="field-help professional-footnote">Serviços e fotografias seguem o estado de publicação do seu perfil. A prévia pública será disponibilizada em uma próxima etapa.</p>
       <Link className="text-link add-business" to="/conta/profissional/cadastro"><Plus size={17} aria-hidden="true" />Cadastrar outro negócio</Link>
     </>}
   </div>;

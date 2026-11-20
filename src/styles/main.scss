@@ -1,5 +1,6 @@
 @use 'tokens';
 @use 'professional';
+@use 'work';
 
 :root {
   @include tokens.properties;
@@ -275,3 +276,4 @@ h1, h2, p { margin: 0; }
 }
 
 @include professional.styles;
+@include work.styles;

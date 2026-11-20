@@ -28,6 +28,7 @@ try {
     run(executable('psql'), [...args, '-f', resolve('supabase/migrations', file)], true);
   }
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/rls.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/storage.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

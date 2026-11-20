@@ -20,8 +20,9 @@ export type ServiceRow = {
 }
 export type PortfolioRow = {
   id: string; business_id: string; service_id: string | null; storage_path: string;
-  caption: string | null; sort_order: number; created_at: string;
+  caption: string | null; sort_order: number; created_at: string; media_state: 'pending' | 'ready' | 'deleting';
 }
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 export interface Database {
   public: {
     Tables: {
@@ -31,12 +32,14 @@ export interface Database {
       businesses: Table<BusinessRow, never, Partial<Pick<BusinessRow, 'name' | 'slug' | 'type' | 'category_id' | 'description' | 'city_id' | 'whatsapp' | 'instagram' | 'avatar_path'>>>;
       business_members: Table<MembershipRow, never, never>;
       business_details: Table<{ business_id: string; legal_name: string | null; tax_id: string | null; updated_at: string }>;
-      services: Table<ServiceRow>;
-      portfolio_items: Table<PortfolioRow>;
+      services: Table<ServiceRow, Pick<ServiceRow, 'id' | 'business_id' | 'category_id' | 'name' | 'description' | 'pricing_type' | 'price_amount_cents' | 'active'>, Partial<Pick<ServiceRow, 'category_id' | 'name' | 'description' | 'pricing_type' | 'price_amount_cents' | 'active'>>>;
+      portfolio_items: Table<PortfolioRow, never, Partial<Pick<PortfolioRow, 'caption' | 'service_id'>>>;
       business_service_areas: Table<{ business_id: string; city_id: string }>;
     };
     Views: Record<string, never>;
     Functions: {
+      portfolio_command: { Args: { command: string; target_business: string; target_item?: string; target_service?: string | null; item_caption?: string | null; ordered_items?: string[] }; Returns: Json };
+      delete_business_service: { Args: { target_business: string; target_service: string }; Returns: undefined };
       create_business: {
         Args: { business_name: string; business_slug: string; business_type: 'autonomo' | 'empresa'; initial_city_id: string };
         Returns: string;

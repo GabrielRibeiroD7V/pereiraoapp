@@ -29,6 +29,10 @@ insert into services(business_id, category_id, name, active) values
  (:'a_id', 'eletrica', 'Serviço inativo', false), (:'draft_id', 'pintura', 'Serviço rascunho', true);
 insert into business_details(business_id, legal_name, tax_id) values (:'a_id', 'Razão privada', '12345678000199');
 insert into portfolio_items(business_id, service_id, storage_path) values (:'a_id', :'service_id', :'a_id' || '/portfolio/teste.webp');
+-- Fixture legada publicada por operador confiável somente no banco isolado.
+reset role;
+update public.portfolio_items set media_state='ready' where business_id=:'a_id';
+set local role authenticated;
 select test.assert_true((select count(*)=2 from business_members), 'criador é proprietário de múltiplos negócios');
 update businesses set category_id='eletrica' where id=:'a_id';
 select test.assert_true((select category_id='eletrica' from businesses where id=:'a_id'), 'owner define categoria principal');
