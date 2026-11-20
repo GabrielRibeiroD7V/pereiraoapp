@@ -14,6 +14,8 @@
 body { margin: 0; min-width: 20rem; font-size: var(--font-body); line-height: 1.5; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .6; cursor: not-allowed; }
 button, a { -webkit-tap-highlight-color: transparent; }
 svg { flex-shrink: 0; }
 h1, h2, p { margin: 0; }
@@ -161,6 +163,21 @@ h1, h2, p { margin: 0; }
 }
 
 .search-context { margin-bottom: var(--space-6); overflow-wrap: anywhere; color: var(--color-secondary); strong { color: var(--color-navy); } }
+
+.auth-page { max-width: 28rem; }
+.auth-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.form-field {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  label { font-size: var(--font-small); font-weight: 600; }
+  input { width: 100%; min-height: 3rem; border: 1px solid var(--color-border); border-radius: var(--radius-small); padding: var(--space-3); background: var(--color-background); color: var(--color-navy); }
+}
+.form-notice, .form-error { padding: var(--space-3); margin-bottom: var(--space-4); border-radius: var(--radius-small); font-size: var(--font-small); overflow-wrap: anywhere; }
+.form-notice { background: var(--color-surface); }
+.form-error { color: var(--color-error); border: 1px solid currentColor; }
+.field-help { font-size: var(--font-small); color: var(--color-secondary); }
+.auth-links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-6); font-size: var(--font-small); a { text-decoration: underline; text-underline-offset: .2em; padding-block: var(--space-3); } }
+.account-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-6); }
+.account-details { display: grid; gap: var(--space-2); margin-block: var(--space-6); dt { font-weight: 600; } dd { margin: 0 0 var(--space-3); overflow-wrap: anywhere; color: var(--color-secondary); } }
 
 .button {
   display: inline-flex;

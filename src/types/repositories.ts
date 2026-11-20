@@ -2,7 +2,7 @@ import type {
   Account, PageResult, PortfolioItem, Provider, ProviderService, SearchFilters,
 } from './domain';
 
-/** Implementações, autenticação e políticas de acesso pertencem a PRs futuros.
+/** Contratos do marketplace completo; o adaptador inicial está em data/foundationRepository.
  * Nunca confiar em ownerId/IDs recebidos do cliente para conceder acesso.
  */
 export interface MarketplaceRepository {

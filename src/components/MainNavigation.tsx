@@ -1,5 +1,5 @@
 import { House, Search, UserRound } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { routes } from '../app/routes';
 
 const items = [
@@ -9,11 +9,13 @@ const items = [
 ] as const;
 
 export function MainNavigation() {
+  const { pathname } = useLocation();
+  const accountPage = ['/entrar', '/criar-conta', '/recuperar-senha', '/redefinir-senha', '/auth/retorno'].includes(pathname);
   return (
     <nav className="main-nav" aria-label="Navegação principal">
       {items.map(({ to, label, Icon }) => (
         <NavLink key={to} to={to} end={to === routes.home}
-          className={({ isActive }) => `main-nav__link${isActive ? ' main-nav__link--active' : ''}`}>
+          className={({ isActive }) => `main-nav__link${isActive || (to === routes.account && accountPage) ? ' main-nav__link--active' : ''}`}>
           <Icon size={23} strokeWidth={1.8} aria-hidden="true" />
           <span>{label}</span>
         </NavLink>
