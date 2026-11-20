@@ -19,7 +19,7 @@ describe('navegação pública', () => {
 
   it('navega sem login e transfere o foco para o título', () => {
     open();
-    fireEvent.click(screen.getByRole('link', { name: 'Buscar serviços' }));
+    fireEvent.click(within(screen.getByRole('navigation')).getByRole('link', { name: 'Buscar' }));
     expect(screen.getByRole('heading', { level: 1, name: 'Buscar' })).toHaveFocus();
     expect(document.title).toBe('Buscar | PEREIRÃO');
     const nav = screen.getByRole('navigation');
@@ -34,7 +34,7 @@ describe('navegação pública', () => {
     open(path);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'PEREIRÃO' })).toBeInTheDocument();
   });
 
   it('oferece recuperação para rota desconhecida', () => {

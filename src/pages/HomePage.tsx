@@ -1,16 +1,32 @@
-import { Search } from 'lucide-react';
-import { LinkButton } from '../components/LinkButton';
+import { BriefcaseBusiness } from 'lucide-react';
+import { CategoryTile } from '../components/CategoryTile';
 import { PageHeader } from '../components/PageHeader';
-import { routes } from '../app/routes';
+import { SearchField } from '../components/SearchField';
+import { ProviderList } from '../components/ProviderList';
+import { categories } from '../config/categories';
 
 export function HomePage() {
   return (
     <>
-      <PageHeader eyebrow="Serviços na sua cidade" title="O que você está procurando?">
-        <p>Profissionais autônomos e empresas, perto de você.</p>
-      </PageHeader>
-      <LinkButton to={routes.search}><Search size={20} aria-hidden="true" />Buscar serviços</LinkButton>
-      <p className="supporting-copy">Navegue livremente pelo PEREIRÃO. Você não precisa entrar para explorar.</p>
+      <PageHeader title="O que você está procurando?" />
+      <SearchField />
+      <section className="home-section" aria-labelledby="categories-title">
+        <h2 id="categories-title">Categorias populares</h2>
+        <ul className="category-grid">
+          {categories.map((category) => <li key={category.id}><CategoryTile category={category} /></li>)}
+        </ul>
+      </section>
+      <section className="home-section" aria-labelledby="featured-title">
+        <h2 id="featured-title">Profissionais em destaque</h2>
+        <ProviderList providers={[]} />
+      </section>
+      <section className="provider-invite" aria-labelledby="invite-title">
+        <BriefcaseBusiness size={24} aria-hidden="true" />
+        <div>
+          <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
+          <p>Divulgue seus serviços no PEREIRÃO e seja encontrado na sua cidade.</p>
+        </div>
+      </section>
     </>
   );
 }
