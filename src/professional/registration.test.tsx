@@ -6,7 +6,7 @@ import type { AuthGateway } from '../auth/types';
 import type { BusinessRow } from '../lib/database.types';
 import type { ProfessionalCatalog, ProfessionalRepository, RegistrationInput } from './types';
 import { emptyRegistration, normalizeRegistration, validateRegistration, createRegistrationSlug } from './validation';
-import { readCheckpoint } from './checkpoint';
+import { readCheckpoint, writeCheckpoint } from './checkpoint';
 
 const bid = '00000000-0000-0000-0000-000000000004';
 const catalog: ProfessionalCatalog = {
@@ -134,12 +134,14 @@ describe('cadastro progressivo e espaço profissional', () => {
   });
 
   it('edita um perfil existente sem executar criação', async () => {
+    writeCheckpoint('registration-user', { slug: 'draft-teste', businessId: bid });
     const repo = repository(); open(repo, `/conta/profissional/${bid}/editar`);
     await details(); await finalStep();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
     await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
     expect(repo.createDraft).not.toHaveBeenCalled();
     expect(repo.getEditable).toHaveBeenCalledWith(bid);
+    expect(readCheckpoint('registration-user')).toBeNull();
   });
 
   it('bloqueia cadastro com aviso honesto antes da nova migração', async () => {

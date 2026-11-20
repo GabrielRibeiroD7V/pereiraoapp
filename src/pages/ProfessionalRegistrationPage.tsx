@@ -69,7 +69,7 @@ export function ProfessionalRegistrationPage() {
       checkpoint.current = { ...attempt, businessId: id };
       if (!businessId) writeCheckpoint(uid, checkpoint.current);
       await repository.saveDraft(id, normalized);
-      if (!businessId) clearCheckpoint(uid);
+      if (!businessId || readCheckpoint(uid)?.businessId === id) clearCheckpoint(uid);
       navigate('/conta/profissional', { replace: true, state: { saved: true } });
     } catch (cause) {
       if (typeof cause === 'object' && cause !== null && 'code' in cause && cause.code === '23505' && !checkpoint.current?.businessId) {
