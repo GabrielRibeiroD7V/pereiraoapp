@@ -18,3 +18,13 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+  sql-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL 17 isolado, sem rede
+        run: >-
+          docker run --rm --network none --user postgres
+          --mount type=bind,source="$PWD/supabase",target=/tests,readonly
+          --mount type=bind,source="$PWD/scripts/test-sql-container.sh",target=/runner.sh,readonly
+          --entrypoint bash postgres:17 /runner.sh

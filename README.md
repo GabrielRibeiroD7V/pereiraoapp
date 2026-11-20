@@ -23,4 +23,8 @@ npm run build
 
 `npm run preview` permite inspecionar localmente o resultado do build. Não há script de publicação.
 
-A versão atual contém a identidade oficial, tela inicial, navegação pública e contratos tipados. A pesquisa e as seis categorias direcionam a `/buscar` com os parâmetros na URL; a listagem ainda não consulta dados reais. Não conecta ao Supabase, não exige segredos e não implementa autenticação. Consulte [arquitetura e limites](docs/architecture.md), [marca oficial](assets/brand/README.md) e [validação do PR #2](docs/pr2-validation.md).
+A versão atual contém identidade oficial, tela inicial, navegação pública e a fundação de autenticação Supabase. A pesquisa e as seis categorias direcionam a `/buscar` com parâmetros; a listagem ainda não consulta dados reais.
+
+A autenticação exige configuração pública válida conforme `.env.example`; sem ela, o marketplace permanece navegável e os formulários informam a indisponibilidade. Não coloque chaves secretas em variáveis VITE. As migrações são **propostas para revisão**, não foram aplicadas remotamente. Merge e build não executam SQL ou deploy.
+
+Consulte [backend, segurança e configuração](docs/backend-auth-foundation.md), [arquitetura visual](docs/architecture.md), [marca oficial](assets/brand/README.md) e [validação do PR #2](docs/pr2-validation.md).
