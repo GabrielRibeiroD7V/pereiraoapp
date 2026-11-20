@@ -23,4 +23,4 @@ npm run build
 
 `npm run preview` permite inspecionar localmente o resultado do build. Não há script de publicação.
 
-A base atual contém somente estrutura visual, navegação pública e contratos tipados. Não conecta ao Supabase, não exige segredos e não implementa busca/autenticação. Consulte [arquitetura e limites](docs/architecture.md).
+A versão atual contém a identidade oficial, tela inicial, navegação pública e contratos tipados. A pesquisa e as seis categorias direcionam a `/buscar` com os parâmetros na URL; a listagem ainda não consulta dados reais. Não conecta ao Supabase, não exige segredos e não implementa autenticação. Consulte [arquitetura e limites](docs/architecture.md), [marca oficial](assets/brand/README.md) e [validação do PR #2](docs/pr2-validation.md).
