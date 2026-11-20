@@ -92,7 +92,7 @@ describe('autenticação e rotas', () => {
     fireEvent.change(screen.getByLabelText('Seu nome'), { target: { value: 'Pessoa de teste' } });
     fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Confira seu e-mail');
-    expect(gateway.signUp).toHaveBeenCalledWith('test@example.invalid', 'somente-teste-123', 'Pessoa de teste');
+    expect(gateway.signUp).toHaveBeenCalledWith('test@example.invalid', 'somente-teste-123', 'Pessoa de teste', '/conta');
     expect(screen.getByLabelText('Senha', { exact: true })).toHaveValue('');
   });
 
@@ -186,7 +186,9 @@ describe('cliente e gateway Supabase', () => {
     const exchange = vi.spyOn(client.auth, 'exchangeCodeForSession').mockResolvedValue({ data: { user: sdkSession.user, session: sdkSession }, error: null });
     const gateway = createAuthGateway(client, () => 'https://preview.example.invalid');
     expect(await gateway.signUp('test@example.invalid', 'test-only', 'Teste')).toEqual({ confirmationRequired: true });
-    expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno', data: { display_name: 'Teste' } } }));
+    expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno?next=%2Fconta', data: { display_name: 'Teste' } } }));
+    await gateway.signUp('test@example.invalid', 'test-only', 'Teste', '/conta/profissional/cadastro');
+    expect(signUp).toHaveBeenLastCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno?next=%2Fconta%2Fprofissional%2Fcadastro', data: { display_name: 'Teste' } } }));
     await gateway.requestReset('test@example.invalid');
     expect(reset).toHaveBeenCalledWith('test@example.invalid', { redirectTo: 'https://preview.example.invalid/auth/retorno?flow=recovery' });
     await Promise.all([gateway.completeCallback('test-code'), gateway.completeCallback('test-code')]);

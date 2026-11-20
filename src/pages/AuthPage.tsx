@@ -44,11 +44,11 @@ export function AuthPage({ mode }: { mode: Mode }) {
         await gateway.signIn(email, password);
         navigate(next, { replace: true });
       } else if (mode === 'signup') {
-        const result = await gateway.signUp(email, password, name);
+        const result = await gateway.signUp(email, password, name, next);
         if (result.confirmationRequired) {
           form.reset();
           setNotice('Confira seu e-mail para confirmar a conta. Se já possui uma conta, entre ou recupere sua senha.');
-        } else navigate('/conta', { replace: true });
+        } else navigate(next, { replace: true });
       } else if (mode === 'recovery') {
         await gateway.requestReset(email);
         form.reset();

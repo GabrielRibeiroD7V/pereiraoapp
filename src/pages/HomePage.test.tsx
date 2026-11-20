@@ -52,14 +52,14 @@ describe('Início', () => {
     expect(screen.getByLabelText('Sua busca')).toHaveTextContent(`Categoria: ${name}`);
   });
 
-  it('mantém estado vazio sem fotos ou avaliações fictícias e convite sem botão', () => {
+  it('mantém estado vazio sem fotos ou avaliações fictícias e convite com destino real', () => {
     open();
     const featured = screen.getByRole('region', { name: 'Profissionais em destaque' });
     expect(within(featured).getByText('Novos profissionais em breve')).toBeInTheDocument();
     expect(within(featured).queryByRole('link')).not.toBeInTheDocument();
     const invite = screen.getByRole('region', { name: 'É profissional ou tem uma empresa?' });
     expect(within(invite).queryByRole('button')).not.toBeInTheDocument();
-    expect(within(invite).queryByRole('link')).not.toBeInTheDocument();
+    expect(within(invite).getByRole('link', { name: 'Anunciar meus serviços' })).toHaveAttribute('href', '/conta/profissional/cadastro');
     expect(screen.getAllByRole('img')).toHaveLength(1);
   });
 

@@ -12,6 +12,10 @@ import { RequireAuth } from '../auth/RequireAuth';
 import { AuthPage } from '../pages/AuthPage';
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import { PersonalDataPage } from '../pages/PersonalDataPage';
+import { ProfessionalProvider } from '../professional/ProfessionalProvider';
+import type { ProfessionalRepository } from '../professional/types';
+import { ProfessionalRegistrationPage } from '../pages/ProfessionalRegistrationPage';
+import { ProfessionalSpacePage } from '../pages/ProfessionalSpacePage';
 
 const titles: Record<string, string> = {
   [routes.home]: 'Início', [routes.search]: 'Buscar', [routes.account]: 'Conta',
@@ -19,14 +23,14 @@ const titles: Record<string, string> = {
   '/redefinir-senha': 'Definir nova senha', '/auth/retorno': 'Confirmar acesso', '/conta/dados': 'Meus dados',
 };
 
-export function App({ authGateway }: { authGateway?: AuthGateway | null }) {
-  return <AuthProvider gateway={authGateway}><AppRoutes /></AuthProvider>;
+export function App({ authGateway, professionalRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null }) {
+  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><AppRoutes /></ProfessionalProvider></AuthProvider>;
 }
 
 function AppRoutes() {
   const { pathname } = useLocation();
   useEffect(() => {
-    document.title = `${titles[pathname] ?? 'Página não encontrada'} | PEREIRÃO`;
+    document.title = `${titles[pathname] ?? (pathname.startsWith('/conta/profissional') ? 'Espaço profissional' : 'Página não encontrada')} | PEREIRÃO`;
   }, [pathname]);
 
   return (
@@ -42,6 +46,9 @@ function AppRoutes() {
         <Route element={<RequireAuth />}>
           <Route path="/conta/dados" element={<PersonalDataPage />} />
           <Route path="/redefinir-senha" element={<AuthPage key="password" mode="password" />} />
+          <Route path="/conta/profissional" element={<ProfessionalSpacePage />} />
+          <Route path="/conta/profissional/cadastro" element={<ProfessionalRegistrationPage key="create" />} />
+          <Route path="/conta/profissional/:businessId/editar" element={<ProfessionalRegistrationPage key="edit" />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

@@ -4,6 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SearchField } from '../components/SearchField';
 import { ProviderList } from '../components/ProviderList';
 import { categories } from '../config/categories';
+import { LinkButton } from '../components/LinkButton';
 
 export function HomePage() {
   return (
@@ -25,6 +26,7 @@ export function HomePage() {
         <div>
           <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
           <p>Divulgue seus serviços no PEREIRÃO e seja encontrado na sua cidade.</p>
+          <LinkButton to="/conta/profissional/cadastro" variant="secondary">Anunciar meus serviços</LinkButton>
         </div>
       </section>
     </>
