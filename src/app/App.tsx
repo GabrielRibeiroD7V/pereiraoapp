@@ -16,11 +16,13 @@ import { ProfessionalProvider } from '../professional/ProfessionalProvider';
 import type { ProfessionalRepository } from '../professional/types';
 import { ProfessionalRegistrationPage } from '../pages/ProfessionalRegistrationPage';
 import { ProfessionalSpacePage } from '../pages/ProfessionalSpacePage';
+import { AccountSecurityPage } from '../pages/AccountSecurityPage';
 
 const titles: Record<string, string> = {
   [routes.home]: 'Início', [routes.search]: 'Buscar', [routes.account]: 'Conta',
   '/entrar': 'Entrar', '/criar-conta': 'Criar conta', '/recuperar-senha': 'Recuperar senha',
   '/redefinir-senha': 'Definir nova senha', '/auth/retorno': 'Confirmar acesso', '/conta/dados': 'Meus dados',
+  '/conta/seguranca': 'Segurança e acesso',
 };
 
 export function App({ authGateway, professionalRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null }) {
@@ -45,6 +47,7 @@ function AppRoutes() {
         <Route path="/auth/retorno" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/conta/dados" element={<PersonalDataPage />} />
+          <Route path="/conta/seguranca" element={<AccountSecurityPage />} />
           <Route path="/redefinir-senha" element={<AuthPage key="password" mode="password" />} />
           <Route path="/conta/profissional" element={<ProfessionalSpacePage />} />
           <Route path="/conta/profissional/cadastro" element={<ProfessionalRegistrationPage key="create" />} />

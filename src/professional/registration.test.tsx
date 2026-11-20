@@ -36,7 +36,7 @@ async function details(company = false) {
   if (company) fireEvent.click(screen.getByRole('radio', { name: 'Empresa' }));
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
   fireEvent.change(screen.getByLabelText(company ? 'Nome da empresa' : 'Nome profissional'), { target: { value: 'Nome de teste' } });
-  fireEvent.change(screen.getByLabelText('Categoria principal'), { target: { value: 'eletrica' } });
+  fireEvent.click(screen.getByRole('radio', { name: 'Elétrica' }));
 }
 async function finalStep() {
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
@@ -65,12 +65,16 @@ describe('cadastro progressivo e espaço profissional', () => {
 
   it.each([false, true])('salva cadastro em três etapas (empresa=%s) sem publicar', async (company) => {
     const repo = repository(); open(repo); await details(company);
+    expect(screen.queryByLabelText('CNPJ')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Mundo Novo/MS' })).not.toBeInTheDocument();
+    expect(screen.getByText('Mundo Novo já está incluída')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Cidade de teste/MS'));
+    await finalStep();
     if (company) {
+      fireEvent.click(screen.getByText('Dados empresariais privados', { exact: true, selector: 'summary' }));
       fireEvent.change(screen.getByLabelText('Razão social'), { target: { value: 'Empresa de teste' } });
       fireEvent.change(screen.getByLabelText('CNPJ'), { target: { value: '12.345.678/0001-99' } });
     } else expect(screen.queryByLabelText('CPF')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText('Cidade de teste/MS'));
-    await finalStep();
     fireEvent.change(screen.getByLabelText('WhatsApp'), { target: { value: '+55 (67) 99999-1234' } });
     fireEvent.change(screen.getByLabelText('Instagram (opcional)'), { target: { value: '@teste' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
@@ -78,6 +82,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(repo.createDraft).toHaveBeenCalledOnce();
     expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ type: company ? 'empresa' : 'autonomo', whatsapp: '5567999991234', instagram: 'teste', areaCityIds: ['mundo-novo-ms', 'test-city'] }));
     const saved = vi.mocked(repo.saveDraft).mock.calls[0]?.[1];
+    if (company) expect(saved).toMatchObject({ legalName: 'Empresa de teste', taxId: '12345678000199' });
     expect(saved).not.toHaveProperty('status'); expect(saved).not.toHaveProperty('ownerId');
     expect(await screen.findByText('Rascunho')).toBeInTheDocument();
     expect(readCheckpoint('registration-user')).toBeNull();
@@ -85,11 +90,13 @@ describe('cadastro progressivo e espaço profissional', () => {
   });
 
   it('valida campos e preserva dados ao voltar etapas', async () => {
-    const repo = repository(); open(repo); await details();
-    fireEvent.change(screen.getByLabelText('Categoria principal'), { target: { value: '' } });
+    const repo = repository(); open(repo);
+    await screen.findByRole('radio', { name: 'Profissional autônomo' });
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    fireEvent.change(screen.getByLabelText('Nome profissional'), { target: { value: 'Nome de teste' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Continuar' }).closest('form')!);
     expect(screen.getByRole('alert')).toHaveTextContent('Selecione uma categoria');
-    fireEvent.change(screen.getByLabelText('Categoria principal'), { target: { value: 'eletrica' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Elétrica' }));
     await finalStep();
     fireEvent.change(screen.getByLabelText('WhatsApp'), { target: { value: 'errado' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
@@ -97,6 +104,19 @@ describe('cadastro progressivo e espaço profissional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
     expect(screen.getByLabelText('Nome profissional')).toHaveValue('Nome de teste');
     expect(repo.createDraft).not.toHaveBeenCalled();
+  });
+
+  it('preserva dados empresariais ao voltar da revisão para informações e avançar', async () => {
+    open(repository()); await details(true); await finalStep();
+    fireEvent.click(screen.getByText('Dados empresariais privados', { exact: true, selector: 'summary' }));
+    fireEvent.change(screen.getByLabelText('Razão social'), { target: { value: 'Nome privado existente' } });
+    fireEvent.change(screen.getByLabelText('CNPJ'), { target: { value: '12345678000199' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
+    expect(screen.getByRole('radio', { name: 'Elétrica' })).toBeChecked();
+    expect(screen.getByLabelText('Nome da empresa')).toHaveValue('Nome de teste');
+    await finalStep();
+    expect(screen.getByLabelText('Razão social')).toHaveValue('Nome privado existente');
+    expect(screen.getByLabelText('CNPJ')).toHaveValue('12345678000199');
   });
 
   it('permite rascunho sem WhatsApp, sem oferecer publicação', async () => {

@@ -1,5 +1,4 @@
-// Tipos manuais: fundação aplicada e category_id proposto no PR #4.
-// Regenerar após aplicação autorizada da nova migração.
+// Tipos manuais das duas migrações aplicadas. O cliente não gerencia publicação.
 type Table<Row, Insert = Partial<Row>, Update = Partial<Insert>> = {
   Row: Row; Insert: Insert; Update: Update; Relationships: [];
 };
@@ -26,10 +25,10 @@ export type PortfolioRow = {
 export interface Database {
   public: {
     Tables: {
-      profiles: Table<ProfileRow, never, Pick<ProfileRow, 'display_name' | 'avatar_url'>>;
+      profiles: Table<ProfileRow, never, Partial<Pick<ProfileRow, 'display_name' | 'avatar_url'>>>;
       cities: Table<{ id: string; name: string; state_code: string; slug: string; active: boolean }, never, never>;
       categories: Table<{ id: string; name: string; active: boolean }, never, never>;
-      businesses: Table<BusinessRow, never, Partial<Pick<BusinessRow, 'name' | 'slug' | 'type' | 'category_id' | 'description' | 'city_id' | 'whatsapp' | 'instagram' | 'avatar_path' | 'status'>>>;
+      businesses: Table<BusinessRow, never, Partial<Pick<BusinessRow, 'name' | 'slug' | 'type' | 'category_id' | 'description' | 'city_id' | 'whatsapp' | 'instagram' | 'avatar_path'>>>;
       business_members: Table<MembershipRow, never, never>;
       business_details: Table<{ business_id: string; legal_name: string | null; tax_id: string | null; updated_at: string }>;
       services: Table<ServiceRow>;
