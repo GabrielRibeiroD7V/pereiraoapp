@@ -61,6 +61,8 @@ Testes de interface cobrem visitante → login → cadastro, retorno após confi
 
 Os testes SQL/RLS executam as duas migrações em PostgreSQL 17.11 nativo temporário, sem TCP. Verificam também categoria principal, preço, permissões entre contas, integridade de portfólio e manutenção do status draft. Os atores de Auth são representados por fixtures apenas no banco isolado, removido ao final. O workflow foi ajustado para PostgreSQL 17 nativo em vez de Docker. Nenhum Docker foi executado nesta tarefa.
 
+O primeiro job SQL no Actions identificou que o runner não inclui os binários da versão 17 no caminho esperado. A CI passou a instalar a versão necessária pelo [repositório oficial PostgreSQL para Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) antes de iniciar o cluster temporário; essa instalação ocorre apenas no runner descartável, não no projeto Supabase ou na máquina do usuário.
+
 No Supabase operacional foram feitas apenas leituras: estrutura, funções, histórico e hash do SQL. Nenhum cadastro fictício ou alteração remota foi feito. O teste ponta a ponta com autenticação real e persistência operacional **não foi realizado**: a nova migração está aguardando autorização e não foi fornecida uma sessão real de teste. Não foram solicitadas senhas ou chaves privadas para contornar isso.
 
 Não foi realizado teste visual em navegador nesta etapa. A interface reutiliza Sass e componentes responsivos existentes, e os controles/estados foram verificados em DOM. Resultados finais de tipos, testes, SQL, build e Actions estão no PR.

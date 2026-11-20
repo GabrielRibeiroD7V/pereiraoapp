@@ -26,6 +26,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Instalar PostgreSQL 17 nativo no runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-17
       - name: PostgreSQL 17 nativo e isolado, sem Docker
         env:
           PG_BIN: /usr/lib/postgresql/17/bin
