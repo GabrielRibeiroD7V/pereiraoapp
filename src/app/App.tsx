@@ -17,6 +17,10 @@ import type { ProfessionalRepository } from '../professional/types';
 import { ProfessionalRegistrationPage } from '../pages/ProfessionalRegistrationPage';
 import { ProfessionalSpacePage } from '../pages/ProfessionalSpacePage';
 import { AccountSecurityPage } from '../pages/AccountSecurityPage';
+import { WorkProvider } from '../work/WorkProvider';
+import type { WorkRepository } from '../work/types';
+import { ServicesPage } from '../pages/ServicesPage';
+import { PortfolioPage } from '../pages/PortfolioPage';
 
 const titles: Record<string, string> = {
   [routes.home]: 'Início', [routes.search]: 'Buscar', [routes.account]: 'Conta',
@@ -25,14 +29,14 @@ const titles: Record<string, string> = {
   '/conta/seguranca': 'Segurança e acesso',
 };
 
-export function App({ authGateway, professionalRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null }) {
-  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><AppRoutes /></ProfessionalProvider></AuthProvider>;
+export function App({ authGateway, professionalRepository, workRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null; workRepository?: WorkRepository | null }) {
+  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><WorkProvider repository={workRepository}><AppRoutes /></WorkProvider></ProfessionalProvider></AuthProvider>;
 }
 
 function AppRoutes() {
   const { pathname } = useLocation();
   useEffect(() => {
-    document.title = `${titles[pathname] ?? (pathname.startsWith('/conta/profissional') ? 'Espaço profissional' : 'Página não encontrada')} | PEREIRÃO`;
+    document.title = `${titles[pathname] ?? (pathname.endsWith('/servicos') ? 'Meus serviços' : pathname.endsWith('/trabalhos') ? 'Meus trabalhos' : pathname.startsWith('/conta/profissional') ? 'Espaço profissional' : 'Página não encontrada')} | PEREIRÃO`;
   }, [pathname]);
 
   return (
@@ -52,6 +56,8 @@ function AppRoutes() {
           <Route path="/conta/profissional" element={<ProfessionalSpacePage />} />
           <Route path="/conta/profissional/cadastro" element={<ProfessionalRegistrationPage key="create" />} />
           <Route path="/conta/profissional/:businessId/editar" element={<ProfessionalRegistrationPage key="edit" />} />
+          <Route path="/conta/profissional/:businessId/servicos" element={<ServicesPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/trabalhos" element={<PortfolioPage key={pathname} />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

@@ -29,3 +29,11 @@ begin
 end;
 $$;
 grant execute on all functions in schema test to anon, authenticated;
+
+-- Somente schema/RLS para ensaio SQL; não simula o servidor HTTP/S3 do Storage.
+create schema storage;
+create table storage.buckets(id text primary key,name text not null,public boolean not null default false,file_size_limit bigint,allowed_mime_types text[]);
+create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text not null,metadata jsonb,unique(bucket_id,name));
+alter table storage.objects enable row level security;
+grant usage on schema storage to anon,authenticated;
+grant select,insert,update,delete on storage.objects to anon,authenticated;

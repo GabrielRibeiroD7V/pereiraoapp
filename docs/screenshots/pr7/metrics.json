@@ -1,0 +1,182 @@
+[
+  {
+    "screen": "servicos",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "servicos",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "servicos",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "servicos",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "editar-servico",
+    "dialogWidth": 337,
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "editar-servico",
+    "dialogWidth": 352,
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "editar-servico",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "editar-servico",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "trabalhos",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "trabalhos",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "trabalhos",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "trabalhos",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "enviar-fotografia",
+    "dialogWidth": 337,
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "enviar-fotografia",
+    "dialogWidth": 352,
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "enviar-fotografia",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "enviar-fotografia",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "confirmar-exclusao",
+    "dialogWidth": 337,
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "confirmar-exclusao",
+    "dialogWidth": 352,
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "confirmar-exclusao",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "confirmar-exclusao",
+    "dialogWidth": 512,
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "screen": "ativacao-pendente",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "screen": "ativacao-pendente",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "screen": "ativacao-pendente",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "screen": "ativacao-pendente",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "width": 1280
+  }
+]
