@@ -18,11 +18,11 @@ O adaptador profissional e a RPC `create_business` não foram alterados. A cria�
 
 Leitura do projeto operacional exclusivo `yazdjiwaksamizrbqewq` em 20/11/2026 confirmou os dois negócios de teste como draft, com as categorias climatização/construção e cidade `mundo-novo-ms`. Os dois IDs, tipos e timestamps de atualização foram preservados. Nenhum deles foi editado, excluído ou recriado para testar este PR. Nenhum usuário, prestador ou dado empresarial fictício foi inserido no remoto.
 
-As duas migrações operacionais continuam registradas: `20261120214652` e `20261120215116`. A nova migração deste PR existe apenas no versionamento e no PostgreSQL temporário de testes. Não houve mudança remota em Auth, URLs, SMTP, grants, tabelas ou RLS.
+Após revisão técnica e autorização específica em 20/11/2026, a proteção foi ativada no projeto operacional. O histórico agora contém `20261120214652`, `20261120215116` e `20261120223813`. Somente o grant de UPDATE de `status` foi revogado; Auth, URLs, SMTP, tabelas e RLS não foram alterados.
 
-## Migração mínima de segurança — ainda não aplicada
+## Migração mínima de segurança — aplicada após revisão
 
-Arquivo: [`20261120223813_restrict_business_status_update.sql`](../supabase/migrations/20261120223813_restrict_business_status_update.sql), gerado pelo Supabase CLI com `migration new`.
+Arquivo: [`20261120223813_restrict_business_status_update.sql`](../supabase/migrations/20261120223813_restrict_business_status_update.sql), gerado pelo Supabase CLI com `migration new`. Aplicado exclusivamente no projeto `yazdjiwaksamizrbqewq`, sem reaplicar versões anteriores. SQL local e histórico remoto têm MD5 `d1e01c33f2ba8bf23eba6addad126735`.
 
 ```sql
 revoke update (status) on table public.businesses from authenticated;
@@ -32,7 +32,11 @@ A fundação concedeu UPDATE por coluna. A leitura operacional confirmou `has_ta
 
 Esse REVOKE impede também despublicação e outras trocas de estado pelo cliente. Uma futura ação de publicação/moderação deve usar um caminho confiável aprovado separadamente. Este PR não cria tal função e não libera publicação. Grants amplos adicionados futuramente precisariam ser reavaliados: revogar privilégio de coluna não neutraliza um privilégio UPDATE concedido à tabela inteira. Ver [PostgreSQL: REVOKE](https://www.postgresql.org/docs/17/sql-revoke.html).
 
-Os tipos do frontend deixam de oferecer `status` em Update de businesses, mas tipos não são barreira de segurança. O bloqueio efetivo exige a aplicação remota autorizada da migração. **A vulnerabilidade permanece no operacional até essa aplicação.** Não liberar perfis públicos assumindo que o PR, o merge ou o deploy executaram a migração.
+Os tipos do frontend deixam de oferecer `status` em Update de businesses, mas tipos não são barreira de segurança. O bloqueio agora está ativo no banco: `has_column_privilege('authenticated', 'public.businesses', 'status', 'UPDATE') = false` e não há privilégio UPDATE da tabela inteira. Os grants dos outros campos e a policy owner/admin permanecem iguais. A RPC continua com a mesma definição, acesso autenticado e default `draft`.
+
+A aplicação do REVOKE (controle de privilégio/DCL) e o registro da versão exata no histórico ocorreram na mesma transação pela integração SQL. A ferramenta de migração não permite informar a versão existente do arquivo; esse procedimento evitou criar outra divergência de timestamp. Guardas conferiram o histórico anterior e os privilégios esperados antes da execução. Não houve edição ou limpeza de dados operacionais.
+
+As verificações posteriores foram somente de leitura no remoto. Comparações de hashes antes/depois confirmaram os dados das nove tabelas, políticas, constraints e funções inalterados. Os dois rascunhos mantêm os mesmos IDs, status e timestamps. Não foram criados usuários ou negócios operacionais para ensaiar a proteção. A recusa de operações por owner/admin e a continuidade da edição comum foram exercitadas no PostgreSQL local isolado.
 
 ## Verificações
 
@@ -63,4 +67,4 @@ O teclado selecionou a próxima categoria com ArrowRight e o foco acompanhou o c
 
 Os testes não substituem inspeção em um celular físico com teclado virtual, VoiceOver/TalkBack ou uma sessão real após deploy. Upload, serviços, portfólio, assinatura, chat, avaliações, orçamento e prévia pública não foram implementados. Nenhuma fotografia aleatória foi adicionada.
 
-Não houve publicação em produção nem no Lovable. O PR fica aberto para revisão. A Vercel está ligada ao GitHub; merge pode disparar publicação automaticamente. Por isso, integrar este PR à main e publicar exigem a autorização específica solicitada nesta tarefa. A aplicação remota da migração exige autorização própria e não é feita pela Vercel.
+Não houve merge, publicação em produção ou no Lovable nesta ativação. O PR permanece aberto, com a migração já alinhada ao banco e o código consistente com os novos privilégios. A Vercel está ligada ao GitHub e usa main para produção; o merge pode disparar automaticamente build/deploy. Merge e publicação continuam aguardando autorização específica. A migração de banco foi uma operação separada e não depende da Vercel.
