@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearAuthReturn, readAuthReturn, rememberAuthReturn } from './flowState';
 import { App } from '../app/App';
 import type { AuthGateway, AuthListener, AuthSession } from './types';
 import { safeReturnPath } from './RequireAuth';
@@ -12,6 +13,7 @@ import type { Session } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 
 const session: AuthSession = { user: { id: 'test-user', email: 'test@example.invalid', displayName: 'Pessoa de teste' } };
+beforeEach(() => localStorage.clear());
 function mockGateway(initial: AuthSession | null = null) {
   let listener: AuthListener | null = null;
   let current = initial;
@@ -102,7 +104,7 @@ describe('autenticação e rotas', () => {
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'test@example.invalid' } });
     fireEvent.click(screen.getByRole('button', { name: 'Enviar instruções' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Se houver uma conta');
-    expect(gateway.requestReset).toHaveBeenCalledWith('test@example.invalid');
+    expect(gateway.requestReset).toHaveBeenCalledWith('test@example.invalid', '/conta');
   });
 
   it('restaura sessão e sai, retirando acesso privado', async () => {
@@ -151,6 +153,8 @@ describe('autenticação e rotas', () => {
     expect(safeReturnPath('https://evil.invalid')).toBe('/conta');
     expect(safeReturnPath('//evil.invalid')).toBe('/conta');
     expect(safeReturnPath('/conta/dados')).toBe('/conta/dados');
+    expect(safeReturnPath('/conta/profissional/00000000-0000-4000-8000-000000000001/editar')).toContain('/editar');
+    expect(safeReturnPath('/conta/profissional/../../evil/editar')).toBe('/conta');
   });
 
   it('cancela a assinatura de eventos ao desmontar', () => {
@@ -167,6 +171,8 @@ describe('cliente e gateway Supabase', () => {
     expect(validPublicConfig('https://other.supabase.co', 'sb_publishable_test')).toBe(false);
     expect(validPublicConfig('https://yazdjiwaksamizrbqewq.supabase.co', 'sb_secret_test')).toBe(false);
     expect(validPublicConfig(undefined, undefined)).toBe(false);
+    expect(validPublicConfig('https://user:pass@yazdjiwaksamizrbqewq.supabase.co', 'sb_publishable_test')).toBe(false);
+    expect(validPublicConfig('https://yazdjiwaksamizrbqewq.supabase.co?token=invalid', 'sb_publishable_test')).toBe(false);
   });
 
   it('deriva redirects da origem fornecida sem domínio de produção presumido', () => {
@@ -186,9 +192,10 @@ describe('cliente e gateway Supabase', () => {
     const exchange = vi.spyOn(client.auth, 'exchangeCodeForSession').mockResolvedValue({ data: { user: sdkSession.user, session: sdkSession }, error: null });
     const gateway = createAuthGateway(client, () => 'https://preview.example.invalid');
     expect(await gateway.signUp('test@example.invalid', 'test-only', 'Teste')).toEqual({ confirmationRequired: true });
-    expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno?next=%2Fconta', data: { display_name: 'Teste' } } }));
+    expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno', data: { display_name: 'Teste' } } }));
     await gateway.signUp('test@example.invalid', 'test-only', 'Teste', '/conta/profissional/cadastro');
-    expect(signUp).toHaveBeenLastCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno?next=%2Fconta%2Fprofissional%2Fcadastro', data: { display_name: 'Teste' } } }));
+    expect(signUp).toHaveBeenLastCalledWith(expect.objectContaining({ options: { emailRedirectTo: 'https://preview.example.invalid/auth/retorno', data: { display_name: 'Teste' } } }));
+    expect(readAuthReturn()).toBe('/conta/profissional/cadastro');
     await gateway.requestReset('test@example.invalid');
     expect(reset).toHaveBeenCalledWith('test@example.invalid', { redirectTo: 'https://preview.example.invalid/auth/retorno?flow=recovery' });
     await Promise.all([gateway.completeCallback('test-code'), gateway.completeCallback('test-code')]);
@@ -198,5 +205,31 @@ describe('cliente e gateway Supabase', () => {
 
   it('não apresenta mensagens técnicas desconhecidas', () => {
     expect(authErrorMessage(new Error('token=do-not-display'))).not.toContain('token');
+  });
+});
+
+describe('destino de autenticação', () => {
+  it('mantém o destino entre recargas e usa somente caminhos locais permitidos', () => {
+    rememberAuthReturn('/conta/profissional/cadastro');
+    expect(readAuthReturn()).toBe('/conta/profissional/cadastro');
+    rememberAuthReturn('https://evil.invalid');
+    expect(readAuthReturn()).toBe('/conta');
+    clearAuthReturn();
+    expect(readAuthReturn()).toBe('/conta');
+  });
+
+  it('descarta destinos expirados ou corrompidos', () => {
+    localStorage.setItem('pereirao.auth.return', JSON.stringify({ path: '/conta/dados', at: Date.now() - 25 * 3600 * 1000 }));
+    expect(readAuthReturn()).toBe('/conta');
+    localStorage.setItem('pereirao.auth.return', '{');
+    expect(readAuthReturn()).toBe('/conta');
+  });
+
+  it('retoma o cadastro após a confirmação sem exigir query dinâmica no redirect', async () => {
+    const { gateway } = mockGateway();
+    rememberAuthReturn('/conta/dados');
+    open('/auth/retorno?code=confirmed', gateway);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Meus dados' })).toBeInTheDocument();
+    expect(readAuthReturn()).toBe('/conta');
   });
 });

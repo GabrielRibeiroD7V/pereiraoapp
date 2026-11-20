@@ -50,14 +50,14 @@ export function AuthPage({ mode }: { mode: Mode }) {
           setNotice('Confira seu e-mail para confirmar a conta. Se já possui uma conta, entre ou recupere sua senha.');
         } else navigate(next, { replace: true });
       } else if (mode === 'recovery') {
-        await gateway.requestReset(email);
+        await gateway.requestReset(email, next);
         form.reset();
         setNotice('Se houver uma conta para esse e-mail, você receberá as instruções para recuperar a senha.');
       } else {
         await gateway.updatePassword(password);
         // Encerrar a sessão local após a troca; demais dispositivos seguem a política do Auth.
         await gateway.signOut();
-        navigate('/entrar?senha=atualizada', { replace: true });
+        navigate(`/entrar?${new URLSearchParams({ senha: 'atualizada', next })}`, { replace: true });
       }
     } catch (cause) { setError(authErrorMessage(cause)); }
     finally { setPending(false); }
@@ -85,7 +85,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         </button>
       </form>
       <nav className="auth-links" aria-label="Opções de acesso">
-        {mode === 'login' && <><Link to={`/criar-conta?${new URLSearchParams({ next })}`}>Criar conta</Link><Link to="/recuperar-senha">Esqueci minha senha</Link></>}
+        {mode === 'login' && <><Link to={`/criar-conta?${new URLSearchParams({ next })}`}>Criar conta</Link><Link to={`/recuperar-senha?${new URLSearchParams({ next })}`}>Esqueci minha senha</Link></>}
         {mode !== 'login' && <Link to={`/entrar?${new URLSearchParams({ next })}`}>Já tenho conta. Entrar</Link>}
         <Link to="/">Continuar sem entrar</Link>
       </nav>

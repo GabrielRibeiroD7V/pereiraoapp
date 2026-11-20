@@ -5,7 +5,8 @@ export function validPublicConfig(url: string | undefined, key: string | undefin
   if (!url || !key?.startsWith('sb_publishable_')) return false;
   try {
     const parsed = new URL(url);
-    return parsed.origin === 'https://yazdjiwaksamizrbqewq.supabase.co' && parsed.pathname === '/';
+    return parsed.origin === 'https://yazdjiwaksamizrbqewq.supabase.co' && parsed.pathname === '/'
+      && !parsed.username && !parsed.password && !parsed.search && !parsed.hash;
   } catch { return false; }
 }
 
