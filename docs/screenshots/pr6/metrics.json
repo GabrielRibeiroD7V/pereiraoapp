@@ -1,0 +1,254 @@
+[
+  {
+    "screen": "etapa-3",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "etapa-3",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "etapa-3",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "etapa-3",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "etapa-2",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "etapa-2",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "etapa-2",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "etapa-2",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "etapa-1",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "etapa-1",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "etapa-1",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "etapa-1",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "conta",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "conta",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "conta",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "conta",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "espaco",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "espaco",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "espaco",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "espaco",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "nome-longo",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "nome-longo",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "nome-longo",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "nome-longo",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "vazio",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "falha",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "falha",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "falha",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "falha",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  },
+  {
+    "screen": "visitante",
+    "navLinks": 3,
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "width": 375
+  },
+  {
+    "screen": "visitante",
+    "navLinks": 3,
+    "scrollWidth": 390,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "screen": "visitante",
+    "navLinks": 3,
+    "scrollWidth": 768,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "screen": "visitante",
+    "navLinks": 3,
+    "scrollWidth": 1280,
+    "scrollY": 0,
+    "width": 1280
+  }
+]

@@ -21,6 +21,21 @@ export function callbackUrl(origin: string, recovery = false) {
 export function createAuthGateway(client: SupabaseClient<Database>, origin: () => string): AuthGateway {
   let callback: { code: string; pending: Promise<void> } | null = null;
   return {
+    async getProfile() {
+      const { data: identity, error: authError } = await client.auth.getUser();
+      if (authError || !identity.user) throw authError ?? { code: 'invalid_credentials' };
+      const { data, error } = await client.from('profiles').select('display_name,avatar_url').eq('id', identity.user.id).single();
+      if (error) throw error;
+      return { displayName: data.display_name, avatarUrl: data.avatar_url };
+    },
+    async updateProfile(displayName) {
+      const name = displayName.trim();
+      if (name.length < 2 || name.length > 100) throw { code: 'invalid_profile_name' };
+      const { data: identity, error: authError } = await client.auth.getUser();
+      if (authError || !identity.user) throw authError ?? { code: 'invalid_credentials' };
+      const { data, error } = await client.from('profiles').update({ display_name: name }).eq('id', identity.user.id).select('id').single();
+      if (error || !data) throw error ?? { code: 'invalid_credentials' };
+    },
     async getSession() {
       const { data, error } = await client.auth.getSession();
       if (error) throw error;

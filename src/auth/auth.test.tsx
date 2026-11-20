@@ -110,8 +110,8 @@ describe('autenticação e rotas', () => {
   it('restaura sessão e sai, retirando acesso privado', async () => {
     const { gateway } = mockGateway(session);
     open('/conta', gateway); await ready();
-    expect(await screen.findByRole('button', { name: 'Sair' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
+    expect(await screen.findByRole('button', { name: /Sair da conta/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Sair da conta/ }));
     expect(await screen.findByRole('link', { name: 'Entrar' })).toBeInTheDocument();
   });
 
@@ -121,14 +121,14 @@ describe('autenticação e rotas', () => {
     gateway.getSession = () => new Promise((done) => { resolve = done; });
     open('/conta', gateway);
     await act(async () => { emit(null); resolve(session); });
-    expect(screen.queryByRole('button', { name: 'Sair' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Sair da conta/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Entrar' })).toBeInTheDocument();
   });
 
   it('confirma código e remove a URL de callback ao concluir', async () => {
     const { gateway } = mockGateway();
     open('/auth/retorno?code=local-test-code', gateway);
-    expect(await screen.findByRole('button', { name: 'Sair' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Sair da conta/ })).toBeInTheDocument();
     expect(gateway.completeCallback).toHaveBeenCalledWith('local-test-code');
     expect(screen.getByLabelText('URL de teste')).toHaveTextContent(/^\/conta$/);
   });

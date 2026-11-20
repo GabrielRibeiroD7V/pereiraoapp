@@ -17,7 +17,12 @@ select test.assert_true((select count(*)=1 from profiles), 'usuário consulta so
 update profiles set display_name='Pessoa A atualizada' where id=auth.uid();
 select test.assert_true((select display_name='Pessoa A atualizada' from profiles), 'atualiza próprio perfil');
 select test.expect_error($s$update profiles set id='00000000-0000-0000-0000-000000000002'$s$, '42501', 'não transfere perfil');
+select test.expect_error($s$update businesses set status='published'$s$, '42501', 'owner não publica diretamente pela API');
+select test.assert_true(not has_column_privilege('authenticated','public.businesses','status','UPDATE'), 'status sem privilégio UPDATE para authenticated');
+-- Fixture publicada por operador confiável somente no PostgreSQL isolado.
+reset role;
 update businesses set status='published' where id=:'a_id';
+set local role authenticated;
 insert into services(business_id, category_id, name, pricing_type, price_amount_cents)
  values (:'a_id', 'eletrica', 'Serviço ativo', 'fixed', 15000) returning id as service_id \gset
 insert into services(business_id, category_id, name, active) values
@@ -45,6 +50,14 @@ select test.expect_error($s$insert into services(business_id,category_id,name,pr
 
 reset role;
 insert into business_members(business_id,user_id,role) values (:'a_id','00000000-0000-0000-0000-000000000003','viewer');
+update business_members set role='admin' where business_id=:'a_id' and user_id='00000000-0000-0000-0000-000000000003';
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000003';
+select test.expect_error($s$update businesses set status='draft'$s$, '42501', 'admin não muda status diretamente');
+update businesses set description='Edição permitida ao admin' where id=:'a_id';
+select test.assert_true((select description='Edição permitida ao admin' from businesses where id=:'a_id'), 'admin continua editando campos comuns');
+reset role;
+update business_members set role='viewer' where business_id=:'a_id' and user_id='00000000-0000-0000-0000-000000000003';
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000002';
 select public.create_business('Negócio B', 'negocio-b', 'empresa', 'mundo-novo-ms') as b_id \gset
@@ -88,8 +101,9 @@ set local role authenticated;
 set local request.jwt.claim.sub = '';
 select test.expect_error($s$select public.create_business('Sem uid','sem-uid','autonomo','mundo-novo-ms')$s$, '42501', 'RPC verifica uid mesmo com role authenticated');
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
-update businesses set status='unpublished' where id=:'a_id';
+select test.expect_error($s$update businesses set status='unpublished'$s$, '42501', 'owner não altera estado de publicação');
 reset role;
+update businesses set status='unpublished' where id=:'a_id';
 set local role anon;
 set local request.jwt.claim.sub = '';
 select test.assert_true((select count(*)=0 from businesses), 'despublicação oculta negócio');
