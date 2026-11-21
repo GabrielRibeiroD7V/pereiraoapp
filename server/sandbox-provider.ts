@@ -74,7 +74,9 @@ export function sandboxLink(value: unknown) {
       !u.password &&
       !u.hash &&
       (/^\/i\/[A-Za-z0-9_-]+$/.test(u.pathname) ||
-        /^\/checkoutSession\/show(?:\/[0-9a-f-]{36})?$/.test(u.pathname))
+        /^\/(?:[0-9]{1,12}\/)?checkoutSession\/show(?:\/[0-9a-f-]{36})?$/.test(
+          u.pathname,
+        ))
       ? u.href
       : null;
   } catch {
@@ -212,18 +214,6 @@ export class SandboxProvider {
     if (!providerId(data.id) || !data.id.startsWith("cus_"))
       throw new ProviderError("INVALID_PROVIDER_RESPONSE");
     return data.id;
-  }
-  async completeSyntheticCustomer(id: string, reference: string) {
-    if (!reference.startsWith("pereirao:synthetic:pr17-"))
-      throw new ProviderError("SANDBOX_DISABLED");
-    const found = await this.findCustomers(reference);
-    if (
-      found.length !== 1 ||
-      found[0]!.id !== id ||
-      found[0]!.externalReference !== reference
-    )
-      throw new ProviderError("INVALID_PROVIDER_RESPONSE");
-    await this.call("POST", "/customers/" + id, syntheticPayer);
   }
   findSubscriptions(customer: string) {
     if (!providerId(customer))

@@ -44,6 +44,72 @@ let createdSubscription = null;
 const emit = () =>
   process.stdout.write("SANDBOX_SMOKE " + JSON.stringify(report) + "\n");
 try {
+  if (run === "pr17-card-audit-20261121-a") {
+    const customer = "cus_000010060912",
+      checkout = "4fa84e61-980f-4110-b35a-8f4678c8808e";
+    const owners = await provider.findCustomers(
+      "pereirao:synthetic:pr17-card-20261121-a",
+    );
+    if (owners.length !== 1 || owners[0].id !== customer)
+      throw Error("RUN_CONFLICT");
+    const subscriptions = await provider.findSubscriptions(customer);
+    report.observedSubscriptions = subscriptions.map((s) => ({
+      id: s.id,
+      customer: s.customer,
+      checkout: s.checkoutSession,
+      externalReference: s.externalReference,
+      method: s.billingType,
+      value: s.value,
+      cycle: s.cycle,
+      status: s.status,
+    }));
+    emit();
+    const matches = subscriptions.filter(
+      (s) =>
+        s.customer === customer &&
+        s.checkoutSession === checkout &&
+        s.billingType === "CREDIT_CARD" &&
+        s.cycle === "MONTHLY" &&
+        cents(s.value) === 1999,
+    );
+    if (matches.length !== 1) throw Error("PROVIDER_MAPPING_NOT_FOUND");
+    const s = await provider.getSubscription(matches[0].id);
+    if (s.customer !== customer || s.checkoutSession !== checkout)
+      throw Error("PROVIDER_MISMATCH");
+    const payments = await provider.payments(s.id);
+    report.cardSubscriptionId = s.id;
+    report.cardPayments = payments.map((p) => ({
+      id: p.id,
+      method: p.billingType,
+      value: p.value,
+      status: p.status,
+      subscription: p.subscription,
+      customer: p.customer,
+    }));
+    emit();
+    for (const item of payments) {
+      const p = await provider.getPayment(item.id);
+      if (
+        p.customer !== customer ||
+        p.subscription !== s.id ||
+        p.billingType !== "CREDIT_CARD" ||
+        cents(p.value) !== 1999
+      )
+        throw Error("PROVIDER_MISMATCH");
+      if (["CONFIRMED", "RECEIVED"].includes(p.status)) {
+        await provider.refund(p.id);
+        report.cardRefund = {
+          paymentId: p.id,
+          status: (await provider.getPayment(p.id)).status,
+        };
+        emit();
+      }
+    }
+    await provider.cancelSubscription(s.id);
+    report.cardCancelled = true;
+    emit();
+    process.exit(0);
+  }
   if (run.startsWith("pr17-inspect-sub_")) {
     const id = run.slice("pr17-inspect-".length);
     const s = await provider.getSubscription(id);
@@ -56,33 +122,6 @@ try {
       externalReference: s.externalReference,
       deleted: s.deleted,
     };
-    emit();
-    process.exit(0);
-  }
-  if (run === "pr17-card-retry-20261121-a") {
-    const found = await provider.findCustomers(
-      "pereirao:synthetic:pr17-card-20261121-a",
-    );
-    if (found.length !== 1 || found[0].id !== "cus_000010060912")
-      throw Error("RUN_CONFLICT");
-    report.phase = "complete_synthetic_customer";
-    emit();
-    await provider.completeSyntheticCustomer(
-      found[0].id,
-      "pereirao:synthetic:pr17-card-20261121-a",
-    );
-    report.phase = "create_card_checkout";
-    emit();
-    const checkout = await provider.createCardCheckout(
-      found[0].id,
-      crypto.randomUUID(),
-      new Date().toISOString().slice(0, 10),
-      "https://pereirao.vercel.app/conta/assinaturas",
-    );
-    report.customerId = found[0].id;
-    report.cardCheckoutId = checkout.id;
-    report.cardCheckoutUrl = checkout.link;
-    report.cardPaymentExecuted = false;
     emit();
     process.exit(0);
   }

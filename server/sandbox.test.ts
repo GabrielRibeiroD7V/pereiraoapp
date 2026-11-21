@@ -115,6 +115,14 @@ function providerFixture() {
 const svc = (s: SandboxStore, p: ReturnType<typeof providerFixture>) =>
   new SandboxService(s, p as unknown as SandboxProvider);
 describe("provider Sandbox: transporte e proteção de segredo", () => {
+  it("preserva o prefixo numérico do link oficial retornado pelo Sandbox", () => {
+    const link =
+      "https://sandbox.asaas.com/000/checkoutSession/show/4fa84e61-980f-4110-b35a-8f4678c8808e";
+    expect(sandboxLink(link)).toBe(link);
+    expect(
+      sandboxLink("https://sandbox.asaas.com/000/checkoutSession/admin"),
+    ).toBeNull();
+  });
   it.each(["$aact_prod_invalid", "legacy", " $aact_hmlg_x", "$aact_hmlg_x\n"])(
     "rejeita chave inadequada %s",
     (key) => expect(() => new SandboxProvider(key)).toThrow("SANDBOX_DISABLED"),

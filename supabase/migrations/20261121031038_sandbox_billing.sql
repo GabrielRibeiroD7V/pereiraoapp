@@ -16,7 +16,7 @@ create table private.sandbox_contracts(
  state text not null default 'prepared' check(state in ('prepared','customer_ready','subscription_pending','pending','active','overdue','cancelled','refunded','uncertain')),reconcile_lease uuid,reconcile_until timestamptz,
  provider_cancelled boolean not null default false,diagnostic_code text,created_at timestamptz not null default now(),updated_at timestamptz not null default now(),
  check(subscription_id is null or subscription_id~'^sub_[A-Za-z0-9_-]+$'),check(checkout_id is null or checkout_id~'^[0-9a-f-]{36}$'),
- check(invoice_url is null or invoice_url~'^https://sandbox[.]asaas[.]com/(i/|checkoutSession/show)')
+ check(invoice_url is null or invoice_url~'^https://sandbox[.]asaas[.]com/(i/|([0-9]{1,12}/)?checkoutSession/show)')
 );
 create unique index sandbox_one_open_contract on private.sandbox_contracts(business_id) where not provider_cancelled;
 create index sandbox_contracts_user_idx on private.sandbox_contracts(user_id,business_id);
