@@ -1,4 +1,5 @@
 // Exclusivamente servidor. Nunca importar por src/.
+import { readFile } from "node:fs/promises";
 export type PaymentMethod = "PIX" | "CREDIT_CARD";
 export interface AsaasSubscription {
   id: string;
@@ -135,6 +136,14 @@ export class SandboxProvider {
               .toLowerCase()
           : "";
         if (/cpf|cnpj/.test(descriptions)) reason = "CUSTOMER_TAX_ID_REQUIRED";
+        else if (/imagem|image|base64/.test(descriptions))
+          reason = "CHECKOUT_IMAGE_REQUIRED";
+        else if (
+          /nextduedate|vencimento|data.*valid|date.*valid/.test(descriptions)
+        )
+          reason = "DUE_DATE_FORMAT";
+        else if (/customerdata|cliente|customer/.test(descriptions))
+          reason = "CUSTOMER_DATA_REQUIRED";
         else if (/chave pix|pix key/.test(descriptions))
           reason = "SANDBOX_PIX_KEY_REQUIRED";
         else if (/permiss|permission|habilit|enabled/.test(descriptions))
@@ -243,9 +252,17 @@ export class SandboxProvider {
             description: "Simulacao, sem cobranca real",
             quantity: 1,
             value: 19.99,
+            imageBase64: (
+              await readFile(
+                new URL(
+                  "../public/images/brand/pereirao-384.png",
+                  import.meta.url,
+                ),
+              )
+            ).toString("base64"),
           },
         ],
-        subscription: { cycle: "MONTHLY", nextDueDate: dueDate },
+        subscription: { cycle: "MONTHLY", nextDueDate: dueDate + " 12:00:00" },
       },
     );
     if (!/^[0-9a-f-]{36}$/i.test(c.id))

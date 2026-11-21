@@ -33,6 +33,25 @@ try {
     emit();
     process.exit(0);
   }
+  if (run === "pr17-card-retry-20261121-a") {
+    const found = await provider.findCustomers(
+      "pereirao:synthetic:pr17-card-20261121-a",
+    );
+    if (found.length !== 1 || found[0].id !== "cus_000010060912")
+      throw Error("RUN_CONFLICT");
+    const checkout = await provider.createCardCheckout(
+      found[0].id,
+      crypto.randomUUID(),
+      new Date().toISOString().slice(0, 10),
+      "https://pereirao.vercel.app/conta/assinaturas",
+    );
+    report.customerId = found[0].id;
+    report.cardCheckoutId = checkout.id;
+    report.cardCheckoutUrl = checkout.link;
+    report.cardPaymentExecuted = false;
+    emit();
+    process.exit(0);
+  }
   const existing = await provider.findCustomers(reference);
   if (existing.length) throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");
   const customer = await provider.createCustomer(reference);

@@ -88,7 +88,7 @@ begin
   else
    if exists(select 1 from private.sandbox_contracts where business_id=bid and not provider_cancelled) then raise exception 'Existing test contract' using errcode='23505';end if;
    insert into private.sandbox_contracts(request_id,business_id,user_id,method,consent_version,first_due_date,customer_id)
-    values(rid,bid,uid,p->>'method','sandbox-v1',greatest(current_date,coalesce((select trial_ends_at::date from public.business_subscriptions where business_id=bid),current_date)),(select customer_id from private.sandbox_customers where business_id=bid)) returning * into c;
+    values(rid,bid,uid,p->>'method','sandbox-v1',greatest(current_date,coalesce((select (trial_ends_at at time zone 'America/Sao_Paulo')::date+1 from public.business_subscriptions where business_id=bid),current_date)),(select customer_id from private.sandbox_customers where business_id=bid)) returning * into c;
    insert into private.sandbox_financial_audit(request_id,actor_id,action,after_state) values(rid,uid,'test_consent','prepared');claimed:=true;
   end if;return jsonb_build_object('claimed',claimed,'contract',to_jsonb(c));
  elsif command='owner_overview' then
