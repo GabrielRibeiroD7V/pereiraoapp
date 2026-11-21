@@ -1,0 +1,52 @@
+[
+  {
+    "scenario": "Dois builds no mesmo origin (A → B)",
+    "environment": "Chromium IAB local com SW real",
+    "result": "PASS: página pública atualizou para B"
+  },
+  {
+    "scenario": "Outra aba com rascunho durante ativação",
+    "environment": "Chromium IAB local com SW real",
+    "result": "PASS: texto preservado, aviso sem recarga"
+  },
+  {
+    "scenario": "Voltar/avançar SPA e navegação documental",
+    "environment": "Chromium IAB local",
+    "result": "PASS: permaneceu B; persisted=true não comprovado"
+  },
+  {
+    "scenario": "BFCache persisted=true, falha de rede, deduplicação e loops",
+    "environment": "Vitest/DOM simulado",
+    "result": "PASS"
+  },
+  {
+    "scenario": "Android beforeinstallprompt",
+    "environment": "Evento sintético com callback em Chromium + testes unitários",
+    "result": "PASS no toque; instalação física não executada"
+  },
+  {
+    "scenario": "iPhone Safari/Chrome iOS",
+    "environment": "Detecção simulada + modal em Chromium",
+    "result": "PASS instruções; Safari e aparelho físicos pendentes"
+  },
+  {
+    "scenario": "Standalone, appinstalled e dispensa",
+    "environment": "Vitest simulado",
+    "result": "PASS"
+  },
+  {
+    "scenario": "Desktop sem oportunidade nativa",
+    "environment": "Vitest + Chromium local",
+    "result": "PASS: nenhum botão nativo falso"
+  },
+  {
+    "scenario": "Estados e cidades do catálogo",
+    "environment": "Componentes reais com fixture local de sete municípios",
+    "result": "PASS nas nove larguras; origem/áreas mantidas"
+  },
+  {
+    "scenario": "Login/logout/admin/financeiro/90 dias/especialidades",
+    "environment": "Suíte automatizada existente",
+    "result": "PASS; sem operações remotas"
+  }
+]

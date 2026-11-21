@@ -69,7 +69,8 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(screen.queryByLabelText('CNPJ')).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: 'Mundo Novo/MS' })).not.toBeInTheDocument();
     expect(screen.getByText('Mundo Novo/MS já está incluída')).toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText('Cidade de teste/MS'));
+    fireEvent.change(screen.getByLabelText('Estado atendido'),{target:{value:'MS'}});
+    fireEvent.change(screen.getByLabelText('Adicionar cidade atendida'),{target:{value:'test-city'}});
     await finalStep();
     if (company) {
       fireEvent.click(screen.getByText('Dados empresariais privados', { exact: true, selector: 'summary' }));
@@ -94,16 +95,20 @@ describe('cadastro progressivo e espaço profissional', () => {
     const repo = repository();
     repo.getCatalog = vi.fn(async () => ({ ...catalog, cities: regionalCityFixture.map(city => ({ id: city.id, name: city.name, state_code: city.stateCode })) }));
     open(repo); await details(type === 'empresa');
+    fireEvent.change(screen.getByLabelText('Estado',{exact:true}),{target:{value:'PR'}});
     fireEvent.change(screen.getByLabelText('Cidade', { exact: true }), { target: { value: 'terra-roxa-pr' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Mundo Novo/MS' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Guaíra/PR' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Eldorado/MS' }));
+    fireEvent.change(screen.getByLabelText('Estado atendido'),{target:{value:'MS'}});
+    fireEvent.change(screen.getByLabelText('Adicionar cidade atendida'),{target:{value:'mundo-novo-ms'}});
+    fireEvent.change(screen.getByLabelText('Estado atendido'),{target:{value:'PR'}});
+    fireEvent.change(screen.getByLabelText('Adicionar cidade atendida'),{target:{value:'guaira-pr'}});
+    fireEvent.change(screen.getByLabelText('Estado atendido'),{target:{value:'MS'}});
+    fireEvent.change(screen.getByLabelText('Adicionar cidade atendida'),{target:{value:'eldorado-ms'}});
     await finalStep();
     expect(screen.getByRole('region', { name: 'Revisão do cadastro' })).toHaveTextContent('Terra Roxa/PR');
     fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
     expect(screen.getByLabelText('Cidade', { exact: true })).toHaveValue('terra-roxa-pr');
-    expect(screen.getByRole('checkbox', { name: 'Guaíra/PR' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Eldorado/MS' })).toBeChecked();
+    expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).toHaveTextContent('Guaíra/PR');
+    expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).toHaveTextContent('Eldorado/MS');
     await finalStep();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
     await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ type, cityId: 'terra-roxa-pr', areaCityIds: ['terra-roxa-pr', 'mundo-novo-ms', 'guaira-pr', 'eldorado-ms'] })));
@@ -118,8 +123,8 @@ describe('cadastro progressivo e espaço profissional', () => {
     await screen.findByRole('radio', { name: 'Profissional autônomo' });
     fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
     expect(screen.getByLabelText('Cidade', { exact: true })).toHaveValue('guaira-pr');
-    expect(screen.getByRole('checkbox', { name: 'Eldorado/MS' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Mundo Novo/MS' })).not.toBeChecked();
+    expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).toHaveTextContent('Eldorado/MS');
+    expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).not.toHaveTextContent('Mundo Novo/MS');
     expect(repo.saveDraft).not.toHaveBeenCalled();
     await finalStep();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));

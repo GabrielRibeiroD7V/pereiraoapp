@@ -24,9 +24,9 @@ describe('navegação do marketplace sem login', () => {
     const repository = marketplaceFixture(), search = vi.spyOn(repository, 'search');
     repository.getCities = async () => regionalCityFixture.map(city => ({ id: city.id, name: city.name, state: city.stateCode }));
     open('/buscar', repository);
-    await screen.findByRole('option', { name: 'Guaíra/PR' });
+    await screen.findByRole('option', { name: 'PR' });
     expect(screen.getByLabelText('Cidade atendida', { exact: true })).toHaveValue('mundo-novo-ms');
-    fireEvent.change(screen.getByLabelText('Pesquisar cidade atendida'), { target: { value: 'guaira PR' } });
+    fireEvent.change(screen.getByLabelText('Estado'), { target: { value: 'PR' } });
     fireEvent.change(screen.getByLabelText('Cidade atendida', { exact: true }), { target: { value: 'guaira-pr' } });
     fireEvent.submit(screen.getByRole('search'));
     await waitFor(() => expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ cityId: 'guaira-pr' }), 1, expect.any(AbortSignal)));

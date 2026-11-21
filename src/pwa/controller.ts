@@ -4,6 +4,9 @@ export interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 export interface PwaState {
+  runningVersion: string | null;
+  publishedVersion: string | null;
+  sessionRefreshRequired: boolean;
   installed: boolean;
   ios: boolean;
   safari: boolean;
@@ -45,6 +48,10 @@ export class PwaController {
   private lastCheck = 0;
   private updateTimer: number | undefined;
   private state: PwaState;
+  private checking: Promise<void> | null = null;
+  private dirty = new Set<Element>();
+  private reloading = false;
+  private retryTimer: number | undefined;
   constructor(
     private browser: Window,
     private device: Navigator,
@@ -63,7 +70,11 @@ export class PwaController {
     } catch {
       /* preferência opcional */
     }
+    const version = browser.document.querySelector<HTMLMetaElement>('meta[name="pereirao-build"]')?.content;
     this.state = {
+      runningVersion: version && /^[a-f0-9]{20}$/.test(version) ? version : null,
+      publishedVersion: null,
+      sessionRefreshRequired: false,
       installed: this.standalone(),
       ios,
       safari: ios && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua),
@@ -104,6 +115,14 @@ export class PwaController {
   start() {
     if (this.started) return;
     this.started = true;
+    if (this.registerWorker) {
+      const poll = () => {
+        if (this.disposed) return;
+        if (this.browser.document.visibilityState === 'visible') void this.checkForUpdate();
+        this.retryTimer = this.browser.setTimeout(poll, 60000);
+      };
+      this.retryTimer = this.browser.setTimeout(poll, 60000);
+    }
     this.listen(this.browser, "beforeinstallprompt", (event) => {
       const candidate = event as InstallPromptEvent;
       if (typeof candidate.prompt !== "function" || !candidate.userChoice)
@@ -126,19 +145,26 @@ export class PwaController {
         });
       });
     this.listen(this.browser, "offline", () =>
-      this.patch({ online: false, refreshRequired: true }),
+      this.patch({ online: false, refreshRequired: true, sessionRefreshRequired: true }),
     );
     this.listen(this.browser, "online", () => {
       this.patch({ online: true });
       void this.checkForUpdate();
     });
     this.listen(this.browser, "focus", () => {
-      void this.checkForUpdate();
+      void this.checkForUpdate(true);
     });
     this.listen(this.browser.document, "visibilitychange", () => {
       if (this.browser.document.visibilityState === "visible")
-        void this.checkForUpdate();
+        void this.checkForUpdate(true);
     });
+    this.listen(this.browser, "pageshow", () => { void this.checkForUpdate(true); });
+    const markDirty = (event: Event) => {
+      const target = event.target as Element | null;
+      if (target?.closest) this.dirty.add(target.closest('form') ?? target);
+    };
+    this.listen(this.browser.document, 'input', markDirty);
+    this.listen(this.browser.document, 'change', markDirty);
     if (
       !this.registerWorker ||
       !this.device.serviceWorker ||
@@ -147,14 +173,24 @@ export class PwaController {
       return;
     this.patch({ worker: "registering" });
     this.listen(this.device.serviceWorker, "controllerchange", () => {
+      this.waiting = null;
       if (!this.controlled) {
         this.controlled = true;
+        this.acknowledgeVersion();
+        void this.checkForUpdate(true);
         return;
       }
       if (this.state.updating) {
         if (this.updateTimer) this.browser.clearTimeout(this.updateTimer);
-        this.browser.location.reload();
-      } else this.patch({ refreshRequired: true, updateReady: false });
+        this.patch({ updating: false, refreshRequired: true, updateReady: false });
+        // Outra aba pode assumir o worker enquanto este formulário está aberto.
+        if (!this.hasEdits() && !this.busy()) this.reload(false);
+      } else {
+        const verifiedCurrent = Boolean(this.state.runningVersion && this.state.publishedVersion === this.state.runningVersion);
+        this.patch({ refreshRequired: !verifiedCurrent || this.state.sessionRefreshRequired, updateReady: false });
+        void this.checkForUpdate(true);
+      }
+      this.acknowledgeVersion();
     });
     const register = () => {
       void this.register();
@@ -183,11 +219,14 @@ export class PwaController {
           ) {
             this.waiting = registration.waiting ?? worker;
             this.patch({ updateReady: true });
+            void this.checkForUpdate(true);
           }
         });
       };
       this.listen(registration, "updatefound", inspect);
       inspect();
+      this.acknowledgeVersion();
+      void this.checkForUpdate();
     } catch {
       this.patch({ worker: "failed" });
     }
@@ -198,20 +237,72 @@ export class PwaController {
       this.patch({ updateReady: true });
     }
   }
-  async checkForUpdate() {
-    if (
-      !this.registration ||
-      !this.state.online ||
-      Date.now() - this.lastCheck < 60000
-    )
-      return;
-    this.lastCheck = Date.now();
+  private acknowledgeVersion() {
+    if (this.state.runningVersion) this.device.serviceWorker?.controller?.postMessage({
+      type: 'PEREIRAO_CLIENT_VERSION', version: this.state.runningVersion,
+    });
+  }
+  private busy() {
+    return Boolean(this.browser.document.querySelector('[aria-busy="true"], form button[type="submit"]:disabled'));
+  }
+  private hasEdits() {
+    for (const element of this.dirty) if (!element.isConnected) this.dirty.delete(element);
+    return this.dirty.size > 0;
+  }
+  private safeToReload() {
+    return !isSensitivePath(this.browser.location.pathname) && !this.hasEdits() && !this.busy()
+      && !this.browser.document.querySelector('dialog[open], input:focus, textarea:focus, select:focus, [contenteditable="true"]:focus');
+  }
+  private reload(automatic: boolean) {
+    if (this.reloading || !this.state.online || this.browser.document.visibilityState !== 'visible') return;
+    if (automatic && !this.safeToReload()) return;
+    const version = this.state.publishedVersion;
+    if (automatic && !version) return;
     try {
-      await this.registration.update();
+      if (automatic && this.browser.sessionStorage.getItem('pereirao.update.attempt') === version) return;
+      if (version) this.browser.sessionStorage.setItem('pereirao.update.attempt', version);
+    } catch { if (automatic) return; } // Sem storage, somente atualização explícita: impede loops.
+    this.reloading = true;
+    this.browser.location.reload(); // Mantém rota, query e hash; nunca redireciona à Home.
+  }
+  private maybeUpdate() {
+    if (!this.state.runningVersion || !this.state.publishedVersion || this.state.runningVersion === this.state.publishedVersion
+      || !this.state.online || this.state.sessionRefreshRequired || this.state.updating || this.reloading
+      || this.browser.document.visibilityState !== 'visible' || !this.safeToReload()) return;
+    try {
+      if (this.browser.sessionStorage.getItem('pereirao.update.attempt') === this.state.publishedVersion) return;
+    } catch { return; }
+    this.update(true);
+  }
+  async checkForUpdate(force = false): Promise<void> {
+    if (!this.registerWorker || !this.state.online || this.disposed) return;
+    if (this.checking) return this.checking;
+    if (!force && Date.now() - this.lastCheck < 15000) return;
+    this.lastCheck = Date.now();
+    this.checking = (async () => {
+      const versionCheck = async () => {
+        if (!this.state.runningVersion) return;
+        const abort = new AbortController();
+        const timeout = this.browser.setTimeout(() => abort.abort(), 8000);
+        try {
+          const response = await this.browser.fetch('/version.json', {
+            cache: 'no-store', credentials: 'omit', redirect: 'error',
+            headers: { Accept: 'application/json' }, signal: abort.signal,
+          });
+          if (!response.ok || !response.headers.get('Content-Type')?.includes('application/json')) return;
+          const data: unknown = await response.json();
+          const version = data && typeof data === 'object' && 'version' in data ? data.version : null;
+          if (typeof version !== 'string' || !/^[a-f0-9]{20}$/.test(version)) return;
+          this.patch({ publishedVersion: version, refreshRequired: version !== this.state.runningVersion || this.state.sessionRefreshRequired });
+        } catch { /* Offline/proteção/erro HTTP nunca invalida a página nem força reload. */ }
+        finally { this.browser.clearTimeout(timeout); }
+      };
+      await Promise.all([versionCheck(), this.registration?.update().catch(() => {})]);
+      if (this.disposed) return;
       this.inspectWaiting();
-    } catch {
-      /* rede instável não invalida a versão ativa */
-    }
+      this.maybeUpdate();
+    })().finally(() => { this.checking = null; });
+    return this.checking;
   }
   async install() {
     if (!this.prompt || this.state.installed || this.state.installing) return;
@@ -237,28 +328,29 @@ export class PwaController {
     try { this.browser.localStorage.setItem(INSTALL_DISMISS_KEY, String(Date.now())); } catch { /* Preferência opcional; navegação privada pode bloquear storage. */ }
     this.patch({ dismissed: true });
   }
-  update() {
-    if (!this.state.online || this.state.updating) return;
+  update(automatic = false) {
+    if (!this.state.online || this.state.updating || this.reloading || this.busy()) return;
+    if (automatic && !this.safeToReload()) return;
+    if (!automatic && this.hasEdits() && !this.browser.confirm('Há alterações não salvas. Atualizar agora e descartá-las?')) return;
+    if (!automatic) this.dirty.clear();
     const waiting = this.registration?.waiting ?? this.waiting;
     if (!waiting) {
-      this.browser.location.reload();
+      // Não recarrega enquanto a instalação ainda está baixando a versão nova.
+      if (this.registration?.installing) return;
+      this.reload(automatic);
       return;
     }
     this.patch({ updating: true, updateError: false });
     try {
-      waiting.postMessage({ type: "PEREIRAO_ACTIVATE_UPDATE" });
-      this.updateTimer = this.browser.setTimeout(
-        () => this.patch({ updating: false, updateError: true }),
-        12000,
-      );
-    } catch {
-      this.patch({ updating: false, updateError: true });
-    }
+      this.updateTimer = this.browser.setTimeout(() => this.patch({ updating: false, updateError: true }), 12000);
+      waiting.postMessage({ type: 'PEREIRAO_ACTIVATE_UPDATE' });
+    } catch { this.patch({ updating: false, updateError: true }); }
   }
   dispose() {
     this.disposed = true;
     for (const cleanup of this.cleanups) cleanup();
     if (this.updateTimer) this.browser.clearTimeout(this.updateTimer);
+    if (this.retryTimer) this.browser.clearTimeout(this.retryTimer);
     this.listeners.clear();
   }
 }

@@ -76,7 +76,7 @@ describe("experiência de instalação e atualização", () => {
       screen.getByRole("button", { name: "Como adicionar no iPhone" }),
     );
     expect(
-      screen.getByText("Abra esta página no Safari para seguir as instruções."),
+      screen.getByText(/Abra este mesmo endereço no Safari/),
     ).toBeInTheDocument();
     f.controller.dispose();
   });
@@ -233,4 +233,24 @@ describe("experiência de instalação e atualização", () => {
     expect(f.controller.getSnapshot().installed).toBe(true);
     f.controller.dispose();
   });
+});
+describe('instalação sem atalhos artificiais',()=>{
+ it('chama prompt nativo no mesmo toque e só confirma por appinstalled',()=>{
+   const f=open();const event=installEvent();act(()=>{f.browser.dispatchEvent(event);});
+   fireEvent.click(screen.getByRole('button',{name:'Instalar PEREIRÃO'}));
+   expect(event.prompt).toHaveBeenCalledOnce();expect(f.controller.getSnapshot().installed).toBe(false);
+   act(()=>{f.browser.dispatchEvent(new Event('appinstalled'));});
+   expect(f.controller.getSnapshot().installed).toBe(true);
+   expect(screen.queryByRole('region',{name:'Instalar PEREIRÃO'})).not.toBeInTheDocument();f.controller.dispose();
+ });
+ it('não convida novamente quando já aberto standalone no iPhone',()=>{
+   const f=open('/',pwaFixture({ios:true,installed:true}));
+   expect(screen.queryByRole('region',{name:'Instalar PEREIRÃO'})).not.toBeInTheDocument();f.controller.dispose();
+ });
+ it('dispensa o convite sem sair da página ou apagar dados',()=>{
+   const f=open('/',pwaFixture({ios:true}));
+   fireEvent.click(screen.getByRole('button',{name:'Dispensar convite de instalação'}));
+   expect(screen.queryByRole('region',{name:'Instalar PEREIRÃO'})).not.toBeInTheDocument();
+   expect(f.browser.location.reload).not.toHaveBeenCalled();f.controller.dispose();
+ });
 });
