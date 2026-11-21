@@ -2,6 +2,18 @@ import { describe,it,expect,vi } from 'vitest';
 import { pwaFixture } from '../test/pwaFixtures';
 const A='aaaaaaaaaaaaaaaaaaaa', B='bbbbbbbbbbbbbbbbbbbb';
 describe('reprodução: versão antiga no retorno ao aplicativo',()=>{
+  it('libera nova tentativa após chegar ao build atual e recupera página antiga restaurada do histórico',async()=>{
+    const storage=new Map([['pereirao.update.attempt',B]]);
+    const current=pwaFixture({enabled:true,version:B,published:B,storage});
+    await vi.waitFor(()=>expect(current.controller.getSnapshot().publishedVersion).toBe(B));
+    expect(storage.has('pereirao.update.attempt')).toBe(false);
+    current.controller.dispose();
+    const old=pwaFixture({enabled:true,version:A,published:B,storage});
+    const restore=new Event('pageshow');Object.defineProperty(restore,'persisted',{value:true});old.browser.dispatchEvent(restore);
+    await vi.waitFor(()=>expect(old.browser.location.reload).toHaveBeenCalledOnce());
+    expect(storage.get('pereirao.update.attempt')).toBe(B);
+    old.controller.dispose();
+  });
   it('detecta outra versão publicada ao restaurar pelo histórico',async()=>{
     const f=pwaFixture({enabled:true,version:A,published:B});
     await vi.waitFor(()=>expect(f.controller.getSnapshot().worker).toBe('ready'));

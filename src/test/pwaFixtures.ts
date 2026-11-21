@@ -12,6 +12,7 @@ export function pwaFixture(
     version?: string;
     published?: string;
     workerVersion?: string | null;
+    storage?: Map<string, string>;
   } = {},
 ) {
   const mode = Object.assign(new EventTarget(), {
@@ -35,7 +36,7 @@ export function pwaFixture(
       async () => registration as unknown as ServiceWorkerRegistration,
     ),
   });
-  const storage = new Map<string, string>();
+  const storage = options.storage ?? new Map<string, string>();
   const document = Object.assign(new EventTarget(), {
     readyState: "complete",
     visibilityState: "visible",
@@ -47,6 +48,7 @@ export function pwaFixture(
     sessionStorage: {
       getItem: (key: string) => storage.get(key) ?? null,
       setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
     },
     localStorage: {
       getItem: (key: string) => storage.get(key) ?? null,
