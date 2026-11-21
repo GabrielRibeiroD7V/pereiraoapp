@@ -70,7 +70,7 @@ Não usar token de bypass na query da URL; não desabilitar a proteção do proj
 
 Opções a revisar e autorizar explicitamente antes da configuração:
 
-- Uma exceção de Deployment Protection para **um hostname exato de Preview**. A exceção é do domínio inteiro, não somente `/api/asaas-webhook`; revisar exposição e disponibilidade no plano antes. Não ativar plano, add-on ou trial automaticamente. Auth/RLS/HMAC da aplicação devem continuar obrigatórios para dados privados.
+- Uma exceção de Deployment Protection para **um hostname exato de Preview**. A documentação atual informa disponibilidade em todos os planos. A exceção é do domínio inteiro, não somente `/api/asaas-webhook`; não ativar plano, add-on ou trial. Auth/RLS/HMAC da aplicação devem continuar obrigatórios para dados privados. Hostname proposto: `pereirao-git-feat-asaas-sandbox-77badblock-5101s-projects.vercel.app`. Endpoint proposto: `https://pereirao-git-feat-asaas-sandbox-77badblock-5101s-projects.vercel.app/api/asaas-webhook`. A exceção permanece dependente de autorização explícita e cobre os futuros deployments desse mesmo alias enquanto existir.
 - Um receptor/relay público limitado aprovado separadamente, ou um endpoint específico em domínio já público após revisão de arquitetura/deploy. Não criar infraestrutura agora nem promover Preview para contornar os guards; o handler financeiro atual recusa Production.
 
 Nenhuma dessas opções foi executada. Enquanto não houver rota aprovada alcançável pelo Asaas, a entrega real permanece pendente.
@@ -98,3 +98,16 @@ R$ 19,99 é referência de homologação. O checkout hospedado de cartão pode c
 - [Situação cadastral](https://docs.asaas.com/reference/check-account-registration-status), [chaves Pix](https://docs.asaas.com/reference/list-keys), [assinatura e billingType](https://docs.asaas.com/reference/create-new-subscription).
 - [Cobranças via Pix](https://docs.asaas.com/docs/cobrancas-via-pix), [oferta de Pix Automático](https://docs.asaas.com/docs/oferta-autom%C3%A1tica-de-pix-autom%C3%A1tico-em-assinaturas-via-api).
 - [Configuração do webhook](https://docs.asaas.com/reference/create-new-webhook), [proteção Vercel](https://vercel.com/docs/deployment-protection), [exceções por domínio](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/deployment-protection-exceptions), [bypass por automação](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation).
+
+## Conferência para provisionamento do webhook
+
+- Branch e PR existentes: `feat/asaas-sandbox`, #17, head revisado `deeba4c2b6ff43a0023ef46de1efd81db6cc6554`. Não abrir outro PR.
+- Proteção atual consultada pela integração: Vercel Authentication habilitada, deploymentType `all_except_custom_domains`; proteção por senha e Trusted IPs desabilitados. Não alterar esses campos globalmente.
+- Chave existente `ASSAS_API_KEY_SANDBOX` é Secret, com destinos Preview e Production. Metadados consultados sem decrypt; não mover/copiar a chave. A presença em Production atende somente ao diagnóstico GET existente, não autoriza handlers financeiros.
+- Ausentes no inventário: `BILLING_RPC_SIGNING_SECRET`, `ASAAS_SANDBOX_WEBHOOK_TOKEN`, `ASAAS_SANDBOX_ENABLED` e `VITE_SANDBOX_BILLING`. Provisionar somente em Preview, branch `feat/asaas-sandbox`, após autorização. Pix e os opt-ins financeiros continuam desligados.
+- A ferramenta de configuração de projetos disponível não expõe uma operação de exceção por hostname. Não substituir por `ssoProtection=null`. Após autorização, se continuar sem API específica disponível, será necessário usar a tela de Deployment Protection para cadastrar unicamente o alias aprovado. Não manipular a proteção por tentativa com payloads desconhecidos.
+- A geração dos dois segredos pode ocorrer sem exibição. O digest HMAC não deve passar por SQL literal em ferramenta/log; é necessário um canal privado parametrizado ou a operação privada do proprietário antes de liberar o consumidor. Não solicitar senha/connection string no chat e não criar um endpoint público de bootstrap.
+- Na futura criação do webhook, usar nome `PEREIRAO PR17 SANDBOX`, token independente, envio sequencial e e-mail de notificação `77badblock@gmail.com` somente se autorizado como parte do provisionamento. Primeiro verificar webhooks existentes por GET, projetando somente id/url/status/eventos; nunca registrar resposta bruta que possa conter authToken. Não duplicar nem alterar um webhook preexistente sem confirmar sua identidade.
+- Antes de habilitar o webhook, confirmar endpoint/token/banco; depois habilitar a entrega, iniciar somente cartão sintético autorizado, registrar IDs, confirmar inbox/GET/painel e executar estorno/cancelamento do ensaio. Qualquer timeout de POST exige conciliação antes de outra tentativa.
+
+A nova consulta de integridade confirmou igualdade integral com o snapshot anterior; a migração financeira continua ausente. Nenhum provisionamento remoto foi executado nesta conferência. O procedimento está pronto para revisão; a execução integrada permanece condicionada às autorizações explícitas.
