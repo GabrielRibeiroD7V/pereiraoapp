@@ -89,6 +89,7 @@ export function createAdminHandler(
             "posts",
             "audit",
             "detail",
+            "subscriptions",
           ].includes(body.section)
         )
           return reply(400, { code: "INVALID_INPUT" });
@@ -99,10 +100,15 @@ export function createAdminHandler(
           Array.isArray(filters)
         )
           return reply(400, { code: "INVALID_INPUT" });
-        const result = await client.rpc("admin_query", {
-          section: body.section,
-          filters: filters as Json,
-        });
+        const result =
+          body.section === "subscriptions"
+            ? await client.rpc("admin_subscription_overview", {
+                filters: filters as Json,
+              })
+            : await client.rpc("admin_query", {
+                section: body.section,
+                filters: filters as Json,
+              });
         return result.error
           ? rpcFailure(result.error.code)
           : reply(200, { data: result.data });

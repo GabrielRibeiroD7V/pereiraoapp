@@ -1,0 +1,40 @@
+.business-subscription-line {
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 0;
+  margin: -0.5rem 0 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.subscription-copy strong {
+  font-size: 0.9375rem;
+}
+.subscription-copy p {
+  font-size: 0.875rem;
+  color: var(--color-secondary);
+  margin-top: 0.25rem;
+}
+.business-subscription-line .text-link {
+  font-size: 0.875rem;
+  padding: 0.35rem 0;
+}
+.subscription-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0;
+  display: grid;
+  gap: 0;
+}
+.subscription-list li {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.subscription-list h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.subscription-phase {
+  margin-top: 1.25rem;
+}

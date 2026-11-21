@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, ChevronRight, LogOut, Settings2, ShieldCheck, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, ChevronRight, CreditCard, LogOut, Settings2, ShieldCheck, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProfileAvatar } from '../components/ProfileAvatar';
 import { MenuRow } from '../components/MenuRow';
@@ -42,6 +42,7 @@ export function AccountPage() {
       </Link>
       {session && <div className="account-menu">
         <AdminEntry />
+        <MenuRow icon={CreditCard} title="Gratuidade e assinatura" description="Consulte a situação de cada negócio" to="/conta/assinaturas"/>
         <MenuRow icon={UserRound} title="Meus dados" description="Nome e informações pessoais" to="/conta/dados" />
         <MenuRow icon={ShieldCheck} title="Segurança e acesso" description="E-mail e recuperação de senha" to="/conta/seguranca" />
         <MenuRow icon={Settings2} title="Configurações" description="Preferências e notificações" soon />
