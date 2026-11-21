@@ -11,7 +11,7 @@ const items = [
 export function MainNavigation() {
   const { pathname } = useLocation();
   const accountPage = ['/entrar', '/criar-conta', '/recuperar-senha', '/redefinir-senha', '/auth/retorno'].includes(pathname);
-  const publicProfile = pathname.startsWith('/prestadores/');
+  const publicProfile = pathname.startsWith('/prestadores/') || pathname.startsWith('/trabalhos/');
   const selected = publicProfile ? routes.search : accountPage ? routes.account : pathname;
   return (
     <nav className="main-nav" aria-label="Navegação principal">

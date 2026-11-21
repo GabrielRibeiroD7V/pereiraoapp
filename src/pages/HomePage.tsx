@@ -3,6 +3,7 @@ import { CategoryTile } from '../components/CategoryTile';
 import { PageHeader } from '../components/PageHeader';
 import { SearchField } from '../components/SearchField';
 import { HomeProviders } from '../marketplace/HomeProviders';
+import {PublishedWorks} from '../posts/PublishedWorks';
 import { categories } from '../config/categories';
 import { LinkButton } from '../components/LinkButton';
 
@@ -21,6 +22,7 @@ export function HomePage() {
         <h2 id="featured-title">Profissionais cadastrados</h2>
         <HomeProviders />
       </section>
+      <PublishedWorks/>
       <section className="provider-invite" aria-labelledby="invite-title">
         <BriefcaseBusiness size={24} aria-hidden="true" />
         <div>

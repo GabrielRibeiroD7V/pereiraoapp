@@ -2,6 +2,7 @@
 @use 'professional';
 @use 'work';
 @use 'marketplace';
+@use 'posts';
 
 :root {
   @include tokens.properties;
@@ -279,3 +280,4 @@ h1, h2, p { margin: 0; }
 @include professional.styles;
 @include work.styles;
 @include marketplace.styles;
+@include posts.styles;

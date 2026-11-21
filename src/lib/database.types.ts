@@ -23,9 +23,12 @@ export type PortfolioRow = {
   caption: string | null; sort_order: number; created_at: string; media_state: 'pending' | 'ready' | 'deleting';
 }
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type WorkPostRow = { id: string; business_id: string; title: string; description: string; status: 'draft' | 'published' | 'unpublished'; created_at: string; updated_at: string; published_at: string | null };
 export interface Database {
   public: {
     Tables: {
+      work_posts: Table<WorkPostRow, never, never>;
+      work_post_images: Table<{ post_id: string; business_id: string; portfolio_item_id: string; sort_order: number }, never, never>;
       profiles: Table<ProfileRow, never, Partial<Pick<ProfileRow, 'display_name' | 'avatar_url'>>>;
       cities: Table<{ id: string; name: string; state_code: string; slug: string; active: boolean }, never, never>;
       categories: Table<{ id: string; name: string; active: boolean }, never, never>;
@@ -38,6 +41,7 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      work_post_command: { Args: { command: string; target_business: string; target_post: string; post_title?: string; post_description?: string; photo_ids?: string[] }; Returns: Json };
       portfolio_command: { Args: { command: string; target_business: string; target_item?: string; target_service?: string | null; item_caption?: string | null; ordered_items?: string[] }; Returns: Json };
       delete_business_service: { Args: { target_business: string; target_service: string }; Returns: undefined };
       create_business: {

@@ -1,0 +1,254 @@
+[
+  {
+    "width": 375,
+    "view": "home",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "manager",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "draft-profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "editor",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "public",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "empty",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "error",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "setup",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "home",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "manager",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "draft-profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "editor",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "public",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "empty",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "error",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "setup",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "home",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "manager",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "draft-profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "editor",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "public",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "empty",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "error",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "setup",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "home",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "manager",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "draft-profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "editor",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "public",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "profile",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "empty",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "error",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "setup",
+    "broken": 0,
+    "nav": 3,
+    "overflow": false
+  }
+]
