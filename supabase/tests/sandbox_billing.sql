@@ -80,4 +80,8 @@ set local role anon;
 select test.expect_error('select * from private.sandbox_payments','42501','sandbox: dados financeiros não públicos');
 select test.expect_error($q$select public.sandbox_billing_server('context','{}',extract(epoch from now())::bigint,gen_random_uuid(),repeat('0',64))$q$,'42501','sandbox: wrapper público não contorna prova');
 reset role;
+-- Primeiro vencimento nunca antecipa o prazo individual (data no fuso brasileiro).
+insert into public.business_subscriptions(business_id,trial_started_at,trial_original_ends_at,trial_ends_at)
+ values(:'biz',now(),now()+interval '2160 hours',now()+interval '2160 hours');
+select test.assert_true((test.sandbox('reserve',:'consent'::jsonb||jsonb_build_object('requestId',gen_random_uuid()))->'contract'->>'first_due_date')::date>(select (trial_ends_at at time zone 'America/Sao_Paulo')::date from public.business_subscriptions where business_id=:'biz'),'sandbox: primeiro vencimento após o fim integral dos 90 dias');
 rollback;

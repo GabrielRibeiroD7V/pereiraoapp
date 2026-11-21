@@ -10,9 +10,35 @@ if (
 )
   throw Error("SMOKE_NOT_AUTHORIZED");
 const key = process.env.ASSAS_API_KEY_SANDBOX ?? "";
-const provider = new SandboxProvider(key);
 const reference = "pereirao:synthetic:" + run;
 const report = { run, environment: "sandbox", supabaseWrites: 0 };
+const provider = new SandboxProvider(key, async (url, init) => {
+  const response = await fetch(url, init);
+  if (!response.ok) {
+    try {
+      const errors = (await response.clone().json()).errors;
+      // Somente diagnóstico desta fixture sintética: remove chave, e-mails e identificadores.
+      report.providerValidation = Array.isArray(errors)
+        ? errors.slice(0, 3).map((e) => ({
+            code:
+              typeof e.code === "string" && /^[a-z_]{3,60}$/.test(e.code)
+                ? e.code
+                : "provider_error",
+            description: String(e.description ?? "")
+              .replaceAll(key, "[credential]")
+              .replace(/\$aact_[^\s"'<>]+/g, "[credential]")
+              .replace(/[\w.+%-]+@[\w.-]+\.[A-Za-z]+/g, "[email]")
+              .replace(/\b(?:cus|sub|pay)_[A-Za-z0-9_-]+\b/g, "[id]")
+              .replace(/\b\d{5,}\b/g, "[number]")
+              .slice(0, 200),
+          }))
+        : [];
+    } catch {
+      /* Nenhum corpo bruto é impresso. */
+    }
+  }
+  return response;
+});
 let createdSubscription = null;
 // IDs sintéticos e estados são a única saída; nunca corpos, headers ou segredos.
 const emit = () =>
@@ -39,10 +65,14 @@ try {
     );
     if (found.length !== 1 || found[0].id !== "cus_000010060912")
       throw Error("RUN_CONFLICT");
+    report.phase = "complete_synthetic_customer";
+    emit();
     await provider.completeSyntheticCustomer(
       found[0].id,
       "pereirao:synthetic:pr17-card-20261121-a",
     );
+    report.phase = "create_card_checkout";
+    emit();
     const checkout = await provider.createCardCheckout(
       found[0].id,
       crypto.randomUUID(),
