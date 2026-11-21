@@ -1,3 +1,5 @@
+> Estado operacional após autorização: [migração e segredos provisionados; decisão do receptor pendente](operacao-webhook-pr17.md). Resultados anteriores abaixo são históricos.
+
 # PR #17 — Conclusão técnica de 21/11/2026
 
 PR: https://github.com/GabrielRibeiroD7V/pereiraoapp/pull/17  

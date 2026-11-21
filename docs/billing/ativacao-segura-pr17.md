@@ -1,6 +1,8 @@
+> Estado mais recente: [migração aplicada, provisionamento e avaliação de exposição](operacao-webhook-pr17.md). As seções históricas abaixo descrevem a ordem e os cuidados originais; não reaplicar a migração financeira.
+
 # PR #17 — Ativação segura e pendências de homologação
 
-Este roteiro é preparatório. Não autoriza migração, provisionamento de segredos, webhook remoto, exceção de proteção, nova assinatura Pix ou merge. Projeto exclusivo: `yazdjiwaksamizrbqewq`. Ambiente financeiro exclusivo: **Asaas Sandbox**.
+Atualização: a migração e os segredos HMAC/webhook foram autorizados e provisionados. A configuração/ensaio do webhook Sandbox está autorizada, mas a rota externa depende da decisão de exposição descrita no relatório operacional. Não há autorização atual para tornar o Preview inteiro público, nova assinatura Pix ou merge. Projeto exclusivo: `yazdjiwaksamizrbqewq`. Ambiente financeiro exclusivo: **Asaas Sandbox**.
 
 ## Pix: evidência e próxima ação do proprietário
 

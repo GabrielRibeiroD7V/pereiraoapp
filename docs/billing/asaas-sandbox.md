@@ -1,3 +1,5 @@
+> Estado operacional após autorização: [migração e segredos provisionados; decisão do receptor pendente](operacao-webhook-pr17.md). Resultados anteriores abaixo são históricos.
+
 # Assinaturas Asaas Sandbox
 
 > Atualização de 21/11: consulte [a conclusão técnica atual](continuacao-pr17.md) e [o roteiro de ativação segura](ativacao-segura-pr17.md). Os ensaios anteriores abaixo são históricos; não equivalem a homologação integral.
