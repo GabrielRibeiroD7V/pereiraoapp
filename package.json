@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.2",
+    "@vercel/functions": "3.11.3",
     "lucide-react": "1.77.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",

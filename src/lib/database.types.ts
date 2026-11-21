@@ -184,6 +184,16 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      sandbox_billing_server: {
+        Args: {
+          command: string;
+          raw_payload: string;
+          issued_at: number;
+          nonce: string;
+          signature: string;
+        };
+        Returns: Json;
+      };
       my_subscriptions: {
         Args: { target_business?: string; page_number?: number };
         Returns: Json;

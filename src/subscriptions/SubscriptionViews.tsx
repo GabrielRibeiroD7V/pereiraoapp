@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSubscriptions } from "./SubscriptionProvider";
+import { useBilling } from "../billing/BillingProvider";
 import { usePublicQuery } from "../marketplace/usePublicQuery";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../marketplace/Pagination";
@@ -59,6 +60,7 @@ export function BusinessSubscriptionLine({
 }: {
   businessId: string;
 }) {
+  const billing = useBilling();
   const repo = useSubscriptions(),
     load = useCallback(
       async (signal: AbortSignal) => {
@@ -91,6 +93,14 @@ export function BusinessSubscriptionLine({
       <Link className="text-link" to="/conta/assinaturas">
         Consultar meus negócios
       </Link>
+      {billing?.available && (
+        <Link
+          className="text-link"
+          to={`/conta/profissional/${businessId}/assinatura`}
+        >
+          Simular assinatura no Sandbox
+        </Link>
+      )}
     </section>
   );
 }
