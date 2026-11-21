@@ -353,14 +353,21 @@ describe('proteção de formulários privados legados na ativação',()=>{
   await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1},source});
   expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.navigate).not.toHaveBeenCalled();expect(source.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_UPDATE_DEFERRED'});
  });
- it('clique legado atualiza somente a própria página pública, sem assumir controle do formulário de outra aba',async()=>{
-  const f=worker(),source={url:'https://pereirao.example/buscar?cidade=guaira-pr',navigate:vi.fn(),postMessage:vi.fn()};
+ it('não tenta navegar a partir do waiting sem controlar a página legada',async()=>{
+  const f=worker(),source={url:'https://pereirao.example/buscar?cidade=guaira-pr',navigate:vi.fn(async()=>{throw new TypeError('The service worker does not control this client');}),postMessage:vi.fn()};
+  f.self.registration={active:{state:'activated'},waiting:{state:'installed'},installing:null};
   f.self.clients.matchAll.mockResolvedValue([{id:'old-form',url:'https://pereirao.example/conta',postMessage:vi.fn()}]);
-  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source});
-  expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.navigate).toHaveBeenCalledWith(source.url);
+  await expect(f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source})).resolves.toBeUndefined();
+  expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.navigate).not.toHaveBeenCalled();expect(source.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_UPDATE_DEFERRED'});
  });
  it('permite ativação com formulário no controlador novo que preserva edições',async()=>{
   const f=worker();f.self.clients.matchAll.mockResolvedValue([{id:'new-form',url:'https://pereirao.example/conta',postMessage:(_data,ports)=>ports[0].postMessage({protocol:1})}]);
   await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1}});expect(f.self.skipWaiting).toHaveBeenCalledOnce();
  });
+});
+it('adia ativação também com rota privada legada em maiúsculas',async()=>{
+ const f=worker(),source={postMessage:vi.fn()};
+ f.self.clients.matchAll.mockResolvedValue([{id:'legacy-admin',url:'https://pereirao.example/ADMIN',postMessage:vi.fn()}]);
+ await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1},source});
+ expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_UPDATE_DEFERRED'});
 });

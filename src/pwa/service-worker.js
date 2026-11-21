@@ -49,7 +49,7 @@ async function hasLegacyPrivateClient() {
   const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   const privateClients = clients.filter(client => {
     if (!client.url) return false;
-    const path = new URL(client.url).pathname;
+    const path = new URL(client.url).pathname.toLowerCase();
     return path === '/admin' || path.startsWith('/admin/') || path === '/conta' || path.startsWith('/conta/')
       || ['/entrar','/criar-conta','/recuperar-senha','/redefinir-senha','/auth/retorno'].includes(path);
   });
@@ -83,8 +83,8 @@ self.addEventListener('message', event => {
       if (!alreadyActive && await hasLegacyPrivateClient()) {
         // Sem ativação global: mantém a tela e os dados dos formulários legados.
         source?.postMessage?.({ type: 'PEREIRAO_UPDATE_DEFERRED' });
-        // Um clique do botão antigo pode atualizar SOMENTE sua própria página pública.
-        if (event.data.protocol !== 1 && publicClient(source)) await source.navigate(source.url);
+        // Um worker waiting não controla a página: WindowClient.navigate rejeitaria.
+        // Não força ativação nem recarga. Clientes legados exigem recarga normal inicial.
         return;
       }
       await self.skipWaiting();

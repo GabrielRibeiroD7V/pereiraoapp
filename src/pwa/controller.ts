@@ -25,6 +25,8 @@ export interface PwaState {
   worker: "unavailable" | "registering" | "ready" | "failed";
 }
 export function isSensitivePath(path: string) {
+  // React Router aceita variações de caixa; a proteção deve classificar igual.
+  path = path.toLowerCase();
   return (
     path === "/admin" ||
     path.startsWith("/admin/") ||
