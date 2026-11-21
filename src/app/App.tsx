@@ -21,6 +21,9 @@ import { WorkProvider } from '../work/WorkProvider';
 import type { WorkRepository } from '../work/types';
 import { ServicesPage } from '../pages/ServicesPage';
 import { PortfolioPage } from '../pages/PortfolioPage';
+import { MarketplaceProvider } from '../marketplace/MarketplaceProvider';
+import type { PublicMarketplace } from '../marketplace/types';
+import { PublicProviderPage } from '../pages/PublicProviderPage';
 
 const titles: Record<string, string> = {
   [routes.home]: 'Início', [routes.search]: 'Buscar', [routes.account]: 'Conta',
@@ -29,14 +32,14 @@ const titles: Record<string, string> = {
   '/conta/seguranca': 'Segurança e acesso',
 };
 
-export function App({ authGateway, professionalRepository, workRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null; workRepository?: WorkRepository | null }) {
-  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><WorkProvider repository={workRepository}><AppRoutes /></WorkProvider></ProfessionalProvider></AuthProvider>;
+export function App({ authGateway, professionalRepository, workRepository, marketplaceRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null; workRepository?: WorkRepository | null; marketplaceRepository?: PublicMarketplace | null }) {
+  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><WorkProvider repository={workRepository}><MarketplaceProvider repository={marketplaceRepository}><AppRoutes /></MarketplaceProvider></WorkProvider></ProfessionalProvider></AuthProvider>;
 }
 
 function AppRoutes() {
   const { pathname } = useLocation();
   useEffect(() => {
-    document.title = `${titles[pathname] ?? (pathname.endsWith('/servicos') ? 'Meus serviços' : pathname.endsWith('/trabalhos') ? 'Meus trabalhos' : pathname.startsWith('/conta/profissional') ? 'Espaço profissional' : 'Página não encontrada')} | PEREIRÃO`;
+    document.title = `${titles[pathname] ?? (pathname.startsWith('/prestadores/') ? 'Perfil profissional' : pathname.endsWith('/servicos') ? 'Meus serviços' : pathname.endsWith('/trabalhos') ? 'Meus trabalhos' : pathname.startsWith('/conta/profissional') ? 'Espaço profissional' : 'Página não encontrada')} | PEREIRÃO`;
   }, [pathname]);
 
   return (
@@ -44,6 +47,7 @@ function AppRoutes() {
       <Route element={<AppShell />}>
         <Route path={routes.home} element={<HomePage />} />
         <Route path={routes.search} element={<SearchPage />} />
+        <Route path="/prestadores/:slug" element={<PublicProviderPage key={pathname} />} />
         <Route path={routes.account} element={<AccountPage />} />
         <Route path="/entrar" element={<AuthPage key="login" mode="login" />} />
         <Route path="/criar-conta" element={<AuthPage key="signup" mode="signup" />} />

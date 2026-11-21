@@ -2,7 +2,7 @@ import { BriefcaseBusiness } from 'lucide-react';
 import { CategoryTile } from '../components/CategoryTile';
 import { PageHeader } from '../components/PageHeader';
 import { SearchField } from '../components/SearchField';
-import { ProviderList } from '../components/ProviderList';
+import { HomeProviders } from '../marketplace/HomeProviders';
 import { categories } from '../config/categories';
 import { LinkButton } from '../components/LinkButton';
 
@@ -18,8 +18,8 @@ export function HomePage() {
         </ul>
       </section>
       <section className="home-section" aria-labelledby="featured-title">
-        <h2 id="featured-title">Profissionais em destaque</h2>
-        <ProviderList providers={[]} />
+        <h2 id="featured-title">Profissionais cadastrados</h2>
+        <HomeProviders />
       </section>
       <section className="provider-invite" aria-labelledby="invite-title">
         <BriefcaseBusiness size={24} aria-hidden="true" />

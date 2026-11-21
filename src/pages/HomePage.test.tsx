@@ -5,7 +5,7 @@ import { App } from '../app/App';
 import { categories } from '../config/categories';
 import { CategoryTile } from '../components/CategoryTile';
 import { ProviderList } from '../components/ProviderList';
-import type { Provider } from '../types/domain';
+import type { PublicProvider } from '../marketplace/types';
 
 function CurrentLocation() {
   const { pathname, search } = useLocation();
@@ -54,7 +54,7 @@ describe('Início', () => {
 
   it('mantém estado vazio sem fotos ou avaliações fictícias e convite com destino real', () => {
     open();
-    const featured = screen.getByRole('region', { name: 'Profissionais em destaque' });
+    const featured = screen.getByRole('region', { name: 'Profissionais cadastrados' });
     expect(within(featured).getByText('Novos profissionais em breve')).toBeInTheDocument();
     expect(within(featured).queryByRole('link')).not.toBeInTheDocument();
     const invite = screen.getByRole('region', { name: 'É profissional ou tem uma empresa?' });
@@ -83,9 +83,9 @@ describe('Início', () => {
 });
 
 // Fixture restrita ao teste: não importada ou servida pelo aplicativo.
-const provider: Pick<Provider, 'id' | 'slug' | 'name' | 'specialty' | 'city' | 'avatar' | 'rating'> = {
+const provider: PublicProvider = {
   id: 'test', slug: 'teste', name: 'Prestador de teste', specialty: 'Serviço de teste',
-  city: { id: 'test-city', name: 'Cidade de teste', state: 'MS' }, avatar: null, rating: null,
+  city: { id: 'test-city', name: 'Cidade de teste', state: 'MS' }, avatarPath: null, type: 'autonomo', categoryId: null, description: null, whatsapp: null, instagram: null,
 };
 
 describe('estrutura da lista futura', () => {
@@ -95,8 +95,8 @@ describe('estrutura da lista futura', () => {
     expect(screen.queryByText(/avaliações/)).not.toBeInTheDocument();
   });
 
-  it('mostra avaliação somente quando fornecida com quantidade positiva', () => {
-    render(<MemoryRouter><ProviderList providers={[{ ...provider, rating: { average: 4.9, count: 2 } }]} /></MemoryRouter>);
-    expect(screen.getByText(/4,9.*2 avaliações/)).toBeInTheDocument();
+  it('não acrescenta avaliações, selos ou distâncias ao perfil público', () => {
+    render(<MemoryRouter><ProviderList providers={[provider]} /></MemoryRouter>);
+    expect(screen.queryByText(/avaliações|verificado|km/)).not.toBeInTheDocument();
   });
 });

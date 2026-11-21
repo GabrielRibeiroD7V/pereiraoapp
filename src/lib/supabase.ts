@@ -22,3 +22,9 @@ export const supabase = validPublicConfig(url, key) ? createClient<Database>(url
     flowType: 'pkce',
   },
 }) : null;
+
+// Marketplace sempre consulta como visitante, inclusive com proprietário logado.
+// Não lê, copia ou persiste a sessão do cliente acima.
+export const publicSupabase = validPublicConfig(url, key) ? createClient<Database>(url!, key!, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'pereirao-public-read' },
+}) : null;
