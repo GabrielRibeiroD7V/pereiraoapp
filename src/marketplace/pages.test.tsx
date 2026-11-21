@@ -22,7 +22,8 @@ describe('navegação do marketplace sem login', () => {
   it('mostra perfil, preços e contatos seguros sem exigir autenticação', async () => {
     open('/prestadores/prestador-simulado');
     await screen.findByRole('heading', { name: 'Prestador simulado' });
-    await screen.findByText('Instalação simulada');
+    fireEvent.click(screen.getByRole('tab', { name: 'Serviços' }));
+    expect(await screen.findByText('Instalação simulada')).toBeVisible();
     expect(screen.getByText(/R\$\s*180,00/)).toBeInTheDocument();
     expect(screen.getByText(/A partir de R\$\s*90,00/)).toBeInTheDocument();
     expect(screen.getByText('Sob orçamento')).toBeInTheDocument();

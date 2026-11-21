@@ -192,7 +192,7 @@
   }
   @media (min-width: 64rem) {
     .published-works-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .public-profile .published-works-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));

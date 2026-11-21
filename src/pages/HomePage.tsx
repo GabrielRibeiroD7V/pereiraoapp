@@ -6,11 +6,10 @@ import { HomeProviders } from '../marketplace/HomeProviders';
 import {PublishedWorks} from '../posts/PublishedWorks';
 import { categories } from '../config/categories';
 import { LinkButton } from '../components/LinkButton';
-import {InstallInvitation}from'../pwa/PwaProvider';
 
 export function HomePage() {
   return (
-    <>
+    <div className="home-page">
       <PageHeader title="O que você está procurando?" />
       <SearchField />
       <section className="home-section" aria-labelledby="categories-title">
@@ -32,7 +31,7 @@ export function HomePage() {
           <LinkButton to="/conta/profissional/cadastro" variant="secondary">Anunciar meus serviços</LinkButton>
         </div>
       </section>
-      <InstallInvitation/>
-    </>
+
+    </div>
   );
 }

@@ -64,6 +64,14 @@ describe("administração protegida", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("99%")).not.toBeInTheDocument();
   });
+  it("renderiza a seção de gratuidade com resumo e tabela sem iniciar períodos", async () => {
+    const f = open('/admin?sec=subscriptions');
+    expect(await screen.findByText('Gratuidade ativa', { selector: '.admin-metrics span' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Gratuidade por negócio' })).toBeVisible();
+    expect(screen.getByRole('cell', { name: 'Aguardando ativação' })).toBeVisible();
+    expect(f.business.status).toBe('draft');
+    expect(f.history).toHaveLength(0);
+  });
   it("filtra e pagina sem carregar todos os usuários", async () => {
     const f = adminFixture();
     const query = vi.spyOn(f.repo, "query");

@@ -1,0 +1,476 @@
+[
+  {
+    "width": 375,
+    "page": "home",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr",
+      "color-contrast"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 375,
+    "page": "busca",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 375,
+    "page": "perfil",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 19
+  },
+  {
+    "width": 375,
+    "page": "conta",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 11
+  },
+  {
+    "width": 375,
+    "page": "profissional",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 11
+  },
+  {
+    "width": 375,
+    "page": "cadastro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "servicos",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "portfolio",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "publicacoes",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "admin",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 17
+  },
+  {
+    "width": 375,
+    "page": "trabalho",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "editar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "assinaturas",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 12
+  },
+  {
+    "width": 375,
+    "page": "sandbox",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "dados",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "seguranca",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 10
+  },
+  {
+    "width": 375,
+    "page": "entrar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "criar-conta",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "recuperar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "redefinir",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "nao-encontrada",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 10
+  },
+  {
+    "width": 375,
+    "page": "admin-usuarios",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 375,
+    "page": "admin-prestadores",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 375,
+    "page": "admin-publicacoes",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 375,
+    "page": "admin-historico",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 375,
+    "page": "admin-sandbox",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 14
+  },
+  {
+    "width": 1280,
+    "page": "home",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr",
+      "color-contrast"
+    ],
+    "passes": 19
+  },
+  {
+    "width": 1280,
+    "page": "busca",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 1280,
+    "page": "perfil",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 19
+  },
+  {
+    "width": 1280,
+    "page": "conta",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 11
+  },
+  {
+    "width": 1280,
+    "page": "profissional",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 11
+  },
+  {
+    "width": 1280,
+    "page": "cadastro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "servicos",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 1280,
+    "page": "portfolio",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 1280,
+    "page": "publicacoes",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 1280,
+    "page": "admin",
+    "violations": [],
+    "incomplete": [],
+    "passes": 16
+  },
+  {
+    "width": 1280,
+    "page": "trabalho",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 1280,
+    "page": "editar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "assinaturas",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 12
+  },
+  {
+    "width": 1280,
+    "page": "sandbox",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 13
+  },
+  {
+    "width": 1280,
+    "page": "dados",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "seguranca",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 10
+  },
+  {
+    "width": 1280,
+    "page": "entrar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "criar-conta",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "recuperar",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "redefinir",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 15
+  },
+  {
+    "width": 1280,
+    "page": "nao-encontrada",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "passes": 10
+  },
+  {
+    "width": 1280,
+    "page": "admin-usuarios",
+    "violations": [],
+    "incomplete": [],
+    "passes": 19
+  },
+  {
+    "width": 1280,
+    "page": "admin-prestadores",
+    "violations": [],
+    "incomplete": [],
+    "passes": 19
+  },
+  {
+    "width": 1280,
+    "page": "admin-publicacoes",
+    "violations": [],
+    "incomplete": [],
+    "passes": 19
+  },
+  {
+    "width": 1280,
+    "page": "admin-historico",
+    "violations": [],
+    "incomplete": [],
+    "passes": 14
+  },
+  {
+    "width": 1280,
+    "page": "admin-sandbox",
+    "violations": [],
+    "incomplete": [],
+    "passes": 13
+  },
+  {
+    "width": 375,
+    "page": "admin-assinaturas",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "passes": 20
+  },
+  {
+    "width": 1280,
+    "page": "admin-assinaturas",
+    "violations": [],
+    "incomplete": [],
+    "passes": 19
+  }
+]

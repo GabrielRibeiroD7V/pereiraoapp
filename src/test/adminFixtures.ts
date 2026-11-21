@@ -1,3 +1,4 @@
+import type { AdminSubscriptions } from '../subscriptions/types';
 // Fixtures locais; jamais importar no bundle do aplicativo.
 import type {
   AdminRepository,
@@ -88,6 +89,15 @@ export function adminFixture(
   const repo: AdminRepository = {
     access: async () => options.allowed !== false,
     query: async <T>(section: AdminSection, filters: AdminFilters = {}) => {
+      if (section === 'subscriptions') {
+        const data: AdminSubscriptions = {
+          items: options.empty ? [] : [{ businessId: business.id, businessName: business.name, state: 'awaiting_activation', trialStartedAt: null, trialEndsAt: null, sameOwnerActivations: 0 }],
+          hasNext: false,
+          summary: { trialActive: 0, trialEnded: 0, active: 0, pendingPayment: 0, cancelled: 0, confirmedRevenueCents: null, revenueAvailable: false },
+          extensionsEnabled: false, checkoutAvailable: false, enforcementEnabled: false,
+        };
+        return data as T;
+      }
       let value: unknown;
       const items =
         options.empty || (filters.page && filters.page > 1)

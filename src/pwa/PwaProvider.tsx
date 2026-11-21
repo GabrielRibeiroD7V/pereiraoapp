@@ -1,3 +1,4 @@
+import { useInstallOpportunity } from './useInstallOpportunity';
 import {
   createContext,
   useContext,
@@ -11,6 +12,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Download,
+  X,
   Share,
   SquarePlus,
   Check,
@@ -60,7 +62,11 @@ function usePwa() {
 export function InstallInvitation() {
   const { controller, state } = usePwa(),
     [help, setHelp] = useState(false);
+  const { pathname } = useLocation();
+  const opportunity = useInstallOpportunity(pathname);
   if (
+    !opportunity ||
+    !state.online ||
     !controller ||
     state.installed ||
     state.dismissed ||
@@ -72,10 +78,10 @@ export function InstallInvitation() {
     return null;
   return (
     <section className="pwa-install" aria-label="Instalar PEREIRÃO">
-      <img src="/images/pwa/icon-192.png" width="48" height="48" alt="" />
+      <button type="button" className="pwa-install-close icon-button" aria-label="Dispensar convite de instalação" onClick={() => controller.dismiss()}><X size={17} aria-hidden="true" /></button>
+      <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
       <div>
         <h2>PEREIRÃO na sua tela inicial</h2>
-        <p>Abra o aplicativo com um toque, sem procurar no navegador.</p>
         <div className="pwa-install-actions">
           {state.canInstall || state.installing ? (
             <button
@@ -96,13 +102,7 @@ export function InstallInvitation() {
               Como adicionar no iPhone
             </button>
           ) : null}
-          <button
-            type="button"
-            className="text-link"
-            onClick={() => controller.dismiss()}
-          >
-            Agora não
-          </button>
+
         </div>
         {state.installError && (
           <p role="alert">

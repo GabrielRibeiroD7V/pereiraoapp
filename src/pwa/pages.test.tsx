@@ -14,6 +14,7 @@ import { createWorkFixtures } from "../test/workFixtures";
 import { Modal } from "../components/Modal";
 import type { AuthListener, AuthSession } from "../auth/types";
 function open(path = "/", f = pwaFixture(), child = <InstallInvitation />) {
+  vi.useFakeTimers();
   render(
     <MemoryRouter initialEntries={[path]}>
       <PwaProvider controller={f.controller}>
@@ -21,6 +22,9 @@ function open(path = "/", f = pwaFixture(), child = <InstallInvitation />) {
       </PwaProvider>
     </MemoryRouter>,
   );
+  fireEvent.pointerDown(document.body);
+  act(() => { vi.advanceTimersByTime(45_000); });
+  vi.useRealTimers();
   return f;
 }
 describe("experiência de instalação e atualização", () => {
@@ -87,7 +91,7 @@ describe("experiência de instalação e atualização", () => {
     const f = pwaFixture();
     f.browser.dispatchEvent(installEvent());
     open("/", f);
-    fireEvent.click(screen.getByRole("button", { name: "Agora não" }));
+    fireEvent.click(screen.getByRole("button", { name: "Dispensar convite de instalação" }));
     expect(f.storage.get("pereirao.install.dismissed")).toBe("1");
     expect(
       screen.queryByRole("button", { name: "Instalar PEREIRÃO" }),

@@ -65,6 +65,7 @@ describe("instalação progressiva e sessão", () => {
     f.controller.dismiss();
     expect([...f.storage.entries()]).toEqual([
       ["pereirao.install.dismissed", "1"],
+      ["pereirao.install.dismissedAt", expect.any(String)],
     ]);
     expect(f.controller.getSnapshot().dismissed).toBe(true);
     f.controller.dispose();

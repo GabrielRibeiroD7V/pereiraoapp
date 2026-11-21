@@ -41,6 +41,10 @@ export function pwaFixture(
       getItem: (key: string) => storage.get(key) ?? null,
       setItem: (key: string, value: string) => storage.set(key, value),
     },
+    localStorage: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+    },
     matchMedia: () => mode,
     location: { reload: vi.fn() },
     setTimeout: globalThis.setTimeout.bind(globalThis),

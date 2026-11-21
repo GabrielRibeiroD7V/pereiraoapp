@@ -8,6 +8,7 @@ import { PublicImage } from '../marketplace/PublicImage';
 import { ContactLinks } from '../marketplace/ContactLinks';
 import { QueryStatus } from '../marketplace/QueryStatus';
 import { Pagination } from '../marketplace/Pagination';
+import { SectionTabs } from '../components/SectionTabs';
 import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
 import { formatPrice } from '../work/validation';
@@ -30,11 +31,19 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
   return <>
     <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.specialty} · {provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
     <ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} />
-    {provider.description && <section className="public-profile-section" aria-label="Sobre"><h2>Sobre</h2><p className="public-about">{provider.description}</p></section>}
-    <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
-    <PagedSection<PublicService> title="Serviços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
+    <SectionTabs label="Conteúdo do perfil" sections={[
+      { id: 'trabalhos', label: 'Trabalhos', content: <>
     <PublishedWorks key={provider.id} businessId={provider.id}/>
     <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
+      </> },
+      { id: 'servicos', label: 'Serviços', content: <>
+    <PagedSection<PublicService> title="Serviços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
+      </> },
+      { id: 'sobre', label: 'Sobre', content: <>
+    {provider.description && <section className="public-profile-section" aria-label="Sobre"><h2>Sobre</h2><p className="public-about">{provider.description}</p></section>}
+    <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
+      </> },
+    ]} />
     {photo && <Modal title="Fotografia do trabalho" onClose={() => setPhoto(null)}><div className="public-enlarged"><PublicImage businessId={provider.id} path={photo.storagePath} alt={photo.caption ?? 'Trabalho do prestador'} /></div>{photo.caption && <p>{photo.caption}</p>}</Modal>}
   </>;
 }

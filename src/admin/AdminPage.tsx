@@ -1,3 +1,4 @@
+import { LayoutDashboard, Users, BriefcaseBusiness, Images, History, CalendarDays, FlaskConical, Activity } from 'lucide-react';
 import { useCallback, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -34,6 +35,7 @@ const sections = [
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
 ] as const;
+const sectionIcons = { dashboard: LayoutDashboard, users: Users, businesses: BriefcaseBusiness, posts: Images, audit: History, subscriptions: CalendarDays, sandbox: FlaskConical };
 const states: Record<string, string> = {
   draft: "Rascunho",
   published: "Publicado",
@@ -204,10 +206,11 @@ function AdminContent() {
     />
   );
   return (
-    <>
+    <div className="admin-workspace">
       <nav className="admin-sections" aria-label="Seções administrativas">
-        {visibleSections.map(([id, label]) => (
-          <button
+        {visibleSections.map(([id, label]) => {
+          const Icon = sectionIcons[id];
+          return <button
             key={id}
             className={id === section ? "is-active" : ""}
             aria-current={id === section ? "page" : undefined}
@@ -216,10 +219,12 @@ function AdminContent() {
               setParams({ sec: id });
             }}
           >
-            {label}
-          </button>
-        ))}
+            <Icon size={18} aria-hidden="true" />
+            <span>{label}</span>
+          </button>;
+        })}
       </nav>
+      <div className="admin-content">
       <div className="admin-section-heading">
         <h2>{visibleSections.find(([id]) => id === section)?.[1]}</h2>
         <button
@@ -310,6 +315,7 @@ function AdminContent() {
                   ["Publicações de trabalhos", data.posts],
                 ].map(([label, value]) => (
                   <article key={label}>
+                    <Activity size={17} aria-hidden="true" />
                     <span>{label}</span>
                     <strong>{value ?? "Indisponível"}</strong>
                   </article>
@@ -546,7 +552,8 @@ function AdminContent() {
           }}
         />
       )}
-    </>
+      </div>
+    </div>
   );
 }
 function Status({ value }: { value: string }) {
@@ -576,6 +583,7 @@ function DataTable({
       aria-label="Registros administrativos"
       tabIndex={0}
     >
+      <p className="admin-table-hint">Deslize para ver todas as colunas.</p>
       <table className="admin-table">
         <thead>
           <tr>

@@ -1,0 +1,90 @@
+[
+  {
+    "page": "modal-servico",
+    "width": 320,
+    "bottom": 733,
+    "height": 812,
+    "left": 16,
+    "right": 304,
+    "scrollable": false,
+    "top": 79,
+    "viewport": 320
+  },
+  {
+    "page": "modal-servico",
+    "width": 375,
+    "bottom": 724,
+    "height": 812,
+    "left": 16,
+    "right": 359,
+    "scrollable": false,
+    "top": 88,
+    "viewport": 375
+  },
+  {
+    "page": "modal-servico",
+    "width": 390,
+    "bottom": 724,
+    "height": 812,
+    "left": 16,
+    "right": 374,
+    "scrollable": false,
+    "top": 88,
+    "viewport": 390
+  },
+  {
+    "page": "modal-servico",
+    "width": 430,
+    "bottom": 724,
+    "height": 812,
+    "left": 16,
+    "right": 414,
+    "scrollable": false,
+    "top": 88,
+    "viewport": 430
+  },
+  {
+    "page": "modal-servico",
+    "width": 768,
+    "bottom": 768,
+    "height": 900,
+    "left": 128,
+    "right": 640,
+    "scrollable": false,
+    "top": 132,
+    "viewport": 768
+  },
+  {
+    "page": "modal-servico",
+    "width": 1024,
+    "bottom": 768,
+    "height": 900,
+    "left": 256,
+    "right": 768,
+    "scrollable": false,
+    "top": 132,
+    "viewport": 1024
+  },
+  {
+    "page": "modal-servico",
+    "width": 1280,
+    "bottom": 768,
+    "height": 900,
+    "left": 384,
+    "right": 896,
+    "scrollable": false,
+    "top": 132,
+    "viewport": 1280
+  },
+  {
+    "page": "modal-servico",
+    "width": 1440,
+    "bottom": 768,
+    "height": 900,
+    "left": 464,
+    "right": 976,
+    "scrollable": false,
+    "top": 132,
+    "viewport": 1440
+  }
+]

@@ -1,11 +1,12 @@
-import { House, Search, UserRound } from 'lucide-react';
+import { House, Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { routes } from '../app/routes';
+import { BrandSymbol } from './Brand';
 
 const items = [
   { to: routes.home, label: 'Início', Icon: House },
   { to: routes.search, label: 'Buscar', Icon: Search },
-  { to: routes.account, label: 'Conta', Icon: UserRound },
+  { to: routes.account, label: 'Conta', Icon: null },
 ] as const;
 
 export function MainNavigation() {
@@ -19,7 +20,7 @@ export function MainNavigation() {
         const active = selected === to || (to !== routes.home && selected.startsWith(`${to}/`));
         return <Link key={to} to={to} aria-current={active ? 'page' : undefined}
           className={`main-nav__link${active ? ' main-nav__link--active' : ''}`}>
-          <Icon size={23} strokeWidth={1.8} aria-hidden="true" />
+          {Icon ? <Icon size={22} strokeWidth={1.8} aria-hidden="true" /> : <BrandSymbol />}
           <span>{label}</span>
         </Link>;
       })}

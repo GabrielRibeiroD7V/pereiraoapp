@@ -1,3 +1,4 @@
+import { installDismissed, INSTALL_DISMISS_KEY } from './installPolicy';
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -57,7 +58,8 @@ export class PwaController {
     let dismissed = false;
     try {
       dismissed =
-        browser.sessionStorage.getItem("pereirao.install.dismissed") === "1";
+        browser.sessionStorage.getItem("pereirao.install.dismissed") === "1" ||
+        installDismissed(browser.localStorage);
     } catch {
       /* preferência opcional */
     }
@@ -232,6 +234,7 @@ export class PwaController {
     } catch {
       /* preferência opcional */
     }
+    try { this.browser.localStorage.setItem(INSTALL_DISMISS_KEY, String(Date.now())); } catch { /* Preferência opcional; navegação privada pode bloquear storage. */ }
     this.patch({ dismissed: true });
   }
   update() {
