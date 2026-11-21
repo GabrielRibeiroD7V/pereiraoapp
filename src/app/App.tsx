@@ -33,6 +33,9 @@ import type { AdminRepository } from "../admin/types";
 import { AdminPage } from "../admin/AdminPage";
 import { SubscriptionProvider } from "../subscriptions/SubscriptionProvider";
 import { SubscriptionsPage } from "../subscriptions/SubscriptionViews";
+import { BillingProvider } from "../billing/BillingProvider";
+import { SandboxBillingPage } from "../billing/BillingViews";
+import type { SandboxBillingRepository } from "../billing/types";
 import type { SubscriptionRepository } from "../subscriptions/types";
 
 const titles: Record<string, string> = {
@@ -59,6 +62,7 @@ export function App({
   publicPosts,
   adminRepository,
   subscriptionRepository,
+  billingRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -68,6 +72,7 @@ export function App({
   publicPosts?: PublicPosts | null;
   adminRepository?: AdminRepository | null;
   subscriptionRepository?: SubscriptionRepository | null;
+  billingRepository?: SandboxBillingRepository | null;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -77,7 +82,9 @@ export function App({
             <PostsProvider managed={managedPosts} publicPosts={publicPosts}>
               <AdminProvider repository={adminRepository}>
                 <SubscriptionProvider repository={subscriptionRepository}>
-                  <AppRoutes />
+                  <BillingProvider repository={billingRepository}>
+                    <AppRoutes />
+                  </BillingProvider>
                 </SubscriptionProvider>
               </AdminProvider>
             </PostsProvider>
@@ -123,6 +130,10 @@ function AppRoutes() {
         <Route path="/auth/retorno" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/conta/assinaturas" element={<SubscriptionsPage />} />
+          <Route
+            path="/conta/profissional/:businessId/assinatura"
+            element={<SandboxBillingPage key={pathname} />}
+          />
           <Route path="/conta/dados" element={<PersonalDataPage />} />
           <Route path="/conta/seguranca" element={<AccountSecurityPage />} />
           <Route

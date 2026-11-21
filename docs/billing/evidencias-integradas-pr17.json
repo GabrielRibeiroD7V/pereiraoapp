@@ -1,0 +1,100 @@
+{
+  "environment": "sandbox",
+  "ids": {
+    "businessId": "f790de1a-68a5-41fe-86fc-6c56ea32ac0a",
+    "userId": "10373c58-c4dc-4c75-864f-1ad823a897d6",
+    "requestId": "3787a7cf-f551-4295-be4a-d7634bb4942a",
+    "customerId": "cus_000010067874",
+    "checkoutId": "578301a6-3d5a-466f-9535-470193be88d0",
+    "webhookId": "f19f75fd-5ed7-4385-8180-2badcb1a1e23",
+    "checkoutCreatedEvent": "evt_37260be8159d4472b4458d3de13efc2d&25680786",
+    "subscriptionId": "sub_ea6zgk6dsijgssru",
+    "paymentId": "pay_0_k6naxt3y6m8e8c",
+    "paidEvent": "evt_20f793f686aa4783d486a40e3c6b91d1&25680822",
+    "confirmedEvent": "evt_15e444ff9b9ab9ec29294aa1abe68025&25680824",
+    "refundRequestId": "a245ae46-383d-4e83-86bf-0061b13a9988"
+  },
+  "final": {
+    "events": [
+      {
+        "state": "reconcile_required",
+        "attempts": 2,
+        "event_id": "evt_pr17_preflight_912984527eca412a83143da9701de193",
+        "event_type": "PAYMENT_CREATED",
+        "diagnostic_code": "reconciliation_required"
+      },
+      {
+        "state": "processed",
+        "attempts": 2,
+        "event_id": "evt_37260be8159d4472b4458d3de13efc2d&25680786",
+        "event_type": "CHECKOUT_CREATED",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 2,
+        "event_id": "evt_05b708f961d739ea7eba7e4db318f621&25680823",
+        "event_type": "PAYMENT_CREATED",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 2,
+        "event_id": "evt_15e444ff9b9ab9ec29294aa1abe68025&25680824",
+        "event_type": "PAYMENT_CONFIRMED",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 1,
+        "event_id": "evt_20f793f686aa4783d486a40e3c6b91d1&25680822",
+        "event_type": "CHECKOUT_PAID",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 2,
+        "event_id": "evt_6561b631fa5580caadd00bbe3b858607&25680821",
+        "event_type": "SUBSCRIPTION_CREATED",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 1,
+        "event_id": "evt_d313266b1bd58128da69a2a96d82e79e&25680854",
+        "event_type": "PAYMENT_REFUNDED",
+        "diagnostic_code": null
+      },
+      {
+        "state": "processed",
+        "attempts": 1,
+        "event_id": "evt_5dbdd3e48f06e3fd744ba0e8e6abd53a&25680877",
+        "event_type": "SUBSCRIPTION_DELETED",
+        "diagnostic_code": null
+      }
+    ],
+    "payment": {
+      "status": "REFUNDED",
+      "settled": false,
+      "paymentId": "pay_0_k6naxt3y6m8e8c",
+      "refundedCents": 1999
+    },
+    "contract": {
+      "state": "cancelled",
+      "requestId": "3787a7cf-f551-4295-be4a-d7634bb4942a",
+      "checkoutId": "578301a6-3d5a-466f-9535-470193be88d0",
+      "customerId": "cus_000010067874",
+      "subscriptionId": "sub_ea6zgk6dsijgssru",
+      "providerCancelled": true
+    },
+    "auditRows": 7,
+    "refundState": "acknowledged"
+  },
+  "integrityPreserved": true,
+  "notes": [
+    "Evento preflight é técnico e não foi entregue pelo Asaas.",
+    "Os sete demais eventos foram recebidos do Asaas e processados, inclusive SUBSCRIPTION_DELETED.",
+    "Replay técnico após estorno retornou 200 com uma só linha e auditoria inalterada (7).",
+    "Pix desabilitado; nenhuma cobrança real, merge ou deploy de produção."
+  ]
+}
