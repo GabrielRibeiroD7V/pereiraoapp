@@ -1,3 +1,5 @@
+> Estado mais recente: [receptor e webhook ativos; correção SQL aguardando autorização](webhook-ativo-pr17.md). Não reaplicar migrações ou provisionamentos históricos.
+
 > Estado mais recente: [migração aplicada, provisionamento e avaliação de exposição](operacao-webhook-pr17.md). As seções históricas abaixo descrevem a ordem e os cuidados originais; não reaplicar a migração financeira.
 
 # PR #17 — Ativação segura e pendências de homologação

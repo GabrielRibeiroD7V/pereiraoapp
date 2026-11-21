@@ -24,6 +24,7 @@ select test.expect_error(format('select public.sandbox_billing_server(''admin_ov
 set local role authenticated;
 set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
 select public.create_business('Sandbox local','sandbox-local','autonomo','mundo-novo-ms') as biz \gset
+select test.assert_true(jsonb_array_length(test.sandbox('owner_overview',jsonb_build_object('userId','00000000-0000-4000-8000-000000009002','businessId',:'biz'))->'payments')=0,'sandbox: consulta do proprietário funciona sem pagamentos');
 select jsonb_build_object('userId','00000000-0000-4000-8000-000000009002','businessId',:'biz','requestId','00000000-0000-4000-8000-000000009900','method','PIX','accepted',true,'termsVersion','sandbox-v1','amountCents',1999) as consent \gset
 select test.expect_error(format('select test.sandbox(''reserve'',%L::jsonb-''accepted'')',:'consent'),'22023','sandbox: consentimento ausente');
 select test.expect_error(format('select test.sandbox(''reserve'',%L::jsonb||''{"accepted":null}'')',:'consent'),'22023','sandbox: consentimento null');
@@ -54,6 +55,7 @@ select test.sandbox('apply_payment',:'payment');
 select test.assert_true((test.sandbox('admin_overview','{"userId":"00000000-0000-4000-8000-000000009001"}')->'summary'->>'receivedCents')::int=0,'sandbox: confirmado não é receita recebida');
 select test.sandbox('apply_payment',:'payment'::jsonb||'{"status":"RECEIVED","settled":true}');
 select test.assert_true((test.sandbox('admin_overview','{"userId":"00000000-0000-4000-8000-000000009001"}')->'summary'->>'receivedCents')::int=1999,'sandbox: recebido conciliado conta receita de teste');
+select test.assert_true(jsonb_array_length(test.sandbox('owner_overview',jsonb_build_object('userId','00000000-0000-4000-8000-000000009002','businessId',:'biz'))->'payments')=1,'sandbox: consulta do proprietário retorna pagamento conciliado');
 select test.assert_true(test.sandbox('context','{"requestId":"00000000-0000-4000-8000-000000009900"}')->>'state'='active','sandbox: ativo somente após snapshot reconciliado');
 select test.assert_true((test.sandbox('claim_refund','{"requestId":"00000000-0000-4000-8000-000000009901","paymentId":"pay_local","userId":"00000000-0000-4000-8000-000000009001"}')->>'claimed')::boolean,'sandbox: estorno reservado');
 select test.assert_true(not (test.sandbox('claim_refund','{"requestId":"00000000-0000-4000-8000-000000009902","paymentId":"pay_local","userId":"00000000-0000-4000-8000-000000009001"}')->>'claimed')::boolean,'sandbox: estorno não duplica');

@@ -1,3 +1,5 @@
+> Estado mais recente: [receptor e webhook ativos; correção SQL aguardando autorização](webhook-ativo-pr17.md). Não reaplicar migrações ou provisionamentos históricos.
+
 > Estado operacional após autorização: [migração e segredos provisionados; decisão do receptor pendente](operacao-webhook-pr17.md). Resultados anteriores abaixo são históricos.
 
 # PR #17 — Conclusão técnica de 21/11/2026

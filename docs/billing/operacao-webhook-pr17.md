@@ -1,3 +1,5 @@
+> Estado mais recente: [receptor e webhook ativos; correção SQL aguardando autorização](webhook-ativo-pr17.md). Não reaplicar migrações ou provisionamentos históricos.
+
 # PR #17 — Ativação financeira e avaliação do receptor
 
 ## Operações concluídas
