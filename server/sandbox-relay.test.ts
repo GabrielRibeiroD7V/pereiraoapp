@@ -125,6 +125,14 @@ describe("receptor restrito do webhook Sandbox", () => {
       ).status,
     ).toBe(400);
   });
+  it("preserva conflito de identidade de evento sem ACK", async () => {
+    const response = await createSandboxRelay(
+      env,
+      async () => new Response("PRIVATE", { status: 409 }),
+    )(req());
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ code: "CONFLICT" });
+  });
   it("reconhece somente a projeção de evento ignorado", async () => {
     expect(
       await (

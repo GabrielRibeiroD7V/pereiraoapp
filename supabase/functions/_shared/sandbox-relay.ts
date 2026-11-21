@@ -91,6 +91,7 @@ export function createSandboxRelay(
         redirect: "error",
       });
       if (response.status === 400) return reply(400, { code: "INVALID_INPUT" });
+      if (response.status === 409) return reply(409, { code: "CONFLICT" });
       if (response.status !== 200) {
         await response.body?.cancel();
         return reply(502, { code: "UPSTREAM_UNAVAILABLE" });

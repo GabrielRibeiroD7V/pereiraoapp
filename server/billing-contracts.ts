@@ -19,7 +19,7 @@ export interface ReconciliationDecision {
 }
 const identifier = (v: unknown): v is string =>
   typeof v === "string" && /^[A-Za-z0-9_&-]{3,200}$/.test(v);
-const supportedBillingEvents = [
+export const supportedBillingEvents = [
   "PAYMENT_CREATED",
   "PAYMENT_CONFIRMED",
   "PAYMENT_RECEIVED",
