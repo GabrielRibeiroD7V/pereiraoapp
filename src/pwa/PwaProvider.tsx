@@ -329,7 +329,7 @@ export function VersionDiagnostics() {
           <dt>Versões de cache estático do PEREIRÃO</dt><dd>{data.staticCacheVersions.join(', ') || 'Nenhuma ou indisponível'}</dd>
         </dl>
         {!data.online && <p className="form-notice">Sem conexão. A versão publicada é a última consulta bem-sucedida, não uma confirmação online.</p>}
-        {(!data.controller || (data.active && !data.active.version)) && <p className="form-notice">Um worker antigo pode não informar sua versão. Salve suas alterações e use “Atualizar aplicativo” na aba antiga. Não é necessário apagar dados do navegador.</p>}
+        {(!data.controller || (data.active && !data.active.version)) && <p className="form-notice">Um worker antigo pode não informar sua versão. Salve o trabalho nas abas antigas. Se o botão antigo não concluir, recarregue normalmente a página pública ou já salva. Não apague dados do navegador.</p>}
         {data.origin !== 'https://pereirao.vercel.app' && <p className="form-notice">Esta origem não é o endereço oficial de produção. Um atalho de Preview ou de teste não acompanha as publicações de pereirao.vercel.app.</p>}
       </>}
       <button type="button" className="button button--secondary" disabled={pending} onClick={() => void inspect()}>Conferir novamente</button>

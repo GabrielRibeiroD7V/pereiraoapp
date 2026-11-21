@@ -183,3 +183,4 @@ describe("instalação progressiva e sessão", () => {
     (path) => expect(isSensitivePath(path)).toBe(false),
   );
 });
+it.each(['/ADMIN','/CoNtA/profissional/cadastro','/ENTRAR','/AUTH/RETORNO'])('protege também a rota aceita pelo roteador com maiúsculas: %s', path=>expect(isSensitivePath(path)).toBe(true));
