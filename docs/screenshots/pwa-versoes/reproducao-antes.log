@@ -1,0 +1,43 @@
+
+ RUN  v5.1.1 /Users/gabrielribeiro/Documents/Codex/2026-11-20/estou-desenvolvendo-o-projeto-pereir-o/work/pereiraoapp
+
+ ❯ src/pwa/version.test.ts (2 tests | 2 failed) 2063ms
+   ❯ reprodução: versão antiga no retorno ao aplicativo (2)
+     × detecta outra versão publicada ao restaurar pelo histórico 1059ms
+     × não deixa um worker waiting indefinidamente em página pública segura 1003ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pwa/version.test.ts > reprodução: versão antiga no retorno ao aplicativo > detecta outra versão publicada ao restaurar pelo histórico
+AssertionError: expected "vi.fn()" to be called at least once
+ ❯ src/pwa/version.test.ts:9:50
+      7|     await vi.waitFor(()=>expect(f.controller.getSnapshot().worker).toB…
+      8|     f.browser.dispatchEvent(new Event('pageshow'));
+      9|     await vi.waitFor(()=>expect(f.browser.fetch).toHaveBeenCalled());
+       |                                                  ^
+     10|     expect(f.controller.getSnapshot()).toMatchObject({runningVersion:A…
+     11|     f.controller.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pwa/version.test.ts > reprodução: versão antiga no retorno ao aplicativo > não deixa um worker waiting indefinidamente em página pública segura
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Number of calls: 0
+
+ ❯ src/pwa/version.test.ts:15:56
+     13|   it('não deixa um worker waiting indefinidamente em página pública se…
+     14|     const f=pwaFixture({enabled:true,waiting:true,version:A,published:…
+     15|     await vi.waitFor(()=>expect(f.waiting.postMessage).toHaveBeenCalle…
+       |                                                        ^
+     16|     f.serviceWorker.dispatchEvent(new Event('controllerchange'));
+     17|     expect(f.browser.location.reload).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  16:12:24
+   Duration  2.60s (tests 82%, environment 13%, setup 3%, transform 1%)
+

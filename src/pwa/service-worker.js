@@ -1,6 +1,8 @@
 /* Gerado por scripts/build-pwa.mjs; não contém dados dinâmicos ou credenciais. */
 const CACHE_PREFIX = 'pereirao-static-';
-const CACHE_NAME = CACHE_PREFIX + '__PWA_VERSION__';
+const VERSION = '__PWA_VERSION__';
+const CACHE_NAME = CACHE_PREFIX + VERSION;
+const clientVersions = new Map();
 const STATIC_ASSETS = __STATIC_ASSETS__;
 const ALLOWED = new Set(STATIC_ASSETS);
 // Não disputa rede com a abertura nem baixa todas as rotas lazy.
@@ -38,13 +40,22 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)));
+    // Não apaga chunks usados por outras abas ou formulários ainda na versão anterior.
     await self.clients.claim();
   })());
 });
 self.addEventListener('message', event => {
   if (event.data?.type === 'PEREIRAO_ACTIVATE_UPDATE') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'PEREIRAO_CLIENT_VERSION' && event.source?.id && /^[a-f0-9]{20}$/.test(event.data.version)) {
+    clientVersions.set(event.source.id, event.data.version);
+    event.waitUntil((async () => {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      // Abas antigas/sem resposta impedem a coleta. Nenhum dado de sessão é armazenado.
+      if (!clients.length || clients.some(client => clientVersions.get(client.id) !== VERSION)) return;
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)));
+    })());
+  }
 });
 self.addEventListener('fetch', event => {
   const request = event.request, url = new URL(request.url);
@@ -58,4 +69,15 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (!url.search && ALLOWED.has(url.pathname)) event.respondWith(staticResponse(request, url.pathname));
+  else if (!url.search && /^\/assets\/[a-zA-Z0-9_-]+\.(?:js|css|woff2)$/.test(url.pathname)) {
+    // Uma aba antiga continua usando SOMENTE suas URLs com hash, nunca um chunk de outro nome.
+    event.respondWith((async () => {
+      for (const key of await caches.keys()) {
+        if (!key.startsWith(CACHE_PREFIX)) continue;
+        const stored = await (await caches.open(key)).match(url.pathname);
+        if (stored && validStatic(stored, url.pathname)) return stored;
+      }
+      return fetch(request); // Nunca salva um recurso desconhecido ou resposta dinâmica.
+    })());
+  }
 });

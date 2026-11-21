@@ -55,13 +55,13 @@ function worker() {
   );
   const self = {
     location: { origin: "https://pereirao.example" },
-    clients: { claim: vi.fn(async () => {}) },
+    clients: { claim: vi.fn(async () => {}), matchAll: vi.fn(async () => [{id:"tab-a"},{id:"tab-b"}]) },
     skipWaiting: vi.fn(async () => {}),
     addEventListener: (name, fn) => listeners.set(name, fn),
   };
   runInNewContext(
     template
-      .replace("__PWA_VERSION__", "test")
+      .replace("__PWA_VERSION__", "aaaaaaaaaaaaaaaaaaaa")
       .replace("__STATIC_ASSETS__", JSON.stringify(paths)),
     { self, caches, Request, Response, URL, Set, fetch: request },
   );
@@ -89,7 +89,7 @@ describe("worker: cache explícito e privado por versão", () => {
   it("pré-carrega apenas suporte offline sem disputar rede com rotas lazy", async () => {
     const f = worker();
     await f.dispatch("install");
-    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
+    expect([...f.stores.get("pereirao-static-aaaaaaaaaaaaaaaaaaaa").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
     expect(f.self.skipWaiting).not.toHaveBeenCalled();
     expect(
       f.request.mock.calls.every(
@@ -103,7 +103,7 @@ describe("worker: cache explícito e privado por versão", () => {
     f.request.mockRejectedValueOnce(Error("offline"));
     await expect(f.dispatch("install")).rejects.toThrow("offline");
     expect(f.stores.has("pereirao-static-old")).toBe(true);
-    expect(f.stores.has("pereirao-static-test")).toBe(false);
+    expect(f.stores.has("pereirao-static-aaaaaaaaaaaaaaaaaaaa")).toBe(false);
   });
   it("recusa HTML no lugar de um asset e limpa instalação incompleta", async () => {
     const f = worker();
@@ -115,16 +115,35 @@ describe("worker: cache explícito e privado por versão", () => {
       }),
     );
     await expect(f.dispatch("install")).rejects.toThrow();
-    expect(f.stores.has("pereirao-static-test")).toBe(false);
+    expect(f.stores.has("pereirao-static-aaaaaaaaaaaaaaaaaaaa")).toBe(false);
   });
-  it("limpa apenas versões antigas próprias na ativação", async () => {
+  it("preserva versões usadas por outras abas na ativação", async () => {
     const f = worker();
     f.stores.set("another-app-cache", new Map());
     f.stores.set("pereirao-static-old", new Map());
     await f.dispatch("activate");
     expect(f.stores.has("another-app-cache")).toBe(true);
-    expect(f.stores.has("pereirao-static-old")).toBe(false);
+    expect(f.stores.has("pereirao-static-old")).toBe(true);
     expect(f.self.clients.claim).toHaveBeenCalledOnce();
+  });
+  it("só coleta caches antigos após TODAS as abas confirmarem a versão nova",async()=>{
+    const f=worker(); f.stores.set('pereirao-static-old',new Map()); f.stores.set('another-app-cache',new Map());
+    await f.dispatch('message',{source:{id:'tab-a'},data:{type:'PEREIRAO_CLIENT_VERSION',version:'aaaaaaaaaaaaaaaaaaaa'}});
+    expect(f.stores.has('pereirao-static-old')).toBe(true);
+    await f.dispatch('message',{source:{id:'tab-b'},data:{type:'PEREIRAO_CLIENT_VERSION',version:'bbbbbbbbbbbbbbbbbbbb'}});
+    expect(f.stores.has('pereirao-static-old')).toBe(true);
+    await f.dispatch('message',{source:{id:'tab-b'},data:{type:'PEREIRAO_CLIENT_VERSION',version:'aaaaaaaaaaaaaaaaaaaa'}});
+    expect(f.stores.has('pereirao-static-old')).toBe(false);
+    expect(f.stores.has('another-app-cache')).toBe(true);
+  });
+  it('serve o mesmo hash antigo para uma aba preservada, sem trocar por chunk novo',async()=>{
+    const f=worker(); f.stores.set('pereirao-static-old',new Map([['/assets/old-123.js',new Response('old chunk',{headers:{'Content-Type':'text/javascript'}})]]));
+    const response=await f.dispatch('fetch',{request:request('/assets/old-123.js')});
+    expect(await response.text()).toBe('old chunk'); expect(f.request).not.toHaveBeenCalled();
+  });
+  it('version.json e manifesto nunca entram no CacheStorage',async()=>{
+    const f=worker(); for(const path of ['/version.json','/manifest.webmanifest']) expect(await f.dispatch('fetch',{request:request(path)})).toBeUndefined();
+    expect(f.caches.open).not.toHaveBeenCalled();
   });
   it("só aplica atualização mediante a mensagem esperada", async () => {
     const f = worker();
@@ -187,9 +206,9 @@ describe("worker: cache explícito e privado por versão", () => {
       request: request("/admin?session=private", {}, true),
     });
     expect(await response.text()).toContain("/offline.html");
-    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
+    expect([...f.stores.get("pereirao-static-aaaaaaaaaaaaaaaaaaaa").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
     expect(
-      JSON.stringify([...f.stores.get("pereirao-static-test").keys()]),
+      JSON.stringify([...f.stores.get("pereirao-static-aaaaaaaaaaaaaaaaaaaa").keys()]),
     ).not.toContain("private");
   });
   it("retorna 503 seguro se o fallback estiver ausente", async () => {
@@ -244,6 +263,7 @@ describe("manifesto e build do PWA", () => {
     try {
       await cp("public", directory, { recursive: true });
       await mkdir(join(directory, "assets"));
+      await writeFile(join(directory,"index.html"),"<html><head></head><body></body></html>");
       await writeFile(
         join(directory, "assets", "app-123.js"),
         'console.log("public")',
@@ -252,6 +272,10 @@ describe("manifesto e build do PWA", () => {
       const first = await buildPwa(directory),
         same = await buildPwa(directory);
       expect(same.version).toBe(first.version);
+      expect(JSON.parse(await readFile(join(directory,'version.json'),'utf8'))).toEqual({version:first.version});
+      expect(await readFile(join(directory,'index.html'),'utf8')).toContain(`name="pereirao-build" content="${first.version}"`);
+      await writeFile(join(directory,'index.html'),'<html><head></head><body>changed HTML</body></html>');
+      expect((await buildPwa(directory)).version).not.toBe(first.version);
       await writeFile(
         join(directory, "assets", "app-123.js"),
         'console.log("updated")',
@@ -283,4 +307,15 @@ describe("manifesto e build do PWA", () => {
     expect(index).toContain("/manifest.webmanifest");
     expect(index).toContain("apple-touch-icon");
   });
+});
+describe('contrato HTTP de versões',()=>{
+ it('impede HTML/version/SW obsoletos e mantém hashes imutáveis sem alterar rotas de API',async()=>{
+  const config=JSON.parse(await readFile('vercel.json','utf8'));
+  const policy=source=>config.headers.filter(h=>h.source===source).flatMap(h=>h.headers);
+  expect(policy('/(.*)')).toContainEqual({key:'Cache-Control',value:'no-store'});
+  expect(policy('/version.json')).toContainEqual({key:'Cache-Control',value:'no-store'});
+  expect(policy('/assets/(.*)')).toContainEqual({key:'Cache-Control',value:'public, max-age=31536000, immutable'});
+  expect(policy('/manifest.webmanifest')).toContainEqual({key:'Cache-Control',value:'no-cache'});
+  for(const path of ['/api/admin','/api/sandbox-billing','/api/asaas-webhook']) expect(config.rewrites).toContainEqual({source:path,destination:path});
+ });
 });

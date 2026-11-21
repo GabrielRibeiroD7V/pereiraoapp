@@ -9,6 +9,8 @@ export function pwaFixture(
     waiting?: boolean;
     online?: boolean;
     enabled?: boolean;
+    version?: string;
+    published?: string;
   } = {},
 ) {
   const mode = Object.assign(new EventTarget(), {
@@ -33,6 +35,7 @@ export function pwaFixture(
   const document = Object.assign(new EventTarget(), {
     readyState: "complete",
     visibilityState: "visible",
+    querySelector: (selector: string) => selector.includes("pereirao-build") && options.version ? { content: options.version } : null,
   });
   const browser = Object.assign(new EventTarget(), {
     document,
@@ -46,7 +49,9 @@ export function pwaFixture(
       setItem: (key: string, value: string) => storage.set(key, value),
     },
     matchMedia: () => mode,
-    location: { reload: vi.fn() },
+    location: { reload: vi.fn(), pathname: "/" },
+    fetch: vi.fn(async () => ({ ok: true, headers: new Headers({"Content-Type":"application/json"}), json: async () => ({version: options.published ?? options.version}) })),
+    confirm: vi.fn(() => true),
     setTimeout: globalThis.setTimeout.bind(globalThis),
     clearTimeout: globalThis.clearTimeout.bind(globalThis),
   });

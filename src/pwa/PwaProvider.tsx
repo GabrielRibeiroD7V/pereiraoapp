@@ -25,6 +25,7 @@ import { PwaController, isSensitivePath } from "./controller";
 import type { PwaState } from "./controller";
 const Context = createContext<PwaController | null>(null);
 const inactive: PwaState = {
+  runningVersion: null, publishedVersion: null, sessionRefreshRequired: false,
   installed: false,
   ios: false,
   safari: false,
@@ -116,8 +117,9 @@ export function InstallInvitation() {
           onClose={() => setHelp(false)}
         >
           <div className="pwa-ios-help">
+            <img src="/images/pwa/icon-192.png" width="48" height="48" alt="Ícone oficial do PEREIRÃO" />
             {!state.safari && (
-              <p>Abra esta página no Safari para seguir as instruções.</p>
+              <p>Abra este mesmo endereço no Safari. Depois, siga os passos abaixo; este navegador não disponibiliza a instalação nativa do iPhone.</p>
             )}
             <ol>
               <li>
@@ -168,9 +170,10 @@ export function InstallInvitation() {
 export function PwaGate({ children }: { children: ReactNode }) {
   const { controller, state } = usePwa(),
     { pathname } = useLocation();
+  const newerBuild = Boolean(state.publishedVersion && state.runningVersion !== state.publishedVersion);
   const sensitive = isSensitivePath(pathname),
     stale = state.updateReady || state.refreshRequired,
-    guard = sensitive && (!state.online || state.refreshRequired);
+    guard = sensitive && (!state.online || state.sessionRefreshRequired);
   const content = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (!guard || !content.current) return;
@@ -193,7 +196,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
     return () => observer.disconnect();
   }, [guard]);
   useEffect(() => {
-    void controller?.checkForUpdate();
+    void controller?.checkForUpdate(true);
   }, [controller, pathname]);
   const updateButton = (
     <button
@@ -205,7 +208,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
       <RefreshCw size={17} aria-hidden="true" />
       {state.updating
         ? "Atualizando…"
-        : state.updateReady
+        : state.updateReady || newerBuild
           ? "Atualizar aplicativo"
           : "Recarregar aplicativo"}
     </button>
@@ -227,15 +230,16 @@ export function PwaGate({ children }: { children: ReactNode }) {
               <>
                 <RefreshCw size={18} aria-hidden="true" />
                 <span>
-                  {state.updateReady
+                  {state.updateReady || newerBuild
                     ? "Nova versão disponível."
                     : "Conexão restabelecida ou versão atualizada."}{" "}
-                  Salve suas alterações antes de recarregar.
+                  Salve suas alterações antes de atualizar. Sua sessão será preservada.
                 </span>
               </>
             )}
           </div>
           {state.online && updateButton}
+          {state.runningVersion && <small>Versão {state.runningVersion.slice(0, 8)}{state.publishedVersion && state.publishedVersion !== state.runningVersion ? ` → ${state.publishedVersion.slice(0, 8)}` : ''}</small>}
           {state.updateError && (
             <p role="alert">Não foi possível atualizar. Tente novamente.</p>
           )}

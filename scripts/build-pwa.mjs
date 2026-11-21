@@ -24,7 +24,10 @@ export async function buildPwa(directory = resolve("dist")) {
     new URL("../src/pwa/service-worker.js", import.meta.url),
     "utf8",
   );
+  const indexPath = resolve(directory, "index.html");
+  const index = (await readFile(indexPath, "utf8")).replace(/<meta name="pereirao-build" content="[a-f0-9]{20}">\n?/g, '');
   const hash = createHash("sha256")
+    .update(index)
     .update(template)
     .update(await readFile(resolve(directory, "manifest.webmanifest")));
   for (const file of staticFiles)
@@ -37,6 +40,8 @@ export async function buildPwa(directory = resolve("dist")) {
       JSON.stringify(staticFiles.map((file) => "/" + file)),
     );
   await writeFile(resolve(directory, "sw.js"), worker);
+  await writeFile(indexPath, index.replace('</head>', `<meta name="pereirao-build" content="${version}">\n</head>`));
+  await writeFile(resolve(directory, "version.json"), JSON.stringify({ version }));
   return { version, assets: staticFiles.length };
 }
 if (

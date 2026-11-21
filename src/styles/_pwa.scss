@@ -7,11 +7,9 @@ body {
   display: none !important;
 }
 .pwa-install {
-  position: fixed;
-  z-index: 9;
-  right: max(1rem, env(safe-area-inset-right, 0px));
-  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + .75rem);
-  width: min(23rem, calc(100vw - 2rem));
+  position: relative;
+  width: min(28rem, calc(100% - 2rem));
+  margin: 0 auto calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 1rem);
   display: flex;
   gap: .625rem;
   border: var(--border-subtle);
@@ -19,12 +17,12 @@ body {
   padding: 1rem;
   align-items: flex-start;
   background: var(--color-background);
-  box-shadow: var(--shadow-floating);
+  box-shadow: none;
 }
 .pwa-install-close { position: absolute; top: .125rem; right: .125rem; border: 0 !important; background: transparent !important; }
 .pwa-install > div { min-width: 0; padding-top: .125rem; }
 .pwa-install h2 { padding-right: 1.5rem; }
-@media (min-width: 64rem) { .pwa-install { bottom: 1.25rem; } }
+@media (min-width: 64rem) { .pwa-install { margin-bottom: 1.5rem; } }
 .pwa-install > img {
   border-radius: 0.65rem;
   flex-shrink: 0;
@@ -127,5 +125,3 @@ body {
     overscroll-behavior-y: none;
   }
 }
-
-body:has(.pwa-install) .page-container { padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 11rem); }
