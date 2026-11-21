@@ -230,7 +230,9 @@ export function PwaGate({ children }: { children: ReactNode }) {
               <>
                 <RefreshCw size={18} aria-hidden="true" />
                 <span>
-                  {state.updateReady || newerBuild
+                  {state.updateDeferred
+                    ? "Há uma aba privada antiga aberta. Salve o trabalho nela e volte ao Início para concluir a atualização."
+                    : state.updateReady || newerBuild
                     ? "Nova versão disponível."
                     : "Conexão restabelecida ou versão atualizada."}{" "}
                   Salve suas alterações antes de atualizar. Sua sessão será preservada.
@@ -277,6 +279,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
           {state.updateError && (
             <p role="alert">Não foi possível atualizar. Tente novamente.</p>
           )}
+          <VersionDiagnostics />
         </main>
       )}
       <div
@@ -289,4 +292,47 @@ export function PwaGate({ children }: { children: ReactNode }) {
       </div>
     </>
   );
+}
+
+/** Diagnóstico sob demanda, sem sessão, identificação pessoal ou conteúdo do cache. */
+export function VersionDiagnostics() {
+  const { controller } = usePwa();
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState<import('./workerVersion').PwaDiagnostics | null>(null);
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+  if (!controller) return null;
+  async function inspect() {
+    setPending(true); setFailed(false);
+    try { setData(await controller!.diagnostics()); } catch { setFailed(true); }
+    finally { setPending(false); }
+  }
+  const version = (value: string | null) => value ?? 'Não informada (legado ou sem resposta)';
+  return <div className="pwa-diagnostics-entry">
+    <button type="button" className="text-link" onClick={() => { setOpen(true); void inspect(); }}>Versão e atualização</button>
+    {open && <Modal title="Versão do PEREIRÃO" onClose={() => setOpen(false)}>
+      <p className="field-help">Somente informações técnicas públicas. Nenhuma senha, sessão ou fotografia é consultada.</p>
+      {pending && <p role="status">Consultando versões…</p>}
+      {failed && <p role="alert">Não foi possível consultar agora. Tente novamente.</p>}
+      {data && <>
+        <dl className="pwa-diagnostics-list">
+          <dt>Origem desta instalação</dt><dd>{data.origin}</dd>
+          <dt>Modo</dt><dd>{data.installed ? 'Aplicativo independente' : 'Aba do navegador'}</dd>
+          <dt>Versão em execução</dt><dd>{version(data.running)}</dd>
+          <dt>Última versão publicada consultada</dt><dd>{version(data.published)}</dd>
+          <dt>Última consulta bem-sucedida</dt><dd>{data.publishedCheckedAt ? new Date(data.publishedCheckedAt).toLocaleString('pt-BR') : 'Nenhuma'}</dd>
+          <dt>Worker que controla esta página</dt><dd>{version(data.controller)}</dd>
+          <dt>Worker ativo</dt><dd>{data.active ? `${data.active.state} · ${version(data.active.version)}` : 'Nenhum'}</dd>
+          <dt>Worker em espera</dt><dd>{data.waiting ? `${data.waiting.state} · ${version(data.waiting.version)}` : 'Nenhum'}</dd>
+          <dt>Worker instalando</dt><dd>{data.installing ?? 'Nenhum'}</dd>
+          <dt>Retorno por BFCache</dt><dd>{data.restoredFromHistory === null ? 'Não observado' : data.restoredFromHistory ? 'Sim' : 'Não no último pageshow'}</dd>
+          <dt>Versões de cache estático do PEREIRÃO</dt><dd>{data.staticCacheVersions.join(', ') || 'Nenhuma ou indisponível'}</dd>
+        </dl>
+        {!data.online && <p className="form-notice">Sem conexão. A versão publicada é a última consulta bem-sucedida, não uma confirmação online.</p>}
+        {(!data.controller || (data.active && !data.active.version)) && <p className="form-notice">Um worker antigo pode não informar sua versão. Salve suas alterações e use “Atualizar aplicativo” na aba antiga. Não é necessário apagar dados do navegador.</p>}
+        {data.origin !== 'https://pereirao.vercel.app' && <p className="form-notice">Esta origem não é o endereço oficial de produção. Um atalho de Preview ou de teste não acompanha as publicações de pereirao.vercel.app.</p>}
+      </>}
+      <button type="button" className="button button--secondary" disabled={pending} onClick={() => void inspect()}>Conferir novamente</button>
+    </Modal>}
+  </div>;
 }

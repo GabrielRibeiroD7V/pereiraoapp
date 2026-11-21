@@ -95,7 +95,7 @@ describe("instalação progressiva e sessão", () => {
     expect(f.waiting.postMessage).not.toHaveBeenCalled();
     f.controller.update();
     expect(f.waiting.postMessage).toHaveBeenCalledWith({
-      type: "PEREIRAO_ACTIVATE_UPDATE",
+      type: "PEREIRAO_ACTIVATE_UPDATE", protocol: 1,
     });
     expect(f.browser.location.reload).not.toHaveBeenCalled();
     f.serviceWorker.dispatchEvent(new Event("controllerchange"));

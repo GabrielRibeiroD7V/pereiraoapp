@@ -44,8 +44,55 @@ self.addEventListener('activate', event => {
     await self.clients.claim();
   })());
 });
+// Não assume que um formulário legado aguenta controllerchange sem bloquear a tela.
+async function hasLegacyPrivateClient() {
+  const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const privateClients = clients.filter(client => {
+    if (!client.url) return false;
+    const path = new URL(client.url).pathname;
+    return path === '/admin' || path.startsWith('/admin/') || path === '/conta' || path.startsWith('/conta/')
+      || ['/entrar','/criar-conta','/recuperar-senha','/redefinir-senha','/auth/retorno'].includes(path);
+  });
+  const capabilities = await Promise.all(privateClients.map(client => new Promise(resolve => {
+    const channel = new MessageChannel();
+    let finished = false;
+    const done = value => { if (finished) return; finished = true; clearTimeout(timer); channel.port1.close(); channel.port2.close(); resolve(value); };
+    const timer = setTimeout(() => done(false), 400);
+    channel.port1.onmessage = event => done(event.data?.protocol === 1);
+    try { client.postMessage({ type: 'PEREIRAO_CAN_ACCEPT_CONTROLLER' }, [channel.port2]); } catch { done(false); }
+  })));
+  return capabilities.some(value => !value);
+}
+function publicClient(source) {
+  if (typeof source?.navigate !== 'function') return false;
+  const target = new URL(source.url);
+  return target.origin === self.location.origin && (target.pathname === '/' || target.pathname === '/buscar'
+    || target.pathname.startsWith('/prestadores/') || target.pathname.startsWith('/trabalhos/'));
+}
 self.addEventListener('message', event => {
-  if (event.data?.type === 'PEREIRAO_ACTIVATE_UPDATE') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'PEREIRAO_GET_VERSION' && event.ports?.[0]) {
+    event.ports[0].postMessage({ version: VERSION });
+  }
+  if (event.data?.type === 'PEREIRAO_ACTIVATE_UPDATE') {
+    // PR19–21 guardavam uma referência ao waiting mesmo após outra aba ativá-lo.
+    // O clique explícito então chegava ao worker JÁ ativo e skipWaiting não fazia nada.
+    const alreadyActive = self.registration?.active?.state === 'activated'
+      && !self.registration.waiting && !self.registration.installing;
+    event.waitUntil((async () => {
+      const source = event.source;
+      if (!alreadyActive && await hasLegacyPrivateClient()) {
+        // Sem ativação global: mantém a tela e os dados dos formulários legados.
+        source?.postMessage?.({ type: 'PEREIRAO_UPDATE_DEFERRED' });
+        // Um clique do botão antigo pode atualizar SOMENTE sua própria página pública.
+        if (event.data.protocol !== 1 && publicClient(source)) await source.navigate(source.url);
+        return;
+      }
+      await self.skipWaiting();
+      if (!alreadyActive || event.data.protocol === 1 || typeof source?.navigate !== 'function') return;
+      // Somente a aba pública que pediu atualização. Nunca navega outras abas ou formulários privados.
+      if (publicClient(source)) await source.navigate(source.url);
+    })());
+  }
   if (event.data?.type === 'PEREIRAO_CLIENT_VERSION' && event.source?.id && /^[a-f0-9]{20}$/.test(event.data.version)) {
     clientVersions.set(event.source.id, event.data.version);
     event.waitUntil((async () => {

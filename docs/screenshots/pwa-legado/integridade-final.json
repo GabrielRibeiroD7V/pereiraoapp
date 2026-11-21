@@ -1,0 +1,32 @@
+[
+  {
+    "snapshot": {
+      "businesses": [
+        {
+          "id": "2f47ee53-719a-4aa8-b64c-0acf78874917",
+          "status": "draft",
+          "category_id": "climatizacao",
+          "fingerprint": "b398fe939bde6d804affe93b58f10cda"
+        },
+        {
+          "id": "2f98a47f-8f2d-484f-8b3f-83c702c8b03a",
+          "status": "draft",
+          "category_id": "construcao",
+          "fingerprint": "c43a657bc78bc204d35c5a1f260409a0"
+        },
+        {
+          "id": "f790de1a-68a5-41fe-86fc-6c56ea32ac0a",
+          "status": "draft",
+          "category_id": "climatizacao",
+          "fingerprint": "85ff7162c3da32646bf7d7638c80f121"
+        }
+      ],
+      "areas_count": 3,
+      "posts_count": 0,
+      "services_count": 0,
+      "trials_started": 0,
+      "portfolio_count": 1,
+      "additional_categories": 0
+    }
+  }
+]

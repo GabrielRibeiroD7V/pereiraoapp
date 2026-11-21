@@ -1,0 +1,46 @@
+{
+  "production": {
+    "state": "READY",
+    "commit": "2b33b3b0c36a3f441c5dbc58e05bb75bc08f0a7a",
+    "version": "a80fb7def4efc4cf5bf6",
+    "executingNewTabPrefix": "a80fb7de",
+    "oldTabExactBuild": "não informado pelo runtime anterior ao PR22"
+  },
+  "nativeChrome": {
+    "activeWorkerBefore": 487,
+    "receivedActiveLocal": "21/11/2026 16:06:16 America/Campo_Grande",
+    "waitingWorkerBefore": 488,
+    "receivedWaitingLocal": "21/11/2026 16:30:08 America/Campo_Grande",
+    "afterExplicitAppUpdate": "488 activated and is running",
+    "authSessionPreserved": true,
+    "storageCleared": false
+  },
+  "historyControllerSHA256": {
+    "PR19": "190fd3536bea389771fab205c5cd0abf69f1020572913cba15b22cfca850b146",
+    "PR20": "190fd3536bea389771fab205c5cd0abf69f1020572913cba15b22cfca850b146",
+    "PR21": "190fd3536bea389771fab205c5cd0abf69f1020572913cba15b22cfca850b146",
+    "PR22": "615e246b464f1d83c5fd887b71b0501d27f9c94a44b86217c4b0c26ca50731a9"
+  },
+  "tests": {
+    "baseline": 444,
+    "fixed": 466,
+    "sqlRls": 385,
+    "newTablesOrMigrations": 0
+  },
+  "physicalDevices": false,
+  "realEdits": {
+    "businessId": "2f47ee53-719a-4aa8-b64c-0acf78874917",
+    "description": "rascunho técnico preexistente; adicionais eletrica/pintura salvos, reabertos e removidos pelo navegador",
+    "initialAdditional": [],
+    "savedAdditional": [
+      "eletrica",
+      "pintura"
+    ],
+    "restoredAdditional": [],
+    "status": "draft",
+    "metadataTimestampChanged": true,
+    "newBusinessCreated": false,
+    "otherBusinessesUnchanged": true,
+    "trialsStarted": 0
+  }
+}

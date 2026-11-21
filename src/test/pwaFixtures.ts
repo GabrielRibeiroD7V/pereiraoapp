@@ -11,6 +11,7 @@ export function pwaFixture(
     enabled?: boolean;
     version?: string;
     published?: string;
+    workerVersion?: string | null;
   } = {},
 ) {
   const mode = Object.assign(new EventTarget(), {
@@ -18,7 +19,10 @@ export function pwaFixture(
   });
   const waiting = Object.assign(new EventTarget(), {
     state: "installed",
-    postMessage: vi.fn(),
+    postMessage: vi.fn((data, ports?: MessagePort[]) => {
+      const version = options.workerVersion === undefined ? options.published ?? options.version : options.workerVersion;
+      if (data.type === 'PEREIRAO_GET_VERSION' && version) ports?.[0]?.postMessage({ version });
+    }),
   });
   const registration = Object.assign(new EventTarget(), {
     waiting: options.waiting ? waiting : null,
@@ -49,7 +53,7 @@ export function pwaFixture(
       setItem: (key: string, value: string) => storage.set(key, value),
     },
     matchMedia: () => mode,
-    location: { reload: vi.fn(), pathname: "/" },
+    location: { reload: vi.fn(), pathname: "/", origin: "https://pereirao.example" },
     fetch: vi.fn(async () => ({ ok: true, headers: new Headers({"Content-Type":"application/json"}), json: async () => ({version: options.published ?? options.version}) })),
     confirm: vi.fn(() => true),
     setTimeout: globalThis.setTimeout.bind(globalThis),
