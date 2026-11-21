@@ -39,6 +39,10 @@ try {
     );
     if (found.length !== 1 || found[0].id !== "cus_000010060912")
       throw Error("RUN_CONFLICT");
+    await provider.completeSyntheticCustomer(
+      found[0].id,
+      "pereirao:synthetic:pr17-card-20261121-a",
+    );
     const checkout = await provider.createCardCheckout(
       found[0].id,
       crypto.randomUUID(),

@@ -1,6 +1,17 @@
 // Exclusivamente servidor. Nunca importar por src/.
 import { readFile } from "node:fs/promises";
 export type PaymentMethod = "PIX" | "CREDIT_CARD";
+const syntheticPayer = {
+  name: "PEREIRAO TESTE SANDBOX",
+  email: "sandbox@example.com",
+  notificationDisabled: true,
+  cpfCnpj: "24971563792",
+  phone: "11999999999",
+  postalCode: "01310000",
+  address: "Avenida Paulista",
+  addressNumber: "0",
+  province: "Bela Vista",
+};
 export interface AsaasSubscription {
   id: string;
   customer: string;
@@ -136,6 +147,12 @@ export class SandboxProvider {
               .toLowerCase()
           : "";
         if (/cpf|cnpj/.test(descriptions)) reason = "CUSTOMER_TAX_ID_REQUIRED";
+        else if (/e-mail|email/.test(descriptions))
+          reason = "CUSTOMER_EMAIL_REQUIRED";
+        else if (/telefone|phone|mobile/.test(descriptions))
+          reason = "CUSTOMER_PHONE_REQUIRED";
+        else if (/postal|cep|endere/.test(descriptions))
+          reason = "CUSTOMER_ADDRESS_REQUIRED";
         else if (/imagem|image|base64/.test(descriptions))
           reason = "CHECKOUT_IMAGE_REQUIRED";
         else if (
@@ -188,16 +205,25 @@ export class SandboxProvider {
   }
   async createCustomer(reference: string) {
     const data = await this.call<{ id: string }>("POST", "/customers", {
-      name: "PEREIRAO TESTE SANDBOX",
-      email: "sandbox@example.invalid",
-      notificationDisabled: true,
-      // Dado de exemplo da documentação oficial; somente cliente sintético no Sandbox.
-      cpfCnpj: "24971563792",
+      // Dados fictícios/exemplo oficial, apenas no Sandbox; notificações desativadas.
+      ...syntheticPayer,
       externalReference: reference,
     });
     if (!providerId(data.id) || !data.id.startsWith("cus_"))
       throw new ProviderError("INVALID_PROVIDER_RESPONSE");
     return data.id;
+  }
+  async completeSyntheticCustomer(id: string, reference: string) {
+    if (!reference.startsWith("pereirao:synthetic:pr17-"))
+      throw new ProviderError("SANDBOX_DISABLED");
+    const found = await this.findCustomers(reference);
+    if (
+      found.length !== 1 ||
+      found[0]!.id !== id ||
+      found[0]!.externalReference !== reference
+    )
+      throw new ProviderError("INVALID_PROVIDER_RESPONSE");
+    await this.call("POST", "/customers/" + id, syntheticPayer);
   }
   findSubscriptions(customer: string) {
     if (!providerId(customer))
