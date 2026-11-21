@@ -4,6 +4,7 @@
 @use 'marketplace';
 @use 'posts';
 @use 'admin';
+@use 'pwa';
 
 :root {
   @include tokens.properties;
@@ -235,7 +236,7 @@ h1, h2, p { margin: 0; }
   display: flex;
   justify-content: space-around;
   min-height: var(--nav-height);
-  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-2) max(var(--space-3),env(safe-area-inset-right,0px)) calc(var(--space-2) + env(safe-area-inset-bottom, 0px)) max(var(--space-3),env(safe-area-inset-left,0px));
   background: var(--color-background);
   border-top: 1px solid var(--color-border);
   &__link {
