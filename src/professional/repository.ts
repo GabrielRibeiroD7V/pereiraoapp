@@ -1,3 +1,4 @@
+import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { CategoryId } from '../types/domain';
@@ -23,7 +24,7 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
   }
   async function getCatalog(): Promise<ProfessionalCatalog> {
     const [cities, categoryRows, readiness] = await Promise.all([
-      client.from('cities').select('id,name,state_code').eq('active', true).order('name'),
+      activeCities(client),
       client.from('categories').select('id,name').eq('active', true).order('name'),
       client.from('businesses').select('category_id').limit(0),
     ]);
@@ -31,9 +32,8 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
       if (['42703', 'PGRST204'].includes(readiness.error.code)) fail('SETUP_REQUIRED');
       throw readiness.error;
     }
-    if (cities.error) throw cities.error;
     if (categoryRows.error) throw categoryRows.error;
-    return { cities: cities.data ?? [], categories: (categoryRows.data ?? [])
+    return { cities, categories: (categoryRows.data ?? [])
       .filter((item) => categories.some((category) => category.id === item.id))
       .map((item) => ({ ...item, id: item.id as CategoryId })) };
   }

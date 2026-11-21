@@ -90,7 +90,7 @@ reset role;
 set local role anon;
 set local request.jwt.claim.sub = '';
 select test.assert_true((select count(*)=6 from categories), 'visitante lê seis categorias');
-select test.assert_true((select count(*)=1 from cities), 'visitante lê cidade operacional');
+select test.assert_true((select exists(select 1 from cities where id='mundo-novo-ms')), 'visitante lê cidade operacional original');
 select test.assert_true((select count(*)=1 from businesses), 'visitante só vê negócio publicado');
 select test.assert_true((select count(*)=1 from services), 'visitante só vê serviço ativo de negócio publicado');
 select test.assert_true((select count(*)=1 from portfolio_items), 'visitante lê metadados do portfólio publicado');

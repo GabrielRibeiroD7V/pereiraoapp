@@ -7,6 +7,7 @@ import type { BusinessRow } from '../lib/database.types';
 import type { ProfessionalCatalog, ProfessionalRepository, RegistrationInput } from './types';
 import { emptyRegistration, normalizeRegistration, validateRegistration, createRegistrationSlug } from './validation';
 import { readCheckpoint, writeCheckpoint } from './checkpoint';
+import { regionalCityFixture } from '../test/regionalCities';
 
 const bid = '00000000-0000-0000-0000-000000000004';
 const catalog: ProfessionalCatalog = {
@@ -67,7 +68,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     const repo = repository(); open(repo); await details(company);
     expect(screen.queryByLabelText('CNPJ')).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: 'Mundo Novo/MS' })).not.toBeInTheDocument();
-    expect(screen.getByText('Mundo Novo já está incluída')).toBeInTheDocument();
+    expect(screen.getByText('Mundo Novo/MS já está incluída')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Cidade de teste/MS'));
     await finalStep();
     if (company) {
@@ -87,6 +88,43 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(await screen.findByText('Rascunho')).toBeInTheDocument();
     expect(readCheckpoint('registration-user')).toBeNull();
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+  });
+
+  it.each(['autonomo', 'empresa'] as const)('preserva origem e várias áreas de MS/PR entre etapas (%s)', async type => {
+    const repo = repository();
+    repo.getCatalog = vi.fn(async () => ({ ...catalog, cities: regionalCityFixture.map(city => ({ id: city.id, name: city.name, state_code: city.stateCode })) }));
+    open(repo); await details(type === 'empresa');
+    fireEvent.change(screen.getByLabelText('Cidade', { exact: true }), { target: { value: 'terra-roxa-pr' } });
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Mundo Novo/MS' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Guaíra/PR' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Eldorado/MS' }));
+    await finalStep();
+    expect(screen.getByRole('region', { name: 'Revisão do cadastro' })).toHaveTextContent('Terra Roxa/PR');
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
+    expect(screen.getByLabelText('Cidade', { exact: true })).toHaveValue('terra-roxa-pr');
+    expect(screen.getByRole('checkbox', { name: 'Guaíra/PR' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Eldorado/MS' })).toBeChecked();
+    await finalStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ type, cityId: 'terra-roxa-pr', areaCityIds: ['terra-roxa-pr', 'mundo-novo-ms', 'guaira-pr', 'eldorado-ms'] })));
+    expect(repo.createDraft).toHaveBeenCalledOnce();
+  });
+
+  it('edição preserva a origem e as áreas existentes sem voltar automaticamente a Mundo Novo', async () => {
+    const repo = repository();
+    repo.getCatalog = vi.fn(async () => ({ ...catalog, cities: regionalCityFixture.map(city => ({ id: city.id, name: city.name, state_code: city.stateCode })) }));
+    repo.getEditable = vi.fn(async () => ({ business: { ...business, city_id: 'guaira-pr' }, input: { ...input, cityId: 'guaira-pr', areaCityIds: ['guaira-pr', 'eldorado-ms'] } }));
+    open(repo, `/conta/profissional/${bid}/editar`);
+    await screen.findByRole('radio', { name: 'Profissional autônomo' });
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
+    expect(screen.getByLabelText('Cidade', { exact: true })).toHaveValue('guaira-pr');
+    expect(screen.getByRole('checkbox', { name: 'Eldorado/MS' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Mundo Novo/MS' })).not.toBeChecked();
+    expect(repo.saveDraft).not.toHaveBeenCalled();
+    await finalStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ cityId: 'guaira-pr', areaCityIds: ['guaira-pr', 'eldorado-ms'] })));
+    expect(repo.createDraft).not.toHaveBeenCalled();
   });
 
   it('valida campos e preserva dados ao voltar etapas', async () => {

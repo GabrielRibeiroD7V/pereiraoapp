@@ -64,6 +64,13 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
     expect(calls[0]?.body).toEqual({ expiresIn: 60 });
     await expect(repository.getImageUrl(p.id, '../secret')).rejects.toThrow(); expect(calls).toHaveLength(1);
   });
+  it.each(['guaira-pr', 'terra-roxa-pr', 'navirai-ms'])('cidade atendida %s não restringe pela sede do negócio', async cityId => {
+    const { repository, calls } = setup([raw]);
+    const result = await repository.search({ ...filters, cityId }, 1);
+    expect(calls[0]!.url.searchParams.get('area_matches.city_id')).toBe(`eq.${cityId}`);
+    expect(calls[0]!.url.searchParams.get('city_id')).toBeNull();
+    expect(result.items[0]?.city.id).toBe('mundo-novo-ms');
+  });
   it('propaga erro da API para permitir nova tentativa na interface', async () => {
     const { repository } = setup({ message: 'unavailable', code: '400' }, 400);
     await expect(repository.search(filters, 1)).rejects.toBeDefined();

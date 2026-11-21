@@ -9,8 +9,10 @@ import type { ProfessionalCatalog, RegistrationInput } from '../professional/typ
 import { createRegistrationSlug, emptyRegistration, normalizeRegistration, professionalError, validateRegistration } from '../professional/validation';
 import { clearCheckpoint, readCheckpoint, writeCheckpoint } from '../professional/checkpoint';
 import type { Checkpoint } from '../professional/checkpoint';
-import { ArrowLeft, ArrowRight, Building2, Check, MapPin, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, ShieldCheck, UserRound } from 'lucide-react';
 import { CategoryIcon } from '../components/CategoryIcon';
+import { CitySelect } from '../locations/CitySelect';
+import { ServiceAreaPicker } from '../locations/ServiceAreaPicker';
 import { StepProgress } from '../components/StepProgress';
 
 const steps = ['Identificação', 'Seu negócio', 'Contatos'];
@@ -107,14 +109,9 @@ export function ProfessionalRegistrationPage() {
               <input type="radio" name="main_category" value={category.id} aria-label={category.name} checked={input.categoryId === category.id} onChange={() => change('categoryId', category.id)} required /><CategoryIcon id={category.id} /><span>{category.name}</span>
             </label>)}</div></fieldset>
             <div className="form-field"><label htmlFor="business-description">Descrição</label><textarea id="business-description" value={input.description} placeholder="Ex.: Instalação e manutenção de ar-condicionado residencial e comercial." maxLength={3000} rows={3} onChange={(event) => change('description', event.target.value)} /></div>
-            <div className="form-field"><label htmlFor="business-city">Cidade</label><select id="business-city" value={input.cityId} required onChange={(event) => change('cityId', event.target.value)}>
-              <option value="">Selecione uma cidade</option>{catalog.cities.map((city) => <option key={city.id} value={city.id}>{city.name}/{city.state_code}</option>)}
-            </select></div>
-            <fieldset className="service-areas"><legend>Área de atendimento</legend>
-              <p className="included-city"><MapPin size={17} aria-hidden="true" /><span>{catalog.cities.find((city) => city.id === input.cityId)?.name || 'Sua cidade'} já está incluída</span><Check size={16} aria-hidden="true" /></p>
-              {catalog.cities.filter((city) => city.id !== input.cityId).map((city) => <label key={city.id}><input type="checkbox" checked={input.areaCityIds.includes(city.id)}
-                onChange={(event) => change('areaCityIds', event.target.checked ? [...input.areaCityIds, city.id] : input.areaCityIds.filter((id) => id !== city.id))} />{city.name}/{city.state_code}</label>)}
-            </fieldset>
+            <CitySelect id="business-city" label="Cidade" cities={catalog.cities.map(city => ({ ...city, stateCode: city.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
+            <p className="field-help">Esta é a localização principal do seu negócio. As cidades atendidas podem ser diferentes.</p>
+            <ServiceAreaPicker cities={catalog.cities.map(city => ({ ...city, stateCode: city.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
           </>}
           {step === 3 && <>
             <FormField id="business-whatsapp" label="WhatsApp" type="tel" autoComplete="tel" placeholder="55 + DDD + número" value={input.whatsapp} maxLength={24} onChange={(event) => change('whatsapp', event.target.value)} />
@@ -130,6 +127,7 @@ export function ProfessionalRegistrationPage() {
               <h3>Revise seu perfil</h3>
               <dl><dt>Nome</dt><dd>{input.name}</dd><dt>Tipo</dt><dd>{input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</dd>
                 <dt>Categoria</dt><dd>{catalog.categories.find((category) => category.id === input.categoryId)?.name}</dd>
+                <dt>Cidade de origem</dt><dd>{catalog.cities.filter(city => city.id === input.cityId).map(city => `${city.name}/${city.state_code}`)}</dd>
                 <dt>Atendimento</dt><dd>{catalog.cities.filter((city) => normalizeRegistration(input).areaCityIds.includes(city.id)).map((city) => `${city.name}/${city.state_code}`).join(', ')}</dd>
               </dl>
               <p className="field-help">Este perfil não será publicado automaticamente. Não há cobrança nesta etapa.</p>

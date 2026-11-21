@@ -9,6 +9,7 @@ import { useMarketplace } from '../marketplace/MarketplaceProvider';
 import { usePublicQuery } from '../marketplace/usePublicQuery';
 import { pageNumber, readFilters } from '../marketplace/validation';
 import { QueryStatus } from '../marketplace/QueryStatus';
+import { CitySelect } from '../locations/CitySelect';
 import { Pagination } from '../marketplace/Pagination';
 
 function FilterForm({ params, onSubmit }: { params: URLSearchParams; onSubmit: (params: URLSearchParams) => void }) {
@@ -29,7 +30,7 @@ function FilterForm({ params, onSubmit }: { params: URLSearchParams; onSubmit: (
   return <form className="public-filters" role="search" onSubmit={submit}>
     <div className="form-field public-search-input"><label htmlFor="market-query">Buscar por nome, especialidade ou serviço</label><input id="market-query" type="search" value={query} onChange={(event) => setQuery(event.target.value)} maxLength={200} placeholder="Qual serviço você procura?" /></div>
     <div className="form-field"><label htmlFor="market-category">Categoria</label><select id="market-category" name="categoria" defaultValue={filters.categoryId}><option value="">Todas as categorias</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
-    <div className="form-field"><label htmlFor="market-city">Cidade atendida</label><select id="market-city" name="cidade" value={selectedCity} onChange={(event) => setSelectedCity(event.target.value)}><option value="">Todas as cidades</option>{selectedCity && !cities.data?.some((item) => item.id === selectedCity) && <option value={selectedCity}>{selectedCity === 'mundo-novo-ms' ? 'Mundo Novo/MS' : 'Localidade selecionada'}</option>}{cities.data?.map((item) => <option key={item.id} value={item.id}>{item.name}/{item.state}</option>)}</select></div>
+    <CitySelect id="market-city" name="cidade" label="Cidade atendida" cities={(cities.data ?? []).map(city => ({ ...city, stateCode: city.state }))} value={selectedCity} onChange={setSelectedCity} emptyLabel="Todas as cidades" fallbackLabel={selectedCity === 'mundo-novo-ms' ? 'Mundo Novo/MS' : 'Localidade selecionada'} />
     <div className="form-field"><label htmlFor="market-type">Tipo de prestador</label><select id="market-type" name="tipo" defaultValue={filters.type}><option value="">Todos</option><option value="autonomo">Autônomos</option><option value="empresa">Empresas</option></select></div>
     <button className="button button--primary" type="submit"><Search size={18} aria-hidden="true" />Pesquisar</button>
     {cities.error && <p role="status" className="field-help">Não foi possível atualizar as cidades. <button className="text-link" type="button" onClick={cities.retry}>Tentar novamente</button></p>}

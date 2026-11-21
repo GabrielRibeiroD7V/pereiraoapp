@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "widths": [
+    320,
+    375,
+    390,
+    393,
+    430,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "maxHeaderDeviationPx": 0,
+  "letteringReductionPercent": 13.0,
+  "noHorizontalPageOverflow": true,
+  "syntheticCatalog": true,
+  "physicalDevice": false,
+  "migration": "20261121190525_regional_service_cities.sql",
+  "sha256": "8f8bf5e5467e09bac44f24f3494714a3fec80aa762861f8d6b9b53abf7799256"
+}

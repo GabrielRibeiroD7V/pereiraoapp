@@ -1,3 +1,4 @@
+import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { City } from '../types/domain';
@@ -51,8 +52,7 @@ export function createPublicMarketplace(client: SupabaseClient<Database>): Publi
       return result.data ? provider(result.data) : null;
     },
     async getCities(signal) {
-      const { data, error } = await client.from('cities').select('id,name,state_code').eq('active', true).order('name').limit(200).abortSignal(signal ?? new AbortController().signal);
-      if (error) throw error; return (data ?? []).map(city);
+      return (await activeCities(client, signal)).map(city);
     },
     async getAreas(id, value, signal) {
       if (!validId(id)) return empty(value);
