@@ -1,0 +1,190 @@
+[
+  {
+    "view": "home",
+    "documentWidth": 375,
+    "heading": "O que você está procurando?",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "search",
+    "documentWidth": 375,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "profile",
+    "documentWidth": 375,
+    "heading": "Prestador simulado",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "empty",
+    "documentWidth": 375,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "error",
+    "documentWidth": 375,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "enlarged",
+    "documentWidth": 375,
+    "modalFits": true,
+    "nav": 3,
+    "width": 375
+  },
+  {
+    "view": "home",
+    "documentWidth": 390,
+    "heading": "O que você está procurando?",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "search",
+    "documentWidth": 390,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "profile",
+    "documentWidth": 390,
+    "heading": "Prestador simulado",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "empty",
+    "documentWidth": 390,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "error",
+    "documentWidth": 390,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "enlarged",
+    "documentWidth": 390,
+    "modalFits": true,
+    "nav": 3,
+    "width": 390
+  },
+  {
+    "view": "home",
+    "documentWidth": 768,
+    "heading": "O que você está procurando?",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "search",
+    "documentWidth": 768,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "profile",
+    "documentWidth": 768,
+    "heading": "Prestador simulado",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "empty",
+    "documentWidth": 768,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "error",
+    "documentWidth": 768,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "enlarged",
+    "documentWidth": 768,
+    "modalFits": true,
+    "nav": 3,
+    "width": 768
+  },
+  {
+    "view": "home",
+    "documentWidth": 1280,
+    "heading": "O que você está procurando?",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 1280
+  },
+  {
+    "view": "search",
+    "documentWidth": 1280,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 1280
+  },
+  {
+    "view": "profile",
+    "documentWidth": 1280,
+    "heading": "Prestador simulado",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 1280
+  },
+  {
+    "view": "empty",
+    "documentWidth": 1280,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 1280
+  },
+  {
+    "view": "error",
+    "documentWidth": 1280,
+    "heading": "Buscar",
+    "imagesBroken": 0,
+    "nav": 3,
+    "width": 1280
+  },
+  {
+    "view": "enlarged",
+    "documentWidth": 1280,
+    "modalFits": true,
+    "nav": 3,
+    "width": 1280
+  }
+]

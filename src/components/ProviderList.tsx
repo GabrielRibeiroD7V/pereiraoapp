@@ -1,12 +1,16 @@
-import { MapPin, Star, UserRound } from 'lucide-react';
+import { MapPin, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Provider } from '../types/domain';
+import { useRef } from 'react';
+import type { PublicProvider } from '../marketplace/types';
+import { ContactLinks } from '../marketplace/ContactLinks';
+import { PublicImage } from '../marketplace/PublicImage';
 import { ContentState } from './ContentState';
 
-type ProviderSummary = Pick<Provider, 'id' | 'slug' | 'name' | 'specialty' | 'city' | 'avatar' | 'rating'>;
-
-/** Não busca dados nem gera exemplos. A futura integração fornecerá a lista. */
-export function ProviderList({ providers }: { providers: readonly ProviderSummary[] }) {
+export function ProviderList({ providers, carousel = false }: { providers: readonly PublicProvider[]; carousel?: boolean }) {
+  const list = useRef<HTMLUListElement>(null);
+  function move(direction: number) {
+    list.current?.scrollBy({ left: direction * list.current.clientWidth * .8, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
   if (providers.length === 0) {
     return <ContentState icon={UserRound} title="Novos profissionais em breve">
       Os perfis de profissionais e empresas da sua cidade aparecerão aqui.
@@ -14,29 +18,28 @@ export function ProviderList({ providers }: { providers: readonly ProviderSummar
   }
 
   return (
-    <ul className="provider-list">
+    <div className={carousel ? 'public-carousel' : undefined}>
+    <ul className="provider-list public-provider-list" ref={list} tabIndex={carousel ? 0 : undefined} aria-label={carousel ? 'Profissionais cadastrados' : undefined}
+      onKeyDown={carousel ? (event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1); } } : undefined}>
       {providers.map((provider) => (
         <li key={provider.id}>
           <Link className="provider-item" to={`/prestadores/${encodeURIComponent(provider.slug)}`}
             aria-label={`Ver perfil de ${provider.name}`}>
             <span className="provider-item__avatar">
-              {provider.avatar ? <img src={provider.avatar.src} alt="" loading="lazy" decoding="async"
-                width={provider.avatar.width} height={provider.avatar.height} /> : <UserRound aria-hidden="true" />}
+              {provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}
             </span>
             <span className="provider-item__details">
               <strong>{provider.name}</strong>
-              <span>{provider.specialty}</span>
+              <span>{provider.specialty} · {provider.type === 'empresa' ? 'Empresa' : 'Autônomo'}</span>
               <span className="provider-item__location"><MapPin size={14} aria-hidden="true" />{provider.city.name}, {provider.city.state}</span>
-              {provider.rating && provider.rating.count > 0 && (
-                <span className="provider-item__rating"><Star size={14} aria-hidden="true" />
-                  {provider.rating.average.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
-                  {' '}({provider.rating.count} avaliações)
-                </span>
-              )}
+              {provider.description && <span className="public-description-preview">{provider.description}</span>}
             </span>
           </Link>
+          <ContactLinks name={provider.name} whatsapp={provider.whatsapp} />
         </li>
       ))}
     </ul>
+    {carousel && providers.length > 1 && <div className="public-carousel-controls" role="group" aria-label="Controles dos profissionais"><button className="button button--secondary" onClick={() => move(-1)} aria-label="Profissionais anteriores">←</button><button className="button button--secondary" onClick={() => move(1)} aria-label="Próximos profissionais">→</button></div>}
+    </div>
   );
 }
