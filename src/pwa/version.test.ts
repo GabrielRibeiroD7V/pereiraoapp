@@ -17,6 +17,21 @@ describe('reprodução: versão antiga no retorno ao aplicativo',()=>{
     expect(f.browser.location.reload).toHaveBeenCalledOnce();
     f.controller.dispose();
   });
+  it('não anuncia atualização quando o worker em espera é anterior à versão publicada',async()=>{
+    const f=pwaFixture({enabled:true,waiting:true,version:B,published:B,workerVersion:A});
+    await vi.waitFor(()=>expect(f.controller.getSnapshot().worker).toBe('ready'));
+    await f.controller.checkForUpdate(true);
+    expect(f.controller.getSnapshot().updateReady).toBe(false);
+    expect(f.waiting.postMessage.mock.calls.some(([message])=>message.type==='PEREIRAO_ACTIVATE_UPDATE')).toBe(false);
+    expect(f.browser.location.reload).not.toHaveBeenCalled();f.controller.dispose();
+  });
+  it('recupera HTML antigo na rota pública mesmo se o worker waiting não informa a versão',async()=>{
+    const f=pwaFixture({enabled:true,waiting:true,version:A,published:B,workerVersion:null});
+    await vi.waitFor(()=>expect(f.browser.location.reload).toHaveBeenCalledOnce());
+    expect(f.controller.getSnapshot().updateReady).toBe(false);
+    expect(f.waiting.postMessage.mock.calls.some(([message])=>message.type==='PEREIRAO_ACTIVATE_UPDATE')).toBe(false);
+    f.controller.dispose();
+  });
 });
 describe('atualização segura, concorrente e offline',()=>{
   it.each(['focus','pageshow'])('verifica a versão no evento %s',async name=>{
@@ -92,6 +107,13 @@ describe('atualização segura, concorrente e offline',()=>{
     const f=pwaFixture({enabled:true,version:A});await vi.waitFor(()=>expect(f.browser.fetch).toHaveBeenCalledOnce());await f.controller.checkForUpdate();
     f.browser.fetch.mockResolvedValueOnce({ok:true,headers:new Headers({'Content-Type':'text/html'}),json:async()=>({version:B})});
     await f.controller.checkForUpdate(true);expect(f.controller.getSnapshot().publishedVersion).toBe(A);expect(f.browser.location.reload).not.toHaveBeenCalled();f.controller.dispose();
+  });
+  it('não atualiza com uma versão publicada antiga quando a consulta atual falha',async()=>{
+    const f=pwaFixture({enabled:true,version:A,published:B});f.browser.location.pathname='/conta';
+    await vi.waitFor(()=>expect(f.controller.getSnapshot().publishedVersion).toBe(B));await f.controller.checkForUpdate(true);
+    f.browser.location.pathname='/';f.browser.fetch.mockRejectedValueOnce(new Error('network'));
+    await f.controller.checkForUpdate(true);
+    expect(f.browser.location.reload).not.toHaveBeenCalled();f.controller.dispose();
   });
 });
 

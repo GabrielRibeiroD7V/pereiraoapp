@@ -243,7 +243,6 @@ export class PwaController {
             this.device.serviceWorker.controller
           ) {
             this.waiting = registration.waiting ?? worker;
-            this.patch({ updateReady: true });
             void this.checkForUpdate(true);
           }
         });
@@ -259,7 +258,6 @@ export class PwaController {
   private inspectWaiting() {
     if (this.registration?.waiting) {
       this.waiting = this.registration.waiting;
-      this.patch({ updateReady: true });
     }
   }
   private acknowledgeVersion() {
@@ -292,13 +290,20 @@ export class PwaController {
   }
   private maybeUpdate() {
     const waitingCurrent = Boolean(this.registration?.waiting && this.waitingVersion === this.state.publishedVersion);
+    if (this.state.sessionRefreshRequired && this.state.publishedVersion && this.state.online
+      && this.browser.document.visibilityState === 'visible' && this.safeToReload()) {
+      this.reload(true);
+      return;
+    }
     if (!this.state.runningVersion || !this.state.publishedVersion || (this.state.runningVersion === this.state.publishedVersion && !waitingCurrent)
-      || (this.registration?.waiting && !waitingCurrent)
       || !this.state.online || this.state.sessionRefreshRequired || this.state.updating || this.reloading
       || this.browser.document.visibilityState !== 'visible' || !this.safeToReload()) return;
     try {
       if (this.browser.sessionStorage.getItem('pereirao.update.attempt') === this.state.publishedVersion) return;
     } catch { return; }
+    // Um waiting legado/desconhecido não deve bloquear indefinidamente a troca
+    // do HTML público. A navegação busca HTML novo pela rede sem ativar esse worker.
+    if (this.registration?.waiting && !waitingCurrent) { this.reload(true); return; }
     this.update(true);
   }
   async checkForUpdate(force = false): Promise<void> {
@@ -308,7 +313,7 @@ export class PwaController {
     this.lastCheck = Date.now();
     this.checking = (async () => {
       const versionCheck = async () => {
-        if (!this.state.runningVersion) return;
+        if (!this.state.runningVersion) return false;
         const abort = new AbortController();
         const timeout = this.browser.setTimeout(() => abort.abort(), 8000);
         try {
@@ -316,23 +321,29 @@ export class PwaController {
             cache: 'no-store', credentials: 'omit', redirect: 'error',
             headers: { Accept: 'application/json' }, signal: abort.signal,
           });
-          if (!response.ok || !response.headers.get('Content-Type')?.includes('application/json')) return;
+          if (!response.ok || !response.headers.get('Content-Type')?.includes('application/json')) return false;
           const data: unknown = await response.json();
           const version = data && typeof data === 'object' && 'version' in data ? data.version : null;
-          if (typeof version !== 'string' || !/^[a-f0-9]{20}$/.test(version)) return;
+          if (typeof version !== 'string' || !/^[a-f0-9]{20}$/.test(version)) return false;
           this.lastVersionSuccess = Date.now();
           this.patch({ publishedVersion: version, refreshRequired: version !== this.state.runningVersion || this.state.sessionRefreshRequired });
-        } catch { /* Offline/proteção/erro HTTP nunca invalida a página nem força reload. */ }
+          return true;
+        } catch { /* Offline/proteção/erro HTTP nunca força reload. */ return false; }
         finally { this.browser.clearTimeout(timeout); }
       };
-      await Promise.all([versionCheck(), this.registration?.update().catch(() => {})]);
+      const [verified] = await Promise.all([versionCheck(), this.registration?.update().catch(() => {})]);
       if (this.disposed) return;
       this.inspectWaiting();
       const waiting = this.registration?.waiting;
       this.waitingVersion = waiting && this.state.runningVersion ? await workerVersion(waiting) : null;
       // A instalação pode ter substituído o candidato enquanto ele respondia.
       if (this.registration?.waiting !== waiting || this.disposed) return;
-      this.maybeUpdate();
+      // Um worker em espera pode ser antigo ou coincidir com o HTML atual.
+      // Só oferecemos atualização quando o build dele foi confirmado como publicado.
+      this.patch({ updateReady: Boolean(verified && waiting && this.waitingVersion
+        && this.waitingVersion === this.state.publishedVersion
+        && this.waitingVersion !== this.state.runningVersion) });
+      if (verified) this.maybeUpdate();
     })().finally(() => { this.checking = null; });
     return this.checking;
   }

@@ -87,12 +87,13 @@ describe("instalação progressiva e sessão", () => {
     f.controller.dispose();
   });
   it("atualização waiting não recarrega antes da ação explícita", async () => {
-    const f = pwaFixture({ waiting: true, enabled: true });
+    const f = pwaFixture({ waiting: true, enabled: true, version: 'aaaaaaaaaaaaaaaaaaaa', published: 'bbbbbbbbbbbbbbbbbbbb' });
+    f.browser.location.pathname = '/conta';
     await vi.waitFor(() =>
       expect(f.controller.getSnapshot().updateReady).toBe(true),
     );
     expect(f.browser.location.reload).not.toHaveBeenCalled();
-    expect(f.waiting.postMessage).not.toHaveBeenCalled();
+    expect(f.waiting.postMessage.mock.calls.some(([message]) => message.type === 'PEREIRAO_ACTIVATE_UPDATE')).toBe(false);
     f.controller.update();
     expect(f.waiting.postMessage).toHaveBeenCalledWith({
       type: "PEREIRAO_ACTIVATE_UPDATE", protocol: 1,

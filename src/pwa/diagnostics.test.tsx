@@ -1,7 +1,15 @@
 import {render,screen,fireEvent,waitFor} from '@testing-library/react';import {MemoryRouter} from 'react-router-dom';import {describe,it,expect,vi} from 'vitest';
 import {PwaProvider,VersionDiagnostics} from './PwaProvider';import {pwaFixture} from '../test/pwaFixtures';
+import {AppShell} from '../components/AppShell';
+import {Route,Routes} from 'react-router-dom';
 const A='aaaaaaaaaaaaaaaaaaaa';
 describe('diagnóstico sob demanda sem dados privados',()=>{
+ it('não expõe o painel técnico na navegação normal, mas permite abri-lo por URL de diagnóstico',()=>{
+  const f=pwaFixture();
+  const shell=(path:string)=>render(<MemoryRouter initialEntries={[path]}><PwaProvider controller={f.controller}><Routes><Route element={<AppShell/>}><Route index element={<p>Página inicial</p>}/></Route></Routes></PwaProvider></MemoryRouter>);
+  const normal=shell('/');expect(screen.queryByRole('button',{name:'Versão e atualização'})).not.toBeInTheDocument();normal.unmount();
+  shell('/?pwa-diagnostico=1');expect(screen.getByRole('button',{name:'Versão e atualização'})).toBeInTheDocument();f.controller.dispose();
+ });
  it('lista somente caches estáticos próprios, sem ler conteúdo/Auth/sessão',async()=>{
   const f=pwaFixture({version:A});Object.assign(f.browser,{caches:{keys:vi.fn(async()=>['outro-cache-privado','pereirao-static-'+A,'pereirao-static-segredo'])}});
   const result=await f.controller.diagnostics();expect(result.staticCacheVersions).toEqual([A]);expect(result.origin).toBe('https://pereirao.example');

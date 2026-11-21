@@ -99,7 +99,8 @@ describe("experiência de instalação e atualização", () => {
     f.controller.dispose();
   });
   it("atualização waiting permite salvar antes da recarga explícita", async () => {
-    const f = pwaFixture({ enabled: true, waiting: true });
+    const f = pwaFixture({ enabled: true, waiting: true, version: 'aaaaaaaaaaaaaaaaaaaa', published: 'bbbbbbbbbbbbbbbbbbbb' });
+    f.browser.location.pathname = '/conta';
     await vi.waitFor(() =>
       expect(f.controller.getSnapshot().updateReady).toBe(true),
     );
@@ -113,10 +114,8 @@ describe("experiência de instalação e atualização", () => {
     );
     expect(screen.getByLabelText("Rascunho")).toBeVisible();
     expect(f.browser.location.reload).not.toHaveBeenCalled();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Atualizar aplicativo" }),
-    );
-    expect(f.waiting.postMessage).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "Atualizar aplicativo" })).not.toBeInTheDocument();
+    expect(f.waiting.postMessage.mock.calls.some(([message]) => message.type === 'PEREIRAO_ACTIVATE_UPDATE')).toBe(false);
     f.controller.dispose();
   });
   it("não apresenta dados administrativos antigos sem rede e exige revalidação ao voltar", () => {
