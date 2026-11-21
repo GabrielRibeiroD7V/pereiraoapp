@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Brand } from "../components/Brand";
+import {AdminSubscriptionsPanel}from'../subscriptions/SubscriptionViews';
 import { PageHeader } from "../components/PageHeader";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../marketplace/Pagination";
@@ -28,6 +29,7 @@ const sections = [
   ["businesses", "Prestadores"],
   ["posts", "Publicações"],
   ["audit", "Histórico"],
+  ["subscriptions", "Gratuidade e assinaturas"],
 ] as const;
 const states: Record<string, string> = {
   draft: "Rascunho",
@@ -277,7 +279,7 @@ function AdminContent() {
           </button>
         </form>
       )}
-      {section === "dashboard" ? (
+      {section === 'subscriptions' ? <AdminSubscriptionsPanel revision={revision}/> : section === "dashboard" ? (
         <Resource<AdminDashboard>
           section={section}
           filters={filters}

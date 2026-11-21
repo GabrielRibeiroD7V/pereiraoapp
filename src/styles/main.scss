@@ -5,6 +5,7 @@
 @use 'posts';
 @use 'admin';
 @use 'pwa';
+@use 'subscriptions';
 
 :root {
   @include tokens.properties;

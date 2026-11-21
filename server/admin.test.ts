@@ -112,6 +112,37 @@ describe("diagnóstico Asaas exclusivamente de servidor", () => {
   });
 });
 describe("API administrativa", () => {
+  it("encaminha indicadores de assinatura pela RPC autorizada e não altera dados", async () => {
+    const f = fixture();
+    const r = await f.handler(
+      req({
+        action: "query",
+        section: "subscriptions",
+        filters: { page: 1, status: "trial_active" },
+      }),
+    );
+    expect(r.status).toBe(200);
+    expect(f.client.rpc).toHaveBeenLastCalledWith(
+      "admin_subscription_overview",
+      { filters: { page: 1, status: "trial_active" } },
+    );
+    expect(r.headers.get("cache-control")).toContain("no-store");
+    expect(f.probe).not.toHaveBeenCalled();
+  });
+  it("sinaliza migração de assinatura ausente sem erro privado", async () => {
+    const f = fixture();
+    f.client.rpc
+      .mockResolvedValueOnce({ data: true, error: null } as never)
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: "PGRST202", message: "private" },
+      } as never);
+    const r = await f.handler(
+      req({ action: "query", section: "subscriptions" }),
+    );
+    expect(r.status).toBe(503);
+    expect(await r.json()).toEqual({ code: "SETUP_REQUIRED" });
+  });
   it("nega acesso sem sessão antes de consultar o banco", async () => {
     const f = fixture();
     expect((await f.handler(req({}, {}))).status).toBe(401);

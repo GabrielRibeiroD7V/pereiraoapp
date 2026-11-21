@@ -1,0 +1,118 @@
+-- Fixtures exclusivamente no PostgreSQL temporário local. Tudo é revertido.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values
+('00000000-0000-4000-8000-000000008001','billing-admin@example.invalid',now()),
+('00000000-0000-4000-8000-000000008002','billing-owner@example.invalid',now()),
+('00000000-0000-4000-8000-000000008003','billing-other@example.invalid',now());
+insert into private.platform_admins(user_id) values('00000000-0000-4000-8000-000000008001');
+select test.assert_true((select count(*)=0 from public.business_subscriptions),'trial: cadastro pessoal não inicia prazo');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008002';
+select public.create_business('Primeiro local','trial-local-a','autonomo','mundo-novo-ms') as a \gset
+select public.create_business('Segundo local','trial-local-b','empresa','mundo-novo-ms') as b \gset
+update public.businesses set category_id='climatizacao',description='Descrição completa local',whatsapp='67999999999' where id in (:'a',:'b');
+select test.assert_true((public.my_subscriptions()->'items'->0->>'state')='awaiting_activation','trial: rascunho aguarda ativação');
+select test.assert_true(jsonb_array_length(public.my_subscriptions()->'items')=2,'trial: vários negócios por conta');
+select test.expect_error('update public.business_subscriptions set trial_ends_at=now()','42501','trial: autoalteração negada');
+select test.expect_error('select * from private.plan_price_versions','42501','trial: preço privado');
+select test.expect_error('select * from private.subscription_provider_links','42501','trial: identificadores externos privados');
+select test.expect_error('select * from private.billing_event_inbox','42501','trial: inbox privada');
+select test.expect_error('select * from private.subscription_history','42501','trial: histórico privado');
+select test.expect_error('select private.subscription_snapshot(gen_random_uuid(),now())','42501','trial: cliente não controla relógio');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008003';
+select public.create_business('Terceiro local','trial-local-c','autonomo','mundo-novo-ms') as c \gset
+select test.assert_true(jsonb_array_length(public.my_subscriptions()->'items')=1,'trial: isolamento de contas');
+select test.expect_error(format('select public.my_subscriptions(%L)',:'a'),'42501','trial: consulta de terceiro negada');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008001';
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''Validação local'',''draft'')',:'c'),'23514','trial: incompleto não ativa');
+select public.admin_action('business',:'a','publish','Validação local completa','draft');
+select public.admin_action('business',:'b','publish','Validação local completa','draft');
+reset role;
+select test.assert_true((select count(*)=2 from public.business_subscriptions),'trial: assinatura por negócio');
+select test.assert_true((select bool_and(trial_original_ends_at-trial_started_at=interval '2160 hours') from public.business_subscriptions),'trial: exatamente 90 dias');
+select trial_started_at as start,trial_ends_at as deadline from public.business_subscriptions where business_id=:'a' \gset
+select test.assert_true(private.subscription_snapshot(:'a',:'deadline'::timestamptz-interval '1 microsecond')->>'state'='trial_active','trial: antes do limite ativo');
+select test.assert_true(private.subscription_snapshot(:'a',:'deadline'::timestamptz)->>'state'='trial_ended','trial: limite exato encerrado');
+select test.assert_true(not (private.subscription_snapshot(:'a',:'deadline')->>'checkoutAvailable')::boolean,'trial: sem checkout');
+select test.assert_true(not (private.subscription_snapshot(:'a',:'deadline')->>'enforcementEnabled')::boolean,'trial: sem bloqueio financeiro');
+select test.expect_error(format('update public.business_subscriptions set trial_started_at=now() where business_id=%L',:'a'),'23514','trial: âncora imutável');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008002';
+select test.assert_true((select count(*)=2 from public.business_subscriptions),'trial: RLS mostra só próprios');
+update public.businesses set description='Descrição editada local' where id=:'a';
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008003';
+select test.assert_true((select count(*)=0 from public.business_subscriptions),'trial: terceiro não lê assinatura');
+select test.expect_error('select public.admin_subscription_overview()','42501','trial: indicadores somente admin');
+select test.expect_error(format('select public.admin_extend_trial(%L,gen_random_uuid(),1,''Motivo local'',now())',:'a'),'42501','trial: dono não estende');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008001';
+select public.admin_action('business',:'a','suspend','Suspensão local aprovada','published');
+select public.admin_action('business',:'a','reactivate','Reativação local aprovada','suspended');
+select public.admin_action('user','00000000-0000-4000-8000-000000008002','suspend','Suspensão de conta local','active');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008002';
+select test.assert_true(jsonb_array_length(public.my_subscriptions()->'items')=2,'trial: conta suspensa consulta situação');
+select test.assert_true(not private.can_manage_business(:'a'),'trial: leitura não restaura gestão suspensa');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008001';
+select public.admin_action('user','00000000-0000-4000-8000-000000008002','reactivate','Reativação de conta local','suspended');
+select public.admin_action('business',:'a','reactivate','Revisão local completa','suspended');
+select test.assert_true((public.admin_subscription_overview()->'summary'->>'trialActive')::int=2,'trial: indicadores reais');
+select test.assert_true(public.admin_subscription_overview()->'summary'->'confirmedRevenueCents'='null'::jsonb,'trial: receita não inventada');
+select test.assert_true((public.admin_subscription_overview()->'items'->0->>'sameOwnerActivations')::int=2,'trial: sinal de múltiplas ativações');
+select test.expect_error(format('select public.admin_extend_trial(%L,gen_random_uuid(),1,''Motivo local'',%L)',:'a',:'deadline'),'55000','trial: extensão desativada');
+reset role;
+select test.assert_true((select trial_started_at=:'start' and trial_ends_at=:'deadline' from public.business_subscriptions where business_id=:'a'),'trial: edição suspensão e sessão não reiniciam');
+select test.assert_true((select count(*)=2 from private.subscription_history where action='trial_started'),'trial: ativação idempotente');
+set local timezone='America/New_York';
+select test.assert_true(('2026-03-01 12:00-05'::timestamptz+interval '2160 hours')-'2026-03-01 12:00-05'::timestamptz=interval '90 days','trial: duração exata atravessa horário de verão');
+select test.assert_true(('2026-01-31 12:00Z'::timestamptz+interval '2160 hours')='2026-05-01 12:00Z'::timestamptz,'trial: não usa meses de duração variável');
+set local timezone='UTC';
+-- Habilitação APENAS na fixture local para testar o controle futuro.
+update private.subscription_settings set extensions_enabled=true;
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008001';
+select public.admin_extend_trial(:'a','00000000-0000-4000-8000-000000008900',10,'Exceção local documentada',:'deadline');
+select test.assert_true((public.admin_extend_trial(:'a','00000000-0000-4000-8000-000000008900',10,'Exceção local documentada',:'deadline')->>'replayed')::boolean,'trial: repetição não duplica extensão');
+select test.expect_error(format('select public.admin_extend_trial(%L,''00000000-0000-4000-8000-000000008900'',11,''Exceção local documentada'',%L)',:'a',:'deadline'),'23505','trial: chave repetida com conteúdo diferente negada');
+select test.expect_error(format('select public.admin_extend_trial(%L,gen_random_uuid(),1,''Exceção local'',%L)',:'a',:'deadline'),'40001','trial: alteração concorrente detectada');
+select test.expect_error(format('select public.admin_extend_trial(%L,gen_random_uuid(),91,''Exceção local'',now())',:'a'),'22023','trial: limite por operação');
+reset role;
+select test.assert_true((select trial_ends_at=:'deadline'::timestamptz+interval '240 hours' from public.business_subscriptions where business_id=:'a'),'trial: extensão persistida uma única vez');
+select test.assert_true((select count(*)=1 from private.subscription_history where action='trial_extended'),'trial: extensão auditada');
+select test.assert_true((select count(*)=1 from private.admin_audit where action='trial_extended'),'trial: auditoria administrativa');
+select test.assert_true((select status='published' from public.businesses where id=:'a'),'trial: extensão não muda publicação');
+select test.expect_error(format('update public.business_subscriptions set status=''active'',contracted_at=now(),price_version_id=(select id from private.plan_price_versions limit 1),contracted_price_cents=2999,billing_cycle=''monthly'' where business_id=%L',:'a'),'23514','trial: contrato deve corresponder à versão de preço');
+update public.business_subscriptions set status='active',contracted_at=now(),price_version_id=(select id from private.plan_price_versions limit 1),contracted_price_cents=1999,billing_cycle='monthly' where business_id=:'a';
+select test.assert_true((public.admin_subscription_overview()->'summary'->>'active')::int=1,'trial: contagem real de assinatura ativa');
+insert into private.plan_price_versions(plan_code,reference_amount_cents) values('professional',2999);
+select test.assert_true((select contracted_price_cents=1999 from public.business_subscriptions where business_id=:'a'),'trial: preço novo preserva contrato anterior');
+select test.expect_error(format('update public.business_subscriptions set contracted_price_cents=2999 where business_id=%L',:'a'),'23514','trial: snapshot contratado imutável');
+select test.expect_error('update private.plan_price_versions set reference_amount_cents=9','23514','trial: versões imutáveis');
+update public.business_subscriptions set status='pending_payment' where business_id=:'a';
+select test.assert_true((public.admin_subscription_overview()->'summary'->>'pendingPayment')::int=1,'trial: contagem real de pagamento pendente');
+update public.business_subscriptions set status='cancelled' where business_id=:'a';
+select test.assert_true((public.admin_subscription_overview()->'summary'->>'cancelled')::int=1,'trial: contagem real de cancelamento');
+select test.assert_true((select count(*)=3 from private.subscription_history where action='subscription_updated'),'trial: mudanças de estado auditadas');
+insert into private.billing_event_inbox(event_id,event_type,provider_object_id) values('evt_local','PAYMENT_CONFIRMED','pay_local');
+select test.expect_error($q$insert into private.billing_event_inbox(event_id,event_type,provider_object_id) values('evt_local','PAYMENT_CONFIRMED','pay_local')$q$,'23505','trial: evento repetido deduplicado');
+select test.assert_true((select status='cancelled' from public.business_subscriptions where business_id=:'a'),'trial: receber evento não concede direitos');
+insert into public.business_members(business_id,user_id,role) values(:'b','00000000-0000-4000-8000-000000008003','viewer');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000008003';
+select test.assert_true((select count(*)=0 from public.business_subscriptions),'trial: viewer não recebe dados de assinatura');
+select test.expect_error('delete from public.business_subscriptions','42501','trial: exclusão pelo prestador negada');
+reset role;
+update public.business_members set role='admin' where business_id=:'b' and user_id='00000000-0000-4000-8000-000000008003';
+set local role authenticated;
+select test.assert_true((select count(*)=1 from public.business_subscriptions),'trial: administrador do negócio consulta apenas vínculo autorizado');
+reset role;
+-- Prazo já encerrado inserido somente como fixture interna para testar ausência de paywall.
+insert into public.business_subscriptions(business_id,trial_started_at,trial_original_ends_at,trial_ends_at) values(:'c',now()-interval '2161 hours',now()-interval '1 hour',now()-interval '1 hour');
+set local role authenticated;
+select test.assert_true(public.my_subscriptions(:'c')->'items'->0->>'state'='trial_ended','trial: prazo encerrado calculado no servidor');
+select test.assert_true(private.can_manage_business(:'c'),'trial: encerramento não ativa bloqueio profissional');
+reset role;
+set local role anon;
+select test.expect_error('select * from public.business_subscriptions','42501','trial: assinatura não pública');
+select test.expect_error('select public.my_subscriptions()','42501','trial: RPC exige autenticação');
+reset role;
+select test.assert_true((select count(*)=3 from public.businesses),'trial: negócios preservados');
+rollback;
