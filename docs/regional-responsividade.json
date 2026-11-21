@@ -1,0 +1,506 @@
+[
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 280
+      },
+      {
+        "height": 44,
+        "width": 280
+      },
+      {
+        "height": 44,
+        "width": 280
+      },
+      {
+        "height": 44,
+        "width": 280
+      },
+      {
+        "height": 44,
+        "width": 280
+      },
+      {
+        "height": 44,
+        "width": 280
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 320,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 320
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 335
+      },
+      {
+        "height": 44,
+        "width": 335
+      },
+      {
+        "height": 44,
+        "width": 335
+      },
+      {
+        "height": 44,
+        "width": 335
+      },
+      {
+        "height": 44,
+        "width": 335
+      },
+      {
+        "height": 44,
+        "width": 335
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 375,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 375
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 350
+      },
+      {
+        "height": 44,
+        "width": 350
+      },
+      {
+        "height": 44,
+        "width": 350
+      },
+      {
+        "height": 44,
+        "width": 350
+      },
+      {
+        "height": 44,
+        "width": 350
+      },
+      {
+        "height": 44,
+        "width": 350
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 390,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 390
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 353
+      },
+      {
+        "height": 44,
+        "width": 353
+      },
+      {
+        "height": 44,
+        "width": 353
+      },
+      {
+        "height": 44,
+        "width": 353
+      },
+      {
+        "height": 44,
+        "width": 353
+      },
+      {
+        "height": 44,
+        "width": 353
+      }
+    ],
+    "height": 852,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 393,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 393
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 390
+      },
+      {
+        "height": 44,
+        "width": 390
+      },
+      {
+        "height": 44,
+        "width": 390
+      },
+      {
+        "height": 44,
+        "width": 390
+      },
+      {
+        "height": 44,
+        "width": 390
+      },
+      {
+        "height": 44,
+        "width": 390
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 430,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 430
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 768,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 768
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 1024,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 1024
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 1280,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 1280
+  },
+  {
+    "center": 0,
+    "controls": [
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      },
+      {
+        "height": 44,
+        "width": 342
+      }
+    ],
+    "height": 900,
+    "page": "cadastro-regional-sintetico",
+    "scrollWidth": 1440,
+    "selected": [
+      "Eldorado/MS",
+      "Guaíra/PR"
+    ],
+    "selectedCity": "mundo-novo-ms",
+    "width": 1440
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 320,
+    "selectedCity": "guaira-pr",
+    "width": 320
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 375,
+    "selectedCity": "guaira-pr",
+    "width": 375
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 390,
+    "selectedCity": "guaira-pr",
+    "width": 390
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 852,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 393,
+    "selectedCity": "guaira-pr",
+    "width": 393
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 430,
+    "selectedCity": "guaira-pr",
+    "width": 430
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 768,
+    "selectedCity": "guaira-pr",
+    "width": 768
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 1024,
+    "selectedCity": "guaira-pr",
+    "width": 1024
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 1280,
+    "selectedCity": "guaira-pr",
+    "width": 1280
+  },
+  {
+    "center": 0,
+    "cityOptions": [
+      "Todas as cidades",
+      "Mundo Novo/MS",
+      "Naviraí/MS",
+      "Itaquiraí/MS",
+      "Eldorado/MS",
+      "Iguatemi/MS",
+      "Guaíra/PR",
+      "Terra Roxa/PR"
+    ],
+    "height": 900,
+    "page": "busca-regional-sintetica",
+    "scrollWidth": 1440,
+    "selectedCity": "guaira-pr",
+    "width": 1440
+  }
+]

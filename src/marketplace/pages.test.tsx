@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App';
+import { regionalCityFixture } from '../test/regionalCities';
 import { marketplaceFixture, publicProviderFixture as p } from '../test/marketplaceFixtures';
 import type { PublicPage, PublicProvider } from './types';
-function Location() { const location = useLocation(); return <output aria-label="URL atual">{location.pathname}{location.search}</output>; }
+function Location() { const location = useLocation(), navigate = useNavigate(); return <><output aria-label="URL atual">{location.pathname}{location.search}</output><button onClick={() => navigate(-1)}>Histórico voltar</button><button onClick={() => navigate(1)}>Histórico avançar</button></>; }
 function open(path: string, repository = marketplaceFixture()) { render(<MemoryRouter initialEntries={[path]}><App marketplaceRepository={repository} /><Location /></MemoryRouter>); return repository; }
 describe('navegação do marketplace sem login', () => {
   it('preserva todos os filtros e a paginação na URL e reinicia página ao pesquisar', async () => {
@@ -18,6 +19,34 @@ describe('navegação do marketplace sem login', () => {
     fireEvent.submit(screen.getByRole('search'));
     expect(screen.getByLabelText('URL atual')).toHaveTextContent('q=pintura&categoria=climatizacao&cidade=mundo-novo-ms&tipo=empresa');
     expect(screen.getByLabelText('URL atual')).not.toHaveTextContent('pagina=');
+  });
+  it('mantém cidade atendida na URL, paginação e histórico voltar/avançar', async () => {
+    const repository = marketplaceFixture(), search = vi.spyOn(repository, 'search');
+    repository.getCities = async () => regionalCityFixture.map(city => ({ id: city.id, name: city.name, state: city.stateCode }));
+    open('/buscar', repository);
+    await screen.findByRole('option', { name: 'Guaíra/PR' });
+    expect(screen.getByLabelText('Cidade atendida', { exact: true })).toHaveValue('mundo-novo-ms');
+    fireEvent.change(screen.getByLabelText('Pesquisar cidade atendida'), { target: { value: 'guaira PR' } });
+    fireEvent.change(screen.getByLabelText('Cidade atendida', { exact: true }), { target: { value: 'guaira-pr' } });
+    fireEvent.submit(screen.getByRole('search'));
+    await waitFor(() => expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ cityId: 'guaira-pr' }), 1, expect.any(AbortSignal)));
+    expect(screen.getByLabelText('URL atual')).toHaveTextContent('cidade=guaira-pr');
+    fireEvent.click(screen.getByRole('button', { name: 'Histórico voltar' }));
+    await waitFor(() => expect(screen.getByLabelText('Cidade atendida', { exact: true })).toHaveValue('mundo-novo-ms'));
+    fireEvent.click(screen.getByRole('button', { name: 'Histórico avançar' }));
+    await waitFor(() => expect(screen.getByLabelText('Cidade atendida', { exact: true })).toHaveValue('guaira-pr'));
+    fireEvent.click(screen.getByRole('button', { name: /Próxima — resultados/ }));
+    await waitFor(() => expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ cityId: 'guaira-pr' }), 2, expect.any(AbortSignal)));
+  });
+  it('perfil apresenta as cidades atendidas, incluindo municípios de outra UF', async () => {
+    const repository = marketplaceFixture();
+    repository.getAreas = async () => ({ items: regionalCityFixture.filter(city => ['mundo-novo-ms', 'guaira-pr', 'eldorado-ms'].includes(city.id)).map(city => ({ id: city.id, name: city.name, state: city.stateCode })), page: 1, hasNext: false });
+    open('/prestadores/prestador-simulado', repository);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Sobre' }));
+    const region = await screen.findByRole('region', { name: 'Área de atendimento' });
+    expect(await within(region).findByText('Guaíra/PR')).toBeVisible();
+    expect(within(region).getByText('Mundo Novo/MS')).toBeVisible();
+    expect(within(region).getByText('Eldorado/MS')).toBeVisible();
   });
   it('mostra perfil, preços e contatos seguros sem exigir autenticação', async () => {
     open('/prestadores/prestador-simulado');
