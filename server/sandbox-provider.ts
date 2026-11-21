@@ -28,6 +28,7 @@ export interface AsaasPayment {
 }
 export class ProviderError extends Error {
   public httpStatus?: number;
+  public reason?: string;
   public code:
     | "PROVIDER_UNAVAILABLE"
     | "PROVIDER_REJECTED"
@@ -42,10 +43,12 @@ export class ProviderError extends Error {
       | "INVALID_PROVIDER_RESPONSE"
       | "SANDBOX_DISABLED",
     httpStatus?: number,
+    reason?: string,
   ) {
     super(code);
     this.code = code;
     this.httpStatus = httpStatus;
+    this.reason = reason;
   }
 }
 export const providerId = (v: unknown): v is string =>
@@ -119,7 +122,26 @@ export class SandboxProvider {
       throw new ProviderError("PROVIDER_UNAVAILABLE");
     }
     if (!response.ok) {
-      await response.body?.cancel();
+      let reason = "PROVIDER_VALIDATION";
+      try {
+        // Classifica somente causas conhecidas, sem propagar descrições/PII do provider.
+        const errors = (await response.json()).errors;
+        const descriptions = Array.isArray(errors)
+          ? errors
+              .map((x) =>
+                typeof x?.description === "string" ? x.description : "",
+              )
+              .join(" ")
+              .toLowerCase()
+          : "";
+        if (/cpf|cnpj/.test(descriptions)) reason = "CUSTOMER_TAX_ID_REQUIRED";
+        else if (/chave pix|pix key/.test(descriptions))
+          reason = "SANDBOX_PIX_KEY_REQUIRED";
+        else if (/permiss|permission|habilit|enabled/.test(descriptions))
+          reason = "SANDBOX_FEATURE_UNAVAILABLE";
+      } catch {
+        /* Nunca expor o corpo de erro. */
+      }
       throw new ProviderError(
         response.status === 404
           ? "NOT_FOUND"
@@ -127,6 +149,7 @@ export class SandboxProvider {
             ? "PROVIDER_UNAVAILABLE"
             : "PROVIDER_REJECTED",
         response.status,
+        reason,
       );
     }
     try {
@@ -159,11 +182,31 @@ export class SandboxProvider {
       name: "PEREIRAO TESTE SANDBOX",
       email: "sandbox@example.invalid",
       notificationDisabled: true,
+      // Dado de exemplo da documentação oficial; somente cliente sintético no Sandbox.
+      cpfCnpj: "24971563792",
       externalReference: reference,
     });
     if (!providerId(data.id) || !data.id.startsWith("cus_"))
       throw new ProviderError("INVALID_PROVIDER_RESPONSE");
     return data.id;
+  }
+  async prepareSyntheticCustomer(customer: string, reference: string) {
+    if (
+      !reference.startsWith("pereirao:synthetic:pr17-") ||
+      !/^cus_[A-Za-z0-9_-]+$/.test(customer)
+    )
+      throw new ProviderError("SANDBOX_DISABLED");
+    const found = await this.findCustomers(reference);
+    if (
+      found.length !== 1 ||
+      found[0]!.id !== customer ||
+      found[0]!.externalReference !== reference
+    )
+      throw new ProviderError("INVALID_PROVIDER_RESPONSE");
+    await this.call("POST", "/customers/" + customer, {
+      cpfCnpj: "24971563792",
+      notificationDisabled: true,
+    });
   }
   findSubscriptions(customer: string) {
     if (!providerId(customer))

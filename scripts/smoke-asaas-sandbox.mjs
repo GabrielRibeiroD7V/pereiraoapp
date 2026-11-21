@@ -19,8 +19,20 @@ const emit = () =>
   process.stdout.write("SANDBOX_SMOKE " + JSON.stringify(report) + "\n");
 try {
   const existing = await provider.findCustomers(reference);
-  if (existing.length) throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");
-  const customer = await provider.createCustomer(reference);
+  // Retomada específica após HTTP 400 conhecido: não cria outro cliente/assinatura.
+  if (
+    existing.length > 1 ||
+    (existing[0] && existing[0].externalReference !== reference)
+  )
+    throw Error("RUN_CONFLICT");
+  const customer =
+    existing[0]?.id ?? (await provider.createCustomer(reference));
+  if (existing.length) {
+    const subscriptions = await provider.findSubscriptions(customer);
+    if (subscriptions.length)
+      throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");
+    await provider.prepareSyntheticCustomer(customer, reference);
+  }
   report.customerId = customer;
   emit();
   const due = new Date().toISOString().slice(0, 10);
@@ -96,6 +108,7 @@ try {
       : "SMOKE_FAILED";
   if (error instanceof Error && "httpStatus" in error)
     report.httpStatus = error.httpStatus;
+  if (error instanceof Error && "reason" in error) report.reason = error.reason;
   emit();
   process.exitCode = 1;
 } finally {
