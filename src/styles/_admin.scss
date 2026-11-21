@@ -236,7 +236,7 @@
   margin: 0;
   min-width: 0;
 }
-.admin-photo-grid button {
+.admin-photo-grid figure > button {
   width: 100%;
   padding: 0;
   background: var(--color-surface);
@@ -245,7 +245,7 @@
   overflow: hidden;
   aspect-ratio: 4/3;
 }
-.admin-photo-grid img {
+.admin-photo-grid figure > button img {
   width: 100%;
   height: 100%;
   object-fit: cover;
