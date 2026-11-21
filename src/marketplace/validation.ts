@@ -1,8 +1,8 @@
 import { categories } from '../config/categories';
 import type { PublicFilters } from './types';
+export {validId,imagePath} from '../lib/mediaPath';
 
 export const validSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 160;
-export const validId = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 export const pageNumber = (value: string | number | null) => Math.min(1000, Math.max(1, Math.floor(Number(value) || 1)));
 export function readFilters(params: URLSearchParams): PublicFilters {
   const category = params.get('categoria') ?? '';
@@ -34,8 +34,4 @@ export function instagramLink(value: string | null) {
   } else username = username.replace(/^@/, '');
   if (!/^[A-Za-z0-9_](?:[A-Za-z0-9._]{0,28}[A-Za-z0-9_])?$/.test(username) || username.includes('..')) return null;
   return `https://www.instagram.com/${username}/`;
-}
-export function imagePath(id: string, path: string) {
-  return validId(id) && path.startsWith(`${id}/portfolio/`) && /^[0-9a-f-]{36}\.(?:webp|png|jpe?g)$/i.test(path.slice(`${id}/portfolio/`.length))
-    && validId(path.slice(`${id}/portfolio/`.length).replace(/\.[^.]+$/, ''));
 }

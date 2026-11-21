@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database, Json } from "../src/lib/database.types.ts";
 import { checkAsaasSandbox } from "./asaas.ts";
-import { imagePath, validId } from "../src/marketplace/validation.ts";
+import { imagePath, validId } from "../src/lib/mediaPath.ts";
 type Env = Record<string, string | undefined>;
 export const adminClient = (env: Env, authorization: string) =>
   createClient<Database>(

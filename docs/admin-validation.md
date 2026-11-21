@@ -55,13 +55,15 @@ Estados: conectado/validado, variável ausente, credencial inválida ou sem perm
 | Camada | Verificação | Resultado e limite |
 |---|---|---|
 | Código | Typecheck, build e histórico de migrações | Aprovados; API e código servidor também incluídos no typecheck |
-| Vitest | 186 testes | Incluem servidor, sanitização, bloqueios, filtros, paginação, decisões/erros, clique repetido, seleção da conta e regressões anteriores; fixtures/HTTP interceptado |
+| Vitest | 187 testes | Incluem inicialização real da API em Node ESM, servidor, sanitização, bloqueios, filtros, paginação, decisões/erros, clique repetido e regressões anteriores; fixtures/HTTP interceptado |
 | PostgreSQL 17 nativo temporário | 191 verificações SQL/RLS | Incluem usuário anônimo/comum/proprietário/admin, concessão por UUID, auditoria, aprovação, moderação, suspensão e preservação de arquivos. Storage e Auth são schemas mínimos simulados, não os serviços operacionais |
 | Visual | 48 cenários em 375, 390, 768 e 1280 px | Sem overflow da página, imagens carregadas quebradas ou modal fora da viewport; tabelas têm rolagem interna. Mais três capturas de resultados simulados |
 | Supabase operacional | Somente leitura | Projeto saudável; quatro migrações, nove tabelas originais, três negócios, uma foto e um objeto; nenhuma escrita |
 | Navegador local | Aprovação, suspensão e diagnóstico | Repositórios em memória e imagens sintéticas; não equivalem a decisões ou autenticação administrativa operacional |
 
 O ensaio encontrou overflow em texto de acessibilidade de uma ação dentro da tabela móvel. A área rolável recebeu contexto de posicionamento; a repetição das capturas afetadas confirmou a correção, sem ocultar o overflow global da página.
+
+A chamada ao primeiro Preview identificou ERR_MODULE_NOT_FOUND na inicialização da API, causado pela importação transitiva de configuração do frontend. A validação de UUID/caminho foi extraída para um módulo puro compartilhado. Um teste que importa a API em processo Node ESM real cobre essa regressão; o endpoint do Preview final deve responder JSON 405 para GET e negar POST anônimo.
 
 Capturas locais sintéticas: [visão geral](screenshots/admin/dashboard-390.png), [desktop](screenshots/admin/dashboard-1280.png), [usuários](screenshots/admin/users-390.png), [prestadores](screenshots/admin/businesses-390.png), [análise](screenshots/admin/review-390.png), [confirmação](screenshots/admin/decision-390.png), [histórico](screenshots/admin/history-390.png), [publicações pendentes](screenshots/admin/pending-390.png), [acesso negado](screenshots/admin/blocked-390.png). [Métricas](screenshots/admin/metrics.json). Fixtures e harness visual não integram o bundle final.
 
