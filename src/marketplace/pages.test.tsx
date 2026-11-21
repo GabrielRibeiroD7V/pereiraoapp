@@ -63,6 +63,16 @@ describe('navegação do marketplace sem login', () => {
     expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
     expect(within(screen.getByRole('navigation')).getByRole('link', { name: 'Buscar' })).toHaveAttribute('aria-current', 'page');
   });
+  it('perfil destaca principal e mostra adicionais sem mudar abas ou contatos', async () => {
+    const repository = marketplaceFixture();
+    repository.getProvider = async () => ({ ...p, categoryId: 'construcao', specialty: 'Construção', additionalSpecialties: [{ id: 'pintura', name: 'Pintura' }, { id: 'eletrica', name: 'Elétrica' }] });
+    open('/prestadores/prestador-simulado', repository);
+    const badges = await screen.findByRole('list', { name: 'Especialidades selecionadas' });
+    expect(badges).toHaveTextContent('ConstruçãoPrincipalPinturaElétrica');
+    expect(screen.getByRole('tab', { name: 'Serviços' })).toBeVisible();
+    expect(screen.getByRole('link', { name: /WhatsApp de Prestador/ })).toBeVisible();
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
+  });
   it('renova a assinatura ao ampliar e fecha a galeria pelo evento cancel do diálogo', async () => {
     const repository = marketplaceFixture(), sign = vi.spyOn(repository, 'getImageUrl');
     open('/prestadores/prestador-simulado', repository);

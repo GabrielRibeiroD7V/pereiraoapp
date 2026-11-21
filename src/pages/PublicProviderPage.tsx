@@ -14,6 +14,7 @@ import { PageHeader } from '../components/PageHeader';
 import { formatPrice } from '../work/validation';
 import type { PublicPage, PublicPhoto, PublicProvider, PublicService } from '../marketplace/types';
 import type { City } from '../types/domain';
+import { SpecialtyBadges } from '../specialties/SpecialtyBadges';
 import {PublishedWorks} from '../posts/PublishedWorks';
 
 function PagedSection<T>({ title, load, render, empty }: { title: string; load: (page: number, signal: AbortSignal) => Promise<PublicPage<T>>; render: (items: T[]) => ReactNode; empty: string }) {
@@ -29,7 +30,8 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
   const areas = useCallback((page: number, signal: AbortSignal) => repository.getAreas(provider.id, page, signal), [repository, provider.id]);
   return <>
-    <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.specialty} · {provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
+    <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
+    <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
     <ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} />
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>

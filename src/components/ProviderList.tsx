@@ -32,6 +32,7 @@ export function ProviderList({ providers, carousel = false }: { providers: reado
               <strong>{provider.name}</strong>
               <span>{provider.specialty} · {provider.type === 'empresa' ? 'Empresa' : 'Autônomo'}</span>
               <span className="provider-item__location"><MapPin size={14} aria-hidden="true" />{provider.city.name}, {provider.city.state}</span>
+              {!!provider.additionalSpecialties?.length && <span aria-label="Especialidades adicionais">{provider.additionalSpecialties.map(item => item.name).join(" · ")}</span>}
               {provider.description && <span className="public-description-preview">{provider.description}</span>}
             </span>
           </Link>

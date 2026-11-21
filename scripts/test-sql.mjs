@@ -1,3 +1,4 @@
+import { testSpecialtyConcurrency } from './test-specialty-concurrency.mjs';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -25,7 +26,10 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
+    const specialties = file === '20261121193603_business_specialties.sql';
+    if (specialties) run(executable('psql'), [...args, '-f', resolve('supabase/tests/specialties_migration_before.sql')], true);
     run(executable('psql'), [...args, '-f', resolve('supabase/migrations', file)], true);
+    if (specialties) run(executable('psql'), [...args, '-f', resolve('supabase/tests/specialties_migration_after.sql')]);
   }
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/rls.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/storage.sql')]);
@@ -36,6 +40,8 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/sandbox_billing.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/admin_bootstrap.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/regional_cities.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/business_specialties.sql')]);
+  await testSpecialtyConcurrency(executable('psql'), args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

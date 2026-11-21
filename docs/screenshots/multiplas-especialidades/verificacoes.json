@@ -1,0 +1,29 @@
+{
+  "layout": "PASS",
+  "widths": [
+    320,
+    375,
+    390,
+    393,
+    430,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "scenes": [
+    "cadastro",
+    "perfil",
+    "busca"
+  ],
+  "headerDeviationPx": 0,
+  "maxSelectionAt320": 6,
+  "physicalDevice": false,
+  "remoteDataUnchanged": true,
+  "remoteMigrations": 11,
+  "proposedMigration": "20261121193603_business_specialties.sql",
+  "migrationSHA256": "cc883caf4ce8064a3e3752e2d77bf8f827de84524a09ae767a206fe4a3bb346a",
+  "automatedTests": 422,
+  "sqlRlsChecks": 385,
+  "sqlConcurrencySessions": 2
+}

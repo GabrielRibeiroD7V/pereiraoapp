@@ -1,3 +1,4 @@
+import { missingSpecialties } from '../lib/specialtiesSchema';
 import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
@@ -7,14 +8,16 @@ import { imagePath, pageNumber, searchTerm, validId, validSlug } from './validat
 
 export const SEARCH_SIZE = 20;
 export const DETAIL_SIZE = 12;
-export const PUBLIC_COLUMNS = 'id,slug,name,type,description,city_id,category_id,whatsapp,instagram,avatar_path,city:cities!businesses_city_id_fkey(id,name,state_code),category:categories!businesses_category_id_fkey(id,name)';
+export const LEGACY_PUBLIC_COLUMNS = 'id,slug,name,type,description,city_id,category_id,whatsapp,instagram,avatar_path,city:cities!businesses_city_id_fkey(id,name,state_code),category:categories!businesses_category_id_fkey(id,name)';
+export const PUBLIC_COLUMNS = LEGACY_PUBLIC_COLUMNS + ',additional_categories:business_categories!business_categories_business_id_fkey(category:categories!business_categories_category_id_fkey(id,name))';
 interface RawCity { id: string; name: string; state_code: string }
-interface RawProvider { id: string; slug: string; name: string; type: 'autonomo' | 'empresa'; description: string | null; category_id: string | null;
+interface RawProvider { additional_categories?: { category: { id: string; name: string } | null }[]; id: string; slug: string; name: string; type: 'autonomo' | 'empresa'; description: string | null; category_id: string | null;
   whatsapp: string | null; instagram: string | null; avatar_path: string | null; city: RawCity | null; category: { id: string; name: string } | null }
 const city = (row: RawCity): City => ({ id: row.id, name: row.name, state: row.state_code });
 function provider(row: RawProvider): PublicProvider {
   return { id: row.id, slug: row.slug, name: row.name, type: row.type, description: row.description,
     categoryId: row.category_id, specialty: row.category?.name ?? 'Serviços locais',
+    additionalSpecialties: (row.additional_categories ?? []).flatMap(item => item.category && item.category.id !== row.category_id ? [item.category] : []).sort((a,b) => a.name.localeCompare(b.name,'pt-BR')),
     city: row.city ? city(row.city) : { id: '', name: 'Localização não informada', state: '' },
     avatarPath: row.avatar_path, whatsapp: row.whatsapp, instagram: row.instagram };
 }
@@ -23,12 +26,22 @@ function empty<T>(value: number): PublicPage<T> { return { items: [], page: page
 
 // Recebe um cliente SEM sessão, separado do cliente de gerenciamento da conta.
 export function createPublicMarketplace(client: SupabaseClient<Database>): PublicMarketplace {
+  let searchReady = true, relationReady = true;
   return {
     async search(filters, value, signal) {
       const current = pageNumber(value), term = searchTerm(filters.query);
       if (filters.query && !term) return empty(current);
+      if (searchReady) {
+        const result = await client.rpc('search_public_businesses', {
+          p_query: term, p_category: filters.categoryId, p_city: filters.cityId,
+          p_type: filters.type, p_page: current,
+        }, { get: true }).abortSignal(signal ?? new AbortController().signal).overrideTypes<RawProvider[], { merge: false }>();
+        if (!result.error) return page((result.data ?? []).map(provider), current, SEARCH_SIZE);
+        if (!missingSpecialties(result.error, 'search_public_businesses')) throw result.error;
+        searchReady = false; // Só a disponibilidade do recurso; nenhum dado ou sessão é cacheado.
+      }
       const aliases = `${term ? ',service_matches:services!services_business_id_fkey(),category_matches:categories!businesses_category_id_fkey()' : ''}${filters.cityId ? ',area_matches:business_service_areas!business_service_areas_business_id_fkey()' : ''}`;
-      let request = client.from('businesses').select(PUBLIC_COLUMNS + aliases).eq('status', 'published');
+      let request = client.from('businesses').select(LEGACY_PUBLIC_COLUMNS + aliases).eq('status', 'published');
       if (filters.categoryId) request = request.eq('category_id', filters.categoryId);
       if (filters.type) request = request.eq('type', filters.type);
       if (filters.cityId) request = request.eq('area_matches.city_id', filters.cityId).not('area_matches', 'is', null);
@@ -46,8 +59,13 @@ export function createPublicMarketplace(client: SupabaseClient<Database>): Publi
     },
     async getProvider(slug, signal) {
       if (!validSlug(slug)) return null;
-      const result = await client.from('businesses').select(PUBLIC_COLUMNS).eq('status', 'published').eq('slug', slug)
+      const read = (columns: string) => client.from('businesses').select(columns).eq('status', 'published').eq('slug', slug)
         .abortSignal(signal ?? new AbortController().signal).maybeSingle().overrideTypes<RawProvider | null, { merge: false }>();
+      let result = await read(relationReady ? PUBLIC_COLUMNS : LEGACY_PUBLIC_COLUMNS);
+      if (result.error && relationReady && missingSpecialties(result.error)) {
+        relationReady = false;
+        result = await read(LEGACY_PUBLIC_COLUMNS);
+      }
       if (result.error) throw result.error;
       return result.data ? provider(result.data) : null;
     },

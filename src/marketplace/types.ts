@@ -4,7 +4,7 @@ import type { ServiceRow } from '../lib/database.types';
 // Projeções públicas: sem proprietário, memberships, dados legais ou perfil pessoal.
 export interface PublicProvider {
   id: string; slug: string; name: string; type: ProviderType; description: string | null;
-  categoryId: string | null; specialty: string; city: City; avatarPath: string | null;
+  categoryId: string | null; specialty: string; additionalSpecialties?: { id: string; name: string }[]; city: City; avatarPath: string | null;
   whatsapp: string | null; instagram: string | null;
 }
 export type PublicService = Pick<ServiceRow, 'id' | 'name' | 'description' | 'pricing_type' | 'price_amount_cents'>;
