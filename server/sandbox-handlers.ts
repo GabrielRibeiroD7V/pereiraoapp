@@ -9,7 +9,7 @@ import {
 import type { SandboxEnv } from "./sandbox-store.ts";
 import { SandboxService, overviewView } from "./sandbox-service.ts";
 import type { SandboxOverview } from "./sandbox-service.ts";
-import { billingNotice } from "./billing-contracts.ts";
+import { billingNotice, isSupportedBillingEvent } from "./billing-contracts.ts";
 import { validId } from "../src/lib/mediaPath.ts";
 function reply(status: number, value: unknown) {
   return Response.json(value, {
@@ -124,7 +124,7 @@ export function createSandboxBillingHandler(
       };
       if (
         typeof action !== "string" ||
-        !allowed[action] ||
+        !Object.hasOwn(allowed, action) ||
         Object.keys(input).some((key) => !allowed[action]!.includes(key))
       )
         throw new BillingError("INVALID_INPUT");
@@ -248,7 +248,11 @@ export function createSandboxWebhookHandler(
     try {
       const input = await body(request, 65536),
         notice = billingNotice(input);
-      if (!notice) return reply(200, { ignored: true });
+      if (!notice) {
+        if (isSupportedBillingEvent(input.event))
+          throw new BillingError("INVALID_INPUT");
+        return reply(200, { ignored: true });
+      }
       const service = serviceFactory(env);
       await service.store.call("enqueue", notice);
       // Acknowledge somente após persistência. Falhas de processamento permanecem na inbox.

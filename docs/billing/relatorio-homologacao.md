@@ -1,5 +1,7 @@
 # PEREIRÃO — Asaas Sandbox / PR #17
 
+> Atualização de 21/11: consulte [a conclusão técnica atual](continuacao-pr17.md) e [o roteiro de ativação segura](ativacao-segura-pr17.md). Os ensaios anteriores abaixo são históricos; não equivalem a homologação integral.
+
 PR: https://github.com/GabrielRibeiroD7V/pereiraoapp/pull/17  
 Branch: `feat/asaas-sandbox`  
 Base: `2eba4951b95e58865c19113602d129dc8592ce28`  

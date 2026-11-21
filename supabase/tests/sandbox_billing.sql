@@ -72,12 +72,22 @@ select test.sandbox('claim_event','{"eventId":"evt_local_001"}')->>'leaseToken' 
 select test.assert_true(test.sandbox('claim_event','{"eventId":"evt_local_001"}') is null,'sandbox: processamento exclusivo');
 select test.assert_true(not (test.sandbox('event_done',jsonb_build_object('eventId','evt_local_001','leaseToken',gen_random_uuid(),'outcome','processed'))->>'ok')::boolean,'sandbox: worker antigo não confirma evento');
 select test.sandbox('event_done',jsonb_build_object('eventId','evt_local_001','leaseToken',:'evtlease','outcome','reconcile_required'));
+select test.sandbox('claim_event','{"eventId":"evt_local_001"}')->>'leaseToken' as expired_event_lease \gset
+reset role;
+update private.billing_event_inbox set lease_until=clock_timestamp()-interval '1 second' where event_id='evt_local_001';
+set local role authenticated;
+select test.assert_true(not (test.sandbox('event_done',jsonb_build_object('eventId','evt_local_001','leaseToken',:'expired_event_lease','outcome','processed'))->>'ok')::boolean,'sandbox: lease expirado não conclui evento');
 select test.assert_true(jsonb_array_length(test.sandbox('retry_events','{"userId":"00000000-0000-4000-8000-000000009001"}')->'eventIds')=1,'sandbox: falha fica disponível para recuperação');
 reset role;
 select test.assert_true((select count(*)=0 from public.business_subscriptions),'sandbox: não inicia gratuidade ou direitos reais');
 select test.assert_true((select status='draft' from public.businesses where id=:'biz'),'sandbox: não publica negócio');
 select test.assert_true((select count(*)>=5 from private.sandbox_financial_audit),'sandbox: mudanças auditadas');
+select test.assert_true(exists(select 1 from private.sandbox_financial_audit where action='payment_reconciled' and before_snapshot->>'refundedCents'='0' and after_snapshot->>'refundedCents'='1999'),'sandbox: auditoria preserva valores anteriores e posteriores do estorno');
+update private.sandbox_contracts set reconcile_until=clock_timestamp()-interval '1 second' where request_id='00000000-0000-4000-8000-000000009900';
+select test.expect_error(format('select test.sandbox(''save_provider'',jsonb_build_object(''requestId'',''00000000-0000-4000-8000-000000009900'',''leaseToken'',%L,''invoiceUrl'',''https://sandbox.asaas.com/i/stale''))',:'lease'),'23514','sandbox: worker expirado não modifica metadados');
+select test.expect_error(format('select test.sandbox(''uncertain'',jsonb_build_object(''requestId'',''00000000-0000-4000-8000-000000009900'',''leaseToken'',%L))',:'lease'),'23514','sandbox: worker expirado não sobrescreve estado atual');
 select test.assert_true((select bool_and(relrowsecurity) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname like 'sandbox_%' and c.relkind='r'),'sandbox: todas tabelas RLS');
+select test.assert_true((select bool_and(not has_table_privilege('authenticated',c.oid,'SELECT,INSERT,UPDATE,DELETE') and not has_table_privilege('anon',c.oid,'SELECT,INSERT,UPDATE,DELETE')) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname like 'sandbox_%' and c.relkind='r'),'sandbox: nenhum acesso direto às sete tabelas privadas');
 set local role anon;
 select test.expect_error('select * from private.sandbox_payments','42501','sandbox: dados financeiros não públicos');
 select test.expect_error($q$select public.sandbox_billing_server('context','{}',extract(epoch from now())::bigint,gen_random_uuid(),repeat('0',64))$q$,'42501','sandbox: wrapper público não contorna prova');
@@ -86,4 +96,9 @@ reset role;
 insert into public.business_subscriptions(business_id,trial_started_at,trial_original_ends_at,trial_ends_at)
  values(:'biz',now(),now()+interval '2160 hours',now()+interval '2160 hours');
 select test.assert_true((test.sandbox('reserve',:'consent'::jsonb||jsonb_build_object('requestId',gen_random_uuid()))->'contract'->>'first_due_date')::date>(select (trial_ends_at at time zone 'America/Sao_Paulo')::date from public.business_subscriptions where business_id=:'biz'),'sandbox: primeiro vencimento após o fim integral dos 90 dias');
+select request_id as next_request from private.sandbox_contracts where not provider_cancelled \gset
+select test.sandbox('save_provider',jsonb_build_object('requestId',:'next_request','subscriptionId','sub_second'));
+select test.expect_error(format('select test.sandbox(''find_contract'',jsonb_build_object(''subscriptionId'',''sub_local'',''externalReference'',%L))',:'next_request'),'23514','sandbox: identificadores que apontam a contratos diferentes são recusados');
+select test.sandbox('claim_contract',jsonb_build_object('requestId',:'next_request'))->>'leaseToken' as next_lease \gset
+select test.expect_error(format('select test.sandbox(''apply_payment'',%L::jsonb||jsonb_build_object(''requestId'',%L,''subscriptionId'',''sub_second'',''leaseToken'',%L))',:'payment',:'next_request',:'next_lease'),'23514','sandbox: pagamento permanece vinculado ao contrato original');
 rollback;

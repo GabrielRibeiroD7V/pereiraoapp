@@ -1,6 +1,7 @@
 // Operação EXPLÍCITA de homologação; não participa do build normal nem toca no Supabase.
 // Executar no build de um Preview desta branch, onde o segredo já existe no servidor.
 import { SandboxProvider, cents } from "../server/sandbox-provider.ts";
+import { sandboxReadOnlyPreflight } from "./preflight-asaas-readonly.mjs";
 const run = process.argv[2];
 if (
   process.env.VERCEL_ENV !== "preview" ||
@@ -58,6 +59,22 @@ try {
     };
     emit();
     process.exit(0);
+  }
+  if (!run.startsWith("pr17-card-")) {
+    if (process.env.ASAAS_SANDBOX_PIX_TEST_AUTHORIZED !== "true")
+      throw Error("PIX_TEST_AUTHORIZATION_REQUIRED");
+    const preflight = await sandboxReadOnlyPreflight(key);
+    if (
+      preflight.accountHttp !== 200 ||
+      preflight.pixHttp !== 200 ||
+      !preflight.account ||
+      !["commercialInfo", "bankAccountInfo", "documentation", "general"].every(
+        (field) => preflight.account[field] === "APPROVED",
+      ) ||
+      !(preflight.pixKeys?.ACTIVE > 0) ||
+      preflight.pixHasMore
+    )
+      throw Error("PIX_CONFIGURATION_NOT_READY");
   }
   const existing = await provider.findCustomers(reference);
   if (existing.length) throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");

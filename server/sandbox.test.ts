@@ -458,6 +458,57 @@ describe("conciliação e operações idempotentes", () => {
   });
 });
 describe("rotas: sessão normal, webhook e modo Preview", () => {
+  it("nega webhook em Production mesmo com flags e token de Sandbox", async () => {
+    const factory = vi.fn(),
+      defer = vi.fn();
+    const r = await createSandboxWebhookHandler(
+      { ...env, VERCEL_ENV: "production" },
+      defer,
+      factory,
+    )(
+      req(
+        {
+          id: "evt_real_denied",
+          event: "PAYMENT_RECEIVED",
+          payment: { id: "pay_local" },
+        },
+        { "asaas-access-token": env.ASAAS_SANDBOX_WEBHOOK_TOKEN },
+      ),
+    );
+    expect(r.status).toBe(403);
+    expect(factory).not.toHaveBeenCalled();
+    expect(defer).not.toHaveBeenCalled();
+  });
+  it.each(["__proto__", "constructor", "toString"])(
+    "rejeita ação herdada %s como entrada inválida",
+    async (action) => {
+      const factory = vi.fn();
+      const r = await createSandboxBillingHandler(
+        env,
+        auth,
+        factory,
+      )(req({ action }));
+      expect(r.status).toBe(400);
+      expect(factory).not.toHaveBeenCalled();
+    },
+  );
+  it("não confirma evento financeiro conhecido com identificador inválido", async () => {
+    const factory = vi.fn(),
+      defer = vi.fn();
+    const r = await createSandboxWebhookHandler(
+      env,
+      defer,
+      factory,
+    )(
+      req(
+        { id: "evt_bad", event: "PAYMENT_RECEIVED", payment: { id: "bad/id" } },
+        { "asaas-access-token": env.ASAAS_SANDBOX_WEBHOOK_TOKEN },
+      ),
+    );
+    expect(r.status).toBe(400);
+    expect(factory).not.toHaveBeenCalled();
+    expect(defer).not.toHaveBeenCalled();
+  });
   it("mantém Pix bloqueado até homologar a modalidade real", async () => {
     const factory = vi.fn();
     const h = createSandboxBillingHandler(

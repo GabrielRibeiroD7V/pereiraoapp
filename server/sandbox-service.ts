@@ -288,6 +288,7 @@ export class SandboxService {
           throw new BillingError("RECONCILIATION_REQUIRED");
         c = await this.store.call<SandboxContract>("customer_saved", {
           requestId,
+          leaseToken,
           customerId: found[0]!.id,
         });
       }
@@ -297,7 +298,11 @@ export class SandboxService {
           s = await this.provider.getSubscription(c.subscription_id);
         } catch (e) {
           if (e instanceof ProviderError && e.code === "NOT_FOUND") {
-            await this.store.call("cancelled", { requestId, userId });
+            await this.store.call("cancelled", {
+              requestId,
+              userId,
+              leaseToken,
+            });
           } else {
             throw e;
           }
@@ -318,10 +323,11 @@ export class SandboxService {
         validateSubscription(s, c);
         c = await this.store.call<SandboxContract>("save_provider", {
           requestId,
+          leaseToken,
           subscriptionId: s.id,
         });
         if (s.deleted || s.status === "INACTIVE") {
-          await this.store.call("cancelled", { requestId, userId });
+          await this.store.call("cancelled", { requestId, userId, leaseToken });
         } else if (s.status !== "ACTIVE")
           throw new BillingError("RECONCILIATION_REQUIRED");
       }
@@ -355,11 +361,12 @@ export class SandboxService {
       if (latest)
         await this.store.call("save_provider", {
           requestId,
+          leaseToken,
           invoiceUrl: sandboxLink(latest.invoiceUrl),
         });
     } catch (e) {
       await this.store
-        .call("uncertain", { requestId: context.request_id })
+        .call("uncertain", { requestId: context.request_id, leaseToken })
         .catch(() => {});
       throw e;
     } finally {

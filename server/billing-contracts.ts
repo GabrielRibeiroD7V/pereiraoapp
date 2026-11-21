@@ -1,4 +1,4 @@
-// Contratos para integração futura. Não é um webhook/endpoint nem altera direitos de uso.
+// Projeção mínima para conciliação. Não persiste payload bruto nem concede direitos de uso.
 export interface BillingWebhookNotice {
   provider: "asaas";
   environment: "sandbox";
@@ -19,37 +19,40 @@ export interface ReconciliationDecision {
 }
 const identifier = (v: unknown): v is string =>
   typeof v === "string" && /^[A-Za-z0-9_&-]{3,200}$/.test(v);
+const supportedBillingEvents = [
+  "PAYMENT_CREATED",
+  "PAYMENT_CONFIRMED",
+  "PAYMENT_RECEIVED",
+  "PAYMENT_OVERDUE",
+  "PAYMENT_REFUNDED",
+  "PAYMENT_DELETED",
+  "PAYMENT_UPDATED",
+  "PAYMENT_RESTORED",
+  "PAYMENT_PARTIALLY_REFUNDED",
+  "PAYMENT_REFUND_IN_PROGRESS",
+  "PAYMENT_CREDIT_CARD_CAPTURE_REFUSED",
+  "PAYMENT_AWAITING_RISK_ANALYSIS",
+  "PAYMENT_REPROVED_BY_RISK_ANALYSIS",
+  "PAYMENT_CHARGEBACK_REQUESTED",
+  "PAYMENT_CHARGEBACK_DISPUTE",
+  "PAYMENT_AWAITING_CHARGEBACK_REVERSAL",
+  "SUBSCRIPTION_CREATED",
+  "SUBSCRIPTION_UPDATED",
+  "SUBSCRIPTION_DELETED",
+  "CHECKOUT_CREATED",
+  "CHECKOUT_PAID",
+  "CHECKOUT_CANCELED",
+  "CHECKOUT_EXPIRED",
+];
+export const isSupportedBillingEvent = (value: unknown): value is string =>
+  typeof value === "string" && supportedBillingEvents.includes(value);
 export function billingNotice(value: unknown): BillingWebhookNotice | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
   if (
     !identifier(v.id) ||
     typeof v.event !== "string" ||
-    ![
-      "PAYMENT_CREATED",
-      "PAYMENT_CONFIRMED",
-      "PAYMENT_RECEIVED",
-      "PAYMENT_OVERDUE",
-      "PAYMENT_REFUNDED",
-      "PAYMENT_DELETED",
-      "PAYMENT_UPDATED",
-      "PAYMENT_RESTORED",
-      "PAYMENT_PARTIALLY_REFUNDED",
-      "PAYMENT_REFUND_IN_PROGRESS",
-      "PAYMENT_CREDIT_CARD_CAPTURE_REFUSED",
-      "PAYMENT_AWAITING_RISK_ANALYSIS",
-      "PAYMENT_REPROVED_BY_RISK_ANALYSIS",
-      "PAYMENT_CHARGEBACK_REQUESTED",
-      "PAYMENT_CHARGEBACK_DISPUTE",
-      "PAYMENT_AWAITING_CHARGEBACK_REVERSAL",
-      "SUBSCRIPTION_CREATED",
-      "SUBSCRIPTION_UPDATED",
-      "SUBSCRIPTION_DELETED",
-      "CHECKOUT_CREATED",
-      "CHECKOUT_PAID",
-      "CHECKOUT_CANCELED",
-      "CHECKOUT_EXPIRED",
-    ].includes(v.event)
+    !isSupportedBillingEvent(v.event)
   )
     return null;
   const object = v.event.startsWith("PAYMENT_")

@@ -1,5 +1,7 @@
 # Assinaturas Asaas Sandbox
 
+> Atualização de 21/11: consulte [a conclusão técnica atual](continuacao-pr17.md) e [o roteiro de ativação segura](ativacao-segura-pr17.md). Os ensaios anteriores abaixo são históricos; não equivalem a homologação integral.
+
 Esta implementação não habilita monetização real. R$ 19,99/mês é uma referência de homologação, sem oferta comercial aprovada. O contrato exige ação e consentimento explícitos do responsável por cada negócio.
 
 ## Limite de ambiente
@@ -50,7 +52,7 @@ O painel mostra indicadores agregados Sandbox separados de gratuidade real; list
 
 O typecheck e o build principais verificam estritamente **src, server e api**, além da CI. `api/tsconfig.json` separa a transpilaçao das Functions, que ocorre após a poda de dependências de desenvolvimento na Vercel, sem exigir tipos do frontend/testes nesse segundo empacotamento. Ele não desativa a checagem obrigatória principal; há teste de regressão para essa garantia. A logo oficial é incluída explicitamente no pacote da Function de checkout.
 
-`scripts/smoke-asaas-sandbox.mjs pr17-<identificador-unico>` é opt-in: exige Preview e branch `feat/asaas-sandbox`, usa a chave somente no processo servidor e cria exclusivamente cliente financeiro sintético, assinatura Pix e checkout de cartão. Nunca executá-lo no build padrão. Registra IDs antes de cancelar/estornar; repetição do mesmo identificador para antes de outro POST. Não acessa Supabase. Confirmação Pix usa a ação oficial `/sandbox/payment/{id}/confirm`. Pagamento com cartão deve ser concluído somente no checkout hospedado com dados oficiais de homologação. Resultados reais ficam no relatório do PR, sem tratá-los como teste remoto da persistência ainda não autorizada.
+`scripts/smoke-asaas-sandbox.mjs pr17-<identificador-unico>` é opt-in: exige Preview e branch `feat/asaas-sandbox`, usa a chave somente no processo servidor e cria exclusivamente cliente financeiro sintético, assinatura Pix e checkout de cartão. Nunca executá-lo no build padrão. Novas tentativas Pix exigem autorização específica adicional e preflight real de aptidão, conforme o roteiro de ativação; o opt-in de teste não foi provisionado. Registra IDs antes de cancelar/estornar; repetição do mesmo identificador para antes de outro POST. Não acessa Supabase. Confirmação Pix usa a ação oficial `/sandbox/payment/{id}/confirm`. Pagamento com cartão deve ser concluído somente no checkout hospedado com dados oficiais de homologação. Resultados reais ficam no relatório do PR, sem tratá-los como teste remoto da persistência ainda não autorizada.
 
 O prefixo `pr17-card-` executa somente a preparação do cartão. O ensaio desta tarefa usou temporariamente um opt-in restrito a Preview no build; esse acionamento foi removido, e a variável temporária foi esvaziada. Builds normais voltaram a executar exclusivamente o diagnóstico GET. Uma resposta desconhecida não autoriza repetir a criação: o backend preserva o ID de checkout conhecido, e a recuperação deve ser conciliada antes de outro POST.
 
