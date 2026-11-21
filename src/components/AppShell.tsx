@@ -8,7 +8,7 @@ import { MainNavigation } from './MainNavigation';
 import { InstallInvitation, VersionDiagnostics } from '../pwa/PwaProvider';
 
 export function AppShell() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const previousPath = useRef(pathname);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function AppShell() {
       </header>
       <main id="main-content" className="page-container" tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
-      <VersionDiagnostics />
+      {new URLSearchParams(search).get('pwa-diagnostico') === '1' && <VersionDiagnostics />}
     </>
   );
 }

@@ -169,10 +169,10 @@ export function InstallInvitation() {
 }
 export function PwaGate({ children }: { children: ReactNode }) {
   const { controller, state } = usePwa(),
-    { pathname } = useLocation();
+    { pathname, search } = useLocation();
   const newerBuild = Boolean(state.publishedVersion && state.runningVersion !== state.publishedVersion);
   const sensitive = isSensitivePath(pathname),
-    stale = state.updateReady || state.refreshRequired,
+    showNotice = !state.online || state.sessionRefreshRequired || state.updateError,
     guard = sensitive && (!state.online || state.sessionRefreshRequired);
   const content = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -215,7 +215,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
   );
   return (
     <>
-      {!guard && (!state.online || stale) && (
+      {!guard && showNotice && (
         <aside className="pwa-notice" aria-label="Estado do aplicativo">
           <div>
             {!state.online ? (
@@ -234,14 +234,13 @@ export function PwaGate({ children }: { children: ReactNode }) {
                     ? "Outra aba privada ainda não confirmou a atualização. Salve o trabalho nela e volte ao Início para concluir."
                     : state.updateReady || newerBuild
                     ? "Nova versão disponível."
-                    : "Conexão restabelecida ou versão atualizada."}{" "}
-                  Salve suas alterações antes de atualizar. Sua sessão será preservada.
+                    : "Conexão restabelecida. Recarregue para validar sua sessão."}{" "}
+                  {state.updateDeferred && 'Salve suas alterações antes de atualizar. Sua sessão será preservada.'}
                 </span>
               </>
             )}
           </div>
           {state.online && updateButton}
-          {state.runningVersion && <small>Versão {state.runningVersion.slice(0, 8)}{state.publishedVersion && state.publishedVersion !== state.runningVersion ? ` → ${state.publishedVersion.slice(0, 8)}` : ''}</small>}
           {state.updateError && (
             <p role="alert">Não foi possível atualizar. Tente novamente.</p>
           )}
@@ -279,7 +278,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
           {state.updateError && (
             <p role="alert">Não foi possível atualizar. Tente novamente.</p>
           )}
-          <VersionDiagnostics />
+          {new URLSearchParams(search).get('pwa-diagnostico') === '1' && <VersionDiagnostics />}
         </main>
       )}
       <div
