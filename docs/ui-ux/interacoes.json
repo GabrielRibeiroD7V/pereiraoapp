@@ -1,0 +1,75 @@
+{
+  "environment": "Navegador local emulado, fixtures sintéticas, sem acesso ao Supabase operacional",
+  "checks": [
+    {
+      "name": "Cadastro empresa etapas 1/2/3 e revisão",
+      "result": "aprovado, sem salvar remotamente"
+    },
+    {
+      "name": "Serviço criar/editar e retorno de foco após Escape",
+      "result": "aprovado com repositório em memória"
+    },
+    {
+      "name": "Fotografia sem arquivo",
+      "result": "erro acessível: Selecione uma fotografia antes de enviar."
+    },
+    {
+      "name": "Busca com falha controlada e tentar novamente",
+      "result": "aprovado com falha simulada"
+    },
+    {
+      "name": "Abas Trabalhos/Serviços/Sobre",
+      "result": "setas e End selecionaram painéis corretos"
+    },
+    {
+      "name": "Tabela administrativa móvel",
+      "result": "rolagem interna por teclado, largura da página preservada"
+    },
+    {
+      "name": "PWA iPhone",
+      "result": "agendamento e instruções em emulação; convite não imediato, dispensa funcional, sem instalação física"
+    },
+    {
+      "name": "PWA convite em 390 px",
+      "result": "altura 107 px; limite inferior 768, navegação começa em 779; oculta ao focar ação no main"
+    },
+    {
+      "name": "Modal paisagem 812x375",
+      "result": "512x343; margens verticais 16; conteúdo interno com rolagem"
+    }
+  ],
+  "additionalAxeChecks": [
+    {
+      "name": "Etapa 3 de empresa",
+      "violations": 0,
+      "incomplete": [
+        "aria-prohibited-attr"
+      ]
+    },
+    {
+      "name": "Modal fotografia",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "name": "Modal publicação",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "name": "Modal revisão administrativa",
+      "violations": 0,
+      "incomplete": []
+    },
+    {
+      "name": "Instruções iPhone",
+      "violations": 0,
+      "incomplete": []
+    }
+  ],
+  "notTested": [
+    "Dispositivos Android/iPhone físicos",
+    "Teclado virtual real",
+    "Novas operações remotas de Auth, Storage ou financeiras"
+  ]
+}

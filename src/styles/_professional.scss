@@ -11,23 +11,23 @@
     h2 { font-size: 1.25rem; overflow-wrap: anywhere; }
     p { color: var(--color-secondary); font-size: .875rem; margin-top: .25rem; }
   }
-  .professional-entry { display: flex; align-items: center; gap: .875rem; padding: 1rem; border-radius: 1rem; background: linear-gradient(110deg, #fff4c5, #fff9e8); margin-bottom: 1rem; border: 1px solid #f5e8b6;
+  .professional-entry { display: flex; align-items: center; gap: .875rem; padding: 1rem; border-radius: 1rem; background: var(--color-brand-soft); margin-bottom: 1rem; border: var(--border-subtle);
     &__icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: .75rem; background: var(--color-primary); flex-shrink: 0; }
     > span:nth-child(2) { flex: 1; min-width: 0; }
     strong { display: block; font-size: 1rem; line-height: 1.3; overflow-wrap: anywhere; }
-    > span > span { display: block; margin-top: .25rem; font-size: .8125rem; color: var(--color-secondary); }
+    > span > span { display: block; margin-top: .25rem; font-size: .875rem; color: var(--color-secondary); }
     &:hover { border-color: #dbbb40; }
   }
   .menu-row { width: 100%; display: flex; align-items: center; gap: .875rem; padding: 1rem .125rem; border: 0; border-bottom: 1px solid var(--color-border); color: var(--color-navy); background: transparent; text-align: left; min-width: 0;
     &__icon { display: grid; place-items: center; width: 2rem; flex-shrink: 0; }
-    &__copy { flex: 1; min-width: 0; strong { display: block; font-size: .9375rem; line-height: 1.4; overflow-wrap: anywhere; } > span { display: block; color: var(--color-secondary); font-size: .8125rem; margin-top: .125rem; overflow-wrap: anywhere; } }
+    &__copy { flex: 1; min-width: 0; strong { display: block; font-size: .9375rem; line-height: 1.4; overflow-wrap: anywhere; } > span { display: block; color: var(--color-secondary); font-size: .875rem; margin-top: .125rem; overflow-wrap: anywhere; } }
     &--soon .menu-row__icon { color: var(--color-secondary); }
     &--danger { margin-top: .75rem; color: var(--color-error); border-bottom: 0; }
     &:is(a, button):hover { background: var(--color-surface); border-radius: .5rem; }
   }
-  .soon-label { flex-shrink: 0; padding: .2rem .45rem; border-radius: .375rem; background: var(--color-surface); color: var(--color-secondary); font-size: .6875rem; font-weight: 600; }
-  .account-explore { margin-top: .5rem; font-size: .8125rem; color: var(--color-secondary); }
-  .back-link { display: inline-flex; align-items: center; gap: .375rem; font-size: .8125rem; color: var(--color-secondary); padding-block: .375rem; margin-bottom: .875rem; min-height: 2.75rem; }
+  .soon-label { flex-shrink: 0; padding: .2rem .45rem; border-radius: .375rem; background: var(--color-surface); color: var(--color-secondary); font-size: .75rem; font-weight: 600; }
+  .account-explore { margin-top: .5rem; font-size: .875rem; color: var(--color-secondary); }
+  .back-link { display: inline-flex; align-items: center; gap: .375rem; font-size: .875rem; color: var(--color-secondary); padding-block: .375rem; margin-bottom: .875rem; min-height: 2.75rem; }
   .personal-form { margin-bottom: 1rem; .account-details { margin: 0; } .button { align-self: flex-start; } }
   .security-email { display: flex; align-items: center; gap: .875rem; padding-block: .75rem 1.25rem; min-width: 0; > div { min-width: 0; } strong { font-size: .875rem; } p { color: var(--color-secondary); overflow-wrap: anywhere; } }
   .business-selector { margin-bottom: 1.25rem; select { text-overflow: ellipsis; } }
@@ -37,7 +37,7 @@
     &__status { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; margin-bottom: 1rem; p { color: var(--color-secondary); font-size: .75rem; } }
     .button { min-height: 2.75rem; padding: .5rem 1rem; font-size: .875rem; }
   }
-  .business-meta { display: flex; flex-wrap: wrap; gap: .375rem 1rem; padding-block: 1rem .75rem; font-size: .8125rem; color: var(--color-secondary); > span { display: inline-flex; align-items: center; gap: .25rem; overflow-wrap: anywhere; min-width: 0; } }
+  .business-meta { display: flex; flex-wrap: wrap; gap: .375rem 1rem; padding-block: 1rem .75rem; font-size: .875rem; color: var(--color-secondary); > span { display: inline-flex; align-items: center; gap: .25rem; overflow-wrap: anywhere; min-width: 0; } }
   .business-status { display: inline-flex; align-items: center; gap: .375rem; font-size: .75rem; font-weight: 600; border-radius: 1rem; padding: .25rem .625rem; background: var(--color-brand-soft);
     > span { width: .375rem; height: .375rem; border-radius: 50%; background: #977300; }
     &--published { background: #e9f5ed; > span { background: #277644; } }
@@ -45,19 +45,19 @@
   }
   .business-management { margin-top: 1.25rem; > h2 { font-size: .9375rem; margin-bottom: .25rem; } }
   .professional-footnote { font-size: .75rem; margin-top: 1rem; }
-  .add-business { display: inline-flex; align-items: center; gap: .375rem; font-size: .8125rem; margin-top: .5rem; }
+  .add-business { display: inline-flex; align-items: center; gap: .375rem; font-size: .875rem; margin-top: .5rem; }
   .professional-empty { display: flex; flex-direction: column; align-items: flex-start; gap: .875rem; padding-block: .5rem; h2 { font-size: 1.25rem; } p { max-width: 32rem; color: var(--color-secondary); font-size: .875rem; } }
 
   .registration-page .page-header__description { font-size: .875rem; margin-top: .5rem; }
   .registration-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin: 0 0 1.5rem; padding: 0 0 1.25rem; border-bottom: 1px solid var(--color-border);
-    li { display: flex; align-items: center; gap: .375rem; font-size: .6875rem; min-width: 0; line-height: 1.3; }
+    li { display: flex; align-items: center; gap: .375rem; font-size: .75rem; min-width: 0; line-height: 1.3; }
     li[aria-current] { text-decoration: none; }
     &__number { width: 1.5rem; height: 1.5rem; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--color-surface); color: var(--color-secondary); font-weight: 600; }
     li[aria-current] &__number { background: var(--color-primary); color: var(--color-navy); }
     li.is-complete &__number { background: var(--color-navy); color: white; }
   }
-  .registration-section-heading { margin-bottom: 1.25rem; .step-caption { font-size: .6875rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-secondary); } h2 { font-size: 1.125rem; margin: .25rem 0 .375rem; letter-spacing: -.025em; } p { font-size: .8125rem; color: var(--color-secondary); } }
-  .registration-fields { gap: 1.125rem; }
+  .registration-section-heading { margin-bottom: 1.25rem; .step-caption { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-secondary); } h2 { font-size: 1.125rem; margin: .25rem 0 .375rem; letter-spacing: -.025em; } p { font-size: .875rem; color: var(--color-secondary); } }
+
   .registration-fields .form-field { gap: .375rem; }
   .registration-fields .field-help { font-size: .75rem; }
   .provider-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem;
@@ -72,16 +72,16 @@
     label:focus-within { outline: 2px solid var(--color-navy); outline-offset: 2px; }
   }
   .service-areas { gap: .625rem; legend { font-size: .875rem; margin-bottom: .5rem; } label { font-size: .875rem; } }
-  .included-city { display: flex; align-items: center; gap: .5rem; background: var(--color-surface); padding: .75rem; border-radius: .625rem; font-size: .8125rem; > span { flex: 1; min-width: 0; overflow-wrap: anywhere; } }
-  .private-details { border: 1px solid var(--color-border); border-radius: .75rem; summary { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .875rem; font-size: .8125rem; font-weight: 600; cursor: pointer; > span { margin-left: auto; color: var(--color-secondary); font-weight: 400; font-size: .75rem; } } .legal-fields { padding: 0 .875rem .875rem; gap: .875rem; } }
-  .registration-review { padding: 1rem; background: var(--color-surface); h3 { font-size: .875rem; } dl { grid-template-columns: 5.5rem minmax(0,1fr); gap: .5rem; font-size: .8125rem; } dt { font-weight: 400; color: var(--color-secondary); } dd { margin: 0; font-weight: 500; } .field-help { margin-top: .875rem; } }
+  .included-city { display: flex; align-items: center; gap: .5rem; background: var(--color-surface); padding: .75rem; border-radius: .625rem; font-size: .875rem; > span { flex: 1; min-width: 0; overflow-wrap: anywhere; } }
+  .private-details { border: 1px solid var(--color-border); border-radius: .75rem; summary { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .875rem; font-size: .875rem; font-weight: 600; cursor: pointer; > span { margin-left: auto; color: var(--color-secondary); font-weight: 400; font-size: .75rem; } } .legal-fields { padding: 0 .875rem .875rem; gap: .875rem; } }
+  .registration-review { border-radius: var(--radius-medium); padding: 1rem; background: var(--color-surface); h3 { font-size: .875rem; } dl { margin: 0; display: grid; grid-template-columns: 5.5rem minmax(0,1fr); gap: .5rem; font-size: .875rem; } dt { font-weight: 400; color: var(--color-secondary); } dd { margin: 0; font-weight: 500; } .field-help { margin-top: .875rem; } }
   .registration-actions { display: flex; gap: .75rem; margin-top: .25rem; .button { flex: 1; padding: .75rem; min-width: 0; font-size: .875rem; } .button--primary:only-child { flex: 0 1 auto; margin-left: auto; min-width: 10rem; } }
-  .registration-assurance { display: flex; align-items: flex-start; gap: .375rem; margin-top: 1rem; font-size: .6875rem; color: var(--color-secondary); }
+  .registration-assurance { display: flex; align-items: flex-start; gap: .375rem; margin-top: 1rem; font-size: .75rem; color: var(--color-secondary); }
   .registration-page > .text-link { font-size: .75rem; color: var(--color-secondary); margin-top: .5rem; }
   @media (min-width: 48rem) {
-    .account-page, .professional-page, .registration-page { max-width: 42rem; }
+    .account-page, .professional-page, .registration-page { max-width: 44rem; }
     .personal-heading h2, .business-identity__heading h2 { font-size: 1.5rem; }
-    .registration-steps li { font-size: .8125rem; gap: .625rem; }
+    .registration-steps li { font-size: .875rem; gap: .625rem; }
     .provider-choice label { padding: 1.25rem; }
     .category-picker__grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   }

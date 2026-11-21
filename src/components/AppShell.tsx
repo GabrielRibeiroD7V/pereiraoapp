@@ -3,6 +3,7 @@ import { MapPin } from 'lucide-react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Brand } from './Brand';
 import { MainNavigation } from './MainNavigation';
+import { InstallInvitation } from '../pwa/PwaProvider';
 
 export function AppShell() {
   const { pathname } = useLocation();
@@ -20,14 +21,15 @@ export function AppShell() {
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
       <header className="app-header">
         <div className="app-header__inner">
+          <MainNavigation />
           <Brand />
           <div className="location" aria-label="Cidade inicial: Mundo Novo, Mato Grosso do Sul">
             <MapPin size={18} aria-hidden="true" /><span>Mundo Novo, MS</span>
           </div>
         </div>
       </header>
-      <MainNavigation />
       <main id="main-content" className="page-container" tabIndex={-1}><Outlet /></main>
+      <InstallInvitation />
     </>
   );
 }

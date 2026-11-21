@@ -1,0 +1,1722 @@
+[
+  {
+    "width": 320,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Buscar",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Prestador simulado",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Conta",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Espaço profissional",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Anunciar meus serviços",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Meus serviços",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Meus trabalhos",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Publicações",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Editar perfil profissional",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Gratuidade e assinatura",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Assinatura em homologação",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Meus dados",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Segurança e acesso",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Entrar",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Criar conta",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Recuperar senha",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Entrar",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Este caminho não existe",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 320,
+    "viewport": 320
+  },
+  {
+    "width": 320,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 375,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Buscar",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Prestador simulado",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Conta",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Espaço profissional",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Anunciar meus serviços",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Meus serviços",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Meus trabalhos",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Publicações",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Editar perfil profissional",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Gratuidade e assinatura",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Assinatura em homologação",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Meus dados",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Segurança e acesso",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Entrar",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Criar conta",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Recuperar senha",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Entrar",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Este caminho não existe",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "width": 375,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 390,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Buscar",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Prestador simulado",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Conta",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Espaço profissional",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Anunciar meus serviços",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Meus serviços",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Meus trabalhos",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Publicações",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Editar perfil profissional",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Gratuidade e assinatura",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Assinatura em homologação",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Meus dados",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Segurança e acesso",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Entrar",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Criar conta",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Recuperar senha",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Entrar",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Este caminho não existe",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 390,
+    "viewport": 390
+  },
+  {
+    "width": 390,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 430,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Buscar",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Prestador simulado",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Conta",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Espaço profissional",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Anunciar meus serviços",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Meus serviços",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Meus trabalhos",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Publicações",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Editar perfil profissional",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Gratuidade e assinatura",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Assinatura em homologação",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Meus dados",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Segurança e acesso",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Entrar",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Criar conta",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Recuperar senha",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Entrar",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Este caminho não existe",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 430,
+    "viewport": 430
+  },
+  {
+    "width": 430,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 1024,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Buscar",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Prestador simulado",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Conta",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Espaço profissional",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Anunciar meus serviços",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Meus serviços",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Meus trabalhos",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Publicações",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Editar perfil profissional",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Gratuidade e assinatura",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Assinatura em homologação",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Meus dados",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Segurança e acesso",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Entrar",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Criar conta",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Recuperar senha",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Entrar",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Este caminho não existe",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1024,
+    "viewport": 1024
+  },
+  {
+    "width": 1024,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1280,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Buscar",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Prestador simulado",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Conta",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Espaço profissional",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Anunciar meus serviços",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Meus serviços",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Meus trabalhos",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Publicações",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Editar perfil profissional",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Gratuidade e assinatura",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Assinatura em homologação",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Meus dados",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Segurança e acesso",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Entrar",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Criar conta",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Recuperar senha",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Entrar",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Este caminho não existe",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1280,
+    "viewport": 1280
+  },
+  {
+    "width": 1280,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1440,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Buscar",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Prestador simulado",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Conta",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Espaço profissional",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Anunciar meus serviços",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Meus serviços",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Meus trabalhos",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Publicações",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Editar perfil profissional",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Gratuidade e assinatura",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Assinatura em homologação",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Meus dados",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Segurança e acesso",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Entrar",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Criar conta",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Recuperar senha",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Entrar",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Este caminho não existe",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1440,
+    "viewport": 1440
+  },
+  {
+    "width": 1440,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
+    "viewport": 1440
+  },
+  {
+    "width": 320,
+    "page": "home",
+    "clipped": [],
+    "scroll": 320,
+    "title": "O que você está procurando?",
+    "viewport": 320
+  },
+  {
+    "width": 375,
+    "page": "home",
+    "clipped": [],
+    "scroll": 375,
+    "title": "O que você está procurando?",
+    "viewport": 375
+  },
+  {
+    "width": 390,
+    "page": "home",
+    "clipped": [],
+    "scroll": 390,
+    "title": "O que você está procurando?",
+    "viewport": 390
+  },
+  {
+    "width": 430,
+    "page": "home",
+    "clipped": [],
+    "scroll": 430,
+    "title": "O que você está procurando?",
+    "viewport": 430
+  },
+  {
+    "width": 768,
+    "page": "home",
+    "clipped": [],
+    "scroll": 768,
+    "title": "O que você está procurando?",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "busca",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Buscar",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "perfil",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Prestador simulado",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "conta",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Conta",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "profissional",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Espaço profissional",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "cadastro",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Anunciar meus serviços",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "servicos",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Meus serviços",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "portfolio",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Meus trabalhos",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "publicacoes",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Publicações",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "trabalho",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Trabalho demonstrativo local",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "editar",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Editar perfil profissional",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "assinaturas",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Gratuidade e assinatura",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "sandbox",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Assinatura em homologação",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "dados",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Meus dados",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "seguranca",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Segurança e acesso",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "entrar",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Entrar",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "criar-conta",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Criar conta",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "recuperar",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Recuperar senha",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "redefinir",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Entrar",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "nao-encontrada",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Este caminho não existe",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-usuarios",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-prestadores",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-publicacoes",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-historico",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 768,
+    "viewport": 768
+  },
+  {
+    "width": 768,
+    "page": "admin-sandbox",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 1024,
+    "page": "home",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "O que você está procurando?",
+    "viewport": 1024
+  },
+  {
+    "width": 1280,
+    "page": "home",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "O que você está procurando?",
+    "viewport": 1280
+  },
+  {
+    "width": 1440,
+    "page": "home",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "O que você está procurando?",
+    "viewport": 1440
+  }
+]
