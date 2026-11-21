@@ -1,3 +1,5 @@
+> Resultado atual: [cartão e webhook validados no fluxo integrado](resultado-integrado-pr17.md). Pix permanece desligado. Os bloqueios e resultados anteriores abaixo são históricos.
+
 # PR #17 — Receptor ativo e bloqueio encontrado no ensaio autenticado
 
 ## Configuração executada

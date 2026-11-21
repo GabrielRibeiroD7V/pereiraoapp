@@ -1,3 +1,5 @@
+> Resultado atual: [cartão e webhook validados no fluxo integrado](resultado-integrado-pr17.md). Pix permanece desligado. Os bloqueios e resultados anteriores abaixo são históricos.
+
 > Estado mais recente: [receptor e webhook ativos; correção SQL aguardando autorização](webhook-ativo-pr17.md). Não reaplicar migrações ou provisionamentos históricos.
 
 # PR #17 — Ativação financeira e avaliação do receptor
