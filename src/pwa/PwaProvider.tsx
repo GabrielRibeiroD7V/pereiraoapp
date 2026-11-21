@@ -231,7 +231,7 @@ export function PwaGate({ children }: { children: ReactNode }) {
                 <RefreshCw size={18} aria-hidden="true" />
                 <span>
                   {state.updateDeferred
-                    ? "Há uma aba privada antiga aberta. Salve o trabalho nela e volte ao Início para concluir a atualização."
+                    ? "Outra aba privada ainda não confirmou a atualização. Salve o trabalho nela e volte ao Início para concluir."
                     : state.updateReady || newerBuild
                     ? "Nova versão disponível."
                     : "Conexão restabelecida ou versão atualizada."}{" "}
