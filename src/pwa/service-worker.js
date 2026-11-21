@@ -3,6 +3,9 @@ const CACHE_PREFIX = 'pereirao-static-';
 const CACHE_NAME = CACHE_PREFIX + '__PWA_VERSION__';
 const STATIC_ASSETS = __STATIC_ASSETS__;
 const ALLOWED = new Set(STATIC_ASSETS);
+// Não disputa rede com a abertura nem baixa todas as rotas lazy.
+// JS/CSS são estáticos permitidos, mas entram no cache somente quando requisitados.
+const PRECACHE_ASSETS = STATIC_ASSETS.filter(path => !path.startsWith('/assets/'));
 const OFFLINE = '/offline.html';
 function validStatic(response, path) {
   const mime = response.headers.get('Content-Type') || '';
@@ -21,7 +24,7 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
-      await Promise.all(STATIC_ASSETS.map(async path => {
+      await Promise.all(PRECACHE_ASSETS.map(async path => {
         const response = await fetch(new Request(new URL(path, self.location.origin), { cache: 'reload', credentials: 'same-origin', redirect: 'error' }));
         if (!validStatic(response, path)) throw new Error('Static asset unavailable');
         await cache.put(path, response);

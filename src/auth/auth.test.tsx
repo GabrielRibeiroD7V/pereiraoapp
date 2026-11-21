@@ -51,9 +51,9 @@ describe('autenticação e rotas', () => {
     expect(screen.getByLabelText('URL de teste')).toHaveTextContent(path);
   });
 
-  it('impede envio sem configuração e permite voltar ao marketplace', () => {
+  it('impede envio sem configuração e permite voltar ao marketplace', async () => {
     open('/entrar', null);
-    expect(screen.getByRole('button', { name: 'Entrar' })).toBeDisabled();
+    expect(await screen.findByRole('button', { name: 'Entrar' })).toBeDisabled();
     fireEvent.click(screen.getByRole('link', { name: 'Continuar sem entrar' }));
     expect(screen.getByRole('heading', { level: 1, name: 'O que você está procurando?' })).toBeInTheDocument();
   });

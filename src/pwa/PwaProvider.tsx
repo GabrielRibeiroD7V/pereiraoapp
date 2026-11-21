@@ -121,6 +121,11 @@ export function InstallInvitation() {
             )}
             <ol>
               <li>
+                <span>
+                  Comece pela <Link className="text-link" to="/" onClick={() => setHelp(false)}>tela Início</Link> antes de adicionar o ícone.
+                </span>
+              </li>
+              <li>
                 <Share aria-hidden="true" />
                 <span>
                   No Safari, toque em <strong>Compartilhar</strong>.

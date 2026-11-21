@@ -9,7 +9,7 @@ import { routes } from '../app/routes';
 import { useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { authErrorMessage } from '../auth/errors';
-import {AdminEntry} from '../admin/AdminPage';
+import {AdminEntry} from '../admin/AdminEntry';
 
 export function AccountPage() {
   const { session, gateway, loading, error: sessionError } = useAuth();

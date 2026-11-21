@@ -94,23 +94,6 @@ function Resource<T>({
     );
   return state.data?.data !== undefined ? children(state.data.data) : null;
 }
-export function AdminEntry() {
-  const repo = useAdmin(),
-    { session } = useAuth();
-  const load = useCallback(async () => {
-    try {
-      return session && repo ? await repo.access() : false;
-    } catch {
-      return false;
-    }
-  }, [repo, session]);
-  const access = usePublicQuery(session?.user.id ?? "", load);
-  return access.data ? (
-    <Link className="text-link" to="/admin">
-      Painel administrativo
-    </Link>
-  ) : null;
-}
 export function AdminPage() {
   const repo = useAdmin(),
     { session } = useAuth();

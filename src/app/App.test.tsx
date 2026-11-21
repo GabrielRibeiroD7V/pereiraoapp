@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { App } from './App';
+import { clearAuthReturn, readAuthReturn, rememberAuthReturn } from '../auth/flowState';
 
 function open(path = '/') {
   return render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
@@ -35,6 +36,14 @@ describe('navegação pública', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     expect(screen.getByRole('img', { name: 'PEREIRÃO' })).toBeInTheDocument();
+  });
+
+  it('abre a Home pelo endereço do ícone sem consumir o retorno de autenticação', () => {
+    rememberAuthReturn('/conta/profissional/cadastro');
+    open('/?source=pwa');
+    expect(screen.getByRole('heading', { level: 1, name: 'O que você está procurando?' })).toBeVisible();
+    expect(readAuthReturn()).toBe('/conta/profissional/cadastro');
+    clearAuthReturn();
   });
 
   it('oferece recuperação para rota desconhecida', () => {
