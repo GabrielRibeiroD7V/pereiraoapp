@@ -327,6 +327,14 @@ export class PwaController {
           if (typeof version !== 'string' || !/^[a-f0-9]{20}$/.test(version)) return false;
           this.lastVersionSuccess = Date.now();
           this.patch({ publishedVersion: version, refreshRequired: version !== this.state.runningVersion || this.state.sessionRefreshRequired });
+          // O reload que chegou ao build certo concluiu a tentativa anterior.
+          // Uma página antiga restaurada depois pelo histórico precisa poder atualizar de novo.
+          if (version === this.state.runningVersion) {
+            try {
+              if (this.browser.sessionStorage.getItem('pereirao.update.attempt') === version)
+                this.browser.sessionStorage.removeItem('pereirao.update.attempt');
+            } catch { /* Storage opcional; não interfere na consulta. */ }
+          }
           return true;
         } catch { /* Offline/proteção/erro HTTP nunca força reload. */ return false; }
         finally { this.browser.clearTimeout(timeout); }
