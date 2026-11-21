@@ -40,6 +40,8 @@ select test.sandbox('customer_saved','{"requestId":"00000000-0000-4000-8000-0000
 select test.sandbox('subscription_started','{"requestId":"00000000-0000-4000-8000-000000009900"}');
 select test.expect_error($q$select test.sandbox('subscription_started','{"requestId":"00000000-0000-4000-8000-000000009900"}')$q$,'23505','sandbox: POST incerto nunca repetido');
 select test.sandbox('save_provider','{"requestId":"00000000-0000-4000-8000-000000009900","subscriptionId":"sub_local"}');
+select test.assert_true(test.sandbox('save_provider','{"requestId":"00000000-0000-4000-8000-000000009900","invoiceUrl":"https://sandbox.asaas.com/000/checkoutSession/show/00000000-0000-4000-8000-000000009900"}')->>'invoice_url' like 'https://sandbox.asaas.com/000/%','sandbox: prefixo numérico oficial aceito');
+select test.expect_error($q$select test.sandbox('save_provider','{"requestId":"00000000-0000-4000-8000-000000009900","invoiceUrl":"https://www.asaas.com/i/real"}')$q$,'23514','sandbox: URL financeira de produção rejeitada');
 select test.expect_error($q$select test.sandbox('save_provider','{"requestId":"00000000-0000-4000-8000-000000009900","subscriptionId":"sub_changed"}')$q$,'23514','sandbox: assinatura imutável');
 select test.expect_error($q$select test.sandbox('context','{"requestId":"00000000-0000-4000-8000-000000009900","userId":"00000000-0000-4000-8000-000000009003"}')$q$,'42501','sandbox: conciliação isolada');
 select test.sandbox('claim_contract','{"requestId":"00000000-0000-4000-8000-000000009900"}')->>'leaseToken' as lease \gset

@@ -25,6 +25,18 @@ function open(repo: SandboxBillingRepository, admin = false) {
   );
 }
 describe("contratação expressa de homologação", () => {
+  it("oferece cartão e identifica Pix ainda não homologado", async () => {
+    const f = billingFixture();
+    f.repo.pixAvailable = false;
+    open(f.repo);
+    expect(await screen.findByRole("combobox")).toHaveValue("CREDIT_CARD");
+    expect(
+      screen.getByRole("option", { name: "Pix — em validação" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText(/contratação por Pix aguarda homologação/),
+    ).toBeInTheDocument();
+  });
   it("exige consentimento, envia preço fixo e bloqueia clique duplicado", async () => {
     const f = billingFixture(),
       start = vi.spyOn(f.repo, "start");
@@ -92,7 +104,7 @@ describe("contratação expressa de homologação", () => {
   it("separa métricas Sandbox e receita real", async () => {
     const f = billingFixture(true);
     open(f.repo, true);
-    await screen.findByText("Receita recebida Sandbox");
+    await screen.findByText("Receita bruta recebida Sandbox");
     expect(screen.getByText("Receita real")).toBeInTheDocument();
     expect(screen.getByText("Indisponível")).toBeInTheDocument();
     expect(screen.getByText(/até 20 contratos/)).toBeInTheDocument();

@@ -29,6 +29,7 @@ const uid = "00000000-0000-4000-8000-000000000001",
 const env = {
   VERCEL_ENV: "preview",
   ASAAS_SANDBOX_ENABLED: "true",
+  ASAAS_SANDBOX_PIX_VERIFIED: "true",
   VITE_SUPABASE_URL: "https://yazdjiwaksamizrbqewq.supabase.co",
   VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fixture",
   ASAAS_SANDBOX_WEBHOOK_TOKEN: "local-webhook-fixture-000000000000000",
@@ -115,6 +116,25 @@ function providerFixture() {
 const svc = (s: SandboxStore, p: ReturnType<typeof providerFixture>) =>
   new SandboxService(s, p as unknown as SandboxProvider);
 describe("provider Sandbox: transporte e proteção de segredo", () => {
+  it("preserva ID de checkout criado quando o formato do link for desconhecido", async () => {
+    const provider = new SandboxProvider("$aact_hmlg_fixture", async () =>
+      Response.json({
+        id: rid,
+        link: "https://sandbox.asaas.com/new-format/" + rid,
+      }),
+    );
+    await expect(
+      provider.createCardCheckout(
+        "cus_local",
+        rid,
+        "2026-11-21",
+        "https://preview.example/conta",
+      ),
+    ).rejects.toMatchObject({
+      code: "INVALID_PROVIDER_RESPONSE",
+      resourceId: rid,
+    });
+  });
   it("preserva o prefixo numérico do link oficial retornado pelo Sandbox", () => {
     const link =
       "https://sandbox.asaas.com/000/checkoutSession/show/4fa84e61-980f-4110-b35a-8f4678c8808e";
@@ -204,6 +224,33 @@ describe("provider Sandbox: transporte e proteção de segredo", () => {
   );
 });
 describe("conciliação e operações idempotentes", () => {
+  it("mantém ID do checkout e bloqueia nova criação após formato inesperado", async () => {
+    const p = providerFixture(),
+      f = storeFixture({
+        reserve: {
+          claimed: true,
+          contract: { ...contract(), method: "CREDIT_CARD" },
+        },
+      });
+    const error = new ProviderError("INVALID_PROVIDER_RESPONSE");
+    error.resourceId = rid;
+    p.createCardCheckout.mockRejectedValue(error);
+    await expect(
+      svc(f.store, p).start(
+        uid,
+        bid,
+        rid,
+        "CREDIT_CARD",
+        "https://preview.example",
+      ),
+    ).rejects.toThrow();
+    expect(f.calls.find((x) => x[0] === "save_provider")?.[1]).toEqual({
+      requestId: rid,
+      checkoutId: rid,
+    });
+    expect(f.calls.at(-1)?.[0]).toBe("uncertain");
+    expect(p.createCardCheckout).toHaveBeenCalledTimes(1);
+  });
   it("recusa e cancela retorno BOLETO para pedido PIX, preservando ID da tentativa", async () => {
     const p = providerFixture(),
       f = storeFixture();
@@ -274,6 +321,7 @@ describe("conciliação e operações idempotentes", () => {
     { billingType: "CREDIT_CARD" },
     { status: "UNKNOWN" },
     { dueDate: "bad" },
+    { dueDate: "2026-02-31" },
   ])("rejeita pagamento divergente %j", (change) =>
     expect(() =>
       paymentSnapshot({ ...payment(), ...change }, contract()),
@@ -410,6 +458,28 @@ describe("conciliação e operações idempotentes", () => {
   });
 });
 describe("rotas: sessão normal, webhook e modo Preview", () => {
+  it("mantém Pix bloqueado até homologar a modalidade real", async () => {
+    const factory = vi.fn();
+    const h = createSandboxBillingHandler(
+      { ...env, ASAAS_SANDBOX_PIX_VERIFIED: undefined },
+      auth,
+      factory,
+    );
+    const r = await h(
+      req({
+        action: "start",
+        businessId: bid,
+        requestId: rid,
+        method: "PIX",
+        accepted: true,
+        amountCents: 1999,
+        termsVersion: "sandbox-v1",
+      }),
+    );
+    expect(r.status).toBe(503);
+    expect(await r.json()).toEqual({ code: "PIX_NOT_VALIDATED" });
+    expect(factory).not.toHaveBeenCalled();
+  });
   const req = (
     value: unknown,
     headers: Record<string, string> = { Authorization: "Bearer fixture" },

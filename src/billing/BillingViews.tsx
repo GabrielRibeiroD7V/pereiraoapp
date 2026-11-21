@@ -27,7 +27,9 @@ export function SandboxBillingPage() {
   const { businessId = "" } = useParams(),
     repo = useBilling(),
     [revision, setRevision] = useState(0),
-    [method, setMethod] = useState<"PIX" | "CREDIT_CARD">("PIX"),
+    [method, setMethod] = useState<"PIX" | "CREDIT_CARD">(
+      repo?.pixAvailable ? "PIX" : "CREDIT_CARD",
+    ),
     [accepted, setAccepted] = useState(false),
     [pending, setPending] = useState(false),
     [error, setError] = useState(""),
@@ -166,16 +168,25 @@ export function SandboxBillingPage() {
                     setMethod(e.target.value as "PIX" | "CREDIT_CARD")
                   }
                 >
-                  <option value="PIX">Pix — pagamento a cada cobrança</option>
+                  <option value="PIX" disabled={!repo.pixAvailable}>
+                    Pix —{" "}
+                    {repo.pixAvailable
+                      ? "pagamento a cada cobrança"
+                      : "em validação"}
+                  </option>
                   <option value="CREDIT_CARD">
                     Cartão de crédito — checkout hospedado
                   </option>
                 </select>
               </label>
               <p className="field-help">
+                {method === "CREDIT_CARD" &&
+                  "O teste com cartão pode ser confirmado imediatamente no Asaas. "}
                 Use somente dados sintéticos e meios de homologação. Nenhum dado
                 completo de cartão será solicitado pelo PEREIRÃO. Pix Automático
                 não está habilitado.
+                {!repo.pixAvailable &&
+                  " A contratação por Pix aguarda homologação neste Sandbox."}
               </p>
               <label className="work-checkbox">
                 <input
@@ -299,7 +310,7 @@ export function SandboxFinancePanel() {
             ["Canceladas Sandbox", summary.cancelled],
             ["Estornadas Sandbox", summary.refunded],
             ["Pagamentos confirmados de teste", summary.confirmedPayments],
-            ["Receita recebida Sandbox", money(summary.receivedCents)],
+            ["Receita bruta recebida Sandbox", money(summary.receivedCents)],
             ["Eventos aguardando conciliação", summary.eventsPending],
             ["Receita real", "Indisponível"],
           ].map(([label, value]) => (
@@ -327,9 +338,9 @@ export function SandboxFinancePanel() {
         </button>
       </div>
       <p className="field-help">
-        Receita recebida considera pagamentos conciliados como recebidos,
-        descontando estornos. Confirmação de cartão ainda sem liquidação não é
-        receita recebida.
+        Receita recebida considera pagamentos conciliados como recebidos, antes
+        das tarifas Asaas e descontando estornos. Confirmação de cartão ainda
+        sem liquidação não é receita recebida.
       </p>
       <ul className="subscription-list">
         {data?.contracts.map((c) => (

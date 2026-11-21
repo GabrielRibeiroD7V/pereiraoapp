@@ -36,6 +36,7 @@ export function billingFixture(open = false) {
   };
   const repo: SandboxBillingRepository = {
     available: true,
+    pixAvailable: true,
     overview: async () => structuredClone(data),
     admin: async () => structuredClone(data),
     start: async (businessId, requestId, method) => {

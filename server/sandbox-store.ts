@@ -3,8 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../src/lib/database.types.ts";
 export type SandboxEnv = Record<string, string | undefined>;
 export class BillingError extends Error {
-  constructor(public code: string) {
+  public code: string;
+  constructor(code: string) {
     super(code);
+    this.code = code;
   }
 }
 export interface SandboxStore {

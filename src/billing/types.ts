@@ -37,6 +37,7 @@ export interface BillingOverview {
 }
 export interface SandboxBillingRepository {
   available: boolean;
+  pixAvailable: boolean;
   overview(businessId: string, signal?: AbortSignal): Promise<BillingOverview>;
   start(
     businessId: string,
@@ -53,13 +54,15 @@ export function billingError(e: unknown) {
   const code = e && typeof e === "object" && "code" in e ? String(e.code) : "";
   return code === "SETUP_REQUIRED"
     ? "A homologação aguarda a migração e a configuração segura do servidor."
-    : code === "SANDBOX_DISABLED"
-      ? "Os testes financeiros ficam disponíveis somente no ambiente Preview autorizado."
-      : code === "CONFLICT"
-        ? "Já existe uma operação de teste para este negócio. Atualize a consulta antes de tentar novamente."
-        : code === "FORBIDDEN" || code === "AUTH_REQUIRED"
-          ? "Sua conta não tem acesso a esta operação."
-          : "Não foi possível concluir. Consulte a situação antes de tentar novamente; não será criada outra assinatura automaticamente.";
+    : code === "PIX_NOT_VALIDATED"
+      ? "O Pix ainda depende de homologação neste Sandbox. Utilize o teste com cartão."
+      : code === "SANDBOX_DISABLED"
+        ? "Os testes financeiros ficam disponíveis somente no ambiente Preview autorizado."
+        : code === "CONFLICT"
+          ? "Já existe uma operação de teste para este negócio. Atualize a consulta antes de tentar novamente."
+          : code === "FORBIDDEN" || code === "AUTH_REQUIRED"
+            ? "Sua conta não tem acesso a esta operação."
+            : "Não foi possível concluir. Consulte a situação antes de tentar novamente; não será criada outra assinatura automaticamente.";
 }
 export const testStates: Record<string, string> = {
   prepared: "Preparando simulação",

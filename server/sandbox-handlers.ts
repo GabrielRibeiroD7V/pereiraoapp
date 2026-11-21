@@ -35,7 +35,9 @@ function errorReply(e: unknown) {
           ? 400
           : code === "CONFLICT"
             ? 409
-            : code === "SETUP_REQUIRED" || code === "SANDBOX_DISABLED"
+            : code === "SETUP_REQUIRED" ||
+                code === "SANDBOX_DISABLED" ||
+                code === "PIX_NOT_VALIDATED"
               ? 503
               : 502,
     { code },
@@ -136,6 +138,12 @@ export function createSandboxBillingHandler(
         !validId(String(input.requestId))
       )
         throw new BillingError("INVALID_INPUT");
+      if (
+        action === "start" &&
+        input.method === "PIX" &&
+        env.ASAAS_SANDBOX_PIX_VERIFIED !== "true"
+      )
+        throw new BillingError("PIX_NOT_VALIDATED");
       const service = serviceFactory(env);
       if (action === "overview")
         return reply(200, {

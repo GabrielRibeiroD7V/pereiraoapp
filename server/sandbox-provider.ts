@@ -39,6 +39,7 @@ export interface AsaasPayment {
   refunds?: { status: string; value: number }[];
 }
 export class ProviderError extends Error {
+  public resourceId?: string;
   public httpStatus?: number;
   public reason?: string;
   public code:
@@ -286,7 +287,11 @@ export class SandboxProvider {
     const link = sandboxLink(
       c.link ?? "https://sandbox.asaas.com/checkoutSession/show?id=" + c.id,
     );
-    if (!link) throw new ProviderError("INVALID_PROVIDER_RESPONSE");
+    if (!link) {
+      const error = new ProviderError("INVALID_PROVIDER_RESPONSE");
+      error.resourceId = c.id;
+      throw error;
+    }
     return { id: c.id, link };
   }
   getSubscription(id: string) {

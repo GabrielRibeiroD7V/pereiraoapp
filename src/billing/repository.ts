@@ -26,6 +26,7 @@ export function createBillingRepository(
   }
   return {
     available,
+    pixAvailable: import.meta.env.VITE_SANDBOX_PIX_VERIFIED === "true",
     overview: (businessId, signal) =>
       call({ action: "overview", businessId }, signal),
     start: (businessId, requestId, method) =>

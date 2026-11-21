@@ -38,7 +38,8 @@ export interface SandboxOverview {
 const date = (value: unknown) =>
   typeof value === "string" &&
   /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-  Number.isFinite(Date.parse(value));
+  Number.isFinite(Date.parse(value)) &&
+  new Date(value + "T00:00:00Z").toISOString().slice(0, 10) === value;
 const knownStatuses = new Set([
   "PENDING",
   "CONFIRMED",
@@ -142,10 +143,12 @@ export function paymentSnapshot(p: AsaasPayment, c: SandboxContract) {
   };
 }
 export class SandboxService {
-  constructor(
-    public store: SandboxStore,
-    private provider: SandboxProvider,
-  ) {}
+  public store: SandboxStore;
+  private provider: SandboxProvider;
+  constructor(store: SandboxStore, provider: SandboxProvider) {
+    this.store = store;
+    this.provider = provider;
+  }
   async start(
     userId: string,
     businessId: string,
@@ -242,6 +245,16 @@ export class SandboxService {
       }
       return contractView(c);
     } catch (e) {
+      if (
+        method === "CREDIT_CARD" &&
+        e instanceof ProviderError &&
+        e.resourceId &&
+        /^[0-9a-f-]{36}$/i.test(e.resourceId)
+      ) {
+        await this.store
+          .call("save_provider", { requestId, checkoutId: e.resourceId })
+          .catch(() => {});
+      }
       await this.store.call("uncertain", { requestId }).catch(() => {});
       throw e;
     }

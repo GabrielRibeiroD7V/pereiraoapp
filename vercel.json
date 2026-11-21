@@ -1,6 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build && node scripts/check-asaas-sandbox.mjs",
+  "functions": {
+    "api/sandbox-billing.ts": {
+      "maxDuration": 60,
+      "includeFiles": "public/images/brand/pereirao-384.png"
+    },
+    "api/asaas-webhook.ts": { "maxDuration": 60 }
+  },
   "rewrites": [
     { "source": "/api/admin", "destination": "/api/admin" },
     { "source": "/api/sandbox-billing", "destination": "/api/sandbox-billing" },
