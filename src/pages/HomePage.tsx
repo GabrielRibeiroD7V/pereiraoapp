@@ -6,6 +6,7 @@ import { HomeProviders } from '../marketplace/HomeProviders';
 import {PublishedWorks} from '../posts/PublishedWorks';
 import { categories } from '../config/categories';
 import { LinkButton } from '../components/LinkButton';
+import {InstallInvitation}from'../pwa/PwaProvider';
 
 export function HomePage() {
   return (
@@ -31,6 +32,7 @@ export function HomePage() {
           <LinkButton to="/conta/profissional/cadastro" variant="secondary">Anunciar meus serviços</LinkButton>
         </div>
       </section>
+      <InstallInvitation/>
     </>
   );
 }

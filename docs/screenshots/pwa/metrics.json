@@ -1,0 +1,226 @@
+[
+  {
+    "width": 375,
+    "view": "standalone",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "update",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "private-offline",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "reconnect",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "offline-document",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "standalone",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "update",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "private-offline",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "reconnect",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "offline-document",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "standalone",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "update",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "private-offline",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "reconnect",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "offline-document",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "standalone",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "update",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "private-offline",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "reconnect",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "offline-document",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "android",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "ios",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "ios-help",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "android",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "ios",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "ios-help",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "android",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "ios",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "ios-help",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "android",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "ios",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "ios-help",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  }
+]
