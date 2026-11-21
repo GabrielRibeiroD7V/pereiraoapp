@@ -30,6 +30,9 @@ h1, h2, h3, p { margin: 0; }
 img { max-width: 100%; }
 button, a, input, select, textarea { touch-action: manipulation; }
 :focus-visible { outline: 3px solid var(--color-navy); outline-offset: 4px; }
+// O título recebe foco por código ao trocar de rota para anunciar a página.
+// Ele não participa da navegação por Tab e não deve aparecer como um campo selecionado.
+#page-title:focus-visible { outline: none; }
 ::selection { background: var(--color-primary); color: var(--color-navy); }
 
 .skip-link {
