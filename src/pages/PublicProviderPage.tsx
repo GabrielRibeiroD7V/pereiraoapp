@@ -13,6 +13,7 @@ import { PageHeader } from '../components/PageHeader';
 import { formatPrice } from '../work/validation';
 import type { PublicPage, PublicPhoto, PublicProvider, PublicService } from '../marketplace/types';
 import type { City } from '../types/domain';
+import {PublishedWorks} from '../posts/PublishedWorks';
 
 function PagedSection<T>({ title, load, render, empty }: { title: string; load: (page: number, signal: AbortSignal) => Promise<PublicPage<T>>; render: (items: T[]) => ReactNode; empty: string }) {
   const [page, setPage] = useState(1);
@@ -32,7 +33,8 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     {provider.description && <section className="public-profile-section" aria-label="Sobre"><h2>Sobre</h2><p className="public-about">{provider.description}</p></section>}
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
     <PagedSection<PublicService> title="Serviços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
-    <PagedSection<PublicPhoto> title="Trabalhos realizados" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
+    <PublishedWorks key={provider.id} businessId={provider.id}/>
+    <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
     {photo && <Modal title="Fotografia do trabalho" onClose={() => setPhoto(null)}><div className="public-enlarged"><PublicImage businessId={provider.id} path={photo.storagePath} alt={photo.caption ?? 'Trabalho do prestador'} /></div>{photo.caption && <p>{photo.caption}</p>}</Modal>}
   </>;
 }

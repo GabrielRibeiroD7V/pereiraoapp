@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Image, MapPin, MessageSquare, PencilLine, Plus, UserRound, Wrench } from 'lucide-react';
+import { ArrowLeft, CreditCard, FileText, Image, MapPin, MessageSquare, PencilLine, Plus, UserRound, Wrench } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { LinkButton } from '../components/LinkButton';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -59,6 +59,7 @@ export function ProfessionalSpacePage() {
         <MenuRow icon={UserRound} title="Meu perfil" description="Apresentação, localização e contatos" />
         <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
         <MenuRow icon={Image} title="Meus trabalhos" description="Fotografias dos seus trabalhos" to={`/conta/profissional/${business.id}/trabalhos`} />
+        <MenuRow icon={FileText} title="Publicações" description="Apresente trabalhos realizados" to={`/conta/profissional/${business.id}/publicacoes`}/>
         <MenuRow icon={CreditCard} title="Minha assinatura" description="Plano e cobrança" soon />
         <MenuRow icon={MessageSquare} title="Mensagens e orçamentos" description="Conversas com seus clientes" soon />
       </section>
