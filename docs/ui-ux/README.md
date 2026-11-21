@@ -19,7 +19,7 @@ A auditoria precedeu as alterações: páginas públicas, autenticação, Conta,
 | Verificação | Resultado |
 |---|---|
 | Typecheck | Aprovado |
-| Vitest | 387 testes, 33 arquivos aprovados |
+| Vitest | 388 testes, 33 arquivos aprovados |
 | SQL/RLS | Suíte regressiva aprovada em PostgreSQL 17 temporário, sem Docker ou conexão remota |
 | Histórico local de migrações | Aprovado; nenhuma migração acrescentada ou aplicada |
 | Build Vite/PWA | Aprovado; 11 recursos estáticos no manifesto de cache |
@@ -58,4 +58,6 @@ Sem alterações em Auth, RPCs, RLS, SQL, rotas de API, publicação, direitos d
 
 **Pendências:** revisão visual no Preview protegido; instalação/abertura e teclado virtual em Android Chrome e iPhone Safari físicos; VoiceOver/TalkBack e zoom nativo. Autenticação/Storage/financeiro neste ensaio foram simulados e os resultados não são apresentados como novas homologações remotas. A configuração de safe areas está preservada no CSS, mas não foi homologada em aparelho com notch.
 
-GitHub Actions e Preview: resultados vinculados ao PR após seu primeiro push. Não fazer merge automaticamente.
+PR #18 aberto para revisão. Preview Vercel gerado pela branch; sem promoção para produção. Resultados finais de CI vinculados ao PR. Não fazer merge automaticamente.
+
+Na revisão das evidências foi corrigido o fixture local da seção de gratuidades, que não fornecia o resumo exigido pelo contrato. A seção foi reexecutada nas oito larguras e recebeu cobertura de renderização com resumo/tabela sem iniciar gratuidade. Todas as 216 capturas finais têm título renderizado; auditorias axe vazias são rejeitadas na conferência dos artefatos. Não foi necessário alterar a lógica de produção.

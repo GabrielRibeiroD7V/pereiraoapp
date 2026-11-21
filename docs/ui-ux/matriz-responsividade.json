@@ -193,13 +193,6 @@
   },
   {
     "width": 320,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 320,
-    "viewport": 320
-  },
-  {
-    "width": 320,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 320,
@@ -400,13 +393,6 @@
   },
   {
     "width": 375,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 375,
-    "viewport": 375
-  },
-  {
-    "width": 375,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 375,
@@ -607,13 +593,6 @@
   },
   {
     "width": 390,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 390,
-    "viewport": 390
-  },
-  {
-    "width": 390,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 390,
@@ -814,13 +793,6 @@
   },
   {
     "width": 430,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 430,
-    "viewport": 430
-  },
-  {
-    "width": 430,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 430,
@@ -1021,13 +993,6 @@
   },
   {
     "width": 1024,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 1024,
-    "viewport": 1024
-  },
-  {
-    "width": 1024,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 1024,
@@ -1228,13 +1193,6 @@
   },
   {
     "width": 1280,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 1280,
-    "viewport": 1280
-  },
-  {
-    "width": 1280,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 1280,
@@ -1431,13 +1389,6 @@
     "clipped": [],
     "scroll": 1440,
     "title": "Painel administrativo",
-    "viewport": 1440
-  },
-  {
-    "width": 1440,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 1440,
     "viewport": 1440
   },
   {
@@ -1682,13 +1633,6 @@
   },
   {
     "width": 768,
-    "page": "admin-assinaturas",
-    "clipped": [],
-    "scroll": 768,
-    "viewport": 768
-  },
-  {
-    "width": 768,
     "page": "admin-sandbox",
     "clipped": [],
     "scroll": 768,
@@ -1717,6 +1661,70 @@
     "clipped": [],
     "scroll": 1440,
     "title": "O que você está procurando?",
+    "viewport": 1440
+  },
+  {
+    "width": 320,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 320,
+    "title": "Painel administrativo",
+    "viewport": 320
+  },
+  {
+    "width": 375,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 375,
+    "title": "Painel administrativo",
+    "viewport": 375
+  },
+  {
+    "width": 390,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 390,
+    "title": "Painel administrativo",
+    "viewport": 390
+  },
+  {
+    "width": 430,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 430,
+    "title": "Painel administrativo",
+    "viewport": 430
+  },
+  {
+    "width": 768,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 768,
+    "title": "Painel administrativo",
+    "viewport": 768
+  },
+  {
+    "width": 1024,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1024,
+    "title": "Painel administrativo",
+    "viewport": 1024
+  },
+  {
+    "width": 1280,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1280,
+    "title": "Painel administrativo",
+    "viewport": 1280
+  },
+  {
+    "width": 1440,
+    "page": "admin-assinaturas",
+    "clipped": [],
+    "scroll": 1440,
+    "title": "Painel administrativo",
     "viewport": 1440
   }
 ]
