@@ -1,0 +1,434 @@
+[
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 852,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 393,
+    "width": 393
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 1024,
+    "width": 1024
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "controls": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "extras": [
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "cadastro-sintetico",
+    "primary": "construcao",
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 852,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 393,
+    "width": 393
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 1024,
+    "width": 1024
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "badges": [
+      "ConstruçãoPrincipal",
+      "Pintura",
+      "Elétrica"
+    ],
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "perfil-sintetico",
+    "primary": "ConstruçãoPrincipal",
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 375,
+    "width": 375
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 852,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 393,
+    "width": 393
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 768,
+    "width": 768
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 1024,
+    "width": 1024
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 1280,
+    "width": 1280
+  },
+  {
+    "additionalLabels": [
+      "Pintura · Elétrica",
+      "Pintura · Elétrica"
+    ],
+    "category": "pintura",
+    "city": "guaira-pr",
+    "headerDelta": 0,
+    "height": 900,
+    "navLinks": 3,
+    "page": "busca-sintetica",
+    "scrollWidth": 1440,
+    "width": 1440
+  }
+]

@@ -143,6 +143,7 @@ export interface Database {
           >
         >
       >;
+      business_categories: Table<{ business_id: string; category_id: string }, never, never>;
       business_members: Table<MembershipRow, never, never>;
       business_details: Table<{
         business_id: string;
@@ -184,6 +185,14 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      set_business_specialties: {
+        Args: { target_business_id: string; primary_category_id: string; additional_category_ids: string[]; expected_primary_category_id: string | null; expected_additional_category_ids: string[] };
+        Returns: undefined;
+      };
+      search_public_businesses: {
+        Args: { p_query?: string; p_category?: string; p_city?: string; p_type?: string; p_page?: number };
+        Returns: Json[];
+      };
       sandbox_billing_server: {
         Args: {
           command: string;

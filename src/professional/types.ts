@@ -5,6 +5,8 @@ export interface RegistrationInput {
   type: ProviderType;
   name: string;
   categoryId: CategoryId | '';
+  additionalCategoryIds: string[];
+  expectedSpecialties?: { primaryId: string | null; additionalIds: string[] };
   description: string;
   cityId: string;
   areaCityIds: string[];
@@ -14,6 +16,7 @@ export interface RegistrationInput {
   taxId: string;
 }
 export interface ProfessionalCatalog {
+  specialtiesAvailable?: boolean;
   cities: { id: string; name: string; state_code: string }[];
   categories: { id: CategoryId; name: string }[];
 }

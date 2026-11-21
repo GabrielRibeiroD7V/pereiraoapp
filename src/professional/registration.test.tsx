@@ -127,6 +127,50 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(repo.createDraft).not.toHaveBeenCalled();
   });
 
+  it.each([false, true])('preserva várias especialidades, promove principal e salva sem duplicar negócio (empresa=%s)', async company => {
+    const repo = repository(); open(repo); await details(company);
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Pintura' }));
+    await finalStep();
+    expect(screen.getByRole('region', { name: 'Revisão do cadastro' })).toHaveTextContent('Pintura');
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
+    expect(screen.getByRole('checkbox', { name: 'Pintura' })).toBeChecked();
+    fireEvent.click(screen.getByRole('radio', { name: 'Pintura' }));
+    expect(screen.getByRole('checkbox', { name: 'Elétrica' })).toBeChecked();
+    expect(screen.queryByRole('checkbox', { name: 'Pintura' })).not.toBeInTheDocument();
+    await finalStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ categoryId: 'pintura', additionalCategoryIds: ['eletrica'] })));
+    expect(repo.createDraft).toHaveBeenCalledOnce();
+  });
+  it('edição carrega as adicionais e permite removê-las sem excluir serviços', async () => {
+    const repo = repository();
+    repo.getEditable = vi.fn(async () => ({ business, input: { ...input, additionalCategoryIds: ['pintura'], expectedSpecialties: { primaryId: 'eletrica', additionalIds: ['pintura'] } } }));
+    open(repo, `/conta/profissional/${bid}/editar`);
+    fireEvent.click(await screen.findByRole('button', { name: 'Continuar' }));
+    expect(screen.getByRole('checkbox', { name: 'Pintura' })).toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Remover especialidade Pintura' }));
+    await finalStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ additionalCategoryIds: [], expectedSpecialties: { primaryId: 'eletrica', additionalIds: ['pintura'] } })));
+    expect(repo.createDraft).not.toHaveBeenCalled();
+  });
+  it('migração pendente mantém a categoria principal e o cadastro anterior funcionando', async () => {
+    const repo = repository(); repo.getCatalog = vi.fn(async () => ({ ...catalog, specialtiesAvailable: false }));
+    open(repo); await details();
+    expect(screen.queryByRole('checkbox', { name: 'Pintura' })).not.toBeInTheDocument();
+    expect(screen.getByText(/especialidades adicionais aguardam/)).toBeVisible();
+    await finalStep(); fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ categoryId: 'eletrica', additionalCategoryIds: [] })));
+  });
+  it('conflito preserva as escolhas e não cria outro perfil na repetição', async () => {
+    const repo = repository(); repo.saveDraft = vi.fn().mockRejectedValue({ code: '40001' });
+    open(repo); await details(); fireEvent.click(screen.getByRole('checkbox', { name: 'Pintura' })); await finalStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Outro responsável');
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
+    expect(screen.getByRole('checkbox', { name: 'Pintura' })).toBeChecked();
+    expect(repo.createDraft).toHaveBeenCalledOnce();
+  });
   it('valida campos e preserva dados ao voltar etapas', async () => {
     const repo = repository(); open(repo);
     await screen.findByRole('radio', { name: 'Profissional autônomo' });

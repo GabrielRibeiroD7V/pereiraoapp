@@ -1,3 +1,4 @@
+import { missingSpecialties } from '../lib/specialtiesSchema';
 import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
@@ -23,17 +24,19 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
     if (!(await managerIds()).includes(id)) fail('NOT_MANAGER');
   }
   async function getCatalog(): Promise<ProfessionalCatalog> {
-    const [cities, categoryRows, readiness] = await Promise.all([
+    const [cities, categoryRows, readiness, specialties] = await Promise.all([
       activeCities(client),
       client.from('categories').select('id,name').eq('active', true).order('name'),
       client.from('businesses').select('category_id').limit(0),
+      client.from('business_categories').select('category_id').limit(0),
     ]);
     if (readiness.error) {
       if (['42703', 'PGRST204'].includes(readiness.error.code)) fail('SETUP_REQUIRED');
       throw readiness.error;
     }
     if (categoryRows.error) throw categoryRows.error;
-    return { cities, categories: (categoryRows.data ?? [])
+    if (specialties.error && !missingSpecialties(specialties.error)) throw specialties.error;
+    return { cities, specialtiesAvailable: !specialties.error, categories: (categoryRows.data ?? [])
       .filter((item) => categories.some((category) => category.id === item.id))
       .map((item) => ({ ...item, id: item.id as CategoryId })) };
   }
@@ -55,18 +58,21 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
     },
     async getEditable(id) {
       await requireManager(id);
-      const [businessResult, areaResult, detailsResult] = await Promise.all([
+      const [businessResult, areaResult, detailsResult, specialtiesResult] = await Promise.all([
         client.from('businesses').select('*').eq('id', id).maybeSingle(),
         client.from('business_service_areas').select('city_id').eq('business_id', id),
         client.from('business_details').select('legal_name,tax_id').eq('business_id', id).maybeSingle(),
+        client.from('business_categories').select('category_id').eq('business_id', id).order('category_id'),
       ]);
       if (businessResult.error) throw businessResult.error;
       if (areaResult.error) throw areaResult.error;
       if (detailsResult.error) throw detailsResult.error;
+      if (specialtiesResult.error && !missingSpecialties(specialtiesResult.error)) throw specialtiesResult.error;
+      const additionalIds = (specialtiesResult.data ?? []).map(row => row.category_id);
       const business = businessResult.data;
       if (!business) return fail('NOT_FOUND');
       return { business, input: { type: business.type, name: business.name,
-        categoryId: (business.category_id ?? '') as CategoryId | '', description: business.description ?? '',
+        categoryId: (business.category_id ?? '') as CategoryId | '', additionalCategoryIds: additionalIds, expectedSpecialties: { primaryId: business.category_id, additionalIds }, description: business.description ?? '',
         cityId: business.city_id, areaCityIds: (areaResult.data ?? []).map((row) => row.city_id),
         whatsapp: business.whatsapp ?? '', instagram: business.instagram ?? '',
         legalName: detailsResult.data?.legal_name ?? '', taxId: detailsResult.data?.tax_id ?? '' } };
@@ -74,6 +80,7 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
     async createDraft(input, slug) {
       const normalized = normalizeRegistration(input);
       const catalog = await getCatalog();
+      if (catalog.specialtiesAvailable === false && normalized.additionalCategoryIds.length) fail('SETUP_REQUIRED');
       if (validateRegistration(normalized, catalog, 3)) fail('INVALID_INPUT');
       const priorId = await ownBusinessBySlug(slug);
       if (priorId) return priorId;
@@ -93,9 +100,19 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
       await requireManager(id);
       const catalog = await getCatalog();
       const normalized = normalizeRegistration(input);
+      if (catalog.specialtiesAvailable === false && normalized.additionalCategoryIds.length) fail('SETUP_REQUIRED');
       if (validateRegistration(normalized, catalog, 3)) fail('INVALID_INPUT');
+      if (catalog.specialtiesAvailable !== false) {
+        const { error } = await client.rpc('set_business_specialties', {
+          target_business_id: id, primary_category_id: normalized.categoryId,
+          additional_category_ids: normalized.additionalCategoryIds,
+          expected_primary_category_id: input.expectedSpecialties?.primaryId ?? null,
+          expected_additional_category_ids: input.expectedSpecialties?.additionalIds ?? [],
+        });
+        if (error) throw error;
+      }
       const { error, data } = await client.from('businesses').update({
-        type: normalized.type, name: normalized.name, category_id: normalized.categoryId || null,
+        type: normalized.type, name: normalized.name, ...(catalog.specialtiesAvailable === false ? { category_id: normalized.categoryId || null } : {}),
         description: normalized.description || null, city_id: normalized.cityId,
         whatsapp: normalized.whatsapp || null, instagram: normalized.instagram || null,
       }).eq('id', id).select('id').maybeSingle();

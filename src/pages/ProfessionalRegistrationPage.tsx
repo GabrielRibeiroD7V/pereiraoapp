@@ -10,6 +10,8 @@ import { createRegistrationSlug, emptyRegistration, normalizeRegistration, profe
 import { clearCheckpoint, readCheckpoint, writeCheckpoint } from '../professional/checkpoint';
 import type { Checkpoint } from '../professional/checkpoint';
 import { ArrowLeft, ArrowRight, Building2, ShieldCheck, UserRound } from 'lucide-react';
+import { SpecialtyPicker } from '../specialties/SpecialtyPicker';
+import type { CategoryId } from '../types/domain';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { CitySelect } from '../locations/CitySelect';
 import { ServiceAreaPicker } from '../locations/ServiceAreaPicker';
@@ -56,6 +58,15 @@ export function ProfessionalRegistrationPage() {
 
   function change<K extends keyof RegistrationInput>(name: K, value: RegistrationInput[K]) {
     setInput((current) => ({ ...current, [name]: value }));
+    setError(null);
+  }
+  function choosePrimary(id: CategoryId) {
+    setInput(current => ({ ...current, categoryId: id,
+      additionalCategoryIds: [...new Set([
+        ...current.additionalCategoryIds.filter(value => value !== id),
+        ...(catalog?.specialtiesAvailable !== false && current.categoryId && current.categoryId !== id && catalog?.categories.some(category => category.id === current.categoryId) ? [current.categoryId] : []),
+      ])],
+    }));
     setError(null);
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -106,8 +117,9 @@ export function ProfessionalRegistrationPage() {
           {step === 2 && <>
             <FormField id="business-name" label={input.type === 'empresa' ? 'Nome da empresa' : 'Nome profissional'} value={input.name} onChange={(event) => change('name', event.target.value)} maxLength={120} required />
             <fieldset className="category-picker"><legend>Categoria principal</legend><div className="category-picker__grid">{catalog.categories.map((category) => <label key={category.id} className={input.categoryId === category.id ? 'is-selected' : ''}>
-              <input type="radio" name="main_category" value={category.id} aria-label={category.name} checked={input.categoryId === category.id} onChange={() => change('categoryId', category.id)} required /><CategoryIcon id={category.id} /><span>{category.name}</span>
+              <input type="radio" name="main_category" value={category.id} aria-label={category.name} checked={input.categoryId === category.id} onChange={() => choosePrimary(category.id)} required /><CategoryIcon id={category.id} /><span>{category.name}</span>
             </label>)}</div></fieldset>
+            {catalog.specialtiesAvailable === false ? <p className="field-help">As especialidades adicionais aguardam uma atualização do banco. Sua categoria principal continua disponível.</p> : <SpecialtyPicker categories={catalog.categories} primaryId={input.categoryId} selected={input.additionalCategoryIds} onChange={ids => change('additionalCategoryIds', ids)} />}
             <div className="form-field"><label htmlFor="business-description">Descrição</label><textarea id="business-description" value={input.description} placeholder="Ex.: Instalação e manutenção de ar-condicionado residencial e comercial." maxLength={3000} rows={3} onChange={(event) => change('description', event.target.value)} /></div>
             <CitySelect id="business-city" label="Cidade" cities={catalog.cities.map(city => ({ ...city, stateCode: city.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
             <p className="field-help">Esta é a localização principal do seu negócio. As cidades atendidas podem ser diferentes.</p>
@@ -127,6 +139,7 @@ export function ProfessionalRegistrationPage() {
               <h3>Revise seu perfil</h3>
               <dl><dt>Nome</dt><dd>{input.name}</dd><dt>Tipo</dt><dd>{input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</dd>
                 <dt>Categoria</dt><dd>{catalog.categories.find((category) => category.id === input.categoryId)?.name}</dd>
+                <dt>Adicionais</dt><dd>{input.additionalCategoryIds.length ? input.additionalCategoryIds.map(id => catalog.categories.find(category => category.id === id)?.name ?? id).join(', ') : 'Nenhuma'}</dd>
                 <dt>Cidade de origem</dt><dd>{catalog.cities.filter(city => city.id === input.cityId).map(city => `${city.name}/${city.state_code}`)}</dd>
                 <dt>Atendimento</dt><dd>{catalog.cities.filter((city) => normalizeRegistration(input).areaCityIds.includes(city.id)).map((city) => `${city.name}/${city.state_code}`).join(', ')}</dd>
               </dl>
