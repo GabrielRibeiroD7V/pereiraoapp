@@ -1,0 +1,97 @@
+{
+  "rows": [
+    {
+      "path": "/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-store",
+      "cdnCacheControl": null,
+      "vercelCache": "MISS"
+    },
+    {
+      "path": "/conta",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-store",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/version.json",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "cacheControl": "no-store",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/sw.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "no-store",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "status": 200,
+      "contentType": "application/manifest+json; charset=utf-8",
+      "cacheControl": "no-cache",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/assets/index-D49U8x8D.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/assets/supabase-Dg3zCikB.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "cdnCacheControl": null,
+      "vercelCache": "MISS"
+    },
+    {
+      "path": "/assets/PageHeader-BdgPoZgq.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/assets/createLucideIcon-CC2QnKOi.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    },
+    {
+      "path": "/assets/index-Bj-lZB2e.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "cacheControl": "public, max-age=31536000, immutable",
+      "cdnCacheControl": null,
+      "vercelCache": "HIT"
+    }
+  ],
+  "version": {
+    "version": "a80fb7def4efc4cf5bf6"
+  },
+  "htmlVersion": "a80fb7def4efc4cf5bf6",
+  "workerVersion": "a80fb7def4efc4cf5bf6",
+  "consistent": true,
+  "assets": [
+    "/assets/index-D49U8x8D.js",
+    "/assets/supabase-Dg3zCikB.js",
+    "/assets/PageHeader-BdgPoZgq.js",
+    "/assets/createLucideIcon-CC2QnKOi.js",
+    "/assets/index-Bj-lZB2e.css"
+  ]
+}

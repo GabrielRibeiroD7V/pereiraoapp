@@ -1,0 +1,17 @@
+[
+  {
+    "dialogWidth": 288,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "dialogWidth": 361,
+    "scrollWidth": 393,
+    "width": 393
+  },
+  {
+    "dialogWidth": 512,
+    "scrollWidth": 1280,
+    "width": 1280
+  }
+]

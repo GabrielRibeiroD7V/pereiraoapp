@@ -63,7 +63,7 @@ function worker() {
     template
       .replace("__PWA_VERSION__", "aaaaaaaaaaaaaaaaaaaa")
       .replace("__STATIC_ASSETS__", JSON.stringify(paths)),
-    { self, caches, Request, Response, URL, Set, fetch: request },
+    { self, caches, Request, Response, URL, Set, MessageChannel, setTimeout, clearTimeout, fetch: request },
   );
   async function dispatch(name, event = {}) {
     const jobs = [];
@@ -317,5 +317,50 @@ describe('contrato HTTP de versões',()=>{
   expect(policy('/assets/(.*)')).toContainEqual({key:'Cache-Control',value:'public, max-age=31536000, immutable'});
   expect(policy('/manifest.webmanifest')).toContainEqual({key:'Cache-Control',value:'no-cache'});
   for(const path of ['/api/admin','/api/sandbox-billing','/api/asaas-webhook']) expect(config.rewrites).toContainEqual({source:path,destination:path});
+ });
+});
+describe('protocolo público de identificação do worker',()=>{
+ it('responde somente com o hash do build e não ativa/limpa caches por consulta',async()=>{
+  const f=worker(),port={postMessage:vi.fn()};
+  await f.dispatch('message',{data:{type:'PEREIRAO_GET_VERSION'},ports:[port]});
+  expect(port.postMessage).toHaveBeenCalledWith({version:'aaaaaaaaaaaaaaaaaaaa'});
+  expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(f.caches.open).not.toHaveBeenCalled();expect(f.caches.delete).not.toHaveBeenCalled();
+ });
+});
+describe('ponte de clique explícito das versões PR19–21',()=>{
+ it('recarrega somente a aba pública que pediu atualização ao worker já ativo',async()=>{
+  const f=worker();f.self.registration={active:{state:'activated'},waiting:null,installing:null};const source={url:'https://pereirao.example/buscar?cidade=guaira-pr#resultado',navigate:vi.fn(async()=>{})};
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source});
+  expect(source.navigate).toHaveBeenCalledWith(source.url);expect(f.caches.delete).not.toHaveBeenCalled();
+ });
+ it.each(['/conta','/conta/profissional/cadastro','/admin','/auth/retorno?code=private'])('não força formulário/rota privada %s',async path=>{
+  const f=worker();f.self.registration={active:{state:'activated'},waiting:null,installing:null};const source={url:'https://pereirao.example'+path,navigate:vi.fn()};
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source});expect(source.navigate).not.toHaveBeenCalled();
+ });
+ it('não interfere na confirmação e controle de reload dos controladores novos',async()=>{
+  const f=worker();f.self.registration={active:{state:'activated'},waiting:null,installing:null};const source={url:'https://pereirao.example/',navigate:vi.fn()};
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1},source});expect(source.navigate).not.toHaveBeenCalled();
+ });
+ it('worker que ainda está waiting só ativa, sem navegar duas vezes',async()=>{
+  const f=worker();f.self.registration={active:{state:'activated'},waiting:{state:'installed'},installing:null};const source={url:'https://pereirao.example/',navigate:vi.fn()};
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source});expect(source.navigate).not.toHaveBeenCalled();expect(f.self.skipWaiting).toHaveBeenCalledOnce();
+ });
+});
+describe('proteção de formulários privados legados na ativação',()=>{
+ it('adia ativação global enquanto uma aba privada antiga não responde ao protocolo',async()=>{
+  const f=worker(),source={url:'https://pereirao.example/',navigate:vi.fn(),postMessage:vi.fn()};
+  f.self.clients.matchAll.mockResolvedValue([{id:'old-form',url:'https://pereirao.example/conta/profissional/cadastro',postMessage:vi.fn()}]);
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1},source});
+  expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.navigate).not.toHaveBeenCalled();expect(source.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_UPDATE_DEFERRED'});
+ });
+ it('clique legado atualiza somente a própria página pública, sem assumir controle do formulário de outra aba',async()=>{
+  const f=worker(),source={url:'https://pereirao.example/buscar?cidade=guaira-pr',navigate:vi.fn(),postMessage:vi.fn()};
+  f.self.clients.matchAll.mockResolvedValue([{id:'old-form',url:'https://pereirao.example/conta',postMessage:vi.fn()}]);
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE'},source});
+  expect(f.self.skipWaiting).not.toHaveBeenCalled();expect(source.navigate).toHaveBeenCalledWith(source.url);
+ });
+ it('permite ativação com formulário no controlador novo que preserva edições',async()=>{
+  const f=worker();f.self.clients.matchAll.mockResolvedValue([{id:'new-form',url:'https://pereirao.example/conta',postMessage:(_data,ports)=>ports[0].postMessage({protocol:1})}]);
+  await f.dispatch('message',{data:{type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1}});expect(f.self.skipWaiting).toHaveBeenCalledOnce();
  });
 });

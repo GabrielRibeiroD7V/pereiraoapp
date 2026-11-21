@@ -125,3 +125,7 @@ body {
     overscroll-behavior-y: none;
   }
 }
+
+.pwa-diagnostics-entry { margin: .5rem auto calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 1rem); text-align: center; font-size: var(--font-small); .work-modal { text-align: left; } .text-link { min-height: var(--touch-target); padding: .5rem; } }
+.pwa-diagnostics-list { display: grid; gap: .375rem; margin-block: 1rem; font-size: .875rem; dt { color: var(--color-secondary); } dd { margin: 0 0 .5rem; overflow-wrap: anywhere; } }
+@media (min-width: 64rem) { .pwa-diagnostics-entry { margin-bottom: 1.5rem; } }

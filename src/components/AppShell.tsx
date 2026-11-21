@@ -5,7 +5,7 @@ import { RouteBoundary } from './RouteBoundary';
 import { LoadingState } from './LoadingState';
 import { Brand } from './Brand';
 import { MainNavigation } from './MainNavigation';
-import { InstallInvitation } from '../pwa/PwaProvider';
+import { InstallInvitation, VersionDiagnostics } from '../pwa/PwaProvider';
 
 export function AppShell() {
   const { pathname } = useLocation();
@@ -41,6 +41,7 @@ export function AppShell() {
       </header>
       <main id="main-content" className="page-container" tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
+      <VersionDiagnostics />
     </>
   );
 }

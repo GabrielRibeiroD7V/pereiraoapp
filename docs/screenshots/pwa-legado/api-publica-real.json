@@ -1,0 +1,42 @@
+{
+  "project": "yazdjiwaksamizrbqewq",
+  "allOperations": "GET without user session",
+  "publicSearchItems": 0,
+  "page": 1,
+  "specialtiesAvailable": true,
+  "activeCities": 7,
+  "activeCategories": 6,
+  "nonexistentProvider": null,
+  "calls": [
+    {
+      "path": "/rest/v1/rpc/search_public_businesses",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/rest/v1/business_categories",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/rest/v1/categories",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/rest/v1/businesses",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/rest/v1/cities",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/rest/v1/businesses",
+      "method": "GET",
+      "status": 200
+    }
+  ]
+}

@@ -12,7 +12,7 @@ describe('reprodução: versão antiga no retorno ao aplicativo',()=>{
   });
   it('não deixa um worker waiting indefinidamente em página pública segura',async()=>{
     const f=pwaFixture({enabled:true,waiting:true,version:A,published:B});
-    await vi.waitFor(()=>expect(f.waiting.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_ACTIVATE_UPDATE'}));
+    await vi.waitFor(()=>expect(f.waiting.postMessage).toHaveBeenCalledWith({type:'PEREIRAO_ACTIVATE_UPDATE',protocol:1}));
     f.serviceWorker.dispatchEvent(new Event('controllerchange'));
     expect(f.browser.location.reload).toHaveBeenCalledOnce();
     f.controller.dispose();

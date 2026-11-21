@@ -1,3 +1,5 @@
+import { workerVersion } from './workerVersion';
+import type { PwaDiagnostics } from './workerVersion';
 import { installDismissed, INSTALL_DISMISS_KEY } from './installPolicy';
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
@@ -19,6 +21,7 @@ export interface PwaState {
   updating: boolean;
   installError: boolean;
   updateError: boolean;
+  updateDeferred?: boolean;
   worker: "unavailable" | "registering" | "ready" | "failed";
 }
 export function isSensitivePath(path: string) {
@@ -49,6 +52,10 @@ export class PwaController {
   private updateTimer: number | undefined;
   private state: PwaState;
   private checking: Promise<void> | null = null;
+  private waitingVersion: string | null = null;
+  private lastVersionSuccess: number | null = null;
+  private activationVersion: string | null = null;
+  private restoredFromHistory: boolean | null = null;
   private dirty = new Set<Element>();
   private reloading = false;
   private retryTimer: number | undefined;
@@ -158,7 +165,7 @@ export class PwaController {
       if (this.browser.document.visibilityState === "visible")
         void this.checkForUpdate(true);
     });
-    this.listen(this.browser, "pageshow", () => { void this.checkForUpdate(true); });
+    this.listen(this.browser, "pageshow", event => { this.restoredFromHistory = Boolean((event as PageTransitionEvent).persisted); void this.checkForUpdate(true); });
     const markDirty = (event: Event) => {
       const target = event.target as Element | null;
       if (target?.closest) this.dirty.add(target.closest('form') ?? target);
@@ -172,6 +179,19 @@ export class PwaController {
     )
       return;
     this.patch({ worker: "registering" });
+    this.listen(this.device.serviceWorker, 'message', event => {
+      const message = event as MessageEvent;
+      if (message.data?.type === 'PEREIRAO_CAN_ACCEPT_CONTROLLER' && message.ports[0]) {
+        // O controlador atual preserva formulários quando outra aba troca o worker.
+        message.ports[0].postMessage({ protocol: 1 });
+      }
+      if (message.data?.type === 'PEREIRAO_UPDATE_DEFERRED'
+        && (message.source === this.registration?.waiting || message.source === this.device.serviceWorker.controller)) {
+        if (this.updateTimer) this.browser.clearTimeout(this.updateTimer);
+        this.activationVersion = null;
+        this.patch({ updating: false, updateDeferred: true, updateReady: true });
+      }
+    });
     this.listen(this.device.serviceWorker, "controllerchange", () => {
       this.waiting = null;
       if (!this.controlled) {
@@ -182,7 +202,10 @@ export class PwaController {
       }
       if (this.state.updating) {
         if (this.updateTimer) this.browser.clearTimeout(this.updateTimer);
-        this.patch({ updating: false, refreshRequired: true, updateReady: false });
+        const alreadyCurrent = this.activationVersion !== null && this.activationVersion === this.state.runningVersion;
+        this.patch({ updating: false, refreshRequired: !alreadyCurrent || this.state.sessionRefreshRequired, updateReady: false });
+        // O HTML já atual não precisa de reload só para trocar o worker legado.
+        if (alreadyCurrent) { this.activationVersion = null; this.acknowledgeVersion(); return; }
         // Outra aba pode assumir o worker enquanto este formulário está aberto.
         if (!this.hasEdits() && !this.busy()) this.reload(false);
       } else {
@@ -266,7 +289,9 @@ export class PwaController {
     this.browser.location.reload(); // Mantém rota, query e hash; nunca redireciona à Home.
   }
   private maybeUpdate() {
-    if (!this.state.runningVersion || !this.state.publishedVersion || this.state.runningVersion === this.state.publishedVersion
+    const waitingCurrent = Boolean(this.registration?.waiting && this.waitingVersion === this.state.publishedVersion);
+    if (!this.state.runningVersion || !this.state.publishedVersion || (this.state.runningVersion === this.state.publishedVersion && !waitingCurrent)
+      || (this.registration?.waiting && !waitingCurrent)
       || !this.state.online || this.state.sessionRefreshRequired || this.state.updating || this.reloading
       || this.browser.document.visibilityState !== 'visible' || !this.safeToReload()) return;
     try {
@@ -293,6 +318,7 @@ export class PwaController {
           const data: unknown = await response.json();
           const version = data && typeof data === 'object' && 'version' in data ? data.version : null;
           if (typeof version !== 'string' || !/^[a-f0-9]{20}$/.test(version)) return;
+          this.lastVersionSuccess = Date.now();
           this.patch({ publishedVersion: version, refreshRequired: version !== this.state.runningVersion || this.state.sessionRefreshRequired });
         } catch { /* Offline/proteção/erro HTTP nunca invalida a página nem força reload. */ }
         finally { this.browser.clearTimeout(timeout); }
@@ -300,9 +326,30 @@ export class PwaController {
       await Promise.all([versionCheck(), this.registration?.update().catch(() => {})]);
       if (this.disposed) return;
       this.inspectWaiting();
+      const waiting = this.registration?.waiting;
+      this.waitingVersion = waiting && this.state.runningVersion ? await workerVersion(waiting) : null;
+      // A instalação pode ter substituído o candidato enquanto ele respondia.
+      if (this.registration?.waiting !== waiting || this.disposed) return;
       this.maybeUpdate();
     })().finally(() => { this.checking = null; });
     return this.checking;
+  }
+  async diagnostics(): Promise<PwaDiagnostics> {
+    await this.checkForUpdate(true);
+    const active = this.registration?.active, waiting = this.registration?.waiting;
+    const [controller, activeVersion, waitingVersion] = await Promise.all([
+      workerVersion(this.device.serviceWorker?.controller), workerVersion(active), workerVersion(waiting),
+    ]);
+    let staticCacheVersions: string[] = [];
+    try { staticCacheVersions = (await this.browser.caches.keys()).flatMap(key => /^pereirao-static-[a-f0-9]{20}$/.test(key) ? [key.slice('pereirao-static-'.length)] : []).sort(); } catch { /* Cache indisponível não impede diagnóstico. */ }
+    return {
+      origin: this.browser.location.origin, installed: this.standalone(), running: this.state.runningVersion,
+      published: this.state.publishedVersion, publishedCheckedAt: this.lastVersionSuccess === null ? null : new Date(this.lastVersionSuccess).toISOString(), online: this.state.online, controller,
+      active: active ? { state: active.state, version: activeVersion } : null,
+      waiting: waiting ? { state: waiting.state, version: waitingVersion } : null,
+      installing: this.registration?.installing?.state ?? null, staticCacheVersions,
+      restoredFromHistory: this.restoredFromHistory,
+    };
   }
   async install() {
     if (!this.prompt || this.state.installed || this.state.installing) return;
@@ -340,10 +387,11 @@ export class PwaController {
       this.reload(automatic);
       return;
     }
-    this.patch({ updating: true, updateError: false });
+    this.patch({ updating: true, updateError: false, updateDeferred: false });
     try {
       this.updateTimer = this.browser.setTimeout(() => this.patch({ updating: false, updateError: true }), 12000);
-      waiting.postMessage({ type: 'PEREIRAO_ACTIVATE_UPDATE' });
+      this.activationVersion = this.waitingVersion;
+      waiting.postMessage({ type: 'PEREIRAO_ACTIVATE_UPDATE', protocol: 1 });
     } catch { this.patch({ updating: false, updateError: true }); }
   }
   dispose() {
