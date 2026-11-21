@@ -6,7 +6,7 @@ const syntheticPayer = {
   email: "sandbox@example.com",
   notificationDisabled: true,
   cpfCnpj: "24971563792",
-  phone: "11999999999",
+  phone: "4738010919",
   postalCode: "01310000",
   address: "Avenida Paulista",
   addressNumber: "0",
@@ -149,7 +149,7 @@ export class SandboxProvider {
         if (/cpf|cnpj/.test(descriptions)) reason = "CUSTOMER_TAX_ID_REQUIRED";
         else if (/e-mail|email/.test(descriptions))
           reason = "CUSTOMER_EMAIL_REQUIRED";
-        else if (/telefone|phone|mobile/.test(descriptions))
+        else if (/telefone|celular|phone|mobile/.test(descriptions))
           reason = "CUSTOMER_PHONE_REQUIRED";
         else if (/postal|cep|endere/.test(descriptions))
           reason = "CUSTOMER_ADDRESS_REQUIRED";
