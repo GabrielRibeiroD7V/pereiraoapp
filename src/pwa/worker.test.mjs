@@ -86,10 +86,10 @@ function request(path, options = {}, navigation = false) {
   return r;
 }
 describe("worker: cache explícito e privado por versão", () => {
-  it("pré-carrega somente os estáticos listados e não ativa atualização sozinho", async () => {
+  it("pré-carrega apenas suporte offline sem disputar rede com rotas lazy", async () => {
     const f = worker();
     await f.dispatch("install");
-    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths);
+    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
     expect(f.self.skipWaiting).not.toHaveBeenCalled();
     expect(
       f.request.mock.calls.every(
@@ -108,6 +108,8 @@ describe("worker: cache explícito e privado por versão", () => {
   it("recusa HTML no lugar de um asset e limpa instalação incompleta", async () => {
     const f = worker();
     f.request.mockResolvedValueOnce(
+      new Response("<html>offline</html>", { headers: { "Content-Type": "text/html" } }),
+    ).mockResolvedValueOnce(
       new Response("<html>login</html>", {
         headers: { "Content-Type": "text/html" },
       }),
@@ -185,7 +187,7 @@ describe("worker: cache explícito e privado por versão", () => {
       request: request("/admin?session=private", {}, true),
     });
     expect(await response.text()).toContain("/offline.html");
-    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths);
+    expect([...f.stores.get("pereirao-static-test").keys()]).toEqual(paths.filter(path => !path.startsWith("/assets/")));
     expect(
       JSON.stringify([...f.stores.get("pereirao-static-test").keys()]),
     ).not.toContain("private");
@@ -199,9 +201,11 @@ describe("worker: cache explícito e privado por versão", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
-  it("serve asset permitido do cache mesmo offline", async () => {
+  it("armazena chunk sob demanda e o serve offline sem pré-carregar todas as rotas", async () => {
     const f = worker();
     await f.dispatch("install");
+    expect(f.request.mock.calls.some(([r]) => new URL(r.url).pathname.startsWith("/assets/"))).toBe(false);
+    await f.dispatch("fetch", { request: request("/assets/app-123.js") });
     f.request.mockRejectedValue(Error("offline"));
     const r = await f.dispatch("fetch", {
       request: request("/assets/app-123.js"),
@@ -217,7 +221,7 @@ describe("manifesto e build do PWA", () => {
     expect(manifest).toMatchObject({
       id: "/",
       name: "PEREIRÃO",
-      start_url: "/",
+      start_url: "/?source=pwa",
       scope: "/",
       display: "standalone",
       theme_color: "#FFD000",

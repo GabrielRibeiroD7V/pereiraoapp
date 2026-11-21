@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useLayoutEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './app/App';
@@ -9,8 +9,21 @@ import {PwaProvider,PwaGate}from'./pwa/PwaProvider';
 const pwa=new PwaController(window,navigator,import.meta.env.PROD);
 pwa.start();
 
+// Métrica local sem telemetria, identidade ou dados de sessão.
+performance.mark('pereirao:react-start');
+function ReactMountMetric() {
+  useLayoutEffect(() => {
+    if (!performance.getEntriesByName('pereirao:react-mount').length) {
+      performance.mark('pereirao:react-commit');
+      performance.measure('pereirao:react-mount', 'pereirao:react-start', 'pereirao:react-commit');
+    }
+  }, []);
+  return null;
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ReactMountMetric />
     <BrowserRouter>
       <PwaProvider controller={pwa}><PwaGate><App /></PwaGate></PwaProvider>
     </BrowserRouter>

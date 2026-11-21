@@ -4,7 +4,7 @@
   "short_name": "PEREIRÃO",
   "description": "Encontre profissionais e serviços na sua cidade.",
   "lang": "pt-BR",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
@@ -28,6 +28,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Início",
+      "short_name": "Início",
+      "url": "/?source=pwa",
+      "icons": [
+        {
+          "src": "/images/pwa/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

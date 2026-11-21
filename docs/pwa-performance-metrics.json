@@ -1,0 +1,132 @@
+{
+  "method": "Lighthouse 13.6.0; median of 3 local cold navigation runs per profile; no Supabase env in either local build; mobile simulated 4x CPU/150ms RTT/1638.4Kbps; desktop preset; physical devices not tested",
+  "metrics": {
+    "antes-mobile": {
+      "first-contentful-paint": 1051.946,
+      "largest-contentful-paint": 1051.946,
+      "cumulative-layout-shift": 0,
+      "server-response-time": 1,
+      "total-blocking-time": 0,
+      "requests": 8
+    },
+    "antes-desktop": {
+      "first-contentful-paint": 281.728,
+      "largest-contentful-paint": 281.728,
+      "cumulative-layout-shift": 0,
+      "server-response-time": 2,
+      "total-blocking-time": 0,
+      "requests": 8
+    },
+    "depois-mobile": {
+      "first-contentful-paint": 756.093,
+      "largest-contentful-paint": 756.093,
+      "cumulative-layout-shift": 0,
+      "server-response-time": 3,
+      "total-blocking-time": 0,
+      "requests": 10
+    },
+    "depois-desktop": {
+      "first-contentful-paint": 204.957,
+      "largest-contentful-paint": 204.957,
+      "cumulative-layout-shift": 0,
+      "server-response-time": 1,
+      "total-blocking-time": 0,
+      "requests": 10
+    }
+  },
+  "antes-initial-assets": {
+    "js": {
+      "bytes": 650506,
+      "gzipBytes": 184145,
+      "files": 2
+    },
+    "css": {
+      "bytes": 45937,
+      "gzipBytes": 8511,
+      "files": 1
+    }
+  },
+  "depois-initial-assets": {
+    "js": {
+      "bytes": 564254,
+      "gzipBytes": 165193,
+      "files": 4
+    },
+    "css": {
+      "bytes": 46660,
+      "gzipBytes": 8639,
+      "files": 1
+    }
+  },
+  "production": {
+    "mobile": {
+      "first-contentful-paint": 849.518,
+      "largest-contentful-paint": 2384.132,
+      "cumulative-layout-shift": 0,
+      "server-response-time": 27,
+      "total-blocking-time": 0,
+      "requests": 12,
+      "supabase": [
+        {
+          "path": "/rest/v1/businesses",
+          "type": "Fetch",
+          "durationMs": 230.18,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/work_posts",
+          "type": "Fetch",
+          "durationMs": 240.12,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/businesses",
+          "type": "Preflight",
+          "durationMs": 117.01,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/work_posts",
+          "type": "Preflight",
+          "durationMs": 116.46,
+          "status": 200
+        }
+      ]
+    },
+    "desktop": {
+      "first-contentful-paint": 211.594,
+      "largest-contentful-paint": 211.594,
+      "cumulative-layout-shift": 0.004,
+      "server-response-time": 28,
+      "total-blocking-time": 0,
+      "requests": 12,
+      "supabase": [
+        {
+          "path": "/rest/v1/businesses",
+          "type": "Fetch",
+          "durationMs": 630.35,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/work_posts",
+          "type": "Fetch",
+          "durationMs": 631.04,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/businesses",
+          "type": "Preflight",
+          "durationMs": 336.59,
+          "status": 200
+        },
+        {
+          "path": "/rest/v1/work_posts",
+          "type": "Preflight",
+          "durationMs": 335.15,
+          "status": 200
+        }
+      ]
+    }
+  },
+  "reactMountMs": 10.296
+}

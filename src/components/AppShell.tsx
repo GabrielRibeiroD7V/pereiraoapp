@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { RouteBoundary } from './RouteBoundary';
+import { LoadingState } from './LoadingState';
 import { Brand } from './Brand';
 import { MainNavigation } from './MainNavigation';
 import { InstallInvitation } from '../pwa/PwaProvider';
@@ -10,10 +12,19 @@ export function AppShell() {
   const previousPath = useRef(pathname);
 
   useEffect(() => {
-    if (previousPath.current !== pathname) {
-      document.getElementById('page-title')?.focus();
-      previousPath.current = pathname;
-    }
+    if (previousPath.current === pathname) return;
+    previousPath.current = pathname;
+    const main = document.getElementById('main-content');
+    const focusTitle = () => {
+      const title = main?.querySelector<HTMLElement>('#page-title');
+      title?.focus();
+      return Boolean(title);
+    };
+    if (focusTitle() || !main) return;
+    // A rota lazy ainda pode estar mostrando o fallback; transfere o foco após montar.
+    const observer = new MutationObserver(() => { if (focusTitle()) observer.disconnect(); });
+    observer.observe(main, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [pathname]);
 
   return (
@@ -28,7 +39,7 @@ export function AppShell() {
           </div>
         </div>
       </header>
-      <main id="main-content" className="page-container" tabIndex={-1}><Outlet /></main>
+      <main id="main-content" className="page-container" tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
     </>
   );

@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import { RouteBoundary } from "../components/RouteBoundary";
+import { LoadingState } from "../components/LoadingState";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
 import { AccountPage } from "../pages/AccountPage";
@@ -9,34 +11,56 @@ import { routes } from "./routes";
 import { AuthProvider } from "../auth/AuthProvider";
 import type { AuthGateway } from "../auth/types";
 import { RequireAuth } from "../auth/RequireAuth";
-import { AuthPage } from "../pages/AuthPage";
-import { AuthCallbackPage } from "../pages/AuthCallbackPage";
-import { PersonalDataPage } from "../pages/PersonalDataPage";
+
 import { ProfessionalProvider } from "../professional/ProfessionalProvider";
 import type { ProfessionalRepository } from "../professional/types";
-import { ProfessionalRegistrationPage } from "../pages/ProfessionalRegistrationPage";
-import { ProfessionalSpacePage } from "../pages/ProfessionalSpacePage";
-import { AccountSecurityPage } from "../pages/AccountSecurityPage";
+
 import { WorkProvider } from "../work/WorkProvider";
 import type { WorkRepository } from "../work/types";
-import { ServicesPage } from "../pages/ServicesPage";
-import { PortfolioPage } from "../pages/PortfolioPage";
+
 import { MarketplaceProvider } from "../marketplace/MarketplaceProvider";
 import type { PublicMarketplace } from "../marketplace/types";
-import { PublicProviderPage } from "../pages/PublicProviderPage";
+
 import { PostsProvider } from "../posts/PostsProvider";
 import type { ManagedPosts, PublicPosts } from "../posts/types";
-import { WorkPostsPage } from "../pages/WorkPostsPage";
-import { PublicWorkPage } from "../pages/PublicWorkPage";
+
 import { AdminProvider } from "../admin/AdminProvider";
 import type { AdminRepository } from "../admin/types";
-import { AdminPage } from "../admin/AdminPage";
+
 import { SubscriptionProvider } from "../subscriptions/SubscriptionProvider";
-import { SubscriptionsPage } from "../subscriptions/SubscriptionViews";
+
 import { BillingProvider } from "../billing/BillingProvider";
-import { SandboxBillingPage } from "../billing/BillingViews";
+
 import type { SandboxBillingRepository } from "../billing/types";
 import type { SubscriptionRepository } from "../subscriptions/types";
+
+const AuthPage = lazy(() => import("../pages/AuthPage").then(module => ({ default: module.AuthPage })));
+
+const AuthCallbackPage = lazy(() => import("../pages/AuthCallbackPage").then(module => ({ default: module.AuthCallbackPage })));
+
+const PersonalDataPage = lazy(() => import("../pages/PersonalDataPage").then(module => ({ default: module.PersonalDataPage })));
+
+const ProfessionalRegistrationPage = lazy(() => import("../pages/ProfessionalRegistrationPage").then(module => ({ default: module.ProfessionalRegistrationPage })));
+
+const ProfessionalSpacePage = lazy(() => import("../pages/ProfessionalSpacePage").then(module => ({ default: module.ProfessionalSpacePage })));
+
+const AccountSecurityPage = lazy(() => import("../pages/AccountSecurityPage").then(module => ({ default: module.AccountSecurityPage })));
+
+const ServicesPage = lazy(() => import("../pages/ServicesPage").then(module => ({ default: module.ServicesPage })));
+
+const PortfolioPage = lazy(() => import("../pages/PortfolioPage").then(module => ({ default: module.PortfolioPage })));
+
+const PublicProviderPage = lazy(() => import("../pages/PublicProviderPage").then(module => ({ default: module.PublicProviderPage })));
+
+const WorkPostsPage = lazy(() => import("../pages/WorkPostsPage").then(module => ({ default: module.WorkPostsPage })));
+
+const PublicWorkPage = lazy(() => import("../pages/PublicWorkPage").then(module => ({ default: module.PublicWorkPage })));
+
+const AdminPage = lazy(() => import("../admin/AdminPage").then(module => ({ default: module.AdminPage })));
+
+const SubscriptionsPage = lazy(() => import("../subscriptions/SubscriptionViews").then(module => ({ default: module.SubscriptionsPage })));
+
+const SandboxBillingPage = lazy(() => import("../billing/BillingViews").then(module => ({ default: module.SandboxBillingPage })));
 
 const titles: Record<string, string> = {
   [routes.home]: "Início",
@@ -104,7 +128,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<RequireAuth />}>
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin" element={<RouteBoundary><Suspense fallback={<LoadingState>Carregando administração…</LoadingState>}><AdminPage /></Suspense></RouteBoundary>} />
       </Route>
       <Route element={<AppShell />}>
         <Route path={routes.home} element={<HomePage />} />
