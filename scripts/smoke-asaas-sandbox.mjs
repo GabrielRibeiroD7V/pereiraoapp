@@ -6,7 +6,7 @@ if (
   process.env.VERCEL_ENV !== "preview" ||
   process.env.VERCEL_GIT_COMMIT_REF !== "feat/asaas-sandbox" ||
   !run ||
-  !/^pr17-[a-z0-9-]{6,40}$/.test(run)
+  !/^pr17-(?:[a-z0-9-]{6,40}|inspect-sub_[a-z0-9]{8,40})$/.test(run)
 )
   throw Error("SMOKE_NOT_AUTHORIZED");
 const key = process.env.ASSAS_API_KEY_SANDBOX ?? "";
@@ -18,6 +18,13 @@ let createdSubscription = null;
 const emit = () =>
   process.stdout.write("SANDBOX_SMOKE " + JSON.stringify(report) + "\n");
 try {
+  if (run.startsWith("pr17-inspect-sub_")) {
+    const id = run.slice("pr17-inspect-".length);
+    const s = await provider.getSubscription(id);
+    report.inspection = {id:s.id,method:s.billingType,cycle:s.cycle,value:s.value,customerId:s.customer,externalReference:s.externalReference,deleted:s.deleted};
+    emit();
+    process.exit(0);
+  }
   const existing = await provider.findCustomers(reference);
   // Retomada específica após HTTP 400 conhecido: não cria outro cliente/assinatura.
   if (
