@@ -9,6 +9,7 @@ import { routes } from '../app/routes';
 import { useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { authErrorMessage } from '../auth/errors';
+import {AdminEntry} from '../admin/AdminPage';
 
 export function AccountPage() {
   const { session, gateway, loading, error: sessionError } = useAuth();
@@ -40,6 +41,7 @@ export function AccountPage() {
         <span><strong>Meu Espaço Profissional</strong><span>Gerencie seu perfil, serviços e anúncios.</span></span><ChevronRight size={23} aria-hidden="true" />
       </Link>
       {session && <div className="account-menu">
+        <AdminEntry />
         <MenuRow icon={UserRound} title="Meus dados" description="Nome e informações pessoais" to="/conta/dados" />
         <MenuRow icon={ShieldCheck} title="Segurança e acesso" description="E-mail e recuperação de senha" to="/conta/seguranca" />
         <MenuRow icon={Settings2} title="Configurações" description="Preferências e notificações" soon />

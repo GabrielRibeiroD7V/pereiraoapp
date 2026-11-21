@@ -28,16 +28,20 @@ import {PostsProvider} from '../posts/PostsProvider';
 import type {ManagedPosts,PublicPosts} from '../posts/types';
 import {WorkPostsPage} from '../pages/WorkPostsPage';
 import {PublicWorkPage} from '../pages/PublicWorkPage';
+import {AdminProvider} from '../admin/AdminProvider';
+import type{AdminRepository}from'../admin/types';
+import {AdminPage}from'../admin/AdminPage';
 
 const titles: Record<string, string> = {
   [routes.home]: 'Início', [routes.search]: 'Buscar', [routes.account]: 'Conta',
   '/entrar': 'Entrar', '/criar-conta': 'Criar conta', '/recuperar-senha': 'Recuperar senha',
   '/redefinir-senha': 'Definir nova senha', '/auth/retorno': 'Confirmar acesso', '/conta/dados': 'Meus dados',
   '/conta/seguranca': 'Segurança e acesso',
+  '/admin': 'Administração',
 };
 
-export function App({ authGateway, professionalRepository, workRepository, marketplaceRepository,managedPosts,publicPosts }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null; workRepository?: WorkRepository | null; marketplaceRepository?: PublicMarketplace | null;managedPosts?:ManagedPosts|null;publicPosts?:PublicPosts|null }) {
-  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><WorkProvider repository={workRepository}><MarketplaceProvider repository={marketplaceRepository}><PostsProvider managed={managedPosts} publicPosts={publicPosts}><AppRoutes /></PostsProvider></MarketplaceProvider></WorkProvider></ProfessionalProvider></AuthProvider>;
+export function App({ authGateway, professionalRepository, workRepository, marketplaceRepository,managedPosts,publicPosts,adminRepository }: { authGateway?: AuthGateway | null; professionalRepository?: ProfessionalRepository | null; workRepository?: WorkRepository | null; marketplaceRepository?: PublicMarketplace | null;managedPosts?:ManagedPosts|null;publicPosts?:PublicPosts|null;adminRepository?:AdminRepository|null }) {
+  return <AuthProvider gateway={authGateway}><ProfessionalProvider repository={professionalRepository}><WorkProvider repository={workRepository}><MarketplaceProvider repository={marketplaceRepository}><PostsProvider managed={managedPosts} publicPosts={publicPosts}><AdminProvider repository={adminRepository}><AppRoutes /></AdminProvider></PostsProvider></MarketplaceProvider></WorkProvider></ProfessionalProvider></AuthProvider>;
 }
 
 function AppRoutes() {
@@ -48,6 +52,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route element={<RequireAuth/>}><Route path="/admin" element={<AdminPage/>}/></Route>
       <Route element={<AppShell />}>
         <Route path={routes.home} element={<HomePage />} />
         <Route path={routes.search} element={<SearchPage />} />
