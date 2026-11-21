@@ -41,6 +41,9 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      admin_access: {Args: Record<string, never>; Returns: boolean};
+      admin_query: {Args: {section: string; filters?: Json}; Returns: Json};
+      admin_action: {Args: {kind:string; target:string; command:string; reason:string; expected_state:string}; Returns: Json};
       work_post_command: { Args: { command: string; target_business: string; target_post: string; post_title?: string; post_description?: string; photo_ids?: string[] }; Returns: Json };
       portfolio_command: { Args: { command: string; target_business: string; target_item?: string; target_service?: string | null; item_caption?: string | null; ordered_items?: string[] }; Returns: Json };
       delete_business_service: { Args: { target_business: string; target_service: string }; Returns: undefined };

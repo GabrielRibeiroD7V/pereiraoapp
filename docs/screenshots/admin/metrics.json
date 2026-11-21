@@ -1,0 +1,338 @@
+[
+  {
+    "width": 375,
+    "view": "dashboard",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "users",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "decision",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "posts",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "pending",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "history",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "empty",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "error",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "setup",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "blocked",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "dashboard",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "users",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "decision",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "posts",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "pending",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "history",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "empty",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "error",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "setup",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "blocked",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "dashboard",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "users",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "decision",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "posts",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "pending",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "history",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "empty",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "error",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "setup",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "blocked",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "dashboard",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "users",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "decision",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "posts",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "pending",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "history",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "empty",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "error",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "setup",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "blocked",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "businesses",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "view": "review",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "businesses",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "view": "review",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "businesses",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "view": "review",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "businesses",
+    "broken": 0,
+    "modalFits": null,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "view": "review",
+    "broken": 0,
+    "modalFits": true,
+    "overflow": false
+  }
+]

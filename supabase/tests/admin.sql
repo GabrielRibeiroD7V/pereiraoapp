@@ -1,0 +1,96 @@
+-- APENAS PostgreSQL descartável local; os UUIDs abaixo não representam usuários operacionais.
+begin;
+insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values
+('00000000-0000-4000-8000-000000009001','admin@example.invalid',now(),'{}'),
+('00000000-0000-4000-8000-000000009002','owner@example.invalid',now(),'{"role":"admin","is_admin":true}'),
+('00000000-0000-4000-8000-000000009003','third@example.invalid',null,'{}'),
+('00000000-0000-4000-8000-000000009004','viewer@example.invalid',null,'{}');
+insert into private.platform_admins(user_id) values('00000000-0000-4000-8000-000000009001');
+set local role anon;
+select test.expect_error('select public.admin_access()','42501','admin: acesso anônimo negado');
+select test.expect_error('select public.admin_query(''dashboard'')','42501','admin: consulta anônima negada');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
+select test.assert_true(not public.admin_access(),'admin: metadados de usuário não concedem papel');
+select test.expect_error('select public.admin_query(''users'')','42501','admin: proprietário não consulta usuários');
+select test.expect_error('select * from private.platform_admins','42501','admin: tabela de privilégios privada');
+select test.expect_error('insert into private.platform_admins values(auth.uid(),now())','42501','admin: autoelevação bloqueada');
+select public.create_business('Negócio técnico local A','admin-local-a','autonomo','mundo-novo-ms') as a \gset
+select public.create_business('Negócio técnico local B','admin-local-b','empresa','mundo-novo-ms') as b \gset
+update public.businesses set category_id='climatizacao',description='Descrição local completa',whatsapp='67999999999' where id=:'a';
+select public.portfolio_command('prepare',:'a','00000000-0000-4000-8000-000000009101');
+insert into storage.objects(bucket_id,name,metadata) select 'business-portfolio',storage_path,'{"size":100,"mimetype":"image/webp"}'::jsonb from public.portfolio_items where business_id=:'a';
+select public.portfolio_command('finalize',:'a','00000000-0000-4000-8000-000000009101');
+select public.work_post_command('save',:'a','00000000-0000-4000-8000-000000009201','Trabalho local','Descrição',array['00000000-0000-4000-8000-000000009101']::uuid[]);
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''Revisão de teste'',''draft'')',:'a'),'42501','admin: dono não aprova próprio perfil');
+select test.expect_error($q$update public.businesses set status='published'$q$,'42501','admin: proteção status frontend preservada');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009003';
+select test.expect_error('select public.admin_query(''dashboard'')','42501','admin: usuário comum sem acesso');
+select test.expect_error('select public.admin_action(''user'',''00000000-0000-4000-8000-000000009002'',''suspend'',''Revisão de teste'',''active'')','42501','admin: terceiro não suspende conta');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select test.assert_true(public.admin_access(),'admin: administrador autorizado');
+select test.assert_true((public.admin_query('dashboard')->>'users')::int=4,'admin: métricas são contagens reais');
+select test.assert_true(public.admin_query('dashboard')->'active7'='null'::jsonb,'admin: atividade ausente não inventada');
+select test.assert_true(jsonb_array_length(public.admin_query('users','{"q":"owner","days":0}')->'items')=1,'admin: pesquisa de usuário');
+select test.assert_true(not (public.admin_query('users')->'items'->0 ? 'raw_user_meta_data'),'admin: consulta não expõe metadados');
+select test.assert_true((public.admin_query('detail',jsonb_build_object('id',:'a'))->'business'->>'id')=:'a','admin: revisão privada do negócio');
+select test.assert_true((select count(*)=1 from storage.objects),'admin: leitura de foto ready de rascunho');
+select test.expect_error('select * from private.admin_audit','42501','admin: auditoria sem leitura direta');
+select test.expect_error('delete from private.admin_audit','42501','admin: auditoria sem exclusão direta');
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''x'',''draft'')',:'a'),'22023','admin: motivo obrigatório');
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''Revisão de teste'',''draft'')',:'b'),'23514','admin: perfil incompleto não publica');
+select public.admin_action('business',:'a','publish','Perfil revisado localmente','draft');
+select test.assert_true((public.admin_query('detail',jsonb_build_object('id',:'a'))->'business'->>'status')='published','admin: aprovação publica perfil');
+select test.assert_true((public.admin_query('audit')->'items'->0->>'after_state')='published','admin: decisão auditada');
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''Revisão de teste'',''draft'')',:'a'),'40001','admin: decisão obsoleta não duplica auditoria');
+select test.assert_true(jsonb_array_length(public.admin_query('audit')->'items')=1,'admin: conflito preserva quantidade de decisões');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
+select public.work_post_command('publish',:'a','00000000-0000-4000-8000-000000009201');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select public.admin_action('post','00000000-0000-4000-8000-000000009201','withdraw','Conteúdo em análise local','published');
+select test.assert_true((public.admin_query('posts')->'items'->0->>'blocked')::boolean,'admin: trabalho retirado e bloqueado');
+set local role anon;
+select test.assert_true((select count(*)=0 from public.work_posts),'admin: trabalho moderado não fica público');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
+select test.expect_error(format('select public.work_post_command(''publish'',%L,''00000000-0000-4000-8000-000000009201'')',:'a'),'42501','admin: prestador não contorna moderação');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select public.admin_action('post','00000000-0000-4000-8000-000000009201','release','Conteúdo liberado localmente','blocked');
+select test.assert_true((public.admin_query('posts')->'items'->0->>'status')='unpublished','admin: liberação não publica automaticamente');
+select public.admin_action('business',:'a','suspend','Suspensão de teste isolado','published');
+select test.assert_true((public.admin_query('detail',jsonb_build_object('id',:'a'))->'business'->>'suspended')::boolean,'admin: negócio suspenso');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
+select test.assert_true(not private.can_manage_business(:'a'),'admin: suspensão bloqueia gestão do prestador');
+select test.expect_error(format('select public.work_post_command(''publish'',%L,''00000000-0000-4000-8000-000000009201'')',:'a'),'42501','admin: negócio suspenso não publica trabalhos');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select public.admin_action('business',:'a','reactivate','Revisão e reativação local','suspended');
+select test.assert_true((public.admin_query('detail',jsonb_build_object('id',:'a'))->'business'->>'status')='published','admin: reativação de negócio exige revisão');
+select public.admin_action('user','00000000-0000-4000-8000-000000009002','suspend','Conta suspensa em teste local','active');
+select test.assert_true((public.admin_query('dashboard')->>'suspended')::int=2,'admin: suspensão da conta retira negócios próprios');
+select test.expect_error(format('select public.admin_action(''business'',%L,''reactivate'',''Revisão de teste'',''suspended'')',:'a'),'23514','admin: conta suspensa impede reativação de perfil');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009002';
+select test.expect_error('select public.create_business(''Atalho'',''atalho-local'',''autonomo'',''mundo-novo-ms'')','42501','admin: conta suspensa não cria negócio');
+select test.assert_true(not private.is_business_member(:'a'),'admin: sessão antiga não restaura permissão profissional');
+select test.assert_true((select count(*)=0 from storage.objects),'admin: conta suspensa não lê arquivos privados');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select public.admin_action('user','00000000-0000-4000-8000-000000009002','reactivate','Conta reativada em teste local','suspended');
+select test.assert_true((public.admin_query('dashboard')->>'suspended')::int=2,'admin: reativar conta não republica negócios');
+select test.expect_error('select public.admin_action(''user'',''00000000-0000-4000-8000-000000009001'',''suspend'',''Teste de bloqueio'',''active'')','42501','admin: administrador protegido contra auto bloqueio');
+select test.expect_error('select public.admin_query(''users'',''{"page":0}'')','22023','admin: paginação inválida negada');
+reset role;
+select test.assert_true((select count(*)=1 from public.portfolio_items),'admin: foto preservada');
+select test.assert_true((select count(*)=1 from storage.objects),'admin: arquivo preservado');
+select test.assert_true((select count(*)=4 from auth.users),'admin: nenhuma conta excluída');
+-- Mais de uma página: não retornar a linha sentinela ao navegador.
+insert into auth.users(id,email) select gen_random_uuid(),'local-'||n||'@example.invalid' from generate_series(1,22)n;
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009001';
+select test.assert_true(jsonb_array_length(public.admin_query('users','{"days":0}')->'items')=20,'admin: página limitada no servidor');
+select test.assert_true((public.admin_query('users','{"days":0}')->>'hasNext')::boolean,'admin: continuação real');
+select test.assert_true(jsonb_array_length(public.admin_query('users','{"page":2,"days":0}')->'items')=6,'admin: segunda página sem perda');
+reset role;
+drop table public.work_posts cascade;
+set local role authenticated;
+select test.assert_true(public.admin_query('dashboard')->'posts'='null'::jsonb,'admin: dashboard funciona sem work_posts');
+select test.assert_true(not (public.admin_query('posts')->>'available')::boolean,'admin: ausência de publicações sinalizada');
+rollback;
