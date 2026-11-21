@@ -193,7 +193,25 @@ export class SandboxService {
           requestId,
           c.first_due_date,
         );
-        validateSubscription(s, c);
+        try {
+          validateSubscription(s, c);
+        } catch (error) {
+          // Resposta divergente, mas inequivocamente da operação: preservar ID e
+          // cancelar a recorrência não consentida. Nunca cancelar recurso alheio.
+          if (
+            /^sub_[A-Za-z0-9_-]+$/.test(s.id) &&
+            s.customer === c.customer_id &&
+            s.externalReference === requestId
+          ) {
+            await this.store.call("save_provider", {
+              requestId,
+              subscriptionId: s.id,
+            });
+            await this.provider.cancelSubscription(s.id);
+            await this.store.call("cancelled", { requestId, userId });
+          }
+          throw error;
+        }
         c = await this.store.call<SandboxContract>("save_provider", {
           requestId,
           subscriptionId: s.id,

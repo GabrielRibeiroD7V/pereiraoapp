@@ -21,81 +21,82 @@ try {
   if (run.startsWith("pr17-inspect-sub_")) {
     const id = run.slice("pr17-inspect-".length);
     const s = await provider.getSubscription(id);
-    report.inspection = {id:s.id,method:s.billingType,cycle:s.cycle,value:s.value,customerId:s.customer,externalReference:s.externalReference,deleted:s.deleted};
+    report.inspection = {
+      id: s.id,
+      method: s.billingType,
+      cycle: s.cycle,
+      value: s.value,
+      customerId: s.customer,
+      externalReference: s.externalReference,
+      deleted: s.deleted,
+    };
     emit();
     process.exit(0);
   }
   const existing = await provider.findCustomers(reference);
-  // Retomada específica após HTTP 400 conhecido: não cria outro cliente/assinatura.
-  if (
-    existing.length > 1 ||
-    (existing[0] && existing[0].externalReference !== reference)
-  )
-    throw Error("RUN_CONFLICT");
-  const customer =
-    existing[0]?.id ?? (await provider.createCustomer(reference));
-  if (existing.length) {
-    const subscriptions = await provider.findSubscriptions(customer);
-    if (subscriptions.length)
-      throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");
-    await provider.prepareSyntheticCustomer(customer, reference);
-  }
+  if (existing.length) throw Error("RUN_ALREADY_EXISTS_DO_NOT_REPEAT_POST");
+  const customer = await provider.createCustomer(reference);
   report.customerId = customer;
   emit();
   const due = new Date().toISOString().slice(0, 10);
   const requestId = crypto.randomUUID();
-  const subscription = await provider.createPixSubscription(
-    customer,
-    requestId,
-    due,
-  );
-  report.pixSubscriptionId = subscription.id;
-  createdSubscription = subscription.id;
-  emit();
-  if (
-    subscription.customer !== customer ||
-    subscription.externalReference !== requestId ||
-    cents(subscription.value) !== 1999 ||
-    subscription.billingType !== "PIX"
-  )
-    throw Error("PROVIDER_MISMATCH");
-  const payments = await provider.payments(subscription.id);
-  const payment = payments[0];
-  if (
-    !payment ||
-    payment.customer !== customer ||
-    payment.subscription !== subscription.id ||
-    cents(payment.value) !== 1999
-  )
-    throw Error("PAYMENT_NOT_READY");
-  report.pixPaymentId = payment.id;
-  report.pixInitialStatus = payment.status;
-  emit();
-  // Endpoint oficial exclusivamente Sandbox. Não recebe IDs externos ao ensaio.
-  const confirmed = await fetch(
-    "https://api-sandbox.asaas.com/v3/sandbox/payment/" +
-      payment.id +
-      "/confirm",
-    {
-      method: "POST",
-      headers: { access_token: key, "User-Agent": "PereiraoSandboxSmoke/1.0" },
-      redirect: "error",
-      signal: AbortSignal.timeout(8000),
-    },
-  );
-  report.confirmHttp = confirmed.status;
-  await confirmed.body?.cancel();
-  const after = await provider.getPayment(payment.id);
-  report.pixConfirmedStatus = after.status;
-  emit();
-  if (["CONFIRMED", "RECEIVED"].includes(after.status)) {
-    await provider.refund(payment.id);
-    report.refundStatus = (await provider.getPayment(payment.id)).status;
+  if (!run.startsWith("pr17-card-")) {
+    const subscription = await provider.createPixSubscription(
+      customer,
+      requestId,
+      due,
+    );
+    report.pixSubscriptionId = subscription.id;
+    createdSubscription = subscription.id;
+    emit();
+    if (
+      subscription.customer !== customer ||
+      subscription.externalReference !== requestId ||
+      cents(subscription.value) !== 1999 ||
+      subscription.billingType !== "PIX"
+    )
+      throw Error("PROVIDER_MISMATCH");
+    const payments = await provider.payments(subscription.id);
+    const payment = payments[0];
+    if (
+      !payment ||
+      payment.customer !== customer ||
+      payment.subscription !== subscription.id ||
+      cents(payment.value) !== 1999
+    )
+      throw Error("PAYMENT_NOT_READY");
+    report.pixPaymentId = payment.id;
+    report.pixInitialStatus = payment.status;
+    emit();
+    // Endpoint oficial exclusivamente Sandbox. Não recebe IDs externos ao ensaio.
+    const confirmed = await fetch(
+      "https://api-sandbox.asaas.com/v3/sandbox/payment/" +
+        payment.id +
+        "/confirm",
+      {
+        method: "POST",
+        headers: {
+          access_token: key,
+          "User-Agent": "PereiraoSandboxSmoke/1.0",
+        },
+        redirect: "error",
+        signal: AbortSignal.timeout(8000),
+      },
+    );
+    report.confirmHttp = confirmed.status;
+    await confirmed.body?.cancel();
+    const after = await provider.getPayment(payment.id);
+    report.pixConfirmedStatus = after.status;
+    emit();
+    if (["CONFIRMED", "RECEIVED"].includes(after.status)) {
+      await provider.refund(payment.id);
+      report.refundStatus = (await provider.getPayment(payment.id)).status;
+      emit();
+    }
+    await provider.cancelSubscription(subscription.id);
+    report.pixCancelled = true;
     emit();
   }
-  await provider.cancelSubscription(subscription.id);
-  report.pixCancelled = true;
-  emit();
   const checkout = await provider.createCardCheckout(
     customer,
     crypto.randomUUID(),

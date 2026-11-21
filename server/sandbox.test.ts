@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect, vi } from "vitest";
 import { createHash, createHmac } from "node:crypto";
-import { SandboxProvider, sandboxLink, cents } from "./sandbox-provider";
+import {
+  SandboxProvider,
+  ProviderError,
+  sandboxLink,
+  cents,
+} from "./sandbox-provider";
 import {
   SandboxService,
   paymentSnapshot,
@@ -191,6 +196,45 @@ describe("provider Sandbox: transporte e proteção de segredo", () => {
   );
 });
 describe("conciliação e operações idempotentes", () => {
+  it("recusa e cancela retorno BOLETO para pedido PIX, preservando ID da tentativa", async () => {
+    const p = providerFixture(),
+      f = storeFixture();
+    p.createPixSubscription.mockResolvedValue({
+      ...subscription(),
+      billingType: "BOLETO",
+    });
+    await expect(
+      svc(f.store, p).start(uid, bid, rid, "PIX", "https://preview.example"),
+    ).rejects.toThrow("RECONCILIATION_REQUIRED");
+    expect(p.cancelSubscription).toHaveBeenCalledWith("sub_local");
+    expect(f.calls.map((x) => x[0])).toEqual([
+      "reserve",
+      "subscription_started",
+      "save_provider",
+      "cancelled",
+      "uncertain",
+    ]);
+    expect(p.payments).not.toHaveBeenCalled();
+  });
+  it("concilia estorno posterior ao cancelamento mesmo se a assinatura retornar 404", async () => {
+    const p = providerFixture(),
+      f = storeFixture({
+        known_payments: ["pay_local"],
+        claim_event: {
+          notice: { eventType: "PAYMENT_REFUNDED", objectId: "pay_local" },
+          leaseToken: uid,
+        },
+      });
+    p.getSubscription.mockRejectedValue(new ProviderError("NOT_FOUND", 404));
+    p.payments.mockRejectedValue(new ProviderError("NOT_FOUND", 404));
+    p.getPayment.mockResolvedValue({ ...payment(), status: "REFUNDED" });
+    await svc(f.store, p).processEvent("evt_refund_after_cancel");
+    expect(f.calls.find((x) => x[0] === "apply_payment")?.[1]).toMatchObject({
+      status: "REFUNDED",
+      refundedCents: 1999,
+    });
+    expect(f.calls.at(-1)?.[1]).toMatchObject({ outcome: "processed" });
+  });
   it.each([
     { customer: "cus_other" },
     { value: 20 },

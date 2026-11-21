@@ -190,24 +190,6 @@ export class SandboxProvider {
       throw new ProviderError("INVALID_PROVIDER_RESPONSE");
     return data.id;
   }
-  async prepareSyntheticCustomer(customer: string, reference: string) {
-    if (
-      !reference.startsWith("pereirao:synthetic:pr17-") ||
-      !/^cus_[A-Za-z0-9_-]+$/.test(customer)
-    )
-      throw new ProviderError("SANDBOX_DISABLED");
-    const found = await this.findCustomers(reference);
-    if (
-      found.length !== 1 ||
-      found[0]!.id !== customer ||
-      found[0]!.externalReference !== reference
-    )
-      throw new ProviderError("INVALID_PROVIDER_RESPONSE");
-    await this.call("POST", "/customers/" + customer, {
-      cpfCnpj: "24971563792",
-      notificationDisabled: true,
-    });
-  }
   findSubscriptions(customer: string) {
     if (!providerId(customer))
       throw new ProviderError("INVALID_PROVIDER_RESPONSE");
