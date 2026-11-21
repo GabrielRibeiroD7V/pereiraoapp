@@ -1,12 +1,40 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build && node scripts/check-asaas-sandbox.mjs",
-  "rewrites": [{ "source": "/api/admin", "destination": "/api/admin" }, { "source": "/(.*)", "destination": "/index.html" }],
-  "headers": [{ "source": "/(.*)", "headers": [
-    { "key": "Referrer-Policy", "value": "no-referrer" },
-    { "key": "X-Content-Type-Options", "value": "nosniff" }
-  ] },
-  {"source":"/sw.js","headers":[{"key":"Cache-Control","value":"no-store"},{"key":"Service-Worker-Allowed","value":"/"}]},
-  {"source":"/manifest.webmanifest","headers":[{"key":"Cache-Control","value":"no-cache"},{"key":"Content-Type","value":"application/manifest+json; charset=utf-8"}]},
-  {"source":"/offline.html","headers":[{"key":"Cache-Control","value":"no-cache"}]}]
+  "rewrites": [
+    { "source": "/api/admin", "destination": "/api/admin" },
+    { "source": "/api/sandbox-billing", "destination": "/api/sandbox-billing" },
+    { "source": "/api/asaas-webhook", "destination": "/api/asaas-webhook" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/offline.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
 }

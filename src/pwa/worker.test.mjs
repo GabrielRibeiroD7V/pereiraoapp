@@ -133,6 +133,8 @@ describe("worker: cache explícito e privado por versão", () => {
   });
   it.each([
     "/api/admin",
+    "/api/sandbox-billing",
+    "/api/asaas-webhook",
     "/api/other",
     "https://yazdjiwaksamizrbqewq.supabase.co/rest/v1/profiles",
     "https://yazdjiwaksamizrbqewq.supabase.co/auth/v1/user",

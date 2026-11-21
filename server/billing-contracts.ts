@@ -7,6 +7,7 @@ export interface BillingWebhookNotice {
   objectId: string;
   subscriptionId: string | null;
   requiresReconciliation: true;
+  externalReference?: string | null;
 }
 export interface ReconciliationDecision {
   businessId: string;
@@ -31,13 +32,31 @@ export function billingNotice(value: unknown): BillingWebhookNotice | null {
       "PAYMENT_OVERDUE",
       "PAYMENT_REFUNDED",
       "PAYMENT_DELETED",
+      "PAYMENT_UPDATED",
+      "PAYMENT_RESTORED",
+      "PAYMENT_PARTIALLY_REFUNDED",
+      "PAYMENT_REFUND_IN_PROGRESS",
+      "PAYMENT_CREDIT_CARD_CAPTURE_REFUSED",
+      "PAYMENT_AWAITING_RISK_ANALYSIS",
+      "PAYMENT_REPROVED_BY_RISK_ANALYSIS",
+      "PAYMENT_CHARGEBACK_REQUESTED",
+      "PAYMENT_CHARGEBACK_DISPUTE",
+      "PAYMENT_AWAITING_CHARGEBACK_REVERSAL",
       "SUBSCRIPTION_CREATED",
       "SUBSCRIPTION_UPDATED",
       "SUBSCRIPTION_DELETED",
+      "CHECKOUT_CREATED",
+      "CHECKOUT_PAID",
+      "CHECKOUT_CANCELED",
+      "CHECKOUT_EXPIRED",
     ].includes(v.event)
   )
     return null;
-  const object = v.event.startsWith("PAYMENT_") ? v.payment : v.subscription;
+  const object = v.event.startsWith("PAYMENT_")
+    ? v.payment
+    : v.event.startsWith("CHECKOUT_")
+      ? v.checkout
+      : v.subscription;
   if (!object || typeof object !== "object" || Array.isArray(object))
     return null;
   const data = object as Record<string, unknown>;
@@ -54,6 +73,15 @@ export function billingNotice(value: unknown): BillingWebhookNotice | null {
         ? data.subscription
         : null,
     requiresReconciliation: true,
+    ...(v.event.startsWith("CHECKOUT_")
+      ? {
+          externalReference:
+            typeof data.externalReference === "string" &&
+            /^[0-9a-f-]{36}$/i.test(data.externalReference)
+              ? data.externalReference
+              : null,
+        }
+      : {}),
   };
 }
 export function billingEventKey(notice: BillingWebhookNotice) {

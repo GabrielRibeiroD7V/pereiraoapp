@@ -2,7 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Brand } from "../components/Brand";
-import {AdminSubscriptionsPanel}from'../subscriptions/SubscriptionViews';
+import { AdminSubscriptionsPanel } from "../subscriptions/SubscriptionViews";
+import { useBilling } from "../billing/BillingProvider";
+import { SandboxFinancePanel } from "../billing/BillingViews";
 import { PageHeader } from "../components/PageHeader";
 import { Modal } from "../components/Modal";
 import { Pagination } from "../marketplace/Pagination";
@@ -30,6 +32,7 @@ const sections = [
   ["posts", "Publicações"],
   ["audit", "Histórico"],
   ["subscriptions", "Gratuidade e assinaturas"],
+  ["sandbox", "Financeiro Sandbox"],
 ] as const;
 const states: Record<string, string> = {
   draft: "Rascunho",
@@ -153,8 +156,12 @@ export function AdminPage() {
   );
 }
 function AdminContent() {
+  const billing = useBilling();
+  const visibleSections = sections.filter(
+    ([id]) => id !== "sandbox" || billing?.available,
+  );
   const [params, setParams] = useSearchParams();
-  const section = sections.some(([id]) => id === params.get("sec"))
+  const section = visibleSections.some(([id]) => id === params.get("sec"))
     ? (params.get("sec") as Exclude<AdminSection, "detail">)
     : "dashboard";
   const page = Math.max(1, Math.min(100000, Number(params.get("page")) || 1)),
@@ -199,7 +206,7 @@ function AdminContent() {
   return (
     <>
       <nav className="admin-sections" aria-label="Seções administrativas">
-        {sections.map(([id, label]) => (
+        {visibleSections.map(([id, label]) => (
           <button
             key={id}
             className={id === section ? "is-active" : ""}
@@ -214,7 +221,7 @@ function AdminContent() {
         ))}
       </nav>
       <div className="admin-section-heading">
-        <h2>{sections.find(([id]) => id === section)?.[1]}</h2>
+        <h2>{visibleSections.find(([id]) => id === section)?.[1]}</h2>
         <button
           className="button button--secondary"
           onClick={() => refresh((n) => n + 1)}
@@ -279,7 +286,11 @@ function AdminContent() {
           </button>
         </form>
       )}
-      {section === 'subscriptions' ? <AdminSubscriptionsPanel revision={revision}/> : section === "dashboard" ? (
+      {section === "sandbox" ? (
+        <SandboxFinancePanel key={revision} />
+      ) : section === "subscriptions" ? (
+        <AdminSubscriptionsPanel revision={revision} />
+      ) : section === "dashboard" ? (
         <Resource<AdminDashboard>
           section={section}
           filters={filters}

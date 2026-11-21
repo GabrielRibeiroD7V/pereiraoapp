@@ -38,3 +38,24 @@
 .subscription-phase {
   margin-top: 1.25rem;
 }
+.sandbox-billing {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  form {
+    display: grid;
+    gap: 1rem;
+    max-width: 38rem;
+    margin-top: 1.25rem;
+  }
+  .work-checkbox {
+    align-items: flex-start;
+    input {
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+  }
+  .subscription-list li > p {
+    margin: 0.4rem 0;
+    font-size: 0.875rem;
+  }
+}

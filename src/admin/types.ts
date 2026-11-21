@@ -1,5 +1,12 @@
 export type AdminSection =
-  "dashboard" | "users" | "businesses" | "posts" | "audit" | "detail" | "subscriptions";
+  | "dashboard"
+  | "users"
+  | "businesses"
+  | "posts"
+  | "audit"
+  | "detail"
+  | "subscriptions"
+  | "sandbox";
 export type SandboxState =
   "connected" | "missing" | "invalid" | "communication_error" | "not_validated";
 export interface SandboxDiagnostic {
