@@ -61,6 +61,13 @@ button, a, input, select, textarea { touch-action: manipulation; }
     gap: 0 .5rem;
   }
 }
+.app-header__actions { display: contents; }
+.app-header__messages {
+  grid-column: 3; grid-row: 1; justify-self: end;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.75rem; height: 2.75rem; border-radius: var(--radius-small); color: var(--color-navy);
+  &:hover, &[aria-current="page"] { background: var(--color-surface); }
+}
 .app-header .brand { grid-column: 2; grid-row: 1; justify-self: center; }
 .app-header .location { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
 
@@ -274,7 +281,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
 }
 @media (min-width: 64rem) {
   .app-header__inner { min-height: 4.5rem; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); padding-inline: var(--space-6); align-content: initial; }
-  .app-header .location { grid-column: 3; grid-row: 1; justify-self: end; font-size: .8125rem; }
+  .app-header__actions { display: flex; grid-column: 3; grid-row: 1; justify-self: end; align-items: center; gap: var(--space-3); min-width: 0; }
+  .app-header .location { font-size: .8125rem; white-space: nowrap; }
   .main-nav { grid-column: 1; grid-row: 1; position: static; min-height: 0; justify-self: start; justify-content: flex-start; gap: .25rem; padding: 0; border: 0;
     &__link { flex-direction: row; flex: 0 0 auto; gap: .5rem; padding: .5rem .75rem; font-size: .8125rem; min-height: 2.75rem; }
   }
