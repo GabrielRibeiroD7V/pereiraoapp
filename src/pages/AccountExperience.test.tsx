@@ -33,7 +33,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
     expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
     expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar?secao=bio`);
-    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
     fireEvent.click(document.querySelector('.owner-settings summary')!);
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
@@ -62,7 +62,7 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
     await waitFor(() => expect(repository.getEditable).toHaveBeenCalledWith(second.id));
     expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar?secao=bio`);
-    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
   });
 
   it('mostra projetos do negócio apenas ao dono e mantém o rascunho privado', async () => {
@@ -112,7 +112,7 @@ describe('experiência pessoal e profissional', () => {
     expect(summary).toHaveTextContent('Fotos1');
     expect(summary).toHaveTextContent('Serviços1');
     expect(summary).toHaveTextContent('Projetos0');
-    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
     expect(screen.getByText('Atendimento na região.')).toBeInTheDocument();
   });
 

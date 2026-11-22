@@ -10,6 +10,7 @@ export interface WorkRepository {
   savePhotoDetails(businessId: string, id: string, caption: string, serviceId: string | null): Promise<void>;
   deletePhoto(businessId: string, id: string): Promise<void>;
   reorderPhotos(businessId: string, ids: string[]): Promise<void>;
-  setProfilePhoto(businessId: string, photoId: string | null): Promise<void>;
+  uploadProfilePhoto(businessId: string, id: string, file: Blob, expectedPath: string | null): Promise<string>;
+  removeProfilePhoto(businessId: string, expectedPath: string | null): Promise<void>;
   imageUrl(path: string): Promise<string>;
 }

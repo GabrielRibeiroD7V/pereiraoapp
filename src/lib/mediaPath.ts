@@ -11,3 +11,13 @@ export function imagePath(id: string, path: string) {
     validId(path.slice(`${id}/portfolio/`.length).replace(/\.[^.]+$/, ""))
   );
 }
+
+// Retrato separado do portfólio; nomes de bucket nunca vêm de entrada livre.
+export function profileImagePath(id: string, path: string) {
+  const prefix = `${id}/profile/`;
+  return validId(id) && path.startsWith(prefix) && path.endsWith('.webp')
+    && validId(path.slice(prefix.length, -5));
+}
+export function imageBucket(id: string, path: string): 'business-profile' | 'business-portfolio' | null {
+  return profileImagePath(id, path) ? 'business-profile' : imagePath(id, path) ? 'business-portfolio' : null;
+}

@@ -1,10 +1,11 @@
+import { imageBucket } from '../lib/mediaPath';
 import { missingSpecialties } from '../lib/specialtiesSchema';
 import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { City } from '../types/domain';
 import type { PublicMarketplace, PublicPage, PublicProvider, PublicService } from './types';
-import { imagePath, pageNumber, searchTerm, validId, validSlug } from './validation';
+import { pageNumber, searchTerm, validId, validSlug } from './validation';
 
 export const SEARCH_SIZE = 20;
 export const DETAIL_SIZE = 12;
@@ -99,11 +100,12 @@ export function createPublicMarketplace(client: SupabaseClient<Database>): Publi
       if (error) throw error; return page((data ?? []).map((row) => ({ id: row.id, caption: row.caption, storagePath: row.storage_path })), current, DETAIL_SIZE);
     },
     async getImageUrl(id, path) {
-      if (!imagePath(id, path)) throw new Error('Invalid image path');
-      const { data, error } = await client.storage.from('business-portfolio').createSignedUrl(path, 60);
+      const bucket = imageBucket(id, path);
+      if (!bucket) throw new Error('Invalid image path');
+      const { data, error } = await client.storage.from(bucket).createSignedUrl(path, 60);
       if (error) throw error;
       const parsed = new URL(data.signedUrl);
-      if (parsed.origin !== 'https://yazdjiwaksamizrbqewq.supabase.co' || parsed.username || parsed.password || parsed.hash || parsed.pathname !== `/storage/v1/object/sign/business-portfolio/${path}`) throw new Error('Invalid image response');
+      if (parsed.origin !== 'https://yazdjiwaksamizrbqewq.supabase.co' || parsed.username || parsed.password || parsed.hash || parsed.pathname !== `/storage/v1/object/sign/${bucket}/${path}`) throw new Error('Invalid image response');
       return data.signedUrl;
     },
   };

@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, PortfolioRow } from '../lib/database.types';
 import type { WorkRepository } from './types';
 import { priceInCents, validateService } from './validation';
+import { imageBucket, profileImagePath } from '../lib/mediaPath';
 import { MAX_UPLOAD_BYTES } from './images';
 export const PORTFOLIO_BUCKET = 'business-portfolio';
 function fail(code: string): never { throw { code }; }
@@ -90,21 +91,37 @@ export function createWorkRepository(client: SupabaseClient<Database>): WorkRepo
       await command(businessId, 'finish_delete', id);
     },
     async reorderPhotos(businessId, ids) { await manager(businessId); await command(businessId, 'reorder', undefined, { ordered_items: ids }); },
-    async setProfilePhoto(businessId, photoId) {
+    async uploadProfilePhoto(businessId, id, file, expectedPath) {
+      if (file.type !== 'image/webp' || !file.size || file.size > MAX_UPLOAD_BYTES) fail('INVALID_INPUT');
       await manager(businessId);
-      let path: string | null = null;
-      if (photoId) {
-        const { data, error } = await client.from('portfolio_items').select('storage_path,media_state').eq('business_id', businessId).eq('id', photoId).maybeSingle();
+      const path = `${businessId}/profile/${id}.webp`;
+      if (!profileImagePath(businessId, path)) fail('INVALID_INPUT');
+      const call = async (name: string) => {
+        const { data, error } = await client.rpc('profile_photo_command', {
+          command: name, target_business: businessId, target_photo: id, expected_avatar_path: expectedPath,
+        });
         if (error) throw error;
-        if (!data || data.media_state !== 'ready' || !data.storage_path.startsWith(`${businessId}/portfolio/`)) fail('INVALID_INPUT');
-        path = data.storage_path;
+        if (!data || typeof data !== 'object' || Array.isArray(data) || data.storage_path !== path || data.business_id !== businessId || data.id !== id) fail('INVALID_RESPONSE');
+        return data;
+      };
+      await call('prepare'); // Falta de migração falha antes de qualquer upload.
+      try { await call('finalize'); return path; }
+      catch (cause) { if (!(cause && typeof cause === 'object' && 'code' in cause && cause.code === '22023')) throw cause; }
+      const uploaded = await client.storage.from('business-profile').upload(path, file, { contentType: 'image/webp', upsert: false, cacheControl: '60' });
+      if (uploaded.error) {
+        // O servidor pode ter recebido o arquivo apesar de uma resposta perdida.
+        try { await call('finalize'); return path; } catch { throw uploaded.error; }
       }
-      const { data, error } = await client.from('businesses').update({ avatar_path: path }).eq('id', businessId).select('id').single();
+      await call('finalize');
+      return path;
+    },
+    async removeProfilePhoto(businessId, expectedPath) {
+      await manager(businessId);
+      const { error } = await client.rpc('profile_photo_command', { command: 'remove', target_business: businessId, expected_avatar_path: expectedPath });
       if (error) throw error;
-      if (!data) fail('NOT_MANAGER');
     },
     async imageUrl(path) {
-      const { data, error } = await client.storage.from(PORTFOLIO_BUCKET).createSignedUrl(path, 60);
+      const { data, error } = await client.storage.from(imageBucket(path.split('/')[0] ?? '', path) ?? fail('INVALID_INPUT')).createSignedUrl(path, 60);
       if (error) throw error; return data.signedUrl;
     },
   };

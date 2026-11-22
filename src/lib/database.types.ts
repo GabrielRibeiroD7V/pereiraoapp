@@ -139,7 +139,6 @@ export interface Database {
             | "city_id"
             | "whatsapp"
             | "instagram"
-            | "avatar_path"
           >
         >
       >;
@@ -185,6 +184,9 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      admin_profile_photo: { Args: { target_business: string }; Returns: string | null };
+      profile_photo_command: { Args: { command: string; target_business: string; target_photo?: string; expected_avatar_path?: string | null }; Returns: Json };
+
       open_conversation: { Args: { target_business: string; message_body: string }; Returns: string };
       send_conversation_message: { Args: { target_conversation: string; message_body: string }; Returns: string };
       my_conversations: { Args: Record<string, never>; Returns: Json };

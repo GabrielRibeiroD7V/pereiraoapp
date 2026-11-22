@@ -15,7 +15,7 @@ function fixture(allowed = true) {
         error: null,
       })),
     },
-    rpc: vi.fn(async (name: string) =>
+    rpc: vi.fn(async (name: string): Promise<{ data: unknown; error: { code: string } | null }> =>
       name === "admin_access"
         ? { data: allowed, error: null }
         : { data: { items: [], hasNext: false }, error: null },
@@ -276,5 +276,28 @@ describe("API administrativa", () => {
       expect(r.status).toBe(status);
       expect(JSON.stringify(await r.json())).not.toContain("private details");
     }
+  });
+});
+
+describe('revisão administrativa do retrato separado', () => {
+  const businessId = '00000000-0000-4000-8000-000000000001';
+  const path = `${businessId}/profile/00000000-0000-4000-8000-000000000101.webp`;
+  it('assina no bucket próprio só após autenticar e autorizar administrador', async () => {
+    const f = fixture();
+    const sign = vi.fn(async () => ({ data: { signedUrl: `https://yazdjiwaksamizrbqewq.supabase.co/storage/v1/object/sign/business-profile/${path}?token=synthetic` }, error: null }));
+    f.client.storage.from.mockReturnValue({ createSignedUrl: sign });
+    expect((await f.handler(req({ action: 'image', businessId, path }))).status).toBe(200);
+    expect(f.client.storage.from).toHaveBeenCalledWith('business-profile'); expect(sign).toHaveBeenCalledWith(path,60);
+    const other = fixture(false);
+    expect((await other.handler(req({ action: 'image', businessId, path }))).status).toBe(403);
+    expect(other.client.storage.from).not.toHaveBeenCalled();
+  });
+  it('adiciona retrato à revisão sem colocá-lo nas fotos de trabalhos', async () => {
+    const f = fixture();
+    f.client.rpc.mockImplementation(async name => name === 'admin_access' ? { data: true, error: null }
+      : name === 'admin_profile_photo' ? { data: path, error: null }
+      : { data: { business: { id: businessId }, photos: [] }, error: null });
+    const response = await f.handler(req({ action: 'query', section: 'detail', filters: { id: businessId } }));
+    expect(response.status).toBe(200); expect((await response.json()).data).toMatchObject({ profilePhoto: path, photos: [] });
   });
 });

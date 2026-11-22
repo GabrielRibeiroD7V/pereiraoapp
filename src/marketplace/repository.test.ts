@@ -95,3 +95,12 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
     await expect(repository.search(filters, 1)).rejects.toBeDefined();
   });
 });
+
+it('assina retrato no bucket próprio e recusa resposta com bucket trocado', async () => {
+  const path = `${p.id}/profile/${photoFixtureId}.webp`;
+  const f = setup({ signedURL: `/object/sign/business-profile/${path}?token=synthetic` });
+  expect(await f.repository.getImageUrl(p.id, path)).toContain('/object/sign/business-profile/');
+  expect(f.calls[0]?.url.pathname).toContain('/sign/business-profile/');
+  const wrong = setup({ signedURL: `/object/sign/business-portfolio/${path}?token=synthetic` });
+  await expect(wrong.repository.getImageUrl(p.id, path)).rejects.toThrow('Invalid image response');
+});

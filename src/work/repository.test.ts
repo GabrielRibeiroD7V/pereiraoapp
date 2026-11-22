@@ -38,15 +38,10 @@ function setup(options: { manager?: boolean; ready?: boolean; uploadFails?: bool
   return { repository: createWorkRepository(client), calls };
 }
 describe('serviços e Storage pelo SDK com transporte interceptado', () => {
-  it('só escolhe foto pronta do próprio negócio e altera apenas o avatar', async () => {
-    const { repository, calls } = setup();
-    await repository.setProfilePhoto(bid, pid);
-    const change = calls.find(call => call.path.endsWith('/businesses') && call.method === 'PATCH');
-    expect(change?.body).toEqual({ avatar_path: `${bid}/portfolio/${pid}.webp` });
-    expect(change?.url.searchParams.get('id')).toBe(`eq.${bid}`);
-    const other = setup({ manager: false });
-    await expect(other.repository.setProfilePhoto(bid, pid)).rejects.toBeDefined();
-    expect(other.calls.some(call => call.method === 'PATCH')).toBe(false);
+  it('bloqueia envio de retrato por terceiro antes de preparar ou enviar arquivo', async () => {
+    const { repository, calls } = setup({ manager: false });
+    await expect(repository.uploadProfilePhoto(bid, pid, new Blob(['x'], { type: 'image/webp' }), null)).rejects.toBeDefined();
+    expect(calls.some(call => call.method === 'POST' || call.method === 'PATCH')).toBe(false);
   });
   it('bloqueia terceiros e estrutura pendente antes de qualquer escrita', async () => {
     for (const options of [{ manager: false }, { ready: false }]) {

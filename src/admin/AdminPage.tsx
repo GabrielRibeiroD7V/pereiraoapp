@@ -713,7 +713,9 @@ function BusinessReview({
           ))}
         </ul>
       )}
-      <h3>Fotografias</h3>
+      <h3>Foto principal do perfil</h3>
+      {data.profilePhoto ? <div className="admin-photo-grid"><AdminPhotoPreview key={data.profilePhoto} businessId={b.id} photo={{ id: 'profile-' + data.profilePhoto, storage_path: data.profilePhoto, caption: 'Foto principal do perfil', media_state: 'ready' }} /></div> : <p>Nenhuma foto principal informada.</p>}
+      <h3>Fotografias de trabalhos</h3>
       {data.photos.length === 0 ? (
         <p>Nenhuma fotografia cadastrada.</p>
       ) : (

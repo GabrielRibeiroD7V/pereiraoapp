@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { ProfilePhotoPicker } from '../work/ProfilePhotoPicker';
 import { ManagedBusinessAvatar } from '../work/ManagedBusinessAvatar';
 import { SectionTabs } from '../components/SectionTabs';
 import { Modal } from '../components/Modal';
@@ -63,13 +64,13 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false }: { b
     {error && <p role="alert" className="form-error">{error}</p>}
     {business && info && <>
       <header className="social-profile-header social-preview-header">
-        <div className="social-preview-identity"><Link to={`/conta/profissional/${businessId}/trabalhos`} aria-label="Alterar foto do perfil"><ManagedBusinessAvatar path={business.business.avatar_path} /></Link><div className="social-preview-identity__details">
+        <div className="social-preview-identity"><div className="profile-photo-controls">{work ? <ProfilePhotoPicker key={businessId} businessId={businessId} path={business.business.avatar_path} repository={work} onSaved={path => setBusiness(current => current?.business.id === businessId ? { ...current, business: { ...current.business, avatar_path: path } } : current)} /> : <ManagedBusinessAvatar path={business.business.avatar_path} />}</div><div className="social-preview-identity__details">
           {embedded ? <h2>{info.name}</h2> : <h1>{info.name}</h1>}<p>{info.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'} · {city ? `${city.name}/${city.state_code}` : 'Cidade não informada'}</p>
           <dl className="social-preview-stats" role="group" aria-label="Resumo do perfil"><div><dt>Projetos</dt><dd>{posts.length}</dd></div><div><dt>Fotos</dt><dd>{contentError ? '—' : photos.length}</dd></div><div><dt>Serviços</dt><dd>{contentError ? '—' : services.length}</dd></div></dl>
         </div></div>
       <SpecialtyBadges primary={category ?? null} additional={catalog?.categories.filter(item => info.additionalCategoryIds.includes(item.id)) ?? []} />
       <p className="public-about social-profile-bio">{info.description || 'Adicione uma descrição para apresentar seu trabalho.'}</p>
-      <div className="social-profile-actions"><Link className="button button--secondary" to={`/conta/profissional/${businessId}/editar?secao=bio`}>Editar perfil e bio</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId}/trabalhos`}>Foto de perfil e trabalhos</Link></div></header>
+      <div className="social-profile-actions"><Link className="button button--secondary" to={`/conta/profissional/${businessId}/editar?secao=bio`}>Editar perfil e bio</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId}/trabalhos`}>Fotos e trabalhos</Link></div></header>
       <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até a aprovação e publicação.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       <SectionTabs label="Conteúdo do perfil" sections={[{ id: 'trabalhos', label: 'Projetos', content: <section className="public-profile-section" aria-label="Projetos e portfólio"><h2>Projetos e trabalhos</h2>
