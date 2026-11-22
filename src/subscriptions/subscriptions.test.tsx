@@ -49,6 +49,12 @@ function open(
   );
 }
 describe("consulta informativa de assinatura", () => {
+  it("mostra a isenção do dono sem oferecer contratação", async () => {
+    open({ list: async () => ({ items: [{ ...item, state: "exempt" }], hasNext: false }) });
+    expect(await screen.findByText("Isento de assinatura")).toBeInTheDocument();
+    expect(screen.getByText(/não precisa contratar uma assinatura/)).toBeInTheDocument();
+    expect(screen.queryByText(/Período gratuito até|Contratar agora/)).not.toBeInTheDocument();
+  });
   it("mantém situações individuais sem oferta ou pagamento", async () => {
     open({
       list: vi.fn(async () => ({

@@ -20,6 +20,7 @@ function StatusCopy({ item }: { item: BusinessSubscription }) {
   return (
     <div className="subscription-copy">
       <strong>{subscriptionLabels[item.state]}</strong>
+      {item.state === "exempt" && <p>Este negócio não precisa contratar uma assinatura.</p>}
       {item.trialEndsAt &&
         (item.state === "trial_active" || item.state === "trial_ended") && (
           <p>
@@ -93,7 +94,7 @@ export function BusinessSubscriptionLine({
       <Link className="text-link" to="/conta/assinaturas">
         Consultar meus negócios
       </Link>
-      {billing?.available && (
+      {billing?.available && state.data?.page?.items[0] && state.data.page.items[0].state !== 'exempt' && (
         <Link
           className="text-link"
           to={`/conta/profissional/${businessId}/assinatura`}
