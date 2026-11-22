@@ -28,8 +28,8 @@ export function PortfolioPage() {
     void run(() => state.repository!.reorderPhotos(state.businessId, ids));
   }
   return <WorkFrame title="Fotos e trabalhos" state={state}>{state.data && state.repository && <>
-    <p className="field-help">Estas fotos são trabalhos realizados. Para trocar o retrato, volte ao seu perfil na Conta.</p>
-    <div className="work-toolbar"><p>Fotografias dos seus trabalhos</p><button className="button button--primary" disabled={pending || state.loading} onClick={() => setEditor('new')}><Plus size={17} aria-hidden="true" />Adicionar fotografia</button></div>
+    <p className="field-help">Estas fotos são trabalhos realizados. Para trocar o retrato, use a foto principal na área Editar perfil profissional.</p>
+    <div className="work-toolbar"><p>Fotografias dos seus trabalhos</p><button className="button button--primary" disabled={pending || state.loading} onClick={() => setEditor('new')}><Plus size={17} aria-hidden="true" />Adicionar foto de trabalho</button></div>
     {error && !deleting && <div role="alert" className="form-error"><p>{error}</p><button type="button" className="text-link" onClick={() => { setError(null); state.refresh(); }}>Atualizar lista</button></div>}
     {state.data.photos.length === 0 ? <div className="work-empty"><Image size={28} aria-hidden="true" /><h2>Mostre o que você faz</h2><p>Envie fotografias de trabalhos realizados pelo seu negócio. Elas seguem a visibilidade do seu perfil.</p></div> : <ul className="portfolio-grid">{state.data.photos.map((photo) => <li key={photo.id}>
       {photo.media_state === 'ready' ? <PortfolioPhoto item={photo} repository={state.repository!} onOpen={(url) => setEnlarged({ url, caption: photo.caption || 'Fotografia do trabalho' })} /> : <div className="portfolio-pending"><Image size={26} aria-hidden="true" /><strong>{photo.media_state === 'pending' ? 'Envio pendente' : 'Exclusão pendente'}</strong><p>{photo.media_state === 'pending' ? 'Retome o envio ou remova esta fotografia.' : 'Tente concluir a exclusão. A fotografia não está disponível publicamente.'}</p></div>}

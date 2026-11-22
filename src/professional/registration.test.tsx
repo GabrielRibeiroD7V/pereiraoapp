@@ -46,26 +46,11 @@ async function finalStep() {
 beforeEach(() => { sessionStorage.clear(); });
 
 describe('cadastro progressivo e espaço profissional', () => {
-  it('abre edição da bio diretamente e mostra o texto antes de salvar', async () => {
-    const repo = repository();
-    open(repo, `/conta/profissional/${bid}/editar?secao=bio`);
-    const bio = await screen.findByLabelText('Descrição');
-    fireEvent.change(bio, { target: { value: 'Atendo Mundo Novo e região.' } });
-    await finalStep();
-    expect(screen.getByRole('region', { name: 'Revisão do cadastro' })).toHaveTextContent('Atendo Mundo Novo e região.');
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Meu perfil' });
-    expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ description: 'Atendo Mundo Novo e região.' }));
-  });
-
-  it('abre a prévia diretamente da edição e mantém fotos no perfil profissional', async () => {
-    const repo = repository(); open(repo, `/conta/profissional/${bid}/editar`);
-    const preview = await screen.findByRole('link', { name: 'Ver prévia do perfil' });
-    expect(screen.getByRole('link', { name: 'Adicionar fotos' })).toHaveAttribute('href', `/conta/profissional/${bid}/trabalhos`);
-    fireEvent.click(preview);
-    expect(await screen.findByRole('heading', { name: input.name })).toBeInTheDocument();
-    expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
-    expect(repo.saveDraft).not.toHaveBeenCalled();
+  it('abre edição existente sem voltar ao cadastro em etapas', async () => {
+    const repo = repository(); open(repo, `/conta/profissional/${bid}/editar?secao=bio`);
+    expect(await screen.findByLabelText('Bio')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Continuar' })).not.toBeInTheDocument();
+    expect(repo.createDraft).not.toHaveBeenCalled();
   });
   it('confirmação de e-mail retorna ao cadastro solicitado', async () => {
     open(repository(), '/auth/retorno?code=local-test&next=%2Fconta%2Fprofissional%2Fcadastro');
@@ -143,14 +128,13 @@ describe('cadastro progressivo e espaço profissional', () => {
     repo.getCatalog = vi.fn(async () => ({ ...catalog, cities: regionalCityFixture.map(city => ({ id: city.id, name: city.name, state_code: city.stateCode })) }));
     repo.getEditable = vi.fn(async () => ({ business: { ...business, city_id: 'guaira-pr' }, input: { ...input, cityId: 'guaira-pr', areaCityIds: ['guaira-pr', 'eldorado-ms'] } }));
     open(repo, `/conta/profissional/${bid}/editar`);
-    await screen.findByRole('radio', { name: 'Profissional autônomo' });
-    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
-    expect(screen.getByLabelText('Cidade', { exact: true })).toHaveValue('guaira-pr');
+    fireEvent.click(await screen.findByRole('tab', { name: 'Atendimento' }));
+    expect(screen.getByLabelText('Cidade de origem', { exact: true })).toHaveValue('guaira-pr');
     expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).toHaveTextContent('Eldorado/MS');
     expect(screen.getByRole('list',{name:'Cidades adicionais selecionadas'})).not.toHaveTextContent('Mundo Novo/MS');
     expect(repo.saveDraft).not.toHaveBeenCalled();
-    await finalStep();
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.change(screen.getByLabelText('WhatsApp'), { target: { value: '5567999991234' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
     await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ cityId: 'guaira-pr', areaCityIds: ['guaira-pr', 'eldorado-ms'] })));
     expect(repo.createDraft).not.toHaveBeenCalled();
   });
@@ -174,11 +158,9 @@ describe('cadastro progressivo e espaço profissional', () => {
     const repo = repository();
     repo.getEditable = vi.fn(async () => ({ business, input: { ...input, additionalCategoryIds: ['pintura'], expectedSpecialties: { primaryId: 'eletrica', additionalIds: ['pintura'] } } }));
     open(repo, `/conta/profissional/${bid}/editar`);
-    fireEvent.click(await screen.findByRole('button', { name: 'Continuar' }));
-    expect(screen.getByRole('checkbox', { name: 'Pintura' })).toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'Pintura' })).toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'Remover especialidade Pintura' }));
-    await finalStep();
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
     await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ additionalCategoryIds: [], expectedSpecialties: { primaryId: 'eletrica', additionalIds: ['pintura'] } })));
     expect(repo.createDraft).not.toHaveBeenCalled();
   });
@@ -266,12 +248,13 @@ describe('cadastro progressivo e espaço profissional', () => {
   it('edita um perfil existente sem executar criação', async () => {
     writeCheckpoint('registration-user', { slug: 'draft-teste', businessId: bid });
     const repo = repository(); open(repo, `/conta/profissional/${bid}/editar`);
-    await details(); await finalStep();
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Meu perfil' });
+    fireEvent.change(await screen.findByLabelText('Bio'), { target: { value: 'Bio alterada' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+    await waitFor(() => expect(repo.saveDraft).toHaveBeenCalledOnce());
     expect(repo.createDraft).not.toHaveBeenCalled();
     expect(repo.getEditable).toHaveBeenCalledWith(bid);
-    expect(readCheckpoint('registration-user')).toBeNull();
+    // An unrelated first-registration checkpoint is not touched by the editor.
+    expect(readCheckpoint('registration-user')?.businessId).toBe(bid);
   });
 
   it('bloqueia cadastro com aviso honesto antes da nova migração', async () => {

@@ -3,9 +3,11 @@ import type { ReactNode } from 'react';
 
 type Section = { id: string; label: string; content: ReactNode };
 /** Abas internas: setas/Home/End movem foco e seleção; painéis mantêm seus dados. */
-export function SectionTabs({ label, sections }: { label: string; sections: readonly Section[] }) {
+export function SectionTabs({ label, sections, selectedId, onSelect }: { label: string; sections: readonly Section[]; selectedId?: string; onSelect?: (id: string) => void }) {
   const prefix = useId();
-  const [selected, setSelected] = useState(sections[0]?.id ?? '');
+  const [internal, setInternal] = useState(sections[0]?.id ?? '');
+  const selected = selectedId ?? internal;
+  const setSelected = (id: string) => { setInternal(id); onSelect?.(id); };
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   return <div className="section-tabs">
     <div className="section-tabs__list" role="tablist" aria-label={label}>

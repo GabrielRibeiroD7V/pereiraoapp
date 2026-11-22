@@ -105,7 +105,7 @@ export function ProfessionalRegistrationPage() {
     {!repository && <p role="status" className="form-notice">O cadastro ainda está sendo preparado. Continue explorando o PEREIRÃO.</p>}
     {error && <p role="alert" className="form-error">{error}</p>}
     {savedId && !businessId && <p className="form-notice">Seu rascunho já foi criado. Ao tentar novamente, continuaremos no mesmo perfil.</p>}
-    {(businessId || savedId) && <div className="registration-photo-link"><strong>Seu perfil</strong><p>Veja como ele aparece para os clientes. A prévia mostra os dados já salvos.</p><div className="registration-preview-actions"><Link className="button button--primary" to={`/conta/profissional/${businessId ?? savedId}/previa`}>Ver prévia do perfil</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId ?? savedId}/trabalhos`}>Adicionar fotos</Link></div></div>}
+    {(businessId || savedId) && <div className="registration-photo-link"><strong>Seu perfil</strong><p>Veja como ele aparece para os clientes. A prévia mostra os dados já salvos.</p><div className="registration-preview-actions"><Link className="button button--primary" to={`/conta/profissional/${businessId ?? savedId}/previa`}>Ver prévia do perfil</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId ?? savedId}/editar?secao=conteudo`}>Gerenciar conteúdo</Link></div></div>}
     {!businessId && !savedId && <p className="field-help">Depois de salvar o rascunho, você poderá adicionar fotos e escolher a foto principal.</p>}
     {catalog && <>
       {(catalog.categories.length === 0 || catalog.cities.length === 0) && <p role="status" className="form-notice">Ainda não há cidade ou categoria disponível para concluir o cadastro.</p>}

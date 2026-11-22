@@ -48,7 +48,7 @@ describe('gerenciamento de serviços e fotografias', () => {
     const NativeURL = URL, revoke = vi.fn();
     vi.stubGlobal('URL', class extends NativeURL { static createObjectURL() { return 'blob:local-only'; } static revokeObjectURL = revoke; });
     const fixtures = open('trabalhos'); const upload = vi.spyOn(fixtures.work, 'uploadPhoto');
-    fireEvent.click(await screen.findByRole('button', { name: 'Adicionar fotografia' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Adicionar foto de trabalho' }));
     fireEvent.change(screen.getByLabelText('Fotografia do trabalho'), { target: { files: [new File(['local'], 'foto.png', { type: 'image/png' })] } });
     expect(await screen.findByAltText('Prévia da fotografia selecionada')).toBeInTheDocument();
     expect(upload).not.toHaveBeenCalled(); expect(optimizeImage).toHaveBeenCalled();

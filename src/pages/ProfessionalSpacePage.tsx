@@ -59,7 +59,7 @@ export function ProfessionalSpacePage() {
         <div className="business-identity__actions"><LinkButton to={`/conta/profissional/${business.id}/previa`}>Ver prévia do perfil</LinkButton><LinkButton variant="secondary" to={`/conta/profissional/${business.id}/editar`}><PencilLine size={17} aria-hidden="true" />Editar dados do perfil</LinkButton></div>
       </section>
       <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Gerenciar conteúdo</h2>
-        <MenuRow icon={Image} title="Fotos e trabalhos" description="Adicionar fotos e escolher foto principal" to={`/conta/profissional/${business.id}/trabalhos`} />
+        <MenuRow icon={Image} title="Fotografias de trabalhos" description="Fotografias de serviços realizados" to={`/conta/profissional/${business.id}/editar?secao=conteudo`} />
         <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
         <MenuRow icon={FileText} title="Publicações" description="Apresente trabalhos realizados" to={`/conta/profissional/${business.id}/publicacoes`}/>
         <MenuRow icon={MessageSquare} title="Mensagens" description="Conversas com seus clientes" to="/mensagens" />
