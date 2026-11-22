@@ -1,21 +1,40 @@
-import { BriefcaseBusiness, ChevronRight, CreditCard, LogOut, MessageSquare, Settings2, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BriefcaseBusiness, CreditCard, Ellipsis, LogOut, MessageCircle, ShieldCheck, UserRound } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { ProfileAvatar } from '../components/ProfileAvatar';
-import { MenuRow } from '../components/MenuRow';
 import { usePersonalProfile } from '../auth/usePersonalProfile';
-import { PageHeader } from '../components/PageHeader';
 import { LinkButton } from '../components/LinkButton';
+import { PageHeader } from '../components/PageHeader';
 import { routes } from '../app/routes';
-import { useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { authErrorMessage } from '../auth/errors';
-import {AdminEntry} from '../admin/AdminEntry';
+import { AdminEntry } from '../admin/AdminEntry';
+import { useProfessionalRepository } from '../professional/ProfessionalProvider';
+import { professionalError } from '../professional/validation';
+import { ProfilePreviewPage } from './ProfilePreviewPage';
+import type { BusinessRow } from '../lib/database.types';
 
 export function AccountPage() {
   const { session, gateway, loading, error: sessionError } = useAuth();
   const { profile, error: profileError } = usePersonalProfile();
+  const professional = useProfessionalRepository();
+  const location = useLocation();
+  const [businesses, setBusinesses] = useState<readonly BusinessRow[]>([]);
+  const [selectedId, setSelectedId] = useState('');
+  const [businessesLoading, setBusinessesLoading] = useState(true);
+  const [businessesError, setBusinessesError] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    setBusinesses([]); setBusinessesError(''); setBusinessesLoading(true);
+    if (!session || !professional) { setBusinessesLoading(false); return; }
+    void professional.listMine().then(rows => { if (live) setBusinesses(rows); })
+      .catch((cause: unknown) => { if (live) setBusinessesError(professionalError(cause)); })
+      .finally(() => { if (live) setBusinessesLoading(false); });
+    return () => { live = false; };
+  }, [session?.user.id, professional]);
+  const selected = businesses.find(item => item.id === (selectedId || location.state?.businessId)) ?? businesses[0];
   async function signOut() {
     if (!gateway || pending) return;
     setPending(true); setError(null);
@@ -23,32 +42,42 @@ export function AccountPage() {
     catch (cause) { setError(authErrorMessage(cause)); }
     finally { setPending(false); }
   }
-  return (
-    <div className="account-page">
-      <PageHeader title="Minha conta" />
-      {loading ? <p role="status">Verificando sua sessão…</p> : session ? <>
-        <Link className="personal-heading" to="/conta/dados" aria-label="Editar dados da conta">
-          <ProfileAvatar src={profile.avatarUrl} /><div className="personal-heading__copy"><h2>{profile.displayName}</h2><p>Nome e e-mail da conta</p></div><ChevronRight size={23} aria-hidden="true" />
-        </Link>
-        {profileError && <p role="status" className="field-help">Não foi possível atualizar seus dados agora. Tente novamente em Dados da conta.</p>}
-      </> : <>
-        <div className="personal-heading"><ProfileAvatar /><div className="personal-heading__copy"><h2>Bem-vindo ao PEREIRÃO</h2><p>Encontre serviços ou anuncie seu trabalho.</p></div></div>
-        <div className="account-actions"><LinkButton to="/entrar">Entrar</LinkButton><LinkButton to="/criar-conta" variant="secondary">Criar conta</LinkButton></div>
-      </>}
+  return <div className="account-page">
+    {!session && <PageHeader title="Minha conta" />}
+    {loading ? <p role="status">Verificando sua sessão…</p> : session ? <>
+      <header className="owner-toolbar"><h1>Meu perfil</h1><div>
+        <Link to="/mensagens" className="owner-toolbar__icon" aria-label="Abrir mensagens"><MessageCircle aria-hidden="true" /></Link>
+        <details className="owner-settings"><summary aria-label="Opções da conta"><Ellipsis aria-hidden="true" /></summary>
+          <nav aria-label="Opções da conta">
+            <Link to="/conta/dados"><UserRound size={18} />Dados da conta</Link>
+            <Link to="/conta/seguranca"><ShieldCheck size={18} />Segurança e acesso</Link>
+            <Link to="/conta/assinaturas"><CreditCard size={18} />Gratuidade e assinatura</Link>
+            <AdminEntry />
+            <button type="button" disabled={pending} onClick={() => void signOut()}><LogOut size={18} />{pending ? 'Saindo…' : 'Sair da conta'}</button>
+          </nav>
+        </details>
+      </div></header>
+      <p className="owner-account-name">Conta de {profile.displayName}</p>
+      {profileError && <p role="status" className="field-help">Não foi possível atualizar seus dados agora.</p>}
       {(error || sessionError) && <p className="form-error" role="alert">{error || sessionError}</p>}
-      <Link className="professional-entry" to={session ? '/conta/profissional' : '/conta/profissional/cadastro'}>
-        <span className="professional-entry__icon"><BriefcaseBusiness size={28} strokeWidth={1.7} aria-hidden="true" /></span>
-        <span><strong>Meu perfil profissional</strong><span>Prévia, fotos, serviços e publicações.</span></span><ChevronRight size={23} aria-hidden="true" />
-      </Link>
-      {session && <div className="account-menu">
-        <MenuRow icon={MessageSquare} title="Mensagens" description="Converse com profissionais e clientes" to="/mensagens" />
-        <AdminEntry />
-        <MenuRow icon={CreditCard} title="Gratuidade e assinatura" description="Consulte a situação de cada negócio" to="/conta/assinaturas"/>
-        <MenuRow icon={ShieldCheck} title="Segurança e acesso" description="E-mail e recuperação de senha" to="/conta/seguranca" />
-        <MenuRow icon={Settings2} title="Configurações" description="Preferências e notificações" soon />
-        <MenuRow icon={LogOut} title={pending ? 'Saindo…' : 'Sair da conta'} description="Encerrar sua sessão no PEREIRÃO" onClick={() => void signOut()} pending={pending} danger />
-      </div>}
+      {businessesLoading && <p role="status">Carregando seu perfil…</p>}
+      {businessesError && <p role="alert" className="form-error">{businessesError}</p>}
+      {!businessesLoading && !businessesError && !professional && <p role="status">Perfil profissional indisponível neste momento.</p>}
+      {!businessesLoading && !businessesError && professional && businesses.length === 0 && <section className="owner-empty">
+        <ProfileAvatar src={profile.avatarUrl} /><h2>{profile.displayName}</h2><p>Você ainda não cadastrou um perfil profissional. Crie um rascunho para adicionar bio, foto, serviços e trabalhos.</p>
+        <LinkButton to="/conta/profissional/cadastro">Criar perfil profissional</LinkButton>
+      </section>}
+      {selected && <>
+        {businesses.length > 1 && <div className="business-selector form-field"><label htmlFor="owner-business">Perfil que você está vendo</label>
+          <select id="owner-business" value={selected.id} onChange={event => setSelectedId(event.target.value)}>{businesses.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
+        <ProfilePreviewPage key={selected.id} businessIdOverride={selected.id} embedded />
+        <div className="owner-management"><Link to="/conta/profissional" state={{ businessId: selected.id }}><BriefcaseBusiness size={18} aria-hidden="true" />Gerenciar serviços, publicações e negócios</Link></div>
+      </>}
+    </> : <>
+      <div className="personal-heading"><ProfileAvatar /><div className="personal-heading__copy"><h2>Bem-vindo ao PEREIRÃO</h2><p>Encontre serviços ou anuncie seu trabalho.</p></div></div>
+      <div className="account-actions"><LinkButton to="/entrar">Entrar</LinkButton><LinkButton to="/criar-conta" variant="secondary">Criar conta</LinkButton></div>
+      <Link className="professional-entry" to="/conta/profissional/cadastro"><span className="professional-entry__icon"><BriefcaseBusiness size={28} aria-hidden="true" /></span><span><strong>Anunciar meus serviços</strong><span>Crie seu perfil profissional.</span></span></Link>
       <Link className="text-link account-explore" to={routes.home}>Continuar explorando</Link>
-    </div>
-  );
+    </>}
+  </div>;
 }

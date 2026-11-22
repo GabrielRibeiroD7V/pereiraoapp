@@ -52,7 +52,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(screen.getByRole('link', { name: 'Adicionar fotos' })).toHaveAttribute('href', `/conta/profissional/${bid}/trabalhos`);
     fireEvent.click(preview);
     expect(await screen.findByRole('heading', { name: input.name })).toBeInTheDocument();
-    expect(screen.getByText(/Prévia privada/)).toBeInTheDocument();
+    expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
     expect(repo.saveDraft).not.toHaveBeenCalled();
   });
   it('confirmação de e-mail retorna ao cadastro solicitado', async () => {

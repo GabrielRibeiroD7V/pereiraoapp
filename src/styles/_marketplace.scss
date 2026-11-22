@@ -31,7 +31,7 @@
     .social-profile-bio { margin: .875rem 0; line-height: 1.5; }
   }
   .social-preview-header { .social-preview-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; margin: .75rem 0 1rem; }
-    .social-preview-identity__details { flex: 1; min-width: 0; h1 { font-size: clamp(1.15rem, 5vw, 1.75rem); line-height: 1.2; overflow-wrap: anywhere; } > p { margin: .3rem 0 .75rem; color: var(--color-secondary); font-size: .8rem; } }
+    .social-preview-identity__details { flex: 1; min-width: 0; h1, h2 { font-size: clamp(1.15rem, 5vw, 1.75rem); line-height: 1.2; overflow-wrap: anywhere; } > p { margin: .3rem 0 .75rem; color: var(--color-secondary); font-size: .8rem; } }
     .profile-avatar { width: clamp(5.5rem, 24vw, 8.5rem); height: clamp(5.5rem, 24vw, 8.5rem); flex-basis: clamp(5.5rem, 24vw, 8.5rem); border: 2px solid var(--color-border); img { object-fit: cover; } }
     .social-preview-stats { display: flex; gap: clamp(.5rem, 3vw, 2rem); margin: 0; > div { display: flex; flex-direction: column-reverse; align-items: center; min-width: 0; } dt { font-size: .75rem; color: var(--color-secondary); } dd { margin: 0; font-weight: 700; font-size: 1rem; color: var(--color-navy); } }
     .social-profile-actions { margin-top: 1rem; }

@@ -6,11 +6,12 @@ import type { AuthGateway } from '../auth/types';
 import type { BusinessRow } from '../lib/database.types';
 import type { ProfessionalRepository } from '../professional/types';
 import type { WorkRepository } from '../work/types';
+import type { ManagedPosts } from '../posts/types';
 import { emptyRegistration } from '../professional/validation';
 
 const first: BusinessRow = { id: '00000000-0000-4000-8000-000000000001', name: 'Autônomo de demonstração', type: 'autonomo', category_id: 'eletrica', city_id: 'mundo-novo-ms', status: 'draft', slug: 'demo', description: null, whatsapp: null, instagram: null, avatar_path: null, created_at: '', updated_at: '' };
 const second: BusinessRow = { ...first, id: '00000000-0000-4000-8000-000000000002', name: 'Empresa de demonstração', type: 'empresa' };
-function setup(path = '/conta', rows = [first, second], savedBusiness?: string, workRepository?: WorkRepository) {
+function setup(path = '/conta', rows = [first, second], savedBusiness?: string, workRepository?: WorkRepository, managedPosts?: ManagedPosts) {
   let name = 'Nome cadastrado';
   const gateway: AuthGateway = {
     getSession: vi.fn(async () => ({ user: { id: 'local-user', email: 'demo@example.invalid', displayName: 'Nome antigo' } })),
@@ -19,24 +20,31 @@ function setup(path = '/conta', rows = [first, second], savedBusiness?: string, 
     updateProfile: vi.fn(async (value) => { name = value; }),
   };
   const repository: ProfessionalRepository = { listMine: vi.fn(async () => rows), getCatalog: vi.fn(async () => ({ categories: [{ id: 'eletrica' as const, name: 'Elétrica' }], cities: [{ id: 'mundo-novo-ms', name: 'Mundo Novo', state_code: 'MS' }] })), getEditable: vi.fn(async (id: string) => ({ business: rows.find((row) => row.id === id)!, input: { ...emptyRegistration, name: 'Nome existente', categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms' } })), createDraft: vi.fn(), saveDraft: vi.fn() };
-  render(<MemoryRouter initialEntries={[{ pathname: path, state: { businessId: savedBusiness } }]}><App authGateway={gateway} professionalRepository={repository} workRepository={workRepository} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[{ pathname: path, state: { businessId: savedBusiness } }]}><App authGateway={gateway} professionalRepository={repository} workRepository={workRepository} managedPosts={managedPosts} /></MemoryRouter>);
   return { gateway, repository };
 }
 
 describe('experiência pessoal e profissional', () => {
-  it('separa conta de negócio, lê o nome cadastrado e mantém três abas', async () => {
+  it('abre o próprio perfil na aba Conta, com Direct e opções privadas', async () => {
     setup();
-    expect(await screen.findByRole('heading', { name: 'Nome cadastrado' })).toBeInTheDocument();
+    expect(await screen.findByText('Conta de Nome cadastrado')).toBeInTheDocument();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Meu perfil profissional/ })).toHaveAttribute('href', '/conta/profissional');
+    expect(await screen.findByRole('heading', { name: 'Nome existente' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
+    expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
+    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    fireEvent.click(document.querySelector('.owner-settings summary')!);
+    expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
+    expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
-    expect(screen.queryByText('Minha assinatura')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Configurações/ })).not.toBeInTheDocument();
   });
 
   it('edita o nome pessoal e o recupera ao voltar à conta', async () => {
     const { gateway } = setup();
-    fireEvent.click(await screen.findByRole('link', { name: 'Editar dados da conta' }));
+    await screen.findByText('Conta de Nome cadastrado');
+    fireEvent.click(document.querySelector('.owner-settings summary')!);
+    fireEvent.click(await screen.findByRole('link', { name: /Dados da conta/ }));
     expect(await screen.findByRole('heading', { name: 'Dados da conta' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Abrir meu perfil profissional' })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Seu nome')).toHaveValue('Nome cadastrado'));
@@ -45,7 +53,24 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Seus dados foram salvos');
     expect(gateway.updateProfile).toHaveBeenCalledWith('Novo nome');
     fireEvent.click(screen.getByRole('link', { name: 'Voltar à conta' }));
-    expect(await screen.findByRole('heading', { name: 'Novo nome' })).toBeInTheDocument();
+    expect(await screen.findByText('Conta de Novo nome')).toBeInTheDocument();
+  });
+
+  it('troca de perfil no próprio topo sem misturar dados dos negócios', async () => {
+    const { repository } = setup();
+    await screen.findByRole('heading', { name: 'Nome existente' });
+    fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
+    await waitFor(() => expect(repository.getEditable).toHaveBeenCalledWith(second.id));
+    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+  });
+
+  it('mostra projetos do negócio apenas ao dono e mantém o rascunho privado', async () => {
+    const posts = { load: vi.fn(async () => ({ business: { id: first.id, name: first.name, status: 'draft' }, posts: { items: [{ id: 'post-1', title: 'Reforma da cozinha', description: 'Projeto concluído', status: 'draft', images: [] }], next: null } })) } as unknown as ManagedPosts;
+    setup('/conta', [first], undefined, undefined, posts);
+    expect(await screen.findByRole('link', { name: 'Gerenciar projeto Reforma da cozinha' })).toHaveAttribute('href', `/conta/profissional/${first.id}/publicacoes`);
+    expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
+    expect(posts.load).toHaveBeenCalledWith(first.id, 1);
   });
 
   it('oferece recuperação existente no contexto pessoal', async () => {
@@ -74,7 +99,7 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
     expect(screen.getByText('Pintura residencial e comercial.')).toBeInTheDocument();
     expect(screen.getByText('WhatsApp: 5567999991234')).toBeInTheDocument();
-    expect(screen.getByText(/Prévia privada/)).toBeInTheDocument();
+    expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
     expect(screen.queryByText('Dado privado')).not.toBeInTheDocument();
   });
 
@@ -86,8 +111,8 @@ describe('experiência pessoal e profissional', () => {
     const summary = await screen.findByRole('group', { name: 'Resumo do perfil' });
     expect(summary).toHaveTextContent('Fotos1');
     expect(summary).toHaveTextContent('Serviços1');
-    expect(summary).toHaveTextContent('Cidades1');
-    expect(screen.getByRole('link', { name: 'Adicionar fotos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(summary).toHaveTextContent('Projetos0');
+    expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
     expect(screen.getByText('Atendimento na região.')).toBeInTheDocument();
   });
 

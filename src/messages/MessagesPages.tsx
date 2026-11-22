@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
+import { ProfileAvatar } from '../components/ProfileAvatar';
 import { useAuth } from '../auth/AuthProvider';
 import { useMessages } from './MessagesProvider';
 import { messageError } from './repository';
@@ -26,16 +27,18 @@ export function MessagesInboxPage() {
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 20000);
     return () => { live = false; window.clearInterval(timer); };
   }, [repository, session?.user.id]);
-  return <div className="messages-page"><PageHeader title="Mensagens"><p>Conversas com profissionais e clientes.</p></PageHeader>
+  return <div className="messages-page"><Link className="back-link" to="/conta">Voltar ao perfil</Link><PageHeader title="Mensagens"><p>Conversas com profissionais e clientes.</p></PageHeader>
     {!repository && <p role="status">Mensagens indisponíveis neste momento.</p>}
     {loading && <p role="status">Carregando conversas…</p>}
     {error && <p role="alert" className="form-error">{error}</p>}
     {!loading && !error && items.length === 0 && <p className="form-notice">Ainda não há conversas. Encontre um profissional na busca para enviar uma mensagem.</p>}
     <ul className="conversation-list">{items.map(item => <li key={item.id}><Link to={`/mensagens/${item.id}`}>
-      <strong>{item.side === 'customer' ? item.businessName : item.customerName}</strong>
-      {item.side === 'professional' && <span className="field-help">{item.businessName}</span>}
-      <span>{item.lastMessage}</span>
-      <small>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.updatedAt))}</small>
+      <ProfileAvatar business={item.side === 'customer'} /><span className="conversation-list__copy">
+        <strong>{item.side === 'customer' ? item.businessName : item.customerName}</strong>
+        {item.side === 'professional' && <small>{item.businessName}</small>}
+        <span>{item.lastMessage}</span>
+      </span>
+      <time dateTime={item.updatedAt}>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.updatedAt))}</time>
     </Link></li>)}</ul>
     <Link className="text-link" to="/buscar">Buscar profissionais</Link>
   </div>;
