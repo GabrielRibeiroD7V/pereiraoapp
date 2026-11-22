@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build && node scripts/build-pwa.mjs && node scripts/build-profile-demo.mjs && node scripts/build-editor-preview.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/build-pwa.mjs && node scripts/build-editor-preview.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
