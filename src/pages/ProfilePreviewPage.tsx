@@ -69,7 +69,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false }: { b
         </div></div>
       <SpecialtyBadges primary={category ?? null} additional={catalog?.categories.filter(item => info.additionalCategoryIds.includes(item.id)) ?? []} />
       <p className="public-about social-profile-bio">{info.description || 'Adicione uma descrição para apresentar seu trabalho.'}</p>
-      <div className="social-profile-actions"><Link className="button button--secondary" to={`/conta/profissional/${businessId}/editar`}>Editar perfil e bio</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId}/trabalhos`}>Foto de perfil e trabalhos</Link></div></header>
+      <div className="social-profile-actions"><Link className="button button--secondary" to={`/conta/profissional/${businessId}/editar?secao=bio`}>Editar perfil e bio</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId}/trabalhos`}>Foto de perfil e trabalhos</Link></div></header>
       <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até a aprovação e publicação.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       <SectionTabs label="Conteúdo do perfil" sections={[{ id: 'trabalhos', label: 'Projetos', content: <section className="public-profile-section" aria-label="Projetos e portfólio"><h2>Projetos e trabalhos</h2>

@@ -58,6 +58,7 @@ export function AccountPage() {
         </details>
       </div></header>
       <p className="owner-account-name">Conta de {profile.displayName}</p>
+      {location.state?.saved && <p className="form-notice" role="status">Rascunho salvo. Confira sua bio, foto e informações abaixo.</p>}
       {profileError && <p role="status" className="field-help">Não foi possível atualizar seus dados agora.</p>}
       {(error || sessionError) && <p className="form-error" role="alert">{error || sessionError}</p>}
       {businessesLoading && <p role="status">Carregando seu perfil…</p>}
