@@ -28,7 +28,7 @@ export function PortfolioPage() {
     [ids[index], ids[target]] = [ids[target]!, ids[index]!];
     void run(() => state.repository!.reorderPhotos(state.businessId, ids));
   }
-  return <WorkFrame title="Meus trabalhos" state={state}>{state.data && state.repository && <>
+  return <WorkFrame title="Fotos e trabalhos" state={state}>{state.data && state.repository && <>
     <section className="work-profile-photo"><ManagedBusinessAvatar path={state.data.business.avatar_path} /><div><h2>Foto principal do perfil</h2><p>Escolha uma das fotografias abaixo. Ela aparece ao lado do seu nome na busca e no perfil.</p>{state.data.business.avatar_path && <button className="text-link" type="button" disabled={pending} onClick={() => void run(() => state.repository!.setProfilePhoto(state.businessId, null))}>Remover foto principal</button>}</div></section>
     <div className="work-toolbar"><p>Fotografias dos seus trabalhos</p><button className="button button--primary" disabled={pending || state.loading} onClick={() => setEditor('new')}><Plus size={17} aria-hidden="true" />Adicionar fotografia</button></div>
     {error && !deleting && <div role="alert" className="form-error"><p>{error}</p><button type="button" className="text-link" onClick={() => { setError(null); state.refresh(); }}>Atualizar lista</button></div>}

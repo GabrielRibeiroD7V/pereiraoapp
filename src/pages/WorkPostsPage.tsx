@@ -73,7 +73,7 @@ export function WorkPostsPage() {
         to="/conta/profissional"
         state={{ businessId }}
       >
-        Espaço profissional
+        Meu perfil profissional
       </Link>
       <PageHeader title="Publicações">
         <p>Apresente trabalhos realizados pelo seu negócio.</p>

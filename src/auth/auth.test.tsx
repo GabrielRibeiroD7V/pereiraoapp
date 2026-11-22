@@ -64,7 +64,7 @@ describe('autenticação e rotas', () => {
     gateway.getSession = () => new Promise((done) => { resolve = done; });
     open('/conta/dados', gateway);
     expect(screen.getByRole('status')).toHaveTextContent('Verificando');
-    expect(screen.queryByRole('heading', { name: 'Meus dados' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Dados da conta' })).not.toBeInTheDocument();
     await act(async () => resolve(null));
     await screen.findByRole('heading', { level: 1, name: 'Entrar' });
     expect(screen.getByLabelText('URL de teste')).toHaveTextContent('/entrar?next=%2Fconta%2Fdados');
@@ -75,7 +75,7 @@ describe('autenticação e rotas', () => {
     open('/entrar?next=%2Fconta%2Fdados', gateway);
     await ready(); credentials();
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Meus dados' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dados da conta' })).toBeInTheDocument();
     expect(gateway.signIn).toHaveBeenCalledWith('test@example.invalid', 'somente-teste-123');
   });
 
@@ -229,7 +229,7 @@ describe('destino de autenticação', () => {
     const { gateway } = mockGateway();
     rememberAuthReturn('/conta/dados');
     open('/auth/retorno?code=confirmed', gateway);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Meus dados' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dados da conta' })).toBeInTheDocument();
     expect(readAuthReturn()).toBe('/conta');
   });
 });

@@ -46,6 +46,15 @@ async function finalStep() {
 beforeEach(() => { sessionStorage.clear(); });
 
 describe('cadastro progressivo e espaço profissional', () => {
+  it('abre a prévia diretamente da edição e mantém fotos no perfil profissional', async () => {
+    const repo = repository(); open(repo, `/conta/profissional/${bid}/editar`);
+    const preview = await screen.findByRole('link', { name: 'Ver prévia do perfil' });
+    expect(screen.getByRole('link', { name: 'Adicionar fotos' })).toHaveAttribute('href', `/conta/profissional/${bid}/trabalhos`);
+    fireEvent.click(preview);
+    expect(await screen.findByRole('heading', { name: input.name })).toBeInTheDocument();
+    expect(screen.getByText(/Prévia privada/)).toBeInTheDocument();
+    expect(repo.saveDraft).not.toHaveBeenCalled();
+  });
   it('confirmação de e-mail retorna ao cadastro solicitado', async () => {
     open(repository(), '/auth/retorno?code=local-test&next=%2Fconta%2Fprofissional%2Fcadastro');
     expect(await screen.findByRole('radio', { name: 'Profissional autônomo' })).toBeInTheDocument();
@@ -80,7 +89,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     fireEvent.change(screen.getByLabelText('WhatsApp'), { target: { value: '+55 (67) 99999-1234' } });
     fireEvent.change(screen.getByLabelText('Instagram (opcional)'), { target: { value: '@teste' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
     expect(repo.createDraft).toHaveBeenCalledOnce();
     expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ type: company ? 'empresa' : 'autonomo', whatsapp: '5567999991234', instagram: 'teste', areaCityIds: ['mundo-novo-ms', 'test-city'] }));
     const saved = vi.mocked(repo.saveDraft).mock.calls[0]?.[1];
@@ -210,7 +219,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     const repo = repository(); open(repo); await details(); await finalStep();
     expect(screen.queryByRole('button', { name: /^Publicar$/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
     expect(repo.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ whatsapp: '' }));
   });
 
@@ -222,7 +231,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(readCheckpoint('registration-user')?.businessId).toBe(bid);
     expect(JSON.stringify(readCheckpoint('registration-user'))).not.toContain('whatsapp');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
     expect(repo.createDraft).toHaveBeenCalledOnce();
     expect(repo.saveDraft).toHaveBeenCalledTimes(2);
   });
@@ -237,7 +246,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(repo.createDraft).toHaveBeenCalledOnce();
     expect(screen.getByRole('button', { name: 'Salvando…' })).toBeDisabled();
     await act(async () => resolve(bid));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
   });
 
   it('edita um perfil existente sem executar criação', async () => {
@@ -245,7 +254,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     const repo = repository(); open(repo, `/conta/profissional/${bid}/editar`);
     await details(); await finalStep();
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
     expect(repo.createDraft).not.toHaveBeenCalled();
     expect(repo.getEditable).toHaveBeenCalledWith(bid);
     expect(readCheckpoint('registration-user')).toBeNull();
@@ -271,7 +280,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('identificador já está em uso');
     fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
-    await screen.findByRole('heading', { level: 1, name: 'Espaço profissional' });
+    await screen.findByRole('heading', { level: 1, name: 'Meu perfil profissional' });
     expect(repo.createDraft).toHaveBeenCalledTimes(2);
     expect(vi.mocked(repo.createDraft).mock.calls[0]?.[1]).not.toBe(vi.mocked(repo.createDraft).mock.calls[1]?.[1]);
   });

@@ -25,7 +25,7 @@ describe('navegação pública', () => {
     expect(document.title).toBe('Buscar | PEREIRÃO');
     const nav = screen.getByRole('navigation');
     fireEvent.click(within(nav).getByRole('link', { name: 'Conta' }));
-    expect(screen.getByRole('heading', { level: 1, name: 'Conta' })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 1, name: 'Minha conta' })).toHaveFocus();
     expect(within(nav).getByRole('link', { name: 'Buscar' })).not.toHaveAttribute('aria-current');
     fireEvent.click(screen.getByRole('link', { name: 'Continuar explorando' }));
     expect(screen.getByRole('heading', { level: 1, name: 'O que você está procurando?' })).toBeInTheDocument();

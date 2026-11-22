@@ -5,11 +5,12 @@ import { App } from '../app/App';
 import type { AuthGateway } from '../auth/types';
 import type { BusinessRow } from '../lib/database.types';
 import type { ProfessionalRepository } from '../professional/types';
+import type { WorkRepository } from '../work/types';
 import { emptyRegistration } from '../professional/validation';
 
 const first: BusinessRow = { id: '00000000-0000-4000-8000-000000000001', name: 'Autônomo de demonstração', type: 'autonomo', category_id: 'eletrica', city_id: 'mundo-novo-ms', status: 'draft', slug: 'demo', description: null, whatsapp: null, instagram: null, avatar_path: null, created_at: '', updated_at: '' };
 const second: BusinessRow = { ...first, id: '00000000-0000-4000-8000-000000000002', name: 'Empresa de demonstração', type: 'empresa' };
-function setup(path = '/conta', rows = [first, second], savedBusiness?: string) {
+function setup(path = '/conta', rows = [first, second], savedBusiness?: string, workRepository?: WorkRepository) {
   let name = 'Nome cadastrado';
   const gateway: AuthGateway = {
     getSession: vi.fn(async () => ({ user: { id: 'local-user', email: 'demo@example.invalid', displayName: 'Nome antigo' } })),
@@ -18,7 +19,7 @@ function setup(path = '/conta', rows = [first, second], savedBusiness?: string) 
     updateProfile: vi.fn(async (value) => { name = value; }),
   };
   const repository: ProfessionalRepository = { listMine: vi.fn(async () => rows), getCatalog: vi.fn(async () => ({ categories: [{ id: 'eletrica' as const, name: 'Elétrica' }], cities: [{ id: 'mundo-novo-ms', name: 'Mundo Novo', state_code: 'MS' }] })), getEditable: vi.fn(async (id: string) => ({ business: rows.find((row) => row.id === id)!, input: { ...emptyRegistration, name: 'Nome existente', categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms' } })), createDraft: vi.fn(), saveDraft: vi.fn() };
-  render(<MemoryRouter initialEntries={[{ pathname: path, state: { businessId: savedBusiness } }]}><App authGateway={gateway} professionalRepository={repository} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[{ pathname: path, state: { businessId: savedBusiness } }]}><App authGateway={gateway} professionalRepository={repository} workRepository={workRepository} /></MemoryRouter>);
   return { gateway, repository };
 }
 
@@ -27,7 +28,7 @@ describe('experiência pessoal e profissional', () => {
     setup();
     expect(await screen.findByRole('heading', { name: 'Nome cadastrado' })).toBeInTheDocument();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Meu Espaço Profissional/ })).toHaveAttribute('href', '/conta/profissional');
+    expect(screen.getByRole('link', { name: /Meu perfil profissional/ })).toHaveAttribute('href', '/conta/profissional');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
     expect(screen.queryByText('Minha assinatura')).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Configurações/ })).not.toBeInTheDocument();
@@ -35,8 +36,9 @@ describe('experiência pessoal e profissional', () => {
 
   it('edita o nome pessoal e o recupera ao voltar à conta', async () => {
     const { gateway } = setup();
-    fireEvent.click(await screen.findByRole('link', { name: 'Editar meus dados pessoais' }));
-    expect(await screen.findByRole('link', { name: 'Abrir meu perfil profissional' })).toHaveAttribute('href', '/conta/profissional');
+    fireEvent.click(await screen.findByRole('link', { name: 'Editar dados da conta' }));
+    expect(await screen.findByRole('heading', { name: 'Dados da conta' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Abrir meu perfil profissional' })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Seu nome')).toHaveValue('Nome cadastrado'));
     fireEvent.change(screen.getByLabelText('Seu nome'), { target: { value: 'Novo nome' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar meus dados' }));
@@ -57,13 +59,11 @@ describe('experiência pessoal e profissional', () => {
     await screen.findByRole('heading', { name: first.name });
     fireEvent.change(screen.getByLabelText('Negócio que você quer gerenciar'), { target: { value: second.id } });
     expect(screen.getByRole('heading', { name: second.name })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
-    expect(screen.getByRole('link', { name: /Meu perfil/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Editar dados do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByRole('link', { name: 'Ver prévia do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/previa`);
-    expect(screen.getByRole('link', { name: 'Adicionar fotos ao perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
-    expect(screen.getByRole('link', { name: /Meus trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: /Fotos e trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
     expect(screen.getByRole('link', { name: /^MensagensConversas com seus clientes/ })).toHaveAttribute('href', '/mensagens');
   });
 
@@ -76,6 +76,19 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByText('WhatsApp: 5567999991234')).toBeInTheDocument();
     expect(screen.getByText(/Prévia privada/)).toBeInTheDocument();
     expect(screen.queryByText('Dado privado')).not.toBeInTheDocument();
+  });
+
+  it('mostra o topo da prévia com foto, números reais e ações de edição', async () => {
+    const work = { list: vi.fn(async () => ({ services: [{ id: 'servico', active: true }], photos: [{ id: 'foto', media_state: 'ready', storage_path: `${first.id}/portfolio/foto.webp` }] })), imageUrl: vi.fn(async () => 'https://example.invalid/foto.webp') } as unknown as WorkRepository;
+    const { repository } = setup(`/conta/profissional/${first.id}/previa`, [first], undefined, work);
+    vi.mocked(repository.getEditable).mockResolvedValueOnce({ business: first, input: { ...emptyRegistration, name: first.name, description: 'Atendimento na região.', categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'] } });
+    expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
+    const summary = await screen.findByRole('group', { name: 'Resumo do perfil' });
+    expect(summary).toHaveTextContent('Fotos1');
+    expect(summary).toHaveTextContent('Serviços1');
+    expect(summary).toHaveTextContent('Cidades1');
+    expect(screen.getByRole('link', { name: 'Adicionar fotos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(screen.getByText('Atendimento na região.')).toBeInTheDocument();
   });
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {

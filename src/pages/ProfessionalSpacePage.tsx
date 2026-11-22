@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, FileText, Image, MapPin, MessageSquare, PencilLine, Plus, UserRound, Wrench } from 'lucide-react';
-import {BusinessSubscriptionLine}from'../subscriptions/SubscriptionViews';
+import { ArrowLeft, FileText, Image, MapPin, MessageSquare, PencilLine, Plus, Wrench } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { LinkButton } from '../components/LinkButton';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -38,7 +37,7 @@ export function ProfessionalSpacePage() {
   const city = catalog?.cities.find((item) => item.id === business?.city_id);
   return <div className="professional-page">
     <Link className="back-link" to="/conta"><ArrowLeft size={17} aria-hidden="true" />Minha conta</Link>
-    <PageHeader title="Espaço profissional" />
+    <PageHeader title="Meu perfil profissional" />
     {location.state?.saved && <p role="status" className="form-notice">Dados salvos. Seu perfil não foi publicado automaticamente.</p>}
     {loading && <p role="status">Carregando seus perfis…</p>}
     {!repository && <p role="status">O espaço profissional ainda está sendo preparado.</p>}
@@ -56,19 +55,15 @@ export function ProfessionalSpacePage() {
         <div className="business-meta"><span>{category || 'Categoria não informada'}</span><span><MapPin size={15} aria-hidden="true" />{city ? `${city.name}/${city.state_code}` : business.city_id}</span></div>
         <div className="business-identity__status"><BusinessStatus status={business.status} /><p>{business.status === 'published' ? 'Visível no marketplace.' : 'Seu perfil não está visível no marketplace.'}</p></div>
         {business.description && <p className="business-identity__description">{business.description}</p>}
-        <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/editar`}><PencilLine size={17} aria-hidden="true" />Editar perfil</LinkButton>
-        <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/previa`}>Ver prévia do perfil</LinkButton>
-        <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/trabalhos`}><Image size={17} aria-hidden="true" />Adicionar fotos ao perfil</LinkButton>
+        <div className="business-identity__actions"><LinkButton to={`/conta/profissional/${business.id}/previa`}>Ver prévia do perfil</LinkButton><LinkButton variant="secondary" to={`/conta/profissional/${business.id}/editar`}><PencilLine size={17} aria-hidden="true" />Editar dados do perfil</LinkButton></div>
       </section>
-      <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Seu negócio</h2>
-        <BusinessSubscriptionLine businessId={business.id}/>
-        <MenuRow icon={UserRound} title="Meu perfil" description="Apresentação, localização e contatos" to={`/conta/profissional/${business.id}/editar`} />
+      <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Gerenciar conteúdo</h2>
+        <MenuRow icon={Image} title="Fotos e trabalhos" description="Adicionar fotos e escolher foto principal" to={`/conta/profissional/${business.id}/trabalhos`} />
         <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
-        <MenuRow icon={Image} title="Meus trabalhos" description="Fotografias dos seus trabalhos" to={`/conta/profissional/${business.id}/trabalhos`} />
         <MenuRow icon={FileText} title="Publicações" description="Apresente trabalhos realizados" to={`/conta/profissional/${business.id}/publicacoes`}/>
         <MenuRow icon={MessageSquare} title="Mensagens" description="Conversas com seus clientes" to="/mensagens" />
       </section>
-      <p className="field-help professional-footnote">Serviços e fotografias seguem o estado de publicação do seu perfil. A prévia é visível somente para quem gerencia o negócio.</p>
+      <p className="field-help professional-footnote">A prévia é privada. Fotos, serviços e publicações só aparecem para clientes quando o perfil estiver publicado.</p>
       <Link className="text-link add-business" to="/conta/profissional/cadastro"><Plus size={17} aria-hidden="true" />Cadastrar outro negócio</Link>
     </>}
   </div>;
