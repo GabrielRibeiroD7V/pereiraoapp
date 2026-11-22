@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { UserRound } from 'lucide-react';
+import { MessageCircle, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useMarketplace } from '../marketplace/MarketplaceProvider';
 import { usePublicQuery } from '../marketplace/usePublicQuery';
@@ -33,6 +33,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
     <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
     <ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} />
+    <Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link>
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
     <PublishedWorks key={provider.id} businessId={provider.id}/>

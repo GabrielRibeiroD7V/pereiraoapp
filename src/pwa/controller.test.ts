@@ -174,6 +174,8 @@ describe("instalação progressiva e sessão", () => {
     "/admin",
     "/conta",
     "/conta/profissional/cadastro",
+    "/mensagens",
+    "/mensagens/iniciar/00000000-0000-4000-8000-000000000001",
     "/auth/retorno",
     "/entrar",
   ])("protege rota sensível %s", (path) =>

@@ -32,6 +32,8 @@ export function isSensitivePath(path: string) {
     path.startsWith("/admin/") ||
     path === "/conta" ||
     path.startsWith("/conta/") ||
+    path === "/mensagens" ||
+    path.startsWith("/mensagens/") ||
     [
       "/entrar",
       "/criar-conta",

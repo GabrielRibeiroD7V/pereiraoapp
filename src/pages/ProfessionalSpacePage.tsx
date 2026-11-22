@@ -62,7 +62,7 @@ export function ProfessionalSpacePage() {
         <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
         <MenuRow icon={Image} title="Meus trabalhos" description="Fotografias dos seus trabalhos" to={`/conta/profissional/${business.id}/trabalhos`} />
         <MenuRow icon={FileText} title="Publicações" description="Apresente trabalhos realizados" to={`/conta/profissional/${business.id}/publicacoes`}/>
-        <MenuRow icon={MessageSquare} title="Mensagens e orçamentos" description="Conversas com seus clientes" soon />
+        <MenuRow icon={MessageSquare} title="Mensagens" description="Conversas com seus clientes" to="/mensagens" />
       </section>
       <p className="field-help professional-footnote">Serviços e fotografias seguem o estado de publicação do seu perfil. A prévia pública será disponibilizada em uma próxima etapa.</p>
       <Link className="text-link add-business" to="/conta/profissional/cadastro"><Plus size={17} aria-hidden="true" />Cadastrar outro negócio</Link>
