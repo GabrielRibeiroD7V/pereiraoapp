@@ -5,6 +5,7 @@ import {BusinessSubscriptionLine}from'../subscriptions/SubscriptionViews';
 import { PageHeader } from '../components/PageHeader';
 import { LinkButton } from '../components/LinkButton';
 import { ProfileAvatar } from '../components/ProfileAvatar';
+import { ManagedBusinessAvatar } from '../work/ManagedBusinessAvatar';
 import { MenuRow } from '../components/MenuRow';
 import { BusinessStatus } from '../components/BusinessStatus';
 import { useAuth } from '../auth/AuthProvider';
@@ -51,12 +52,13 @@ export function ProfessionalSpacePage() {
         <select id="managed-business" value={business.id} onChange={(event) => setSelectedId(event.target.value)}>{businesses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
       </div>}
       <section className="business-identity" aria-label="Identificação do negócio">
-        <div className="business-identity__heading"><ProfileAvatar business /><div><p className="business-type">{business.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><h2>{business.name}</h2></div></div>
+        <div className="business-identity__heading"><ManagedBusinessAvatar path={business.avatar_path} /><div><p className="business-type">{business.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><h2>{business.name}</h2></div></div>
         <div className="business-meta"><span>{category || 'Categoria não informada'}</span><span><MapPin size={15} aria-hidden="true" />{city ? `${city.name}/${city.state_code}` : business.city_id}</span></div>
         <div className="business-identity__status"><BusinessStatus status={business.status} /><p>{business.status === 'published' ? 'Visível no marketplace.' : 'Seu perfil não está visível no marketplace.'}</p></div>
         {business.description && <p className="business-identity__description">{business.description}</p>}
         <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/editar`}><PencilLine size={17} aria-hidden="true" />Editar perfil</LinkButton>
         <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/previa`}>Ver prévia do perfil</LinkButton>
+        <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/trabalhos`}><Image size={17} aria-hidden="true" />Adicionar fotos ao perfil</LinkButton>
       </section>
       <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Seu negócio</h2>
         <BusinessSubscriptionLine businessId={business.id}/>

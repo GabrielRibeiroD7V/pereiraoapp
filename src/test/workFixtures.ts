@@ -25,6 +25,7 @@ export function createWorkFixtures(empty = false, visitor = false) {
     savePhotoDetails: async (bid, id, caption, serviceId) => { check(bid); photos = photos.map((row) => row.id === id ? { ...row, caption, service_id: serviceId } : row); },
     deletePhoto: async (bid, id) => { check(bid); photos = photos.filter((row) => row.id !== id); },
     reorderPhotos: async (bid, ids) => { check(bid); photos = photos.map((row) => ({ ...row, sort_order: ids.indexOf(row.id) })).sort((a, b) => a.sort_order - b.sort_order); },
+    setProfilePhoto: async (bid, photoId) => { check(bid); const photo = photos.find(row => row.id === photoId && row.media_state === 'ready'); if (photoId && !photo) throw new Error('Fotografia indisponível'); business.avatar_path = photo?.storage_path ?? null; },
     imageUrl: async () => fixtureImage,
   };
   return { gateway, professional, work, snapshot: () => ({ services, photos }) };
