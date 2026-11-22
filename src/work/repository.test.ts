@@ -15,6 +15,8 @@ function setup(options: { manager?: boolean; ready?: boolean; uploadFails?: bool
     let result: unknown = [], status = 200;
     if (url.pathname.endsWith('/business_members')) result = options.manager === false ? [] : [{ id: 'member' }];
     else if (url.pathname.endsWith('/portfolio_items') && url.searchParams.get('select') === 'media_state' && options.ready === false) { result = { code: '42703', message: 'missing' }; status = 400; }
+    else if (url.pathname.endsWith('/portfolio_items') && url.searchParams.get('select') === 'storage_path,media_state') result = [{ storage_path: `${bid}/portfolio/${pid}.webp`, media_state: 'ready' }];
+    else if (url.pathname.endsWith('/businesses') && method === 'PATCH') result = [{ id: bid }];
     else if (url.pathname.endsWith('/services')) {
       if (method === 'POST') { inserted = true; result = { id: pid }; if (options.lostServiceResponse) { result = { code: '08006' }; status = 503; } }
       else if (method === 'PATCH') result = { id: pid };
@@ -36,6 +38,16 @@ function setup(options: { manager?: boolean; ready?: boolean; uploadFails?: bool
   return { repository: createWorkRepository(client), calls };
 }
 describe('serviços e Storage pelo SDK com transporte interceptado', () => {
+  it('só escolhe foto pronta do próprio negócio e altera apenas o avatar', async () => {
+    const { repository, calls } = setup();
+    await repository.setProfilePhoto(bid, pid);
+    const change = calls.find(call => call.path.endsWith('/businesses') && call.method === 'PATCH');
+    expect(change?.body).toEqual({ avatar_path: `${bid}/portfolio/${pid}.webp` });
+    expect(change?.url.searchParams.get('id')).toBe(`eq.${bid}`);
+    const other = setup({ manager: false });
+    await expect(other.repository.setProfilePhoto(bid, pid)).rejects.toBeDefined();
+    expect(other.calls.some(call => call.method === 'PATCH')).toBe(false);
+  });
   it('bloqueia terceiros e estrutura pendente antes de qualquer escrita', async () => {
     for (const options of [{ manager: false }, { ready: false }]) {
       const { repository, calls } = setup(options);

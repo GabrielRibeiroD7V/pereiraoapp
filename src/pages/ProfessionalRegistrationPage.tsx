@@ -103,6 +103,8 @@ export function ProfessionalRegistrationPage() {
     {!repository && <p role="status" className="form-notice">O cadastro ainda está sendo preparado. Continue explorando o PEREIRÃO.</p>}
     {error && <p role="alert" className="form-error">{error}</p>}
     {savedId && !businessId && <p className="form-notice">Seu rascunho já foi criado. Ao tentar novamente, continuaremos no mesmo perfil.</p>}
+    {(businessId || savedId) && <div className="registration-photo-link"><strong>Fotos do perfil</strong><p>Adicione fotos dos seus trabalhos e escolha a foto principal em Meus trabalhos.</p><Link className="button button--secondary" to={`/conta/profissional/${businessId ?? savedId}/trabalhos`}>Adicionar fotos e escolher foto principal</Link></div>}
+    {!businessId && !savedId && <p className="field-help">Depois de salvar o rascunho, você poderá adicionar fotos e escolher a foto principal.</p>}
     {catalog && <>
       {(catalog.categories.length === 0 || catalog.cities.length === 0) && <p role="status" className="form-notice">Ainda não há cidade ou categoria disponível para concluir o cadastro.</p>}
       <StepProgress labels={steps} step={step} />

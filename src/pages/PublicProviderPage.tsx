@@ -30,10 +30,12 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
   const areas = useCallback((page: number, signal: AbortSignal) => repository.getAreas(provider.id, page, signal), [repository, provider.id]);
   return <>
-    <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
-    <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
-    <ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} />
-    <Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link>
+    <header className="social-profile-header">
+      <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
+      <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
+      {provider.description && <p className="public-about social-profile-bio">{provider.description}</p>}
+      <div className="social-profile-actions"><Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link><ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} /></div>
+    </header>
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
     <PublishedWorks key={provider.id} businessId={provider.id}/>
@@ -43,7 +45,6 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <PagedSection<PublicService> title="Serviços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
       </> },
       { id: 'sobre', label: 'Sobre', content: <>
-    {provider.description && <section className="public-profile-section" aria-label="Sobre"><h2>Sobre</h2><p className="public-about">{provider.description}</p></section>}
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },
     ]} />

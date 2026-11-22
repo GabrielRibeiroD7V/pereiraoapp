@@ -60,6 +60,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByRole('link', { name: /Meu perfil/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByRole('link', { name: 'Ver prévia do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/previa`);
+    expect(screen.getByRole('link', { name: 'Adicionar fotos ao perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
     expect(screen.getByRole('link', { name: /Meus trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);

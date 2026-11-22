@@ -90,6 +90,19 @@ export function createWorkRepository(client: SupabaseClient<Database>): WorkRepo
       await command(businessId, 'finish_delete', id);
     },
     async reorderPhotos(businessId, ids) { await manager(businessId); await command(businessId, 'reorder', undefined, { ordered_items: ids }); },
+    async setProfilePhoto(businessId, photoId) {
+      await manager(businessId);
+      let path: string | null = null;
+      if (photoId) {
+        const { data, error } = await client.from('portfolio_items').select('storage_path,media_state').eq('business_id', businessId).eq('id', photoId).maybeSingle();
+        if (error) throw error;
+        if (!data || data.media_state !== 'ready' || !data.storage_path.startsWith(`${businessId}/portfolio/`)) fail('INVALID_INPUT');
+        path = data.storage_path;
+      }
+      const { data, error } = await client.from('businesses').update({ avatar_path: path }).eq('id', businessId).select('id').single();
+      if (error) throw error;
+      if (!data) fail('NOT_MANAGER');
+    },
     async imageUrl(path) {
       const { data, error } = await client.storage.from(PORTFOLIO_BUCKET).createSignedUrl(path, 60);
       if (error) throw error; return data.signedUrl;
