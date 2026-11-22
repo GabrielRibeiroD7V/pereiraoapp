@@ -36,7 +36,7 @@ A migração `20261122184357_business_profile_images.sql` continua proposta no #
 - CI do SHA atual deve passar antes da revisão; links e resultado ficam no corpo do PR. SQL/RLS roda somente em PostgreSQL descartável no CI, sem Docker. Não representa upload HTTP no Storage remoto.
 
 ![Conteúdo no celular emulado](images/editar-perfil-mobile.png)
-![Atendimento no desktop emulado](images/editar-perfil-desktop.png)
+![Conteúdo no desktop emulado](images/editar-perfil-desktop.png)
 
 ## Demonstração no Preview, sem operações remotas
 
