@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
 import { FormField } from '../components/FormField';
 import { useAuth } from '../auth/AuthProvider';
@@ -24,6 +24,7 @@ export function ProfessionalRegistrationPage() {
   const { session } = useAuth();
   const uid = session?.user.id ?? '';
   const { businessId } = useParams();
+  const { search } = useLocation();
   const navigate = useNavigate();
   const [catalog, setCatalog] = useState<ProfessionalCatalog | null>(null);
   const [input, setInput] = useState<RegistrationInput>({ ...emptyRegistration });
@@ -49,11 +50,12 @@ export function ProfessionalRegistrationPage() {
       setSavedId(id ?? null);
       setCatalog(values);
       setInput(existing?.input ?? { ...emptyRegistration, cityId: values.cities.find((city) => city.id === 'mundo-novo-ms')?.id ?? values.cities[0]?.id ?? '', areaCityIds: [] });
+      if (existing && new URLSearchParams(search).get('secao') === 'bio') setStep(2);
     }
     void load().catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [repository, businessId, uid]);
+  }, [repository, businessId, uid, search]);
   useEffect(() => { if (step > 1) heading.current?.focus(); }, [step]);
 
   function change<K extends keyof RegistrationInput>(name: K, value: RegistrationInput[K]) {
@@ -87,7 +89,7 @@ export function ProfessionalRegistrationPage() {
       if (!businessId) writeCheckpoint(uid, checkpoint.current);
       await repository.saveDraft(id, normalized);
       if (!businessId || readCheckpoint(uid)?.businessId === id) clearCheckpoint(uid);
-      navigate('/conta/profissional', { replace: true, state: { saved: true, businessId: id } });
+      navigate('/conta', { replace: true, state: { saved: true, businessId: id } });
     } catch (cause) {
       if (typeof cause === 'object' && cause !== null && 'code' in cause && cause.code === '23505' && !checkpoint.current?.businessId) {
         checkpoint.current = null; clearCheckpoint(uid);
@@ -97,7 +99,7 @@ export function ProfessionalRegistrationPage() {
   }
 
   return <div className="registration-page">
-    <Link className="back-link" to="/conta/profissional"><ArrowLeft size={17} aria-hidden="true" />Meu perfil profissional</Link>
+    <Link className="back-link" to="/conta" state={{ businessId: businessId ?? savedId }}><ArrowLeft size={17} aria-hidden="true" />Voltar ao meu perfil</Link>
     <PageHeader title={businessId ? 'Editar perfil profissional' : 'Anunciar meus serviços'}><p>Seu próximo cliente começa conhecendo seu trabalho.</p></PageHeader>
     {loading && <p role="status">Carregando informações do cadastro…</p>}
     {!repository && <p role="status" className="form-notice">O cadastro ainda está sendo preparado. Continue explorando o PEREIRÃO.</p>}
@@ -140,6 +142,7 @@ export function ProfessionalRegistrationPage() {
             <section aria-label="Revisão do cadastro" className="registration-review">
               <h3>Revise seu perfil</h3>
               <dl><dt>Nome</dt><dd>{input.name}</dd><dt>Tipo</dt><dd>{input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</dd>
+                <dt>Bio</dt><dd>{input.description.trim() || 'Bio não preenchida. Volte para adicionar sua apresentação.'}</dd>
                 <dt>Categoria</dt><dd>{catalog.categories.find((category) => category.id === input.categoryId)?.name}</dd>
                 <dt>Adicionais</dt><dd>{input.additionalCategoryIds.length ? input.additionalCategoryIds.map(id => catalog.categories.find(category => category.id === id)?.name ?? id).join(', ') : 'Nenhuma'}</dd>
                 <dt>Cidade de origem</dt><dd>{catalog.cities.filter(city => city.id === input.cityId).map(city => `${city.name}/${city.state_code}`)}</dd>
@@ -156,6 +159,6 @@ export function ProfessionalRegistrationPage() {
       </form>
       <p className="registration-assurance"><ShieldCheck size={16} aria-hidden="true" />Ao concluir, seu perfil será salvo como rascunho. Sem publicação ou cobrança automática.</p>
     </>}
-    <Link className="text-link" to="/conta/profissional">Voltar ao meu perfil profissional</Link>
+    <Link className="text-link" to="/conta" state={{ businessId: businessId ?? savedId }}>Voltar ao meu perfil</Link>
   </div>;
 }

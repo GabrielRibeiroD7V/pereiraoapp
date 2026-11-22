@@ -32,7 +32,7 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('heading', { name: 'Nome existente' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
     expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
-    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar?secao=bio`);
     expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
     fireEvent.click(document.querySelector('.owner-settings summary')!);
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
@@ -61,7 +61,7 @@ describe('experiência pessoal e profissional', () => {
     await screen.findByRole('heading', { name: 'Nome existente' });
     fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
     await waitFor(() => expect(repository.getEditable).toHaveBeenCalledWith(second.id));
-    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar?secao=bio`);
     expect(screen.getByRole('link', { name: 'Foto de perfil e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
   });
 

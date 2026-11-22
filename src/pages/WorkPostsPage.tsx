@@ -70,10 +70,10 @@ export function WorkPostsPage() {
     <div className="managed-posts">
       <Link
         className="back-link"
-        to="/conta/profissional"
+        to="/conta"
         state={{ businessId }}
       >
-        Meu perfil profissional
+        Meu perfil
       </Link>
       <PageHeader title="Publicações">
         <p>Apresente trabalhos realizados pelo seu negócio.</p>
