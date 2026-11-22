@@ -1,7 +1,8 @@
 # Foto principal direta — proposta compatível, não aplicada
 
-PR #36, branch `feat/foto-principal-direta`, dependente de #35 para bio/retorno.
-O PR #37 contém exclusivamente as duas renomeações de migrações já aplicadas.
+PR #36, branch `feat/foto-principal-direta`, agora baseado em `main` no commit `ff88eb80030aeed612c071006afc2fa9c0fe8449`.
+Os PRs #37 e #35 foram integrados por squash. O rebase reaplica somente os dois commits do fluxo de foto sobre essa base, herdando as renomeações canônicas sem repetir a implementação da bio.
+A aceitação real da bio no Chrome/Preview passou nas quatro etapas e está registrada no #35; isso não homologa Safari/iPhone nem upload.
 Nenhum merge, migração remota ou deploy de produção autorizado nesta rodada. Apenas Previews automáticos são permitidos.
 
 ## Mudança de estratégia após revisão de compatibilidade
@@ -44,9 +45,9 @@ Falha SQL na finalização mantém a foto anterior; resposta HTTP perdida é res
 
 ## Sequência revisada — ações futuras condicionadas à autorização
 
-1. Concluir a aceitação da bio no Preview #35 pelo titular (docs/aceitacao-bio-preview.md). Continua pendente.
-2. Revisar/integrar #37 com autorização; propagar sua base/nomenclatura aos PRs dependentes sem manter arquivos duplicados.
-3. Com autorização de merge/deploy, integrar #35, aguardar READY e retarget/rebase do #36 sobre main; rever diff/CI e novo Preview. Nenhum desses passos foi executado nesta rodada.
+1. Rebase e atualização da base do #36 para main, com os nomes canônicos do #37 e a bio/retorno do #35 herdados. Rever diff, CI e Preview no novo SHA.
+2. O diff deve conter apenas o fluxo de retrato, seus leitores/revisão/compatibilidade, testes e esta documentação. Nenhum SQL histórico é modificado.
+3. CI/Preview aprovados não significam upload homologado. A expansão continua ausente do Storage operacional.
 4. Conferir projeto, histórico, hash aprovado e pending list: com #37 propagado, só a migração de retratos deve estar pendente. Não aplicar migrações antigas, repair ou include-all. A integração Supabase não recebe parâmetro de versão: combinar previamente aplicador versionado ou registro/renomeação para o ID real gerado; não mudar histórico silenciosamente.
 5. Após autorização específica, aplicar exclusivamente a expansão. Conferir tabela, coluna, bucket, RPCs e triggers; RLS/grants: avatar legado UPDATE continua true, profile_avatar_path UPDATE false, status UPDATE false. Conferir IDs/estados dos negócios, trial, isenção e arquivos preservados.
 6. **Só agora** o Preview #36 poderá testar upload real, com sessão legítima e consentimento para gravar o retrato no banco operacional compartilhado. Não requer publicação nem merge do #36. Testar também troca legada em produção e retorno ao Preview com a foto selecionada mais recentemente, sem simular dados comerciais.
