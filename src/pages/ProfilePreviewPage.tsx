@@ -76,7 +76,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       <SectionTabs label="Conteúdo do perfil" sections={[{ id: 'trabalhos', label: 'Projetos', content: <section className="public-profile-section" aria-label="Projetos e portfólio"><h2>Projetos e trabalhos</h2>
         {posts.length > 0 && <ul className="owner-posts">{posts.map(post => <li key={post.id}>
-          <Link to={`/conta/profissional/${businessId}/publicacoes`} aria-label={`Gerenciar projeto ${post.title}`}>
+          <Link to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`} aria-label={`Gerenciar projeto ${post.title}`}>
             {post.images[0] ? <ManagedPhoto businessId={businessId} photo={post.images[0]} /> : <span className="owner-posts__empty">Sem foto</span>}
             <strong>{post.title}</strong><small>{post.status === 'published' ? 'Publicado' : 'Rascunho'}</small>
           </Link></li>)}</ul>}

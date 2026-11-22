@@ -15,7 +15,7 @@ const labels = {
   published: "Publicado",
   unpublished: "Fora de circulação",
 };
-export function WorkPostsPage() {
+export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: boolean; onChanged?: () => void } = {}) {
   const { businessId = "" } = useParams(),
     { session } = useAuth(),
     { managed } = usePosts();
@@ -58,7 +58,7 @@ export function WorkPostsPage() {
     try {
       await managed.command(businessId, confirm.post.id, confirm.command);
       setConfirm(null);
-      state.retry();
+      state.retry(); onChanged?.();
     } catch (e) {
       setError(postError(e));
     } finally {
@@ -68,15 +68,15 @@ export function WorkPostsPage() {
   }
   return (
     <div className="managed-posts">
-      <Link
+      {!embedded && <Link
         className="back-link"
-        to={`/conta/profissional/${businessId}/editar?secao=conteudo`}
+        to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`}
       >
         Voltar a editar perfil
-      </Link>
-      <PageHeader title="Publicações">
+      </Link>}
+      {embedded ? <h3>Publicações</h3> : <PageHeader title="Publicações">
         <p>Apresente trabalhos realizados pelo seu negócio.</p>
-      </PageHeader>
+      </PageHeader>}
       <QueryStatus {...state} />
       {!state.loading && !state.error && !state.data && (
         <p role="status" className="form-notice">
@@ -171,7 +171,7 @@ export function WorkPostsPage() {
               onClose={() => setEditor(null)}
               onSave={async (id, input) => {
                 await managed!.save(businessId, id, input);
-                state.retry();
+                state.retry(); onChanged?.();
               }}
             />
           )}

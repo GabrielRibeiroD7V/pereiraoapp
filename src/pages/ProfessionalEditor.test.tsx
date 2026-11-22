@@ -1,13 +1,16 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App';
 import { createWorkFixtures, fixtureBusinessId as bid } from '../test/workFixtures';
 import type { EditableBusiness, RegistrationInput } from '../professional/types';
 import { postsFixtures } from '../test/postsFixtures';
 import { emptyRegistration } from '../professional/validation';
 
-function open(section = '', visitor = false, company = false) {
+vi.mock('../work/images', async original => ({ ...await original<typeof import('../work/images')>(), optimizeImage: vi.fn(async () => new Blob(['synthetic'], { type: 'image/webp' })) }));
+afterEach(() => vi.unstubAllGlobals());
+
+function open(section = '', visitor = false, company = false, route?: string) {
   const f = createWorkFixtures(false, visitor);
   let input: RegistrationInput = { ...emptyRegistration, type: company ? 'empresa' : 'autonomo', name: 'Perfil salvo', description: 'Bio salva', categoryId: 'climatizacao', cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], legalName: 'Privado', taxId: '12345678000199' };
   const business = { id: bid, name: input.name, type: input.type, slug: 'local', city_id: input.cityId, category_id: 'climatizacao' as const, status: 'draft' as const, description: input.description, whatsapp: null, instagram: null, avatar_path: null, created_at: '', updated_at: '' };
@@ -15,7 +18,7 @@ function open(section = '', visitor = false, company = false) {
     if (id !== bid) throw { code: 'NOT_MANAGER' };
     return { business: { ...business, name: input.name, description: input.description, type: input.type }, input: { ...input } };
   }), createDraft: vi.fn(), saveDraft: vi.fn(async (_id: string, value: RegistrationInput) => { input = { ...value }; }) };
-  render(<MemoryRouter initialEntries={[`/conta/profissional/${bid}/editar${section}`]}><App authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
   return { ...f, professional };
 }
 describe('área central do perfil existente', () => {
@@ -81,7 +84,7 @@ describe('área central do perfil existente', () => {
     const f = open(); let reject!: (error: Error) => void;
     f.professional.saveDraft.mockImplementationOnce(() => new Promise<void>((_resolve, no) => { reject = no; }));
     fireEvent.change(await screen.findByLabelText('Bio'), { target: { value: 'Preservar esta edição' } });
-    const form = screen.getByRole('button', { name: 'Salvar alterações' }).closest('form')!;
+    const form = (screen.getByRole('button', { name: 'Salvar alterações' }) as HTMLButtonElement).form!;
     fireEvent.submit(form); fireEvent.submit(form);
     expect(f.professional.saveDraft).toHaveBeenCalledOnce();
     await act(async () => reject(new Error('offline')));
@@ -90,15 +93,59 @@ describe('área central do perfil existente', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
     expect(await screen.findByText('Bio salva')).toBeVisible();
   });
-  it.each(['servicos', 'trabalhos', 'publicacoes'])('retorna de %s à central do mesmo negócio sem cadastro em etapas', async page => {
-    open('?secao=conteudo');
-    fireEvent.click(await screen.findByRole('link', { name: page === 'servicos' ? /Meus serviços/ : page === 'trabalhos' ? /Adicionar foto de trabalho/ : /Publicações de trabalhos/ }));
-    const back = await screen.findByRole('link', { name: 'Voltar a editar perfil' });
-    expect(back).toHaveAttribute('href', `/conta/profissional/${bid}/editar?secao=conteudo`);
-    if (page === 'trabalhos') expect(await screen.findByRole('button', { name: 'Adicionar foto de trabalho' })).toBeInTheDocument();
-    fireEvent.click(back);
-    expect(await screen.findByRole('tab', { name: 'Conteúdo' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.queryByRole('button', { name: 'Continuar' })).not.toBeInTheDocument();
+  it('gerencia serviços na central sem abrir outra rota ou submeter os dados do perfil', async () => {
+    const f = open('?secao=conteudo');
+    const save = vi.spyOn(f.work, 'saveService');
+    fireEvent.click(await screen.findByRole('button', { name: 'Adicionar serviço' }));
+    expect(document.querySelector('form form')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Nome do serviço'), { target: { value: 'Novo serviço na central' } });
+    fireEvent.change(screen.getByLabelText('Categoria'), { target: { value: 'eletrica' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar serviço' }));
+    expect(await screen.findByRole('heading', { name: 'Novo serviço na central' })).toBeInTheDocument();
+    expect(save).toHaveBeenCalledOnce();
+    expect(save.mock.calls[0]![0]).toBe(bid);
+    expect(f.professional.saveDraft).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Voltar a editar perfil' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Excluir serviço Novo serviço na central' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(screen.getByRole('heading', { name: 'Novo serviço na central' })).toBeInTheDocument();
+  });
+  it('abre e cancela foto de trabalho na central preservando edições textuais', async () => {
+    const NativeURL = URL;
+    vi.stubGlobal('URL', class extends NativeURL { static createObjectURL() { return 'blob:synthetic'; } static revokeObjectURL() {} });
+    const f = open();
+    const upload = vi.spyOn(f.work, 'uploadPhoto');
+    fireEvent.change(await screen.findByLabelText('Bio'), { target: { value: 'Bio não salva' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Conteúdo' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Fotos de trabalhos' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Adicionar foto de trabalho' }));
+    expect(document.querySelector('form form')).toBeNull();
+    expect(screen.getByLabelText('Fotografia do trabalho')).toHaveAttribute('type', 'file');
+    fireEvent.change(screen.getByLabelText('Fotografia do trabalho'), { target: { files: [new File(['synthetic'], 'synthetic.png', { type: 'image/png' })] } });
+    expect(await screen.findByAltText('Prévia da fotografia selecionada')).toBeVisible();
+    expect(upload).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
+    expect(upload).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
+    expect(screen.getByLabelText('Bio')).toHaveValue('Bio não salva');
+    expect(f.professional.saveDraft).not.toHaveBeenCalled();
+  });
+  it('abre o editor de publicações e cancela dentro da central', async () => {
+    open('?secao=conteudo&conteudo=publicacoes');
+    fireEvent.click(await screen.findByRole('button', { name: 'Nova publicação' }));
+    expect(document.querySelector('form form')).toBeNull();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
+    expect(screen.getByRole('tab', { name: 'Publicações' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
+  });
+  it.each([['servicos', 'servicos'], ['trabalhos', 'fotos'], ['publicacoes', 'publicacoes']])('mantém link antigo /%s e retorna ao gerenciador do mesmo negócio', async (path, manager) => {
+    open('', false, false, `/conta/profissional/${bid}/${path}`);
+    const link = await screen.findByRole('link', { name: 'Voltar a editar perfil' });
+    expect(link).toHaveAttribute('href', `/conta/profissional/${bid}/editar?secao=conteudo&conteudo=${manager}`);
+    fireEvent.click(link);
+    expect(await screen.findByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Conteúdo' })).toHaveAttribute('aria-selected', 'true');
   });
   it('redireciona visitante sem consultar o negócio, preservando o destino', async () => {
     const f = open('', true);

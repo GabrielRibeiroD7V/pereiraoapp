@@ -18,6 +18,9 @@ import { useWorkRepository } from '../work/WorkProvider';
 import { ProfilePhotoPicker } from '../work/ProfilePhotoPicker';
 import { ManagedBusinessAvatar } from '../work/ManagedBusinessAvatar';
 import { effectiveAvatarPath } from '../lib/mediaPath';
+import { ServicesPage } from './ServicesPage';
+import { PortfolioPage } from './PortfolioPage';
+import { WorkPostsPage } from './WorkPostsPage';
 import { ProfilePreviewPage } from './ProfilePreviewPage';
 
 const sections = ['perfil', 'atendimento', 'conteudo', 'previa'];
@@ -30,6 +33,7 @@ export function ProfessionalEditorPage() {
   const [query, setQuery] = useSearchParams();
   const requested = query.get('secao') ?? '';
   const section = sections.includes(requested) ? requested : 'perfil';
+  const contentSection = ['servicos', 'fotos', 'publicacoes'].includes(query.get('conteudo') ?? '') ? query.get('conteudo')! : 'servicos';
   const [saved, setSaved] = useState<EditableBusiness | null>(null);
   const [input, setInput] = useState<RegistrationInput | null>(null);
   const [catalog, setCatalog] = useState<ProfessionalCatalog | null>(null);
@@ -99,6 +103,14 @@ export function ProfessionalEditorPage() {
     } catch (cause) { if (epoch.current === requestEpoch) setError(professionalError(cause)); }
     finally { if (epoch.current === requestEpoch) { busy.current = false; setPending(false); } }
   }
+  function contentChanged() {
+    const requestEpoch = epoch.current;
+    void repository?.getEditable(businessId).then(value => {
+      if (epoch.current === requestEpoch) setSaved(current => current ? { ...current, business: value.business } : current);
+    }).catch(() => { /* Text edits and their saved baseline must not be overwritten by a media refresh. */ });
+    setRevision(value => value + 1);
+  }
+  function selectSection(id: string) { setQuery(current => { current.set('secao', id); return current; }, { replace: true }); }
   function discard() {
     if (saved) setInput(saved.input);
     setFormVersion(value => value + 1); setError(''); setNotice('Alterações não salvas descartadas.'); setRevision(value => value + 1);
@@ -119,32 +131,35 @@ export function ProfessionalEditorPage() {
         <div><strong>{saved.input.name}</strong><p>{saved.input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><BusinessStatus status={saved.business.status} /></div>
       </header>
       <p hidden={section !== 'perfil'} className="field-help">Foto principal é o retrato do perfil. Ela não é adicionada às fotografias de trabalhos.</p>
-      <form key={formVersion} className="auth-form profile-editor__form" onSubmit={save} noValidate aria-busy={pending}>
+      <div className="auth-form profile-editor__form" aria-busy={pending}>
         <p className="profile-editor__save-state" role="status">{dirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
-        <SectionTabs label="Editar conteúdo profissional" selectedId={section} onSelect={id => setQuery({ secao: id }, { replace: true })} sections={[
-          { id: 'perfil', label: 'Perfil', content: <fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Identidade e especialidades</legend>
+        <SectionTabs label="Editar conteúdo profissional" selectedId={section} onSelect={selectSection} sections={[
+          { id: 'perfil', label: 'Perfil', content: <form id="profile-identity-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Identidade e especialidades</legend>
             <div className="form-field"><label htmlFor="edit-provider-type">Tipo de prestador</label><select id="edit-provider-type" value={input.type} onChange={event => change('type', event.target.value as RegistrationInput['type'])}><option value="autonomo">Profissional autônomo</option><option value="empresa">Empresa</option></select></div>
             <FormField id="edit-business-name" label={input.type === 'empresa' ? 'Nome da empresa' : 'Nome profissional'} value={input.name} onChange={event => change('name', event.target.value)} maxLength={120} required />
             <div className="form-field"><label htmlFor="edit-business-bio">Bio</label><textarea id="edit-business-bio" value={input.description} rows={4} maxLength={3000} onChange={event => change('description', event.target.value)} /></div>
             <div className="form-field"><label htmlFor="edit-category">Categoria principal</label><select id="edit-category" value={input.categoryId} onChange={event => primary(event.target.value as CategoryId)} required><option value="" disabled>Selecione</option>{catalog.categories.map(value => <option key={value.id} value={value.id}>{value.name}</option>)}</select></div>
             {catalog.specialtiesAvailable !== false ? <SpecialtyPicker categories={catalog.categories} primaryId={input.categoryId} selected={input.additionalCategoryIds} onChange={ids => change('additionalCategoryIds', ids)} /> : <p className="field-help">Especialidades adicionais indisponíveis. A categoria principal foi preservada.</p>}
-          </fieldset> },
-          { id: 'atendimento', label: 'Atendimento', content: <fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Cidades e contatos públicos</legend>
+          </fieldset></form> },
+          { id: 'atendimento', label: 'Atendimento', content: <form id="profile-coverage-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Cidades e contatos públicos</legend>
             <CitySelect id="edit-city" label="Cidade de origem" cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
             <ServiceAreaPicker cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
             <FormField id="edit-whatsapp" label="WhatsApp" type="tel" value={input.whatsapp} maxLength={24} onChange={event => change('whatsapp', event.target.value)} />
             <p className="field-help">Informe país e DDD. Obrigatório antes da publicação administrativa.</p>
             <FormField id="edit-instagram" label="Instagram (opcional)" value={input.instagram} maxLength={31} onChange={event => change('instagram', event.target.value)} />
-          </fieldset> },
-          { id: 'conteudo', label: 'Conteúdo', content: <section className="profile-editor__content" aria-label="Gerenciar conteúdo salvo"><h2>Conteúdo do perfil</h2><p className="field-help">Cada seção usa os dados deste negócio e retorna para esta área.</p>
-            <Link to={`/conta/profissional/${businessId}/servicos`}><strong>Meus serviços</strong><span>Nome, descrição, categoria e preços</span></Link>
-            <Link to={`/conta/profissional/${businessId}/trabalhos`}><strong>Adicionar foto de trabalho</strong><span>Fotografias de serviços realizados, separadas do retrato</span></Link>
-            <Link to={`/conta/profissional/${businessId}/publicacoes`}><strong>Publicações de trabalhos</strong><span>Preparar e gerenciar trabalhos com fotos e descrição</span></Link>
+          </fieldset></form> },
+          { id: 'conteudo', label: 'Conteúdo', content: <section className="profile-editor__content" aria-label="Gerenciar conteúdo salvo">
+            <h2>Conteúdo do perfil</h2><p className="field-help">Gerencie o conteúdo deste negócio aqui. Cada operação tem sua própria confirmação; Salvar alterações é apenas para os dados do perfil.</p>
+            <SectionTabs label="Gerenciar serviços, fotos e publicações" selectedId={contentSection} onSelect={id => setQuery(current => { current.set('conteudo', id); return current; }, { replace: true })} sections={[
+              { id: 'servicos', label: 'Serviços', content: section === 'conteudo' && contentSection === 'servicos' && <ServicesPage embedded onChanged={contentChanged} /> },
+              { id: 'fotos', label: 'Fotos de trabalhos', content: section === 'conteudo' && contentSection === 'fotos' && <PortfolioPage embedded onChanged={contentChanged} /> },
+              { id: 'publicacoes', label: 'Publicações', content: section === 'conteudo' && contentSection === 'publicacoes' && <WorkPostsPage embedded onChanged={contentChanged} /> },
+            ]} />
           </section> },
           { id: 'previa', label: 'Prévia', content: <section aria-label="Prévia dos dados salvos"><p className="form-notice">Prévia privada dos dados salvos. Alterações ainda não salvas não aparecem aqui.</p>{section === 'previa' && <ProfilePreviewPage key={`${businessId}:${revision}`} businessIdOverride={businessId} embedded readOnly />}</section> },
         ]} />
-        {(section === 'perfil' || section === 'atendimento') && <div className="profile-editor__actions"><button type="submit" className="button button--primary" disabled={pending || !dirty}>{pending ? 'Salvando…' : 'Salvar alterações'}</button><button type="button" className="button button--secondary" disabled={pending || !dirty} onClick={discard}>Cancelar alterações</button></div>}
-      </form>
+        {(section === 'perfil' || section === 'atendimento') && <div className="profile-editor__actions"><button type="submit" form={section === 'perfil' ? 'profile-identity-form' : 'profile-coverage-form'} className="button button--primary" disabled={pending || !dirty}>{pending ? 'Salvando…' : 'Salvar alterações'}</button><button type="button" className="button button--secondary" disabled={pending || !dirty} onClick={discard}>Cancelar alterações</button></div>}
+      </div>
       <p className="field-help">Salvar não publica seu negócio, não inicia gratuidade e não ativa cobrança. A publicação do perfil depende de aprovação administrativa.</p>
     </>}
     {leave && <Modal title="Descartar alterações não salvas?" onClose={() => setLeave(null)}><p>As informações ainda não salvas não aparecerão na prévia.</p><div className="work-actions"><button type="button" className="button button--secondary" onClick={() => setLeave(null)}>Continuar editando</button><button type="button" className="button button--primary" onClick={() => { const destination = leave; setLeave(null); navigate(destination, { state: { businessId } }); }}>Descartar e sair</button></div></Modal>}
