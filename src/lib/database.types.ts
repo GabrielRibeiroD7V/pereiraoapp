@@ -185,6 +185,10 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      open_conversation: { Args: { target_business: string; message_body: string }; Returns: string };
+      send_conversation_message: { Args: { target_conversation: string; message_body: string }; Returns: string };
+      my_conversations: { Args: Record<string, never>; Returns: Json };
+      my_conversation_messages: { Args: { target_conversation: string; before_message?: string | null }; Returns: Json };
       set_business_specialties: {
         Args: { target_business_id: string; primary_category_id: string; additional_category_ids: string[]; expected_primary_category_id: string | null; expected_additional_category_ids: string[] };
         Returns: undefined;

@@ -51,7 +51,7 @@ describe('experiência pessoal e profissional', () => {
     expect(link).toHaveAttribute('href', '/recuperar-senha?next=%2Fconta%2Fseguranca');
   });
 
-  it('seleciona o negócio administrado e não inventa links para recursos futuros', async () => {
+  it('seleciona o negócio administrado e oferece a caixa de mensagens', async () => {
     setup('/conta/profissional');
     await screen.findByRole('heading', { name: first.name });
     fireEvent.change(screen.getByLabelText('Negócio que você quer gerenciar'), { target: { value: second.id } });
@@ -60,8 +60,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
     expect(screen.getByRole('link', { name: /Meus trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
-    expect(screen.queryByRole('link', { name: /Minha assinatura|Mensagens/ })).not.toBeInTheDocument();
-    expect(screen.getAllByText('Em breve')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: /^MensagensConversas com seus clientes/ })).toHaveAttribute('href', '/mensagens');
   });
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {

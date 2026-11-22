@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, ChevronRight, CreditCard, LogOut, Settings2, ShieldCheck, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, ChevronRight, CreditCard, LogOut, MessageSquare, Settings2, ShieldCheck, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProfileAvatar } from '../components/ProfileAvatar';
 import { MenuRow } from '../components/MenuRow';
@@ -41,6 +41,7 @@ export function AccountPage() {
         <span><strong>Meu Espaço Profissional</strong><span>Gerencie seu perfil, serviços e anúncios.</span></span><ChevronRight size={23} aria-hidden="true" />
       </Link>
       {session && <div className="account-menu">
+        <MenuRow icon={MessageSquare} title="Mensagens" description="Converse com profissionais e clientes" to="/mensagens" />
         <AdminEntry />
         <MenuRow icon={CreditCard} title="Gratuidade e assinatura" description="Consulte a situação de cada negócio" to="/conta/assinaturas"/>
         <MenuRow icon={UserRound} title="Meus dados" description="Nome e informações pessoais" to="/conta/dados" />

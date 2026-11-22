@@ -33,6 +33,8 @@ import { BillingProvider } from "../billing/BillingProvider";
 
 import type { SandboxBillingRepository } from "../billing/types";
 import type { SubscriptionRepository } from "../subscriptions/types";
+import { MessagesProvider } from "../messages/MessagesProvider";
+import type { MessageRepository } from "../messages/repository";
 
 const AuthPage = lazy(() => import("../pages/AuthPage").then(module => ({ default: module.AuthPage })));
 
@@ -61,6 +63,9 @@ const AdminPage = lazy(() => import("../admin/AdminPage").then(module => ({ defa
 const SubscriptionsPage = lazy(() => import("../subscriptions/SubscriptionViews").then(module => ({ default: module.SubscriptionsPage })));
 
 const SandboxBillingPage = lazy(() => import("../billing/BillingViews").then(module => ({ default: module.SandboxBillingPage })));
+const MessagesInboxPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.MessagesInboxPage })));
+const NewConversationPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.NewConversationPage })));
+const ConversationPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.ConversationPage })));
 
 const titles: Record<string, string> = {
   [routes.home]: "Início",
@@ -75,6 +80,7 @@ const titles: Record<string, string> = {
   "/conta/seguranca": "Segurança e acesso",
   "/admin": "Administração",
   "/conta/assinaturas": "Gratuidade e assinatura",
+  "/mensagens": "Mensagens",
 };
 
 export function App({
@@ -87,6 +93,7 @@ export function App({
   adminRepository,
   subscriptionRepository,
   billingRepository,
+  messageRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -97,6 +104,7 @@ export function App({
   adminRepository?: AdminRepository | null;
   subscriptionRepository?: SubscriptionRepository | null;
   billingRepository?: SandboxBillingRepository | null;
+  messageRepository?: MessageRepository | null;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -107,7 +115,7 @@ export function App({
               <AdminProvider repository={adminRepository}>
                 <SubscriptionProvider repository={subscriptionRepository}>
                   <BillingProvider repository={billingRepository}>
-                    <AppRoutes />
+                    <MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider>
                   </BillingProvider>
                 </SubscriptionProvider>
               </AdminProvider>
@@ -153,6 +161,9 @@ function AppRoutes() {
         />
         <Route path="/auth/retorno" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
+          <Route path="/mensagens" element={<MessagesInboxPage />} />
+          <Route path="/mensagens/iniciar/:businessId" element={<NewConversationPage />} />
+          <Route path="/mensagens/:conversationId" element={<ConversationPage key={pathname} />} />
           <Route path="/conta/assinaturas" element={<SubscriptionsPage />} />
           <Route
             path="/conta/profissional/:businessId/assinatura"

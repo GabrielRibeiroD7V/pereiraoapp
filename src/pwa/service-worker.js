@@ -50,7 +50,7 @@ async function hasLegacyPrivateClient() {
   const privateClients = clients.filter(client => {
     if (!client.url) return false;
     const path = new URL(client.url).pathname.toLowerCase();
-    return path === '/admin' || path.startsWith('/admin/') || path === '/conta' || path.startsWith('/conta/')
+    return path === '/admin' || path.startsWith('/admin/') || path === '/conta' || path.startsWith('/conta/') || path === '/mensagens' || path.startsWith('/mensagens/')
       || ['/entrar','/criar-conta','/recuperar-senha','/redefinir-senha','/auth/retorno'].includes(path);
   });
   const capabilities = await Promise.all(privateClients.map(client => new Promise(resolve => {
