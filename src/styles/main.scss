@@ -327,3 +327,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   .profile-editor__identity { align-items: flex-start; gap: .75rem; }
   .profile-editor__identity .button { font-size: .75rem; padding-inline: .5rem; }
 }
+
+.profile-editor__service-entry { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: 1rem 0; border-block: var(--border-subtle); margin-bottom: 1rem; }
+.profile-editor__service-entry[hidden] { display: none; }
+.profile-editor__service-entry p { margin: .25rem 0 0; max-width: 35rem; }

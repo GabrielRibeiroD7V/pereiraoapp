@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PencilLine, Plus, Power, Trash2, Wrench } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { ServiceEditor } from '../work/ServiceEditor';
@@ -6,19 +6,20 @@ import { WorkFrame } from '../work/WorkFrame';
 import { useBusinessWork } from '../work/useBusinessWork';
 import { formatPrice, workError } from '../work/validation';
 import type { ServiceRow } from '../lib/database.types';
-export function ServicesPage({ embedded = false, onChanged }: { embedded?: boolean; onChanged?: () => void } = {}) {
+export function ServicesPage({ embedded = false, onChanged, startNew = false, onStartNew }: { embedded?: boolean; onChanged?: () => void; startNew?: boolean; onStartNew?: () => void } = {}) {
   const state = useBusinessWork();
   const [editor, setEditor] = useState<ServiceRow | 'new' | null>(null);
   const [deleting, setDeleting] = useState<ServiceRow | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false);
+  useEffect(() => { if (startNew && state.data) { setEditor('new'); onStartNew?.(); } }, [startNew, state.data, onStartNew]);
   async function run(operation: () => Promise<void>) {
     if (busy.current) return;
     busy.current = true; setPending(true); setError(null);
     try { await operation(); setDeleting(null); state.refresh(); onChanged?.(); } catch (cause) { setError(workError(cause)); } finally { busy.current = false; setPending(false); }
   }
-  return <WorkFrame embedded={embedded} title="Meus serviços" state={state}>
+  return <WorkFrame embedded={embedded} title={embedded ? "Serviços e preços" : "Meus serviços"} state={state}>
     {state.data && <>
       <div className="work-toolbar"><p>O que seu negócio oferece</p><button className="button button--primary" disabled={pending || state.loading} onClick={() => setEditor('new')}><Plus size={17} aria-hidden="true" />Adicionar serviço</button></div>
       {error && !deleting && <div role="alert" className="form-error"><p>{error}</p><button type="button" className="text-link" onClick={() => { setError(null); state.refresh(); }}>Atualizar lista</button></div>}

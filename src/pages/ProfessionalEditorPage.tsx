@@ -130,6 +130,7 @@ export function ProfessionalEditorPage() {
         }} /> : <ManagedBusinessAvatar path={effectiveAvatarPath(saved.business)} />}</div>
         <div><strong>{saved.input.name}</strong><p>{saved.input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><BusinessStatus status={saved.business.status} /></div>
       </header>
+      <div className="profile-editor__service-entry" hidden={section === 'conteudo' && contentSection === 'servicos'}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra. Não é a assinatura do PEREIRÃO.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', 'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
       <p hidden={section !== 'perfil'} className="field-help">Foto principal é o retrato do perfil. Ela não é adicionada às fotografias de trabalhos.</p>
       <div className="auth-form profile-editor__form" aria-busy={pending}>
         <p className="profile-editor__save-state" role="status">{dirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
@@ -151,7 +152,7 @@ export function ProfessionalEditorPage() {
           { id: 'conteudo', label: 'Conteúdo', content: <section className="profile-editor__content" aria-label="Gerenciar conteúdo salvo">
             <h2>Conteúdo do perfil</h2><p className="field-help">Gerencie o conteúdo deste negócio aqui. Cada operação tem sua própria confirmação; Salvar alterações é apenas para os dados do perfil.</p>
             <SectionTabs label="Gerenciar serviços, fotos e publicações" selectedId={contentSection} onSelect={id => setQuery(current => { current.set('conteudo', id); return current; }, { replace: true })} sections={[
-              { id: 'servicos', label: 'Serviços', content: section === 'conteudo' && contentSection === 'servicos' && <ServicesPage embedded onChanged={contentChanged} /> },
+              { id: 'servicos', label: 'Serviços e preços', content: section === 'conteudo' && contentSection === 'servicos' && <ServicesPage embedded onChanged={contentChanged} startNew={query.get('acao') === 'adicionar-servico'} onStartNew={() => setQuery(current => { current.delete('acao'); return current; }, { replace: true })} /> },
               { id: 'fotos', label: 'Fotos de trabalhos', content: section === 'conteudo' && contentSection === 'fotos' && <PortfolioPage embedded onChanged={contentChanged} /> },
               { id: 'publicacoes', label: 'Publicações', content: section === 'conteudo' && contentSection === 'publicacoes' && <WorkPostsPage embedded onChanged={contentChanged} /> },
             ]} />

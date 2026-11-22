@@ -22,6 +22,18 @@ function open(section = '', visitor = false, company = false, route?: string) {
   return { ...f, professional };
 }
 describe('área central do perfil existente', () => {
+  it('abre Adicionar serviço diretamente da entrada, cancela sem gravar e mantém o negócio', async () => {
+    const f = open();
+    await screen.findByLabelText('Bio');
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar serviço' }));
+    expect(await screen.findByRole('dialog', { name: 'Adicionar serviço' })).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Serviços e preços' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByLabelText('Preço (R$)')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(f.professional.saveDraft).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Editar perfil profissional' })).toBeVisible();
+  });
   it('separa edição do primeiro cadastro, mantém três abas principais e não mostra dados privados', async () => {
     open();
     expect(await screen.findByLabelText('Bio')).toHaveValue('Bio salva');
