@@ -34,6 +34,11 @@ export function PersonalDataPage() {
       <dl className="account-details"><dt>E-mail</dt><dd>{session?.user.email || 'E-mail não informado'}</dd></dl>
       {gateway?.updateProfile && <button className="button button--primary" disabled={loading || pending || loadError}>{pending ? 'Salvando…' : 'Salvar meus dados'}</button>}
     </form>
+    <section className="personal-professional-link" aria-labelledby="professional-data-title">
+      <h2 id="professional-data-title">Perfil profissional</h2>
+      <p>Descrição, cidade, contatos, serviços e trabalhos ficam no seu Espaço Profissional.</p>
+      <LinkButton to="/conta/profissional" variant="secondary">Abrir meu perfil profissional</LinkButton>
+    </section>
     <LinkButton to="/conta" variant="secondary">Voltar à conta</LinkButton>
   </div>;
 }

@@ -54,17 +54,19 @@ export function ProfessionalSpacePage() {
         <div className="business-identity__heading"><ProfileAvatar business /><div><p className="business-type">{business.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><h2>{business.name}</h2></div></div>
         <div className="business-meta"><span>{category || 'Categoria não informada'}</span><span><MapPin size={15} aria-hidden="true" />{city ? `${city.name}/${city.state_code}` : business.city_id}</span></div>
         <div className="business-identity__status"><BusinessStatus status={business.status} /><p>{business.status === 'published' ? 'Visível no marketplace.' : 'Seu perfil não está visível no marketplace.'}</p></div>
+        {business.description && <p className="business-identity__description">{business.description}</p>}
         <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/editar`}><PencilLine size={17} aria-hidden="true" />Editar perfil</LinkButton>
+        <LinkButton variant="secondary" to={`/conta/profissional/${business.id}/previa`}>Ver prévia do perfil</LinkButton>
       </section>
       <section className="business-management" aria-labelledby="management-title"><h2 id="management-title">Seu negócio</h2>
         <BusinessSubscriptionLine businessId={business.id}/>
-        <MenuRow icon={UserRound} title="Meu perfil" description="Apresentação, localização e contatos" />
+        <MenuRow icon={UserRound} title="Meu perfil" description="Apresentação, localização e contatos" to={`/conta/profissional/${business.id}/editar`} />
         <MenuRow icon={Wrench} title="Meus serviços" description="Seu catálogo de serviços" to={`/conta/profissional/${business.id}/servicos`} />
         <MenuRow icon={Image} title="Meus trabalhos" description="Fotografias dos seus trabalhos" to={`/conta/profissional/${business.id}/trabalhos`} />
         <MenuRow icon={FileText} title="Publicações" description="Apresente trabalhos realizados" to={`/conta/profissional/${business.id}/publicacoes`}/>
         <MenuRow icon={MessageSquare} title="Mensagens" description="Conversas com seus clientes" to="/mensagens" />
       </section>
-      <p className="field-help professional-footnote">Serviços e fotografias seguem o estado de publicação do seu perfil. A prévia pública será disponibilizada em uma próxima etapa.</p>
+      <p className="field-help professional-footnote">Serviços e fotografias seguem o estado de publicação do seu perfil. A prévia é visível somente para quem gerencia o negócio.</p>
       <Link className="text-link add-business" to="/conta/profissional/cadastro"><Plus size={17} aria-hidden="true" />Cadastrar outro negócio</Link>
     </>}
   </div>;
