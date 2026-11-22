@@ -1,3 +1,4 @@
+import { effectiveAvatarPath } from '../lib/mediaPath';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, Image, MapPin, MessageSquare, PencilLine, Plus, Wrench } from 'lucide-react';
@@ -51,7 +52,7 @@ export function ProfessionalSpacePage() {
         <select id="managed-business" value={business.id} onChange={(event) => setSelectedId(event.target.value)}>{businesses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
       </div>}
       <section className="business-identity" aria-label="Identificação do negócio">
-        <div className="business-identity__heading"><ManagedBusinessAvatar path={business.avatar_path} /><div><p className="business-type">{business.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><h2>{business.name}</h2></div></div>
+        <div className="business-identity__heading"><ManagedBusinessAvatar path={effectiveAvatarPath(business)} /><div><p className="business-type">{business.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><h2>{business.name}</h2></div></div>
         <div className="business-meta"><span>{category || 'Categoria não informada'}</span><span><MapPin size={15} aria-hidden="true" />{city ? `${city.name}/${city.state_code}` : business.city_id}</span></div>
         <div className="business-identity__status"><BusinessStatus status={business.status} /><p>{business.status === 'published' ? 'Visível no marketplace.' : 'Seu perfil não está visível no marketplace.'}</p></div>
         {business.description && <p className="business-identity__description">{business.description}</p>}

@@ -11,6 +11,6 @@ export interface WorkRepository {
   deletePhoto(businessId: string, id: string): Promise<void>;
   reorderPhotos(businessId: string, ids: string[]): Promise<void>;
   uploadProfilePhoto(businessId: string, id: string, file: Blob, expectedPath: string | null): Promise<string>;
-  removeProfilePhoto(businessId: string, expectedPath: string | null): Promise<void>;
+  removeProfilePhoto(businessId: string, expectedPath: string | null, legacyOnly?: boolean): Promise<void>;
   imageUrl(path: string): Promise<string>;
 }

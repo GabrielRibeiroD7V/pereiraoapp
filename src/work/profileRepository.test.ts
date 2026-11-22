@@ -56,3 +56,8 @@ describe('Storage de retratos via SDK com transporte simulado', () => {
     for (const value of [`${bid}/profile/../../x.webp`,path+'?token=x',path.replace(bid,id),path.replace('.webp','.svg')]) expect(imageBucket(bid,value)).toBeNull();
   });
 });
+
+it('exclusão de trabalho limpa somente fallback legado por RPC', async () => {
+  const f = setup(); await f.repository.removeProfilePhoto(bid,`${bid}/portfolio/${id}.webp`,true);
+  expect(f.calls.at(-1)?.body).toMatchObject({ command:'clear_legacy',target_business:bid,expected_avatar_path:`${bid}/portfolio/${id}.webp` });
+});

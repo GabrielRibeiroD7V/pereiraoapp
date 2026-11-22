@@ -1,3 +1,4 @@
+import { effectiveAvatarPath } from '../lib/mediaPath';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ProfilePhotoPicker } from '../work/ProfilePhotoPicker';
@@ -64,7 +65,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false }: { b
     {error && <p role="alert" className="form-error">{error}</p>}
     {business && info && <>
       <header className="social-profile-header social-preview-header">
-        <div className="social-preview-identity"><div className="profile-photo-controls">{work ? <ProfilePhotoPicker key={businessId} businessId={businessId} path={business.business.avatar_path} repository={work} onSaved={path => setBusiness(current => current?.business.id === businessId ? { ...current, business: { ...current.business, avatar_path: path } } : current)} /> : <ManagedBusinessAvatar path={business.business.avatar_path} />}</div><div className="social-preview-identity__details">
+        <div className="social-preview-identity"><div className="profile-photo-controls">{work ? <ProfilePhotoPicker key={businessId} businessId={businessId} path={effectiveAvatarPath(business.business)} repository={work} onSaved={path => setBusiness(current => current?.business.id === businessId ? { ...current, business: { ...current.business, profile_avatar_path: path } } : current)} /> : <ManagedBusinessAvatar path={effectiveAvatarPath(business.business)} />}</div><div className="social-preview-identity__details">
           {embedded ? <h2>{info.name}</h2> : <h1>{info.name}</h1>}<p>{info.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'} · {city ? `${city.name}/${city.state_code}` : 'Cidade não informada'}</p>
           <dl className="social-preview-stats" role="group" aria-label="Resumo do perfil"><div><dt>Projetos</dt><dd>{posts.length}</dd></div><div><dt>Fotos</dt><dd>{contentError ? '—' : photos.length}</dd></div><div><dt>Serviços</dt><dd>{contentError ? '—' : services.length}</dd></div></dl>
         </div></div>

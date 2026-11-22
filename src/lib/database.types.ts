@@ -30,6 +30,7 @@ export type BusinessRow = {
   whatsapp: string | null;
   instagram: string | null;
   avatar_path: string | null;
+  profile_avatar_path?: string | null;
   status: "draft" | "published" | "unpublished";
   created_at: string;
   updated_at: string;
@@ -196,6 +197,10 @@ export interface Database {
         Returns: undefined;
       };
       search_public_businesses: {
+        Args: { p_query?: string; p_category?: string; p_city?: string; p_type?: string; p_page?: number };
+        Returns: Json[];
+      };
+      search_public_businesses_profile: {
         Args: { p_query?: string; p_category?: string; p_city?: string; p_type?: string; p_page?: number };
         Returns: Json[];
       };

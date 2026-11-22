@@ -115,9 +115,9 @@ export function createWorkRepository(client: SupabaseClient<Database>): WorkRepo
       await call('finalize');
       return path;
     },
-    async removeProfilePhoto(businessId, expectedPath) {
+    async removeProfilePhoto(businessId, expectedPath, legacyOnly = false) {
       await manager(businessId);
-      const { error } = await client.rpc('profile_photo_command', { command: 'remove', target_business: businessId, expected_avatar_path: expectedPath });
+      const { error } = await client.rpc('profile_photo_command', { command: legacyOnly ? 'clear_legacy' : 'remove', target_business: businessId, expected_avatar_path: expectedPath });
       if (error) throw error;
     },
     async imageUrl(path) {

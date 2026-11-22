@@ -21,3 +21,8 @@ export function profileImagePath(id: string, path: string) {
 export function imageBucket(id: string, path: string): 'business-profile' | 'business-portfolio' | null {
   return profileImagePath(id, path) ? 'business-profile' : imagePath(id, path) ? 'business-portfolio' : null;
 }
+
+// Compatibilidade com registros anteriores à migração de retratos.
+export function effectiveAvatarPath(business: { avatar_path: string | null; profile_avatar_path?: string | null }) {
+  return business.profile_avatar_path ?? business.avatar_path;
+}
