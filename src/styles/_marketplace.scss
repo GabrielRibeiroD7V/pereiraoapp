@@ -30,6 +30,12 @@
     }
     .social-profile-bio { margin: .875rem 0; line-height: 1.5; }
   }
+  .social-preview-header { .social-preview-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; margin: .75rem 0 1rem; }
+    .social-preview-identity__details { flex: 1; min-width: 0; h1 { font-size: clamp(1.15rem, 5vw, 1.75rem); line-height: 1.2; overflow-wrap: anywhere; } > p { margin: .3rem 0 .75rem; color: var(--color-secondary); font-size: .8rem; } }
+    .profile-avatar { width: clamp(5.5rem, 24vw, 8.5rem); height: clamp(5.5rem, 24vw, 8.5rem); flex-basis: clamp(5.5rem, 24vw, 8.5rem); border: 2px solid var(--color-border); img { object-fit: cover; } }
+    .social-preview-stats { display: flex; gap: clamp(.5rem, 3vw, 2rem); margin: 0; > div { display: flex; flex-direction: column-reverse; align-items: center; min-width: 0; } dt { font-size: .75rem; color: var(--color-secondary); } dd { margin: 0; font-weight: 700; font-size: 1rem; color: var(--color-navy); } }
+    .social-profile-actions { margin-top: 1rem; }
+  }
   .social-profile-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; .button { flex: 1 1 9rem; justify-content: center; min-height: 2.75rem; font-size: .875rem; } .public-contacts { flex: 1 1 10rem; .button { flex: 1 1 auto; } } }
   .social-preview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .2rem; > li { border: 0; border-radius: 0; } .portfolio-image { aspect-ratio: 1; } .portfolio-image button, .portfolio-image img { width: 100%; height: 100%; object-fit: cover; } .portfolio-copy { display: none; } }
   .public-profile-heading { padding-bottom: var(--space-3); display: flex; gap: var(--space-4); align-items: flex-start; margin-block: var(--space-4); > div { min-width: 0; } .page-header { margin-bottom: var(--space-2); } h1 { overflow-wrap: anywhere; } p { color: var(--color-secondary); font-size: var(--font-small); } }

@@ -33,17 +33,19 @@
   .security-email { display: flex; align-items: center; gap: .875rem; padding-block: .75rem 1.25rem; min-width: 0; > div { min-width: 0; } strong { font-size: .875rem; } p { color: var(--color-secondary); overflow-wrap: anywhere; } }
   .business-selector { margin-bottom: 1.25rem; select { text-overflow: ellipsis; } }
   .business-identity { padding: 0 0 1.25rem; border-bottom: 1px solid var(--color-border);
+    &__actions { display: flex; flex-wrap: wrap; gap: .5rem; .button { flex: 1 1 10rem; justify-content: center; } }
     &__description { margin: 0 0 1rem; color: var(--color-secondary); overflow-wrap: anywhere; white-space: pre-wrap; }
     &__heading { display: flex; align-items: center; gap: .875rem; > div { flex: 1; min-width: 0; } h2 { font-size: 1.25rem; overflow-wrap: anywhere; } }
     .business-type { font-size: .75rem; color: var(--color-secondary); margin-bottom: .25rem; }
     &__status { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; margin-bottom: 1rem; p { color: var(--color-secondary); font-size: .75rem; } }
     .button { min-height: 2.75rem; padding: .5rem 1rem; font-size: .875rem; }
   }
-  .profile-preview { .form-notice { margin-bottom: 1rem; } .preview-enlarged { max-width: 100%; height: auto; } }
+  .profile-preview { .social-preview-notice { margin: 1rem 0; } .preview-enlarged { max-width: 100%; height: auto; } }
   .registration-photo-link, .work-profile-photo { display: flex; align-items: center; gap: 1rem; padding: 1rem; margin: 1rem 0; border: 1px solid var(--color-border); border-radius: .75rem; background: var(--color-surface);
     > div { min-width: 0; } h2, strong { font-size: 1rem; } p { color: var(--color-secondary); font-size: .875rem; margin: .25rem 0 .75rem; } .button { min-height: 2.75rem; font-size: .875rem; }
   }
   .registration-photo-link { display: block; }
+  .registration-preview-actions { display: flex; flex-wrap: wrap; gap: .5rem; .button { flex: 1 1 10rem; justify-content: center; } }
   .work-profile-photo .profile-avatar { width: 4.5rem; height: 4.5rem; }
   .work-set-avatar { font-size: .75rem; min-height: 2.5rem; padding: .4rem .6rem; }
   .business-meta { display: flex; flex-wrap: wrap; gap: .375rem 1rem; padding-block: 1rem .75rem; font-size: .875rem; color: var(--color-secondary); > span { display: inline-flex; align-items: center; gap: .25rem; overflow-wrap: anywhere; min-width: 0; } }

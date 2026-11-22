@@ -71,13 +71,13 @@ const ConversationPage = lazy(() => import("../messages/MessagesPages").then(mod
 const titles: Record<string, string> = {
   [routes.home]: "Início",
   [routes.search]: "Buscar",
-  [routes.account]: "Conta",
+  [routes.account]: "Minha conta",
   "/entrar": "Entrar",
   "/criar-conta": "Criar conta",
   "/recuperar-senha": "Recuperar senha",
   "/redefinir-senha": "Definir nova senha",
   "/auth/retorno": "Confirmar acesso",
-  "/conta/dados": "Meus dados",
+  "/conta/dados": "Dados da conta",
   "/conta/seguranca": "Segurança e acesso",
   "/admin": "Administração",
   "/conta/assinaturas": "Gratuidade e assinatura",
@@ -131,7 +131,7 @@ export function App({
 function AppRoutes() {
   const { pathname } = useLocation();
   useEffect(() => {
-    document.title = `${titles[pathname] ?? (pathname.startsWith("/trabalhos/") ? "Trabalho realizado" : pathname.endsWith("/publicacoes") ? "Publicações" : pathname.startsWith("/prestadores/") ? "Perfil profissional" : pathname.endsWith("/servicos") ? "Meus serviços" : pathname.endsWith("/trabalhos") ? "Meus trabalhos" : pathname.startsWith("/conta/profissional") ? "Espaço profissional" : "Página não encontrada")} | PEREIRÃO`;
+    document.title = `${titles[pathname] ?? (pathname.startsWith("/trabalhos/") ? "Trabalho realizado" : pathname.endsWith("/publicacoes") ? "Publicações" : pathname.startsWith("/prestadores/") ? "Perfil profissional" : pathname.endsWith("/servicos") ? "Meus serviços" : pathname.endsWith("/trabalhos") ? "Fotos e trabalhos" : pathname.startsWith("/conta/profissional") ? "Meu perfil profissional" : "Página não encontrada")} | PEREIRÃO`;
   }, [pathname]);
 
   return (

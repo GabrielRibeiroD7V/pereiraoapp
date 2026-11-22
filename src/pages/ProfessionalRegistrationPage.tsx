@@ -97,13 +97,13 @@ export function ProfessionalRegistrationPage() {
   }
 
   return <div className="registration-page">
-    <Link className="back-link" to="/conta/profissional"><ArrowLeft size={17} aria-hidden="true" />Espaço profissional</Link>
+    <Link className="back-link" to="/conta/profissional"><ArrowLeft size={17} aria-hidden="true" />Meu perfil profissional</Link>
     <PageHeader title={businessId ? 'Editar perfil profissional' : 'Anunciar meus serviços'}><p>Seu próximo cliente começa conhecendo seu trabalho.</p></PageHeader>
     {loading && <p role="status">Carregando informações do cadastro…</p>}
     {!repository && <p role="status" className="form-notice">O cadastro ainda está sendo preparado. Continue explorando o PEREIRÃO.</p>}
     {error && <p role="alert" className="form-error">{error}</p>}
     {savedId && !businessId && <p className="form-notice">Seu rascunho já foi criado. Ao tentar novamente, continuaremos no mesmo perfil.</p>}
-    {(businessId || savedId) && <div className="registration-photo-link"><strong>Fotos do perfil</strong><p>Adicione fotos dos seus trabalhos e escolha a foto principal em Meus trabalhos.</p><Link className="button button--secondary" to={`/conta/profissional/${businessId ?? savedId}/trabalhos`}>Adicionar fotos e escolher foto principal</Link></div>}
+    {(businessId || savedId) && <div className="registration-photo-link"><strong>Seu perfil</strong><p>Veja como ele aparece para os clientes. A prévia mostra os dados já salvos.</p><div className="registration-preview-actions"><Link className="button button--primary" to={`/conta/profissional/${businessId ?? savedId}/previa`}>Ver prévia do perfil</Link><Link className="button button--secondary" to={`/conta/profissional/${businessId ?? savedId}/trabalhos`}>Adicionar fotos</Link></div></div>}
     {!businessId && !savedId && <p className="field-help">Depois de salvar o rascunho, você poderá adicionar fotos e escolher a foto principal.</p>}
     {catalog && <>
       {(catalog.categories.length === 0 || catalog.cities.length === 0) && <p role="status" className="form-notice">Ainda não há cidade ou categoria disponível para concluir o cadastro.</p>}
@@ -156,6 +156,6 @@ export function ProfessionalRegistrationPage() {
       </form>
       <p className="registration-assurance"><ShieldCheck size={16} aria-hidden="true" />Ao concluir, seu perfil será salvo como rascunho. Sem publicação ou cobrança automática.</p>
     </>}
-    <Link className="text-link" to="/conta/profissional">Voltar ao espaço profissional</Link>
+    <Link className="text-link" to="/conta/profissional">Voltar ao meu perfil profissional</Link>
   </div>;
 }

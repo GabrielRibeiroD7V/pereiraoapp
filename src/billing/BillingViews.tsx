@@ -69,7 +69,7 @@ export function SandboxBillingPage() {
   return (
     <div className="account-page sandbox-billing">
       <Link className="back-link" to="/conta/profissional">
-        Espaço profissional
+        Meu perfil profissional
       </Link>
       <PageHeader title="Assinatura em homologação">
         <p>Sandbox Asaas · somente simulações, sem cobrança real.</p>

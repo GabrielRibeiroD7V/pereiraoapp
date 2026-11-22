@@ -124,7 +124,7 @@ export function PostEditor({
                 <legend>Fotografias do seu portfólio</legend>
                 {choices.data.items.length === 0 ? (
                   <p className="field-help">
-                    Adicione fotografias em Meus trabalhos para selecioná-las
+                    Adicione fotografias em Fotos e trabalhos para selecioná-las
                     aqui.
                   </p>
                 ) : (
