@@ -66,3 +66,40 @@ a conta legítima e aguarda ativação dos campos novos; o caminho QA é separad
 PR #39 não foi mesclado: este PR não altera AppShell nem MainNavigation e deve
 preservar o único atalho global quando sua base for atualizada sobre a main que
 contiver #39. Não restaurar o atalho duplicado no toolbar da Conta.
+
+## Revisão de produto após as referências de organização
+
+O ponto central agora é `/conta/profissional/:id/perfil`, não a edição. A entrada
+legada `/conta/profissional` resolve o negócio escolhido e abre a vitrine. A Conta
+continua mostrando o perfil próprio, sem transformar dados privados em conteúdo
+público. Identidade, bio com quebras de linha, especialidades, cidades, ações,
+serviços e grade são visíveis; trajetória opcional fica em um detalhe recolhível.
+
+Editar perfil abre `/editar`; salvar ou cancelar volta ao perfil do mesmo negócio.
+Título/experiência/formação/credenciais têm a tela própria `/apresentacao`, com
+retorno ao mesmo perfil e proteção de edição não salva. Não há formulários
+aninhados nem exigência de preencher campos novos para editar a bio existente.
+
+Adicionar tem escolhas explícitas: `/servicos?acao=novo`, `/trabalhos?acao=novo`
+e `/publicacoes?acao=novo`; abre o formulário correspondente uma vez, consome a
+intenção na URL e mantém a rota antiga funcional. As três páginas oferecem
+Voltar ao perfil. `/previa` é somente leitura e mostra dados salvos, sem publicar.
+O retrato usa o seletor do #36; não cria item no portfólio.
+
+Mensagens navega para `/mensagens`. Não há número de não lidas inventado.
+O cabeçalho #39 continua em outro PR: não foi incorporado ou removido aqui.
+A simulação local de integração preservou seu atalho sem conflito de arquivos.
+
+QA novo: scripts/profile-hub-qa.mjs, nove larguras, fluxo perfil → editar →
+cancelar → editar/salvar → perfil → serviço sob orçamento → perfil → escolher e
+cancelar foto → mensagens → Conta → ver como cliente. Tudo em memória, zero
+uploads reais, sem conta operacional. URLs completas do negócio sintético e
+resultados estão em outputs/perfil-central-revisado/results.json na entrega.
+Os testes não comprovam Safari, Android físicos, novo login ou Storage real.
+Recarga da demonstração restaura os exemplos; não deve ser usada como prova de
+persistência remota. A persistência SQL foi testada apenas no PostgreSQL isolado.
+
+Preview contém demonstração isolada em `/qa/profile-editor/index.html?view=profile`;
+ela não é incluída em build Production nem no precache do PWA e usa config pública
+Supabase vazia. Preview normal mantém conta legítima e campos novos indisponíveis
+até autorização/aplicação específica da migração. Nunca confundir os dois.

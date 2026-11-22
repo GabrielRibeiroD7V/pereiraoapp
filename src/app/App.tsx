@@ -50,6 +50,7 @@ const BusinessPrivateDataPage = lazy(() => import("../pages/BusinessPrivateDataP
 
 const ProfessionalEditorPage = lazy(() => import("../pages/ProfessionalEditorPage").then(module => ({ default: module.ProfessionalEditorPage })));
 
+const PresentationPage = lazy(() => import("../pages/PresentationPage").then(module => ({ default: module.PresentationPage })));
 const ProfessionalSpacePage = lazy(() => import("../pages/ProfessionalSpacePage").then(module => ({ default: module.ProfessionalSpacePage })));
 const ProfilePreviewPage = lazy(() => import("../pages/ProfilePreviewPage").then(module => ({ default: module.ProfilePreviewPage })));
 
@@ -197,7 +198,9 @@ function AppRoutes() {
             element={<ProfessionalEditorPage key={pathname} />}
           />
           <Route path="/conta/profissional/:businessId/dados-empresariais" element={<BusinessPrivateDataPage key={pathname} />} />
-          <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/apresentacao" element={<PresentationPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/perfil" element={<ProfilePreviewPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} readOnly />} />
           <Route
             path="/conta/profissional/:businessId/servicos"
             element={<ServicesPage key={pathname} />}

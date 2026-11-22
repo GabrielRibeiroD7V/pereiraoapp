@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { PencilLine, Plus, Power, Trash2, Wrench } from 'lucide-react';
 import { Modal } from '../components/Modal';
@@ -8,12 +9,14 @@ import { formatPrice, workError } from '../work/validation';
 import type { ServiceRow } from '../lib/database.types';
 export function ServicesPage({ embedded = false, onChanged, startNew = false, onStartNew }: { embedded?: boolean; onChanged?: () => void; startNew?: boolean; onStartNew?: () => void } = {}) {
   const state = useBusinessWork();
+  const [query,setQuery] = useSearchParams();
+  const requestedNew = !embedded && query.get('acao') === 'novo';
   const [editor, setEditor] = useState<ServiceRow | 'new' | null>(null);
   const [deleting, setDeleting] = useState<ServiceRow | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false);
-  useEffect(() => { if (startNew && state.data) { setEditor('new'); onStartNew?.(); } }, [startNew, state.data, onStartNew]);
+  useEffect(() => { if ((startNew || requestedNew) && state.data) { setEditor('new'); onStartNew?.(); if(requestedNew)setQuery(current=>{current.delete('acao');return current;},{replace:true}); } }, [startNew, requestedNew, state.data, onStartNew, setQuery]);
   async function run(operation: () => Promise<void>) {
     if (busy.current) return;
     busy.current = true; setPending(true); setError(null);

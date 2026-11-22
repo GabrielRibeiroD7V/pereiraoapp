@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Image, PencilLine, Plus, Trash2 } from 'lucide-react';
 import type { PortfolioRow } from '../lib/database.types';
 import { Modal } from '../components/Modal';
@@ -9,12 +10,15 @@ import { PortfolioPhoto } from '../work/PortfolioPhoto';
 import { workError } from '../work/validation';
 export function PortfolioPage({ embedded = false, onChanged }: { embedded?: boolean; onChanged?: () => void } = {}) {
   const state = useBusinessWork();
+  const [query,setQuery] = useSearchParams();
+  const requestedNew = !embedded && query.get('acao') === 'novo';
   const [editor, setEditor] = useState<PortfolioRow | 'new' | null>(null);
   const [deleting, setDeleting] = useState<PortfolioRow | null>(null);
   const [enlarged, setEnlarged] = useState<{ url: string; caption: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false);
+  useEffect(()=>{if(requestedNew && state.data){setEditor('new');setQuery(current=>{current.delete('acao');return current;},{replace:true});}},[requestedNew,state.data,setQuery]);
   const ready = state.data?.photos.filter((photo) => photo.media_state === 'ready') ?? [];
   async function run(operation: () => Promise<void>) {
     if (busy.current) return;

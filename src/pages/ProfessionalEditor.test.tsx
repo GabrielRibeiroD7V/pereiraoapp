@@ -22,20 +22,16 @@ function open(section = '', visitor = false, company = false, route?: string, pr
   return { ...f, professional };
 }
 describe('área central do perfil existente', () => {
-  it('a vitrine usa título persistido e não a apresentação ainda em edição', async () => {
+  it('edita a apresentação em tela própria e volta ao perfil com dados persistidos', async () => {
     let saved = { headline: 'Título persistido', experience: '', education: '', certifications: '', professional_registration: '' };
     const repository = { get: vi.fn(async () => ({ available: true, data: { ...saved } })), save: vi.fn(async (_id: string, value: typeof saved) => { saved = { ...value }; }) };
-    open('', false, false, undefined, repository);
-    fireEvent.change(await screen.findByLabelText('Título profissional'), { target: { value: 'Título não salvo' } });
-    fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
-    expect(await screen.findByText('Título persistido')).toBeVisible();
-    expect(screen.queryByText('Título não salvo')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
+    open('', false, false, `/conta/profissional/${bid}/apresentacao`, repository);
+    fireEvent.change(await screen.findByLabelText('Título profissional'), { target: { value: 'Novo título salvo' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar apresentação' }));
-    await screen.findByText(/Apresentação salva/);
-    fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
-    expect(await screen.findByText('Título não salvo')).toBeVisible();
-    expect(repository.save).toHaveBeenCalledWith(bid, expect.objectContaining({ headline: 'Título não salvo' }));
+    expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeVisible();
+    expect(await screen.findByText('Novo título salvo')).toBeVisible();
+    expect(repository.save).toHaveBeenCalledWith(bid, expect.objectContaining({ headline: 'Novo título salvo' }));
+    expect(screen.queryByLabelText('Título profissional')).not.toBeInTheDocument();
   });
   it('abre Adicionar serviço diretamente da entrada, cancela sem gravar e mantém o negócio', async () => {
     const f = open();
@@ -67,19 +63,19 @@ describe('área central do perfil existente', () => {
     expect(screen.queryByRole('link', { name: 'Editar perfil' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
     fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
-    await screen.findByText(/Alterações salvas\./);
+    await screen.findByText(/Perfil salvo\./);
     expect(f.professional.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ description: 'Bio em edição' }));
     expect(f.professional.saveDraft.mock.calls[0]![1]).not.toHaveProperty('status');
     expect(f.professional.createDraft).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
-    expect(await within(screen.getByRole('region', { name: 'Prévia dos dados salvos' })).findByText('Bio em edição')).toBeVisible();
+    expect(await screen.findByText('Bio em edição')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${bid}/editar`);
     expect(screen.getByText(/Rascunho privado/)).toBeVisible();
   });
   it('preserva dados empresariais privados sem exibi-los no editor público', async () => {
     const f = open('', false, true);
     fireEvent.change(await screen.findByLabelText('Bio'), { target: { value: 'Empresa atualizada' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
-    await screen.findByText(/Alterações salvas\./);
+    await screen.findByText(/Perfil salvo\./);
     expect(f.professional.saveDraft).toHaveBeenCalledWith(bid, expect.objectContaining({ type: 'empresa', legalName: 'Privado', taxId: '12345678000199' }));
     expect(screen.queryByText('Privado')).not.toBeInTheDocument();
   });
@@ -90,7 +86,7 @@ describe('área central do perfil existente', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
     expect(screen.getByLabelText('Nome profissional')).toHaveValue('Não salvo');
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar alterações' }));
-    expect(screen.getByLabelText('Nome profissional')).toHaveValue('Perfil salvo');
+    expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeVisible();
     expect(f.professional.saveDraft).not.toHaveBeenCalled();
   });
   it('protege saída por links e recarga com alterações; permite continuar editando', async () => {
@@ -98,13 +94,13 @@ describe('área central do perfil existente', () => {
     fireEvent.change(await screen.findByLabelText('Bio'), { target: { value: 'Não perder' } });
     const unload = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(unload); expect(unload.defaultPrevented).toBe(true);
-    fireEvent.click(screen.getByRole('link', { name: 'Voltar à Conta' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Voltar ao perfil' }));
     expect(screen.getByRole('dialog')).toHaveTextContent('Descartar alterações');
     fireEvent.click(screen.getByRole('button', { name: 'Continuar editando' }));
     expect(screen.getByLabelText('Bio')).toHaveValue('Não perder');
-    fireEvent.click(screen.getByRole('link', { name: 'Voltar à Conta' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Voltar ao perfil' }));
     fireEvent.click(screen.getByRole('button', { name: 'Descartar e sair' }));
-    expect(await screen.findByRole('heading', { name: 'Meu perfil' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeInTheDocument();
     expect(f.professional.saveDraft).not.toHaveBeenCalled();
   });
   it('falha preserva edição e prévia antiga; cliques repetidos não duplicam gravação', async () => {
@@ -133,7 +129,7 @@ describe('área central do perfil existente', () => {
     expect(save.mock.calls[0]![0]).toBe(bid);
     expect(f.professional.saveDraft).not.toHaveBeenCalled();
     expect(screen.getByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Voltar a editar perfil' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'Voltar ao perfil' })).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Excluir serviço Novo serviço na central' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
     expect(screen.getByRole('heading', { name: 'Novo serviço na central' })).toBeInTheDocument();
@@ -166,13 +162,12 @@ describe('área central do perfil existente', () => {
     expect(screen.getByRole('tab', { name: 'Publicações' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
   });
-  it.each([['servicos', 'servicos'], ['trabalhos', 'fotos'], ['publicacoes', 'publicacoes']])('mantém link antigo /%s e retorna ao gerenciador do mesmo negócio', async (path, manager) => {
+  it.each([['servicos', 'servicos'], ['trabalhos', 'fotos'], ['publicacoes', 'publicacoes']])('mantém link antigo /%s e retorna ao gerenciador do mesmo negócio', async (path) => {
     open('', false, false, `/conta/profissional/${bid}/${path}`);
-    const link = await screen.findByRole('link', { name: 'Voltar a editar perfil' });
-    expect(link).toHaveAttribute('href', `/conta/profissional/${bid}/editar?secao=conteudo&conteudo=${manager}`);
+    const link = await screen.findByRole('link', { name: 'Voltar ao perfil' });
+    expect(link).toHaveAttribute('href', `/conta/profissional/${bid}/perfil`);
     fireEvent.click(link);
-    expect(await screen.findByRole('heading', { name: 'Editar perfil profissional' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Conteúdo' })).toHaveAttribute('aria-selected', 'true');
+    expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeInTheDocument();
   });
   it('redireciona visitante sem consultar o negócio, preservando o destino', async () => {
     const f = open('', true);

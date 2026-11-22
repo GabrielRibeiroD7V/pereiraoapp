@@ -346,3 +346,17 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .social-profile-header { border-top: 4px solid var(--color-primary); padding-top: 1rem; }
 
 .profile-editor__identity[hidden] { display: none; }
+
+.social-profile-bio { white-space: pre-line; }
+.social-preview-header { position: relative; }
+.profile-options { position: absolute; right: 0; top: 1rem; }
+.profile-options summary { padding: .5rem; cursor: pointer; }
+.profile-add { position: relative; }
+.profile-add > summary { list-style: none; cursor: pointer; }
+.profile-add nav, .profile-options nav { position: absolute; z-index: 3; background: white; border: var(--border-subtle); border-radius: .75rem; padding: .5rem; min-width: 13rem; box-shadow: var(--shadow-floating); }
+.profile-add nav a, .profile-options nav a { display: block; padding: .75rem; }
+.profile-options nav { right: 0; }
+.owner-profile-actions { flex-wrap: wrap; }
+
+.professional-background { border-block: var(--border-subtle); margin-block: 1rem; }
+.professional-background > summary { cursor: pointer; font-weight: 600; padding: .875rem 0; min-height: 2.75rem; }
