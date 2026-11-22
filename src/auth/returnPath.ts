@@ -1,6 +1,6 @@
 export function safeReturnPath(value: string | null) {
   const edit =
-    /^\/conta\/profissional\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/(editar|servicos|trabalhos|publicacoes|assinatura)$/i;
+    /^\/conta\/profissional\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/(editar|previa|servicos|trabalhos|publicacoes|assinatura)$/i;
   const chat = /^\/mensagens\/(?:iniciar\/)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return value &&
     ([

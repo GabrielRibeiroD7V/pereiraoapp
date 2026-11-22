@@ -36,6 +36,7 @@ describe('experiência pessoal e profissional', () => {
   it('edita o nome pessoal e o recupera ao voltar à conta', async () => {
     const { gateway } = setup();
     fireEvent.click(await screen.findByRole('link', { name: 'Editar meus dados pessoais' }));
+    expect(await screen.findByRole('link', { name: 'Abrir meu perfil profissional' })).toHaveAttribute('href', '/conta/profissional');
     await waitFor(() => expect(screen.getByLabelText('Seu nome')).toHaveValue('Nome cadastrado'));
     fireEvent.change(screen.getByLabelText('Seu nome'), { target: { value: 'Novo nome' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar meus dados' }));
@@ -57,10 +58,23 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.change(screen.getByLabelText('Negócio que você quer gerenciar'), { target: { value: second.id } });
     expect(screen.getByRole('heading', { name: second.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: /Meu perfil/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Ver prévia do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/previa`);
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
     expect(screen.getByRole('link', { name: /Meus trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
     expect(screen.getByRole('link', { name: /^MensagensConversas com seus clientes/ })).toHaveAttribute('href', '/mensagens');
+  });
+
+  it('mostra bio e contato na prévia privada de um rascunho, sem publicar', async () => {
+    const { repository } = setup('/conta/profissional', [first]);
+    vi.mocked(repository.getEditable).mockResolvedValueOnce({ business: first, input: { ...emptyRegistration, name: first.name, description: 'Pintura residencial e comercial.', categoryId: 'eletrica', cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], whatsapp: '5567999991234', legalName: 'Dado privado' } });
+    fireEvent.click(await screen.findByRole('link', { name: 'Ver prévia do perfil' }));
+    expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
+    expect(screen.getByText('Pintura residencial e comercial.')).toBeInTheDocument();
+    expect(screen.getByText('WhatsApp: 5567999991234')).toBeInTheDocument();
+    expect(screen.getByText(/Prévia privada/)).toBeInTheDocument();
+    expect(screen.queryByText('Dado privado')).not.toBeInTheDocument();
   });
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {
