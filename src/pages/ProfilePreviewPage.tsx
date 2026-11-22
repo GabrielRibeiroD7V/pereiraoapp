@@ -1,3 +1,6 @@
+import { ContactLinks } from '../marketplace/ContactLinks';
+import { usePresentation } from '../presentation/PresentationProvider';
+import { PresentationSections } from '../presentation/PresentationSections';
 import { effectiveAvatarPath } from '../lib/mediaPath';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -21,6 +24,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const { businessId: routeBusinessId = '' } = useParams();
   const businessId = businessIdOverride ?? routeBusinessId;
   const professional = useProfessionalRepository();
+  const presentation = usePresentation(businessId);
   const work = useWorkRepository();
   const { managed: postsRepository } = usePosts();
   const [posts, setPosts] = useState<ManagedPost[]>([]);
@@ -48,13 +52,13 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       if (postsRepository) {
         try {
           const page = await postsRepository.load(businessId, 1);
-          if (live) setPosts(page.posts.items);
+          if (live) setPosts(readOnly ? page.posts.items.filter(post => post.status === 'published') : page.posts.items);
         } catch { /* O restante do perfil continua disponível. */ }
       }
     }).catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [professional, work, postsRepository, businessId]);
+  }, [professional, work, postsRepository, businessId, readOnly]);
   const info = business?.input;
   const category = catalog?.categories.find(item => item.id === info?.categoryId);
   const city = catalog?.cities.find(item => item.id === info?.cityId);
@@ -69,17 +73,23 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
           {embedded ? <h2>{info.name}</h2> : <h1>{info.name}</h1>}<p>{info.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'} · {city ? `${city.name}/${city.state_code}` : 'Cidade não informada'}</p>
           <dl className="social-preview-stats" role="group" aria-label="Resumo do perfil"><div><dt>Projetos</dt><dd>{posts.length}</dd></div><div><dt>Fotos</dt><dd>{contentError ? '—' : photos.length}</dd></div><div><dt>Serviços</dt><dd>{contentError ? '—' : services.length}</dd></div></dl>
         </div></div>
+      {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <SpecialtyBadges primary={category ?? null} additional={catalog?.categories.filter(item => info.additionalCategoryIds.includes(item.id)) ?? []} />
       <p className="public-about social-profile-bio">{info.description || 'Adicione uma descrição para apresentar seu trabalho.'}</p>
+      {readOnly && <div className="social-profile-actions"><button type="button" className="button button--secondary" disabled>Mensagem pelo PEREIRÃO</button><ContactLinks name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} /></div>}
+      {readOnly && <p className="field-help">Prévia: mensagens ficam disponíveis aos visitantes após publicação. Nenhuma conversa é iniciada aqui.</p>}
       {!readOnly && <div className="social-profile-actions"><Link className="button button--secondary" to={`/conta/profissional/${businessId}/editar`}>Editar perfil</Link></div>}</header>
       <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até a aprovação e publicação.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
+      {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
+      <PresentationSections data={presentation.data} company={info.type === 'empresa'} />
       <SectionTabs label="Conteúdo do perfil" sections={[{ id: 'trabalhos', label: 'Projetos', content: <section className="public-profile-section" aria-label="Projetos e portfólio"><h2>Projetos e trabalhos</h2>
         {posts.length > 0 && <ul className="owner-posts">{posts.map(post => <li key={post.id}>
-          <Link to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`} aria-label={`Gerenciar projeto ${post.title}`}>
+          <div className="owner-posts__project">
             {post.images[0] ? <ManagedPhoto businessId={businessId} photo={post.images[0]} /> : <span className="owner-posts__empty">Sem foto</span>}
-            <strong>{post.title}</strong><small>{post.status === 'published' ? 'Publicado' : 'Rascunho'}</small>
-          </Link></li>)}</ul>}
+            <strong>{post.title}</strong>{post.description && <p>{post.description}</p>}<small>{post.status === 'published' ? 'Publicado' : 'Rascunho'}</small>
+          {!readOnly && <Link to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`} aria-label={`Gerenciar projeto ${post.title}`}>Editar projeto</Link>}
+          </div></li>)}</ul>}
         {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={setEnlarged} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, { id: 'servicos', label: 'Serviços', content: <section className="public-profile-section" aria-label="Serviços"><h2>Serviços</h2>
         {services.length ? <ul className="public-services">{services.map(service => <li key={service.id}><div><h3>{service.name}</h3>{service.description && <p>{service.description}</p>}</div><strong>{formatPrice(service.pricing_type, service.price_amount_cents)}</strong></li>)}</ul> : <p className="field-help">Nenhum serviço cadastrado.</p>}</section>
       }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />

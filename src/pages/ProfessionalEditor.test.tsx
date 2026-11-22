@@ -10,7 +10,7 @@ import { emptyRegistration } from '../professional/validation';
 vi.mock('../work/images', async original => ({ ...await original<typeof import('../work/images')>(), optimizeImage: vi.fn(async () => new Blob(['synthetic'], { type: 'image/webp' })) }));
 afterEach(() => vi.unstubAllGlobals());
 
-function open(section = '', visitor = false, company = false, route?: string) {
+function open(section = '', visitor = false, company = false, route?: string, presentationRepository?: import('../presentation/model').PresentationRepository) {
   const f = createWorkFixtures(false, visitor);
   let input: RegistrationInput = { ...emptyRegistration, type: company ? 'empresa' : 'autonomo', name: 'Perfil salvo', description: 'Bio salva', categoryId: 'climatizacao', cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], legalName: 'Privado', taxId: '12345678000199' };
   const business = { id: bid, name: input.name, type: input.type, slug: 'local', city_id: input.cityId, category_id: 'climatizacao' as const, status: 'draft' as const, description: input.description, whatsapp: null, instagram: null, avatar_path: null, created_at: '', updated_at: '' };
@@ -18,10 +18,25 @@ function open(section = '', visitor = false, company = false, route?: string) {
     if (id !== bid) throw { code: 'NOT_MANAGER' };
     return { business: { ...business, name: input.name, description: input.description, type: input.type }, input: { ...input } };
   }), createDraft: vi.fn(), saveDraft: vi.fn(async (_id: string, value: RegistrationInput) => { input = { ...value }; }) };
-  render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App presentationRepository={presentationRepository} authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
   return { ...f, professional };
 }
 describe('área central do perfil existente', () => {
+  it('a vitrine usa título persistido e não a apresentação ainda em edição', async () => {
+    let saved = { headline: 'Título persistido', experience: '', education: '', certifications: '', professional_registration: '' };
+    const repository = { get: vi.fn(async () => ({ available: true, data: { ...saved } })), save: vi.fn(async (_id: string, value: typeof saved) => { saved = { ...value }; }) };
+    open('', false, false, undefined, repository);
+    fireEvent.change(await screen.findByLabelText('Título profissional'), { target: { value: 'Título não salvo' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
+    expect(await screen.findByText('Título persistido')).toBeVisible();
+    expect(screen.queryByText('Título não salvo')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar apresentação' }));
+    await screen.findByText(/Apresentação salva/);
+    fireEvent.click(screen.getByRole('tab', { name: 'Prévia' }));
+    expect(await screen.findByText('Título não salvo')).toBeVisible();
+    expect(repository.save).toHaveBeenCalledWith(bid, expect.objectContaining({ headline: 'Título não salvo' }));
+  });
   it('abre Adicionar serviço diretamente da entrada, cancela sem gravar e mantém o negócio', async () => {
     const f = open();
     await screen.findByLabelText('Bio');

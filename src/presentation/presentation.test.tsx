@@ -1,0 +1,17 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
+import { PresentationProvider } from './PresentationProvider';
+import { PresentationEditor } from './PresentationEditor';
+import { PresentationSections } from './PresentationSections';
+import { emptyPresentation, validatePresentation } from './model';
+import type { Presentation, PresentationRepository } from './model';
+function fixture() { let saved:Presentation={...emptyPresentation,headline:'Título salvo'};const repo:PresentationRepository={get:vi.fn(async()=>({available:true,data:{...saved}})),save:vi.fn(async(_id,value)=>{saved={...value};})};return repo; }
+function open(repo:PresentationRepository,company=false){return render(<MemoryRouter><PresentationProvider value={repo}><PresentationEditor businessId="local-business" company={company} onSaved={vi.fn()}/></PresentationProvider></MemoryRouter>);}
+describe('apresentação profissional opcional',()=>{
+ it('salva para o negócio correto e recupera dados persistidos ao remontar',async()=>{const repo=fixture();const view=open(repo);fireEvent.change(await screen.findByLabelText('Título profissional'),{target:{value:'Engenheira civil'}});fireEvent.click(screen.getByRole('button',{name:'Salvar apresentação'}));await screen.findByText(/Apresentação salva/);expect(repo.save).toHaveBeenCalledWith('local-business',expect.objectContaining({headline:'Engenheira civil'}));view.unmount();open(repo);expect(await screen.findByLabelText('Título profissional')).toHaveValue('Engenheira civil');});
+ it('cancelar não grava e falha mantém a edição',async()=>{const repo=fixture();repo.save=vi.fn().mockRejectedValue(new Error('offline'));open(repo);fireEvent.change(await screen.findByLabelText('Título profissional'),{target:{value:'Não salvo'}});fireEvent.click(screen.getByRole('button',{name:'Salvar apresentação'}));expect(await screen.findByRole('alert')).toHaveTextContent('edição foi preservada');expect(screen.getByLabelText('Título profissional')).toHaveValue('Não salvo');fireEvent.click(screen.getByRole('button',{name:'Cancelar apresentação'}));expect(screen.getByLabelText('Título profissional')).toHaveValue('Título salvo');});
+ it('não oferece gravação antes da migração',async()=>{const repo=fixture();repo.get=vi.fn(async()=>({available:false,data:emptyPresentation}));open(repo);expect(await screen.findByText(/aguardam ativação autorizada/)).toBeInTheDocument();expect(screen.getByRole('button',{name:'Salvar apresentação'})).toBeDisabled();});
+ it('separa contexto da empresa e nunca inventa credencial',async()=>{open(fixture(),true);expect(await screen.findByLabelText('Título da empresa')).toBeInTheDocument();fireEvent.click(screen.getByText('Experiência, formação e credenciais (opcional)'));expect(screen.getByLabelText('Qualificação da equipe (com atribuição)')).toBeInTheDocument();expect(screen.queryByText('Verificado')).not.toBeInTheDocument();});
+ it('omite seções vazias e informa que registro é autodeclarado',()=>{render(<PresentationSections data={{...emptyPresentation,professional_registration:'Registro demonstrativo'}}/>);expect(screen.getByText('Registro demonstrativo')).toBeInTheDocument();expect(screen.getByText(/Não verificado/)).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'Formação'})).not.toBeInTheDocument();expect(validatePresentation({...emptyPresentation,headline:'x'.repeat(121)})).not.toBe('');});
+});

@@ -1,3 +1,5 @@
+import { PresentationProvider } from '../presentation/PresentationProvider';
+import type { PresentationRepository } from '../presentation/model';
 import { lazy, Suspense, useEffect } from "react";
 import { RouteBoundary } from "../components/RouteBoundary";
 import { LoadingState } from "../components/LoadingState";
@@ -99,6 +101,7 @@ export function App({
   subscriptionRepository,
   billingRepository,
   messageRepository,
+  presentationRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -110,6 +113,7 @@ export function App({
   subscriptionRepository?: SubscriptionRepository | null;
   billingRepository?: SandboxBillingRepository | null;
   messageRepository?: MessageRepository | null;
+  presentationRepository?: PresentationRepository | null;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -120,7 +124,7 @@ export function App({
               <AdminProvider repository={adminRepository}>
                 <SubscriptionProvider repository={subscriptionRepository}>
                   <BillingProvider repository={billingRepository}>
-                    <MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider>
+                    <PresentationProvider value={presentationRepository}><MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider></PresentationProvider>
                   </BillingProvider>
                 </SubscriptionProvider>
               </AdminProvider>
