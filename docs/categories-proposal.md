@@ -3,10 +3,13 @@
 Proposta independente, baseada na main ff88eb80030aeed612c071006afc2fa9c0fe8449.
 Não integra os PRs #36, #38 ou #39 e não autoriza merge.
 
-Cards com superfícies claras em tons da marca, ícones vetoriais já existentes,
-texto azul-marinho e bordas discretas. Três colunas no celular e seis a partir de
+Cards brancos com seis ilustrações SVG originais, grandes e consistentes,
+texto azul-marinho e bordas discretas. A direção anterior de fundos coloridos e
+ícones pequenos foi substituída conforme revisão do titular. Três colunas no celular e seis a partir de
 768 CSS px. Nomes e destinos `/buscar?categoria=<id>` permanecem iguais.
 Não há emojis, fotografias de prestadores ou requisições de imagens externas.
+Os SVGs em public/images/categories/illustrations foram desenhados neste PR,
+sem material de terceiros. Usam uma paleta comum e não representam trabalhos reais.
 O suporte a futuras fotografias oficiais e ao fallback de erro foi preservado.
 
 ![Viewport móvel 393 × 852, Chromium local](screenshots/categories/mobile-393.png)

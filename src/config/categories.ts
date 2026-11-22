@@ -1,14 +1,13 @@
 import type { Category, CategoryId } from '../types/domain';
 
-// Fotos só serão associadas após o recebimento dos arquivos oficiais.
-// null não deve ser substituído por foto de prestador ou imagem externa.
+// Ilustrações SVG originais do PEREIRÃO; nunca representam trabalhos de prestadores.
 export const categories = [
-  { id: 'climatizacao', name: 'Climatização', officialImage: null },
-  { id: 'pintura', name: 'Pintura', officialImage: null },
-  { id: 'construcao', name: 'Construção', officialImage: null },
-  { id: 'eletrica', name: 'Elétrica', officialImage: null },
-  { id: 'marcenaria', name: 'Marcenaria', officialImage: null },
-  { id: 'limpeza', name: 'Limpeza', officialImage: null },
+  { id: 'climatizacao', name: 'Climatização', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/climatizacao.svg', alt: '', width: 160, height: 112 } },
+  { id: 'pintura', name: 'Pintura', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/pintura.svg', alt: '', width: 160, height: 112 } },
+  { id: 'construcao', name: 'Construção', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/construcao.svg', alt: '', width: 160, height: 112 } },
+  { id: 'eletrica', name: 'Elétrica', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/eletrica.svg', alt: '', width: 160, height: 112 } },
+  { id: 'marcenaria', name: 'Marcenaria', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/marcenaria.svg', alt: '', width: 160, height: 112 } },
+  { id: 'limpeza', name: 'Limpeza', officialImage: { kind: 'official-category', src: '/images/categories/illustrations/limpeza.svg', alt: '', width: 160, height: 112 } },
 ] as const satisfies readonly Category[];
 
 export const categoryById: Readonly<Record<CategoryId, Category>> = Object.fromEntries(

@@ -60,7 +60,7 @@ describe('Início', () => {
     const invite = screen.getByRole('region', { name: 'É profissional ou tem uma empresa?' });
     expect(within(invite).queryByRole('button')).not.toBeInTheDocument();
     expect(within(invite).getByRole('link', { name: 'Anunciar meus serviços' })).toHaveAttribute('href', '/conta/profissional/cadastro');
-    expect(screen.getAllByRole('img')).toHaveLength(1);
+    expect(screen.getAllByRole('img')).toHaveLength(1); // Ilustrações decorativas têm alt vazio.
   });
 
   it('reconhece parâmetros em acesso direto e ignora categoria desconhecida', () => {
