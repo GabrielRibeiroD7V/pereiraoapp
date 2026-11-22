@@ -37,6 +37,7 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/work_posts.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/admin.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/subscriptions.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/billing_exemption.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/sandbox_billing.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/admin_bootstrap.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/regional_cities.sql')]);

@@ -1,4 +1,5 @@
 export type SubscriptionState =
+  | "exempt"
   | "awaiting_activation"
   | "trial_active"
   | "trial_ended"
@@ -54,6 +55,7 @@ export interface AdminSubscriptions {
   enforcementEnabled: false;
 }
 export const subscriptionLabels: Record<SubscriptionState, string> = {
+  exempt: "Isento de assinatura",
   awaiting_activation: "Aguardando ativação",
   trial_active: "Gratuidade ativa",
   trial_ended: "Gratuidade encerrada",
