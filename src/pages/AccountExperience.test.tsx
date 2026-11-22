@@ -35,6 +35,8 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
     expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
     fireEvent.click(document.querySelector('.owner-settings summary')!);
+    expect(screen.getByRole('link', { name: /Cadastrar outro negócio/ })).toHaveAttribute('href', '/conta/profissional/cadastro');
+    expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);

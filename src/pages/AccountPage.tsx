@@ -50,6 +50,7 @@ export function AccountPage() {
         <details className="owner-settings"><summary aria-label="Opções da conta"><Ellipsis aria-hidden="true" /></summary>
           <nav aria-label="Opções da conta">
             <Link to="/conta/dados"><UserRound size={18} />Dados da conta</Link>
+            {selected && <Link to="/conta/profissional/cadastro"><BriefcaseBusiness size={18} />Cadastrar outro negócio</Link>}
             {selected?.type === 'empresa' && <Link to={`/conta/profissional/${selected.id}/dados-empresariais`}><BriefcaseBusiness size={18} />Dados empresariais privados</Link>}
             <Link to="/conta/seguranca"><ShieldCheck size={18} />Segurança e acesso</Link>
             <Link to="/conta/assinaturas"><CreditCard size={18} />Gratuidade e assinatura</Link>
@@ -73,7 +74,6 @@ export function AccountPage() {
         {businesses.length > 1 && <div className="business-selector form-field"><label htmlFor="owner-business">Perfil que você está vendo</label>
           <select id="owner-business" value={selected.id} onChange={event => setSelectedId(event.target.value)}>{businesses.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>}
         <ProfilePreviewPage key={selected.id} businessIdOverride={selected.id} embedded />
-        <div className="owner-management"><Link to={`/conta/profissional/${selected.id}/editar?secao=conteudo`}><BriefcaseBusiness size={18} aria-hidden="true" />Gerenciar conteúdo do perfil</Link></div>
       </>}
     </> : <>
       <div className="personal-heading"><ProfileAvatar /><div className="personal-heading__copy"><h2>Bem-vindo ao PEREIRÃO</h2><p>Encontre serviços ou anuncie seu trabalho.</p></div></div>
