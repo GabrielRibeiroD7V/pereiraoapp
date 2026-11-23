@@ -64,3 +64,12 @@
 .profile-photo-trigger:focus-visible { outline: 2px solid #0b1739; outline-offset: 4px; }
 .profile-photo-trigger:disabled { cursor: wait; }
 .profile-photo-preview { object-fit: contain; }
+
+.profile-framing { width: 100%; }
+.profile-framing__circle { position: relative; width: min(100%, 17rem); aspect-ratio: 1; margin: .75rem auto; overflow: hidden; border-radius: 50%; background: var(--color-surface); border: 2px solid var(--color-navy); touch-action: none; cursor: grab; }
+.profile-framing__circle:active { cursor: grabbing; }
+.profile-framing__circle img { position: absolute; max-width: none; user-select: none; pointer-events: none; }
+.profile-framing fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.profile-framing legend { font-weight: 600; margin-bottom: .5rem; }
+.profile-framing label { display: flex; flex-direction: column; gap: .25rem; margin-block: .5rem; font-size: .875rem; }
+.profile-framing input[type=range] { width: 100%; min-height: 2.75rem; padding: 0; accent-color: var(--color-navy); }
