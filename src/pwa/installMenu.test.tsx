@@ -16,6 +16,7 @@ describe('instalação diretamente no menu da Conta', () => {
     mount(f);
     fireEvent.click(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' }));
     expect(screen.getByRole('dialog', { name: 'Adicionar à Tela de Início' })).toBeVisible();
+    expect(screen.getByRole('dialog').closest('nav')).toBeNull();
     expect(screen.getByText('Compartilhar')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Entendi' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

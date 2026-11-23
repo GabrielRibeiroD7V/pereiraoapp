@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useInstallOpportunity } from './useInstallOpportunity';
 import {
   createContext,
@@ -182,18 +183,19 @@ export function InstallAppAccess({ menu = false }: { menu?: boolean }) {
       if (nativeAvailable) void controller?.install();
       else setHelp(true);
     }}>{menu && <Download size={18} aria-hidden="true" />}{state.installing ? 'Abrindo instalação…' : menu ? 'Aplicativo PEREIRÃO' : state.ios ? 'Adicionar à Tela de Início' : 'Instalar aplicativo'}</button>;
+  const helpDialog = help && !state.installed && (state.ios ? <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} /> :
+      <Modal title="Instalar aplicativo" onClose={() => setHelp(false)}>
+        <p>O navegador não disponibilizou a instalação direta nesta página. Se houver uma opção Instalar aplicativo no menu ou na barra de endereço do navegador, use-a.</p>
+        <p>Se já adicionou o PEREIRÃO, abra pelo ícone existente. Não é necessário criar outro atalho.</p>
+        <button type="button" className="button button--primary" onClick={() => setHelp(false)}>Entendi</button>
+      </Modal>);
   return <>
     {menu ? action : <section className="account-install" aria-label="Aplicativo PEREIRÃO">
       <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
       <div>{action}{!state.installed && <p className="field-help">{nativeAvailable ? 'Instale pelo navegador, sem alterar sua conta.' : 'Veja como adicionar o PEREIRÃO ao seu dispositivo.'}</p>}</div>
     </section>}
     {state.installError && <p role="alert">Não foi possível abrir a instalação. Tente novamente pelo menu do navegador.</p>}
-    {help && !state.installed && (state.ios ? <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} /> :
-      <Modal title="Instalar aplicativo" onClose={() => setHelp(false)}>
-        <p>O navegador não disponibilizou a instalação direta nesta página. Se houver uma opção Instalar aplicativo no menu ou na barra de endereço do navegador, use-a.</p>
-        <p>Se já adicionou o PEREIRÃO, abra pelo ícone existente. Não é necessário criar outro atalho.</p>
-        <button type="button" className="button button--primary" onClick={() => setHelp(false)}>Entendi</button>
-      </Modal>)}
+    {helpDialog && (menu ? createPortal(helpDialog, document.body) : helpDialog)}
   </>;
 }
 
