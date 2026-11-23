@@ -11,3 +11,9 @@ Cancelar não envia. Erro de prévia/recorte impede upload e conserva o retrato 
 Validação direcionada: recorte de 9:16, paisagem e quadrado; coordenadas nos limites e zoom; CSS da prévia compatível com o mesmo retângulo; gestos de arraste; sliders acessíveis; erro e cancelamento; envio dos bytes recortados; tentativa repetida preservando ID/bytes; falha antes de upload mantendo retrato. Os testes da conversão #45 continuam cobrindo WebP nativo/fallback, formatos, tamanho e erro de canvas.
 
 Teste físico pendente: Preview normal no Safari/iPhone → selecionar uma foto consentida → mover rosto para dentro do círculo → ajustar zoom → conferir bordas → cancelar. O upload real do novo recorte e sua persistência dependem de ensaio autorizado; nenhum registro remoto foi alterado nesta revisão. A eventual integração exige decisão separada, sem merge automático.
+
+## Simplificação após aceite físico do enquadramento
+
+Gabriel relatou que o enquadramento do #46 funcionou corretamente no iPhone, mas os sliders de posição/zoom eram redundantes para o uso com o dedo. Nova revisão: controles recolhidos em Ajustes (alternativa acessível por teclado), arraste de um dedo e pinça de dois dedos com zoom ancorado no ponto da imagem sob o centro dos dedos. Zoom permanece 1–3 e posição nunca expõe área fora da imagem. Soltar um dedo continua o arraste sem saltar; cancelamento/perda de captura encerra o gesto correspondente. Touch-action:none continua restrito ao círculo, sem desabilitar zoom/navegação da página inteira.
+
+27 testes direcionados validaram os gestos, transição pinça→arraste, limites, coordenadas, controles recolhidos e envio/cancelamento. Typecheck e build aprovados. Gestos automatizados são simulados; o relato físico do #46 não homologa a nova pinça. Nenhuma foto/dado remoto foi alterado e não houve merge nesta revisão.

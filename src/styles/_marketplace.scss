@@ -73,3 +73,6 @@
 .profile-framing legend { font-weight: 600; margin-bottom: .5rem; }
 .profile-framing label { display: flex; flex-direction: column; gap: .25rem; margin-block: .5rem; font-size: .875rem; }
 .profile-framing input[type=range] { width: 100%; min-height: 2.75rem; padding: 0; accent-color: var(--color-navy); }
+
+.profile-framing__adjustments { margin-block: .5rem; }
+.profile-framing__adjustments > summary { min-height: 2.75rem; padding-block: .625rem; cursor: pointer; color: var(--color-secondary); font-size: .875rem; }
