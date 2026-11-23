@@ -108,6 +108,7 @@ describe('retrato direto com confirmação, sem portfólio', () => {
 
   it('envia o enquadramento escolhido, não a foto vertical inteira', async () => {
     const { upload } = setup(); select(); await readyPreview();
+    fireEvent.click(screen.getByText('Ajustes'));
     fireEvent.change(screen.getByLabelText('Zoom da foto'), { target: { value: '2' } });
     fireEvent.change(screen.getByLabelText('Posição vertical'), { target: { value: '0.1' } });
     expect(upload).not.toHaveBeenCalled();
