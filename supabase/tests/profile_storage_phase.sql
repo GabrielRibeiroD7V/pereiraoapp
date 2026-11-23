@@ -2,7 +2,7 @@
 begin;
 create role supabase_storage_admin nologin;
 create role service_role nologin bypassrls;
-grant service_role to supabase_storage_admin;
+grant service_role,authenticated to supabase_storage_admin;
 grant usage on schema storage,test to service_role;
 grant execute on all functions in schema test to service_role;
 grant insert,select on storage.objects to service_role;
