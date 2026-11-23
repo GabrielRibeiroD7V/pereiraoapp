@@ -28,6 +28,7 @@ describe('experiência pessoal e profissional', () => {
   it('abre o próprio perfil na aba Conta, com Direct e opções privadas', async () => {
     setup();
     expect(await screen.findByText('Conta de Nome cadastrado')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Aplicativo PEREIRÃO' })).toBeVisible();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
@@ -37,6 +38,7 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.click(document.querySelector('.owner-settings summary')!);
     expect(screen.getByRole('link', { name: /Cadastrar outro negócio/ })).toHaveAttribute('href', '/conta/profissional/cadastro');
     expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('href', '#instalar-aplicativo');
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);

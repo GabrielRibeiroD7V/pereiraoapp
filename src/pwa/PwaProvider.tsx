@@ -111,20 +111,25 @@ export function InstallInvitation() {
           </p>
         )}
       </div>
-      {help && (
+      {help && <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} onUnderstood={() => controller.dismiss()} />}
+    </section>
+  );
+}
+function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; onClose: () => void; onUnderstood?: () => void }) {
+  return (
         <Modal
           title="Adicionar à Tela de Início"
-          onClose={() => setHelp(false)}
+          onClose={() => onClose()}
         >
           <div className="pwa-ios-help">
             <img src="/images/pwa/icon-192.png" width="48" height="48" alt="Ícone oficial do PEREIRÃO" />
-            {!state.safari && (
+            {!safari && (
               <p>Abra este mesmo endereço no Safari. Depois, siga os passos abaixo; este navegador não disponibiliza a instalação nativa do iPhone.</p>
             )}
             <ol>
               <li>
                 <span>
-                  Comece pela <Link className="text-link" to="/" onClick={() => setHelp(false)}>tela Início</Link> antes de adicionar o ícone.
+                  Comece pela <Link className="text-link" to="/" onClick={() => onClose()}>tela Início</Link> antes de adicionar o ícone.
                 </span>
               </li>
               <li>
@@ -148,6 +153,7 @@ export function InstallInvitation() {
                 </span>
               </li>
             </ol>
+            <p className="field-help">Se já adicionou o PEREIRÃO, abra pelo ícone existente; não crie outro atalho.</p>
             <p className="field-help">
               Ao abrir pelo ícone da tela inicial, o PEREIRÃO funciona como
               aplicativo quando o sistema oferece esse modo.
@@ -155,18 +161,43 @@ export function InstallInvitation() {
             <button
               className="button button--primary"
               onClick={() => {
-                setHelp(false);
-                controller.dismiss();
+                onClose();
+                onUnderstood?.();
               }}
             >
               Entendi
             </button>
           </div>
         </Modal>
-      )}
-    </section>
   );
 }
+
+/** Always available in Conta, independently of the optional invitation cooldown. */
+export function InstallAppAccess() {
+  const { controller, state } = usePwa();
+  const [help, setHelp] = useState(false);
+  const nativeAvailable = state.canInstall && !state.installed;
+  return <section id="instalar-aplicativo" className="account-install" aria-label="Aplicativo PEREIRÃO">
+    <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
+    <div>
+      {state.installed ? <p role="status">PEREIRÃO aberto como aplicativo instalado.</p> : <>
+        <button type="button" className="text-link" disabled={state.installing} onClick={() => {
+          if (nativeAvailable) void controller?.install();
+          else setHelp(true);
+        }}>{state.installing ? 'Abrindo instalação…' : state.ios ? 'Adicionar à Tela de Início' : 'Instalar aplicativo'}</button>
+        <p className="field-help">{nativeAvailable ? 'Instale pelo navegador, sem alterar sua conta.' : 'Veja como adicionar o PEREIRÃO ao seu dispositivo.'}</p>
+      </>}
+      {state.installError && <p role="alert">Não foi possível abrir a instalação. Tente novamente pelo menu do navegador.</p>}
+    </div>
+    {help && !state.installed && (state.ios ? <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} /> :
+      <Modal title="Instalar aplicativo" onClose={() => setHelp(false)}>
+        <p>O navegador não disponibilizou a instalação direta nesta página. Se houver uma opção Instalar aplicativo no menu ou na barra de endereço do navegador, use-a.</p>
+        <p>Se já adicionou o PEREIRÃO, abra pelo ícone existente. Não é necessário criar outro atalho.</p>
+        <button type="button" className="button button--primary" onClick={() => setHelp(false)}>Entendi</button>
+      </Modal>)}
+  </section>;
+}
+
 export function PwaGate({ children }: { children: ReactNode }) {
   const { controller, state } = usePwa(),
     { pathname, search } = useLocation();
