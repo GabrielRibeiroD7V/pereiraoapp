@@ -48,6 +48,12 @@ export function adminFixture(
   };
   const history: AuditEntry[] = [];
   const detail: AdminDetail = {
+    reviewCatalog: {
+      primaryCategory: { id: "climatizacao", name: "Climatização", active: true },
+      additionalSpecialties: [],
+      originCity: { id: "mundo-novo-ms", name: "Mundo Novo", stateCode: "MS", active: true },
+      serviceCities: [{ id: "mundo-novo-ms", name: "Mundo Novo", stateCode: "MS", active: true }],
+    },
     servicesHasNext: false,
     photosHasNext: false,
     business,

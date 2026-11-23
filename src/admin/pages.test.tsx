@@ -234,3 +234,14 @@ describe("administração protegida", () => {
     ).toBeInTheDocument();
   });
 });
+
+it('não permite aprovar na interface sem ler especialidades e atendimento',async()=>{
+  const f=adminFixture();f.detail.reviewCatalog=null;
+  const action=vi.spyOn(f.repo,'act');
+  open('/admin?sec=businesses',f);
+  fireEvent.click(await screen.findByRole('button',{name:/Analisar perfil/}));
+  expect(await screen.findByRole('button',{name:'Aprovar publicação'})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Suspender'})).toBeEnabled();
+  expect(screen.getByText(/A revisão completa de especialidades/)).toBeVisible();
+  expect(action).not.toHaveBeenCalled();
+});

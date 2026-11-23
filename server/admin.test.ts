@@ -301,3 +301,32 @@ describe('revisão administrativa do retrato separado', () => {
     expect(response.status).toBe(200); expect((await response.json()).data).toMatchObject({ profilePhoto: path, photos: [] });
   });
 });
+
+describe('catálogo da revisão administrativa',()=>{
+ const businessId='00000000-0000-4000-8000-000000000001';
+ const catalog={primaryCategory:{id:'eletrica',name:'Elétrica',active:true},additionalSpecialties:[],originCity:{id:'mundo-novo-ms',name:'Mundo Novo',stateCode:'MS',active:true},serviceCities:[]};
+ it('consulta por ID autorizado e mantém resposta privada sem credencial administrativa',async()=>{
+  const f=fixture();
+  f.client.rpc.mockImplementation(async name=>({data:name==='admin_access'?true:name==='admin_profile_photo'?null:name==='admin_review_catalog'?catalog:{business:{id:businessId}},error:null}));
+  const r=await f.handler(req({action:'query',section:'detail',filters:{id:businessId}}));
+  expect(r.status).toBe(200);expect(r.headers.get('cache-control')).toBe('private, no-store');
+  expect((await r.json()).data.reviewCatalog).toEqual(catalog);
+  expect(f.client.rpc).toHaveBeenCalledWith('admin_review_catalog',{target_business:businessId});
+ });
+ it('identifica RPC ainda não ativada sem anunciar lista vazia',async()=>{
+  const f=fixture();
+  f.client.rpc.mockImplementation(async name=>name==='admin_review_catalog'?{data:null,error:{code:'PGRST202'}}:{data:name==='admin_access'?true:{business:{id:businessId}},error:null});
+  const r=await f.handler(req({action:'query',section:'detail',filters:{id:businessId}}));
+  expect(r.status).toBe(200);expect((await r.json()).data.reviewCatalog).toBeNull();
+ });
+ it('não consulta os dados quando admin_access recusa o usuário',async()=>{
+  const f=fixture(false);const r=await f.handler(req({action:'query',section:'detail',filters:{id:businessId}}));
+  expect(r.status).toBe(403);expect(f.client.rpc).not.toHaveBeenCalledWith('admin_review_catalog',expect.anything());
+ });
+ it('não oculta uma recusa de permissão como listas vazias',async()=>{
+  const f=fixture();
+  f.client.rpc.mockImplementation(async name=>name==='admin_review_catalog'?{data:null,error:{code:'42501'}}:{data:name==='admin_access'?true:{business:{id:businessId}},error:null});
+  const r=await f.handler(req({action:'query',section:'detail',filters:{id:businessId}}));
+  expect(r.status).toBe(403);expect(await r.json()).toEqual({code:'FORBIDDEN'});
+ });
+});

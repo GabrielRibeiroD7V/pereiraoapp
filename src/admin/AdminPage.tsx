@@ -1,3 +1,4 @@
+import { ReviewClassification } from './ReviewClassification';
 import { LayoutDashboard, Users, BriefcaseBusiness, Images, History, CalendarDays, FlaskConical, Activity } from 'lucide-react';
 import { useCallback, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -660,9 +661,7 @@ function BusinessReview({
       <h3>{b.name}</h3>
       <Status value={state} />
       <p>{b.description || "Descrição não informada."}</p>
-      <p>
-        {b.category ?? "Sem categoria"} · {b.city ?? "Sem cidade"}
-      </p>
+      <ReviewClassification catalog={data.reviewCatalog ?? null} fallbackCategory={b.category} fallbackCity={b.city} />
       <p>WhatsApp: {b.whatsapp ?? "Não informado"}</p>
       <div className="work-actions">
         {(b.suspended
@@ -674,6 +673,7 @@ function BusinessReview({
           <button
             key={command}
             className="button button--secondary"
+            disabled={!data.reviewCatalog && (command === "publish" || command === "reactivate")}
             onClick={() =>
               decide(
                 {
