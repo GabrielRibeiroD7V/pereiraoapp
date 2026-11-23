@@ -91,7 +91,6 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       {!readOnly && <div className="social-profile-actions owner-profile-actions">
         <Link className="button button--primary" to={`/conta/profissional/${businessId}/editar`}>Editar perfil</Link>
         <details className="profile-add"><summary className="button button--secondary">Adicionar</summary><nav aria-label="Adicionar ao perfil"><Link to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><Link to={`/conta/profissional/${businessId}/publicacoes?acao=novo`}>Adicionar publicação</Link></nav></details>
-        <Link className="button button--secondary" to="/mensagens">Mensagens</Link>
         <Link className="button button--secondary" to={`/conta/profissional/${businessId}/previa`}>Ver como cliente</Link>
         <ContactLinks name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} />
       </div>}</header>

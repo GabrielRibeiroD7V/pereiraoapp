@@ -15,8 +15,10 @@ export function MessagesInboxPage() {
   const [items, setItems] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
     let live = true;
+    setItems([]); setError(''); setLoading(true);
     if (!repository) { setLoading(false); return; }
     const load = async () => {
       try { const data = await repository.list(); if (live) { setItems(data); setError(''); } }
@@ -26,12 +28,12 @@ export function MessagesInboxPage() {
     void load();
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 20000);
     return () => { live = false; window.clearInterval(timer); };
-  }, [repository, session?.user.id]);
+  }, [repository, session?.user.id, retry]);
   return <div className="messages-page"><Link className="back-link" to="/conta">Voltar ao perfil</Link><PageHeader title="Mensagens"><p>Conversas com profissionais e clientes.</p></PageHeader>
     {!repository && <p role="status">Mensagens indisponíveis neste momento.</p>}
     {loading && <p role="status">Carregando conversas…</p>}
-    {error && <p role="alert" className="form-error">{error}</p>}
-    {!loading && !error && items.length === 0 && <p className="form-notice">Ainda não há conversas. Encontre um profissional na busca para enviar uma mensagem.</p>}
+    {error && <div role="alert" className="form-error"><p>{error}</p><button type="button" className="text-link" onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></div>}
+    {repository && !loading && !error && items.length === 0 && <p className="form-notice">Ainda não há conversas. Encontre um profissional na busca para enviar uma mensagem.</p>}
     <ul className="conversation-list">{items.map(item => <li key={item.id}><Link to={`/mensagens/${item.id}`}>
       <ProfileAvatar business={item.side === 'customer'} /><span className="conversation-list__copy">
         <strong>{item.side === 'customer' ? item.businessName : item.customerName}</strong>

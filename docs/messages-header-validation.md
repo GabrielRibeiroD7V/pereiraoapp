@@ -37,3 +37,23 @@ aceitação no dispositivo. Nenhuma captura sintética foi apresentada como real
 
 PR independente de #36/#38, baseado na main. Ao atualizar a base de #38, preservar
 este atalho e não restaurar o duplicado no toolbar de Conta. Sem merge autorizado.
+
+## Revisão após a integração da vitrine profissional
+
+Base de produção: `2fbabb90241d12c4d263d7fcdba1e803eddc908c`.
+
+- Removido também o botão local Mensagens do perfil próprio: o acesso global
+  compartilhado já atende essa tela. O CTA de contato com outro profissional
+  permanece no perfil público, assim como o WhatsApp.
+- A caixa não anuncia ausência de conversas quando o repositório está indisponível.
+- Erro de leitura oferece Tentar novamente; nova sessão ou nova tentativa limpa a
+  lista anterior e mostra carregamento antes do resultado.
+- Seis regressões novas cobrem perfil próprio sem duplicata, carregamento, vazio,
+  indisponibilidade, erro/retomada e retorno a conversa/início após autenticação.
+- 39 testes direcionados de cabeçalho, mensagens, central e persistência de serviços
+  passaram, além de typecheck e build. São testes locais com repositórios em memória.
+- Preview real: navegação anônima pelo ícone abriu Entrar com next=/mensagens.
+  Capturas desktop e emulação iPhone 16 393×852 foram realizadas no Chrome.
+  Não houve login, envio de mensagem nem alteração operacional nesta revisão.
+- A troca operacional entre duas contas continua pendente; depende de um negócio
+  legitimamente publicado com autorização própria. CI não substitui esse ensaio.
