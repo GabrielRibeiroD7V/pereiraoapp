@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BriefcaseBusiness, CreditCard, Download, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, CreditCard, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { InstallAppAccess } from '../pwa/PwaProvider';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -54,7 +54,7 @@ export function AccountPage() {
             {selected?.type === 'empresa' && <Link to={`/conta/profissional/${selected.id}/dados-empresariais`}><BriefcaseBusiness size={18} />Dados empresariais privados</Link>}
             <Link to="/conta/seguranca"><ShieldCheck size={18} />Segurança e acesso</Link>
             <Link to="/conta/assinaturas"><CreditCard size={18} />Gratuidade e assinatura</Link>
-            <a href="#instalar-aplicativo"><Download size={18} />Aplicativo PEREIRÃO</a>
+            <InstallAppAccess menu />
             <AdminEntry />
             <button type="button" disabled={pending} onClick={() => void signOut()}><LogOut size={18} />{pending ? 'Saindo…' : 'Sair da conta'}</button>
           </nav>
@@ -82,6 +82,6 @@ export function AccountPage() {
       <Link className="professional-entry" to="/conta/profissional/cadastro"><span className="professional-entry__icon"><BriefcaseBusiness size={28} aria-hidden="true" /></span><span><strong>Anunciar meus serviços</strong><span>Crie seu perfil profissional.</span></span></Link>
       <Link className="text-link account-explore" to={routes.home}>Continuar explorando</Link>
     </>}
-    <InstallAppAccess />
+    {!session && <InstallAppAccess />}
   </div>;
 }
