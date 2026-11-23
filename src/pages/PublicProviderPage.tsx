@@ -1,3 +1,4 @@
+import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { usePresentation } from '../presentation/PresentationProvider';
 import { PresentationSections } from '../presentation/PresentationSections';
 import { useCallback, useState } from 'react';
@@ -35,6 +36,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
   return <>
     <header className="social-profile-header">
       <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
+      <PresentationIdentity data={presentation.data} company={provider.type === 'empresa'} />
       {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
       {provider.description && <p className="public-about social-profile-bio">{provider.description}</p>}

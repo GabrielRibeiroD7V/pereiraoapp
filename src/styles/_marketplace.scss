@@ -73,3 +73,7 @@
 .profile-framing legend { font-weight: 600; margin-bottom: .5rem; }
 .profile-framing label { display: flex; flex-direction: column; gap: .25rem; margin-block: .5rem; font-size: .875rem; }
 .profile-framing input[type=range] { width: 100%; min-height: 2.75rem; padding: 0; accent-color: var(--color-navy); }
+
+.professional-declaration { overflow-wrap: anywhere; margin-block: .75rem; }
+.professional-declaration small { display: block; margin-top: .25rem; }
+.professional-linkedin { display: inline-flex; align-items: center; min-height: 2.75rem; overflow-wrap: anywhere; }
