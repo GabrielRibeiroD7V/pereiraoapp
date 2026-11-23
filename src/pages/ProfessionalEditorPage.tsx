@@ -99,7 +99,7 @@ export function ProfessionalEditorPage() {
       if (epoch.current !== requestEpoch) return;
       setSaved(value); setInput(value.input); setRevision(value => value + 1);
       setFormVersion(value => value + 1);
-      setNotice('Alterações salvas. A prévia mostra os dados gravados. O status de publicação não foi alterado.');
+      navigate(`/conta/profissional/${businessId}/perfil`, { replace: true, state: { saved: true } });
     } catch (cause) { if (epoch.current === requestEpoch) setError(professionalError(cause)); }
     finally { if (epoch.current === requestEpoch) { busy.current = false; setPending(false); } }
   }
@@ -113,24 +113,24 @@ export function ProfessionalEditorPage() {
   function selectSection(id: string) { setQuery(current => { current.set('secao', id); return current; }, { replace: true }); }
   function discard() {
     if (saved) setInput(saved.input);
-    setFormVersion(value => value + 1); setError(''); setNotice('Alterações não salvas descartadas.'); setRevision(value => value + 1);
+    navigate(`/conta/profissional/${businessId}/perfil`, { replace: true });
   }
   return <div className="profile-editor">
-    <Link className="back-link" to="/conta" state={{ businessId }}>Voltar à Conta</Link>
+    <Link className="back-link" to={`/conta/profissional/${businessId}/perfil`}>Voltar ao perfil</Link>
     <PageHeader title="Editar perfil profissional"><p>Organize a apresentação e o conteúdo do seu negócio.</p></PageHeader>
     {loading && <p role="status">Carregando perfil…</p>}
     {!repository && <p role="status">Edição indisponível neste momento.</p>}
     {error && <p role="alert" className="form-error">{error}</p>}
     {notice && <p role="status" className="form-notice">{notice}</p>}
     {saved && input && catalog && <>
-      <header className="profile-editor__identity">
+      <header className="profile-editor__identity" hidden={section === 'previa'}>
         <div className="profile-photo-controls" hidden={section !== 'perfil'} inert={pending}>{work ? <ProfilePhotoPicker actionLabel="Foto principal" businessId={businessId} path={effectiveAvatarPath(saved.business)} repository={work} onSaved={path => {
           setSaved(current => current ? { ...current, business: { ...current.business, profile_avatar_path: path } } : current);
           setRevision(value => value + 1);
         }} /> : <ManagedBusinessAvatar path={effectiveAvatarPath(saved.business)} />}</div>
         <div><strong>{saved.input.name}</strong><p>{saved.input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><BusinessStatus status={saved.business.status} /></div>
       </header>
-      <div className="profile-editor__service-entry" hidden={section === 'conteudo' && contentSection === 'servicos'}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra. Não é a assinatura do PEREIRÃO.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', 'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
+      <div className="profile-editor__service-entry" hidden={section === 'previa' || (section === 'conteudo' && contentSection === 'servicos')}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra. Não é a assinatura do PEREIRÃO.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', 'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
       <p hidden={section !== 'perfil'} className="field-help">Foto principal é o retrato do perfil. Ela não é adicionada às fotografias de trabalhos.</p>
       <div className="auth-form profile-editor__form" aria-busy={pending}>
         <p className="profile-editor__save-state" role="status">{dirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
@@ -161,6 +161,7 @@ export function ProfessionalEditorPage() {
         ]} />
         {(section === 'perfil' || section === 'atendimento') && <div className="profile-editor__actions"><button type="submit" form={section === 'perfil' ? 'profile-identity-form' : 'profile-coverage-form'} className="button button--primary" disabled={pending || !dirty}>{pending ? 'Salvando…' : 'Salvar alterações'}</button><button type="button" className="button button--secondary" disabled={pending || !dirty} onClick={discard}>Cancelar alterações</button></div>}
       </div>
+      <p hidden={section !== 'perfil'}><Link className="button button--secondary" to={`/conta/profissional/${businessId}/apresentacao`}>Editar título, experiência e formação</Link></p>
       <p className="field-help">Salvar não publica seu negócio, não inicia gratuidade e não ativa cobrança. A publicação do perfil depende de aprovação administrativa.</p>
     </>}
     {leave && <Modal title="Descartar alterações não salvas?" onClose={() => setLeave(null)}><p>As informações ainda não salvas não aparecerão na prévia.</p><div className="work-actions"><button type="button" className="button button--secondary" onClick={() => setLeave(null)}>Continuar editando</button><button type="button" className="button button--primary" onClick={() => { const destination = leave; setLeave(null); navigate(destination, { state: { businessId } }); }}>Descartar e sair</button></div></Modal>}

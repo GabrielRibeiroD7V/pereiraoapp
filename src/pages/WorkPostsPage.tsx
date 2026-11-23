@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHeader } from "../components/PageHeader";
 import { Modal } from "../components/Modal";
 import { useAuth } from "../auth/AuthProvider";
@@ -28,6 +28,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
     command: "publish" | "unpublish" | "delete";
   } | null>(null);
   const busy = useRef(false);
+  const [query,setQuery] = useSearchParams();
   const load = useCallback(
     async (signal: AbortSignal) => {
       if (!managed) return null;
@@ -50,6 +51,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
     JSON.stringify([businessId, session?.user.id, page]),
     load,
   );
+  useEffect(()=>{if(!embedded && query.get('acao')==='novo' && state.data){setEditor('new');setQuery(current=>{current.delete('acao');return current;},{replace:true});}},[embedded,query,state.data,setQuery]);
   async function act() {
     if (!confirm || !managed || busy.current) return;
     busy.current = true;
@@ -70,9 +72,9 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
     <div className="managed-posts">
       {!embedded && <Link
         className="back-link"
-        to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`}
+        to={`/conta/profissional/${businessId}/perfil`}
       >
-        Voltar a editar perfil
+        Voltar ao perfil
       </Link>}
       {embedded ? <h3>Publicações</h3> : <PageHeader title="Publicações">
         <p>Apresente trabalhos realizados pelo seu negócio.</p>

@@ -38,6 +38,7 @@ try {
       const clipping = await page.evaluate(() => [...document.querySelectorAll('input:not([type="hidden"]),textarea,select,.profile-editor__actions button')].filter(e => e.getClientRects().length && !e.closest('[hidden]')).filter(e => { const r=e.getBoundingClientRect();return r.left < 0 || r.right > innerWidth + 1; }).map(e => e.id || e.textContent));
       assert.deepEqual(clipping, [], `clipped form controls ${width}/${section}`);
       results.push({ width, height: width === 393 ? 852 : 900, section, ...layout, controlsInsideViewport: true });
+      if (section === 'Prévia' && [393,1280].includes(width)) await (await page.$('.profile-preview')).screenshot({ path: resolve(output, `profile-view-${width}.png`) });
       if ([320,393,768,1280].includes(width)) await page.screenshot({ path: resolve(output, `${width}-${section}.png`), fullPage: true });
     }
   }

@@ -19,7 +19,7 @@ function setup(path = '/conta', rows = [first, second], savedBusiness?: string, 
     getProfile: vi.fn(async () => ({ displayName: name, avatarUrl: null })),
     updateProfile: vi.fn(async (value) => { name = value; }),
   };
-  const repository: ProfessionalRepository = { listMine: vi.fn(async () => rows), getCatalog: vi.fn(async () => ({ categories: [{ id: 'eletrica' as const, name: 'Elétrica' }], cities: [{ id: 'mundo-novo-ms', name: 'Mundo Novo', state_code: 'MS' }] })), getEditable: vi.fn(async (id: string) => ({ business: rows.find((row) => row.id === id)!, input: { ...emptyRegistration, name: 'Nome existente', categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms' } })), createDraft: vi.fn(), saveDraft: vi.fn() };
+  const repository: ProfessionalRepository = { listMine: vi.fn(async () => rows), getCatalog: vi.fn(async () => ({ categories: [{ id: 'eletrica' as const, name: 'Elétrica' }], cities: [{ id: 'mundo-novo-ms', name: 'Mundo Novo', state_code: 'MS' }] })), getEditable: vi.fn(async (id: string) => ({ business: rows.find((row) => row.id === id)!, input: { ...emptyRegistration, name: rows.find(row => row.id === id)!.name, categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms' } })), createDraft: vi.fn(), saveDraft: vi.fn() };
   render(<MemoryRouter initialEntries={[{ pathname: path, state: { businessId: savedBusiness } }]}><App authGateway={gateway} professionalRepository={repository} workRepository={workRepository} managedPosts={managedPosts} /></MemoryRouter>);
   return { gateway, repository };
 }
@@ -29,7 +29,7 @@ describe('experiência pessoal e profissional', () => {
     setup();
     expect(await screen.findByText('Conta de Nome cadastrado')).toBeInTheDocument();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: 'Nome existente' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
     expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
@@ -60,7 +60,7 @@ describe('experiência pessoal e profissional', () => {
 
   it('troca de perfil no próprio topo sem misturar dados dos negócios', async () => {
     const { repository } = setup();
-    await screen.findByRole('heading', { name: 'Nome existente' });
+    await screen.findByRole('heading', { name: first.name });
     fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
     await waitFor(() => expect(repository.getEditable).toHaveBeenCalledWith(second.id));
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
@@ -81,26 +81,23 @@ describe('experiência pessoal e profissional', () => {
     expect(link).toHaveAttribute('href', '/recuperar-senha?next=%2Fconta%2Fseguranca');
   });
 
-  it('seleciona o negócio administrado e oferece a caixa de mensagens', async () => {
-    setup('/conta/profissional');
+  it('abre a vitrine do negócio escolhido, com ações e serviços evidentes', async () => {
+    setup('/conta', [first,second]);
     await screen.findByRole('heading', { name: first.name });
-    fireEvent.change(screen.getByLabelText('Negócio que você quer gerenciar'), { target: { value: second.id } });
-    expect(screen.getByRole('heading', { name: second.name })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Editar dados do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
-    expect(screen.getByRole('link', { name: 'Ver prévia do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/previa`);
-    expect(screen.getByText('Rascunho')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
-    expect(screen.getByRole('link', { name: /Fotografias de trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar?secao=conteudo`);
-    expect(screen.getByRole('link', { name: /^MensagensConversas com seus clientes/ })).toHaveAttribute('href', '/mensagens');
+    fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
+    expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.getByRole('link', { name: 'Gerenciar serviços' })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
+    expect(screen.getByRole('link', { name: 'Mensagens' })).toHaveAttribute('href', '/mensagens');
+    expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
   });
 
   it('mostra bio e contato na prévia privada de um rascunho, sem publicar', async () => {
-    const { repository } = setup('/conta/profissional', [first]);
+    const { repository } = setup(`/conta/profissional/${first.id}/perfil`, [first]);
     vi.mocked(repository.getEditable).mockResolvedValueOnce({ business: first, input: { ...emptyRegistration, name: first.name, description: 'Pintura residencial e comercial.', categoryId: 'eletrica', cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], whatsapp: '5567999991234', legalName: 'Dado privado' } });
-    fireEvent.click(await screen.findByRole('link', { name: 'Ver prévia do perfil' }));
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
     expect(screen.getByText('Pintura residencial e comercial.')).toBeInTheDocument();
-    expect(screen.getByText('WhatsApp: 5567999991234')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /WhatsApp de/ })).toHaveAttribute('href', expect.stringContaining('5567999991234'));
     expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
     expect(screen.queryByText('Dado privado')).not.toBeInTheDocument();
   });
@@ -143,6 +140,6 @@ describe('experiência pessoal e profissional', () => {
   it('retorna ao negócio que acabou de ser salvo, sem escolher outro por engano', async () => {
     setup('/conta/profissional', [first, second], second.id);
     expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument();
-    expect(screen.getByLabelText('Negócio que você quer gerenciar')).toHaveValue(second.id);
+    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
   });
 });

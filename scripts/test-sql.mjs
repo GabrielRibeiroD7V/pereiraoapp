@@ -26,10 +26,13 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
+    const storageGuard = file === '20261123000107_fix_profile_storage_guard.sql';
+    if(storageGuard)run(executable('psql'), [...args, '-v', 'guard_fixed=false', '-f', resolve('supabase/tests/profile_storage_phase.sql')]);
     const specialties = file === '20261121193603_business_specialties.sql';
     if (specialties) run(executable('psql'), [...args, '-f', resolve('supabase/tests/specialties_migration_before.sql')], true);
     run(executable('psql'), [...args, '-f', resolve('supabase/migrations', file)], true);
     if (specialties) run(executable('psql'), [...args, '-f', resolve('supabase/tests/specialties_migration_after.sql')]);
+    if(storageGuard)run(executable('psql'), [...args, '-v', 'guard_fixed=true', '-f', resolve('supabase/tests/profile_storage_phase.sql')]);
   }
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/rls.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/storage.sql')]);
@@ -44,6 +47,7 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/regional_cities.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/business_specialties.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/profile_images.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/business_presentation.sql')]);
   await testSpecialtyConcurrency(executable('psql'), args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {

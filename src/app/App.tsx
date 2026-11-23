@@ -1,3 +1,5 @@
+import { PresentationProvider } from '../presentation/PresentationProvider';
+import type { PresentationRepository } from '../presentation/model';
 import { lazy, Suspense, useEffect } from "react";
 import { RouteBoundary } from "../components/RouteBoundary";
 import { LoadingState } from "../components/LoadingState";
@@ -48,6 +50,7 @@ const BusinessPrivateDataPage = lazy(() => import("../pages/BusinessPrivateDataP
 
 const ProfessionalEditorPage = lazy(() => import("../pages/ProfessionalEditorPage").then(module => ({ default: module.ProfessionalEditorPage })));
 
+const PresentationPage = lazy(() => import("../pages/PresentationPage").then(module => ({ default: module.PresentationPage })));
 const ProfessionalSpacePage = lazy(() => import("../pages/ProfessionalSpacePage").then(module => ({ default: module.ProfessionalSpacePage })));
 const ProfilePreviewPage = lazy(() => import("../pages/ProfilePreviewPage").then(module => ({ default: module.ProfilePreviewPage })));
 
@@ -99,6 +102,7 @@ export function App({
   subscriptionRepository,
   billingRepository,
   messageRepository,
+  presentationRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -110,6 +114,7 @@ export function App({
   subscriptionRepository?: SubscriptionRepository | null;
   billingRepository?: SandboxBillingRepository | null;
   messageRepository?: MessageRepository | null;
+  presentationRepository?: PresentationRepository | null;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -120,7 +125,7 @@ export function App({
               <AdminProvider repository={adminRepository}>
                 <SubscriptionProvider repository={subscriptionRepository}>
                   <BillingProvider repository={billingRepository}>
-                    <MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider>
+                    <PresentationProvider value={presentationRepository}><MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider></PresentationProvider>
                   </BillingProvider>
                 </SubscriptionProvider>
               </AdminProvider>
@@ -193,7 +198,9 @@ function AppRoutes() {
             element={<ProfessionalEditorPage key={pathname} />}
           />
           <Route path="/conta/profissional/:businessId/dados-empresariais" element={<BusinessPrivateDataPage key={pathname} />} />
-          <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/apresentacao" element={<PresentationPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/perfil" element={<ProfilePreviewPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} readOnly />} />
           <Route
             path="/conta/profissional/:businessId/servicos"
             element={<ServicesPage key={pathname} />}

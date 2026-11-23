@@ -93,6 +93,7 @@ export type WorkPostRow = {
 export interface Database {
   public: {
     Tables: {
+      business_presentations: Table<import('../presentation/model').Presentation & { business_id: string }>;
       business_subscriptions: Table<BusinessSubscriptionRow, never, never>;
       work_posts: Table<WorkPostRow, never, never>;
       work_post_images: Table<
@@ -185,6 +186,7 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      save_business_presentation: { Args: { target_business: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
       admin_profile_photo: { Args: { target_business: string }; Returns: string | null };
       profile_photo_command: { Args: { command: string; target_business: string; target_photo?: string; expected_avatar_path?: string | null }; Returns: Json };
 

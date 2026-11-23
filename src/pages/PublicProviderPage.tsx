@@ -1,3 +1,5 @@
+import { usePresentation } from '../presentation/PresentationProvider';
+import { PresentationSections } from '../presentation/PresentationSections';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { MessageCircle, UserRound } from 'lucide-react';
@@ -25,6 +27,7 @@ function PagedSection<T>({ title, load, render, empty }: { title: string; load: 
 }
 function ProfileContent({ provider }: { provider: PublicProvider }) {
   const repository = useMarketplace()!;
+  const presentation = usePresentation(provider.id, true);
   const [photo, setPhoto] = useState<PublicPhoto | null>(null);
   const services = useCallback((page: number, signal: AbortSignal) => repository.getServices(provider.id, page, signal), [repository, provider.id]);
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
@@ -32,17 +35,18 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
   return <>
     <header className="social-profile-header">
       <div className="public-profile-heading"><span className="provider-item__avatar">{provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}</span><div><PageHeader title={provider.name} /><p>{provider.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><p>{provider.city.name}{provider.city.state && `/${provider.city.state}`}</p></div></div>
+      {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
       {provider.description && <p className="public-about social-profile-bio">{provider.description}</p>}
       <div className="social-profile-actions"><Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link><ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} /></div>
     </header>
+    {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
+    <PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
+    <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
     <PublishedWorks key={provider.id} businessId={provider.id}/>
     <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
-      </> },
-      { id: 'servicos', label: 'Serviços', content: <>
-    <PagedSection<PublicService> title="Serviços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
       </> },
       { id: 'sobre', label: 'Sobre', content: <>
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />

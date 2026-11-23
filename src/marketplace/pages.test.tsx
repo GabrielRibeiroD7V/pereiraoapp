@@ -51,7 +51,7 @@ describe('navegação do marketplace sem login', () => {
   it('mostra perfil, preços e contatos seguros sem exigir autenticação', async () => {
     open('/prestadores/prestador-simulado');
     await screen.findByRole('heading', { name: 'Prestador simulado' });
-    fireEvent.click(screen.getByRole('tab', { name: 'Serviços' }));
+    expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
     expect(await screen.findByText('Instalação simulada')).toBeVisible();
     expect(screen.getByText(/R\$\s*180,00/)).toBeInTheDocument();
     expect(screen.getByText(/A partir de R\$\s*90,00/)).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe('navegação do marketplace sem login', () => {
     open('/prestadores/prestador-simulado', repository);
     const badges = await screen.findByRole('list', { name: 'Especialidades selecionadas' });
     expect(badges).toHaveTextContent('ConstruçãoPrincipalPinturaElétrica');
-    expect(screen.getByRole('tab', { name: 'Serviços' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
     expect(screen.getByRole('link', { name: /WhatsApp de Prestador/ })).toBeVisible();
     expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
   });
