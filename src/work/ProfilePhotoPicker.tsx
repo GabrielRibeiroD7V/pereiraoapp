@@ -4,8 +4,8 @@ import { ManagedBusinessAvatar } from './ManagedBusinessAvatar';
 import { optimizeImage } from './images';
 import type { WorkRepository } from './types';
 
-export function ProfilePhotoPicker({ businessId, path, repository, onSaved }: {
-  businessId: string; path: string | null; repository: WorkRepository; onSaved: (path: string | null) => void;
+export function ProfilePhotoPicker({ businessId, path, repository, onSaved, actionLabel = 'Adicionar fotografia' }: {
+  businessId: string; path: string | null; repository: WorkRepository; onSaved: (path: string | null) => void; actionLabel?: string;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [selection, setSelection] = useState<{ id: string; file: Blob } | null>(null);
@@ -64,7 +64,7 @@ export function ProfilePhotoPicker({ businessId, path, repository, onSaved }: {
     <button type="button" className="profile-photo-trigger" aria-label="Alterar foto principal" disabled={pending || processing} onClick={choose}>
       <ManagedBusinessAvatar path={path} />
     </button>
-    <button type="button" className="button button--secondary" disabled={pending || processing} onClick={choose}>Adicionar fotografia</button>
+    <button type="button" className="button button--secondary" disabled={pending || processing} onClick={choose}>{actionLabel}</button>
     {open && <Modal title="Confirmar foto principal" locked={pending} onClose={cancel}>
       <div aria-busy={pending || processing}><p>Esta é a foto do seu perfil. Ela não será adicionada aos trabalhos ou às publicações.</p>
       {processing && <p role="status">Preparando imagem…</p>}

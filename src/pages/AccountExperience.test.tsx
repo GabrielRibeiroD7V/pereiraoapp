@@ -32,9 +32,11 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('heading', { name: 'Nome existente' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
     expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
-    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar?secao=bio`);
-    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
+    expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
     fireEvent.click(document.querySelector('.owner-settings summary')!);
+    expect(screen.getByRole('link', { name: /Cadastrar outro negócio/ })).toHaveAttribute('href', '/conta/profissional/cadastro');
+    expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
@@ -61,14 +63,14 @@ describe('experiência pessoal e profissional', () => {
     await screen.findByRole('heading', { name: 'Nome existente' });
     fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
     await waitFor(() => expect(repository.getEditable).toHaveBeenCalledWith(second.id));
-    expect(screen.getByRole('link', { name: 'Editar perfil e bio' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar?secao=bio`);
-    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
   });
 
   it('mostra projetos do negócio apenas ao dono e mantém o rascunho privado', async () => {
     const posts = { load: vi.fn(async () => ({ business: { id: first.id, name: first.name, status: 'draft' }, posts: { items: [{ id: 'post-1', title: 'Reforma da cozinha', description: 'Projeto concluído', status: 'draft', images: [] }], next: null } })) } as unknown as ManagedPosts;
     setup('/conta', [first], undefined, undefined, posts);
-    expect(await screen.findByRole('link', { name: 'Gerenciar projeto Reforma da cozinha' })).toHaveAttribute('href', `/conta/profissional/${first.id}/publicacoes`);
+    expect(await screen.findByRole('link', { name: 'Gerenciar projeto Reforma da cozinha' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar?secao=conteudo&conteudo=publicacoes`);
     expect(screen.getByText(/Rascunho privado/)).toBeInTheDocument();
     expect(posts.load).toHaveBeenCalledWith(first.id, 1);
   });
@@ -88,7 +90,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('link', { name: 'Ver prévia do perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/previa`);
     expect(screen.getByText('Rascunho')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Meus serviços/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
-    expect(screen.getByRole('link', { name: /Fotos e trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/trabalhos`);
+    expect(screen.getByRole('link', { name: /Fotografias de trabalhos/ })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar?secao=conteudo`);
     expect(screen.getByRole('link', { name: /^MensagensConversas com seus clientes/ })).toHaveAttribute('href', '/mensagens');
   });
 
@@ -112,8 +114,23 @@ describe('experiência pessoal e profissional', () => {
     expect(summary).toHaveTextContent('Fotos1');
     expect(summary).toHaveTextContent('Serviços1');
     expect(summary).toHaveTextContent('Projetos0');
-    expect(screen.getByRole('link', { name: 'Fotos e trabalhos' })).toHaveAttribute('href', `/conta/profissional/${first.id}/trabalhos`);
+    expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
     expect(screen.getByText('Atendimento na região.')).toBeInTheDocument();
+  });
+
+  it('edita dados empresariais somente na área privada da Conta', async () => {
+    const { repository } = setup(`/conta/profissional/${second.id}/dados-empresariais`, [second]);
+    const value = { business: second, input: { ...emptyRegistration, type: 'empresa' as const, name: second.name, categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms', description: 'Bio pública preservada', legalName: 'Razão privada', taxId: '12345678000199' } };
+    vi.mocked(repository.getEditable).mockResolvedValue(value);
+    expect(await screen.findByLabelText('Razão social')).toHaveValue('Razão privada');
+    fireEvent.change(screen.getByLabelText('Razão social'), { target: { value: 'Descartar' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(screen.getByLabelText('Razão social')).toHaveValue('Razão privada');
+    expect(repository.saveDraft).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Razão social'), { target: { value: 'Razão atualizada' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar dados empresariais' }));
+    await waitFor(() => expect(repository.saveDraft).toHaveBeenCalledWith(second.id, expect.objectContaining({ legalName: 'Razão atualizada', description: 'Bio pública preservada' })));
+    expect(screen.queryByLabelText('Bio')).not.toBeInTheDocument();
   });
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {
