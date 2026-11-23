@@ -10,11 +10,11 @@ beforeEach(() => {
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
 });
 afterEach(() => { vi.restoreAllMocks(); vi.mocked(optimizeImage).mockReset().mockResolvedValue(new Blob(['optimized'], { type: 'image/webp' })); });
-function setup() {
+function setup(path: string | null = null) {
   const fixtures = createWorkFixtures(), onSaved = vi.fn();
   const upload = vi.spyOn(fixtures.work, 'uploadProfilePhoto');
   const portfolio = vi.spyOn(fixtures.work, 'uploadPhoto');
-  render(<WorkProvider repository={fixtures.work}><ProfilePhotoPicker businessId={bid} path={null} repository={fixtures.work} onSaved={onSaved} /></WorkProvider>);
+  render(<WorkProvider repository={fixtures.work}><ProfilePhotoPicker businessId={bid} path={path} repository={fixtures.work} onSaved={onSaved} /></WorkProvider>);
   return { fixtures, onSaved, upload, portfolio };
 }
 function select() { fireEvent.change(screen.getByLabelText('Selecionar foto principal'), { target: { files: [new File(['photo'], 'my-photo.png', { type: 'image/png' })] } }); }
@@ -84,4 +84,18 @@ describe('retrato direto com confirmação, sem portfólio', () => {
     resolve(new Blob(['x'], { type: 'image/webp' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); expect(upload).not.toHaveBeenCalled();
   });
+  it('falha antes de upload preserva o retrato anterior e oferece outro seletor', async () => {
+    const previous = `${bid}/profile/00000000-0000-4000-8000-000000000099.webp`;
+    vi.mocked(optimizeImage).mockRejectedValueOnce(new Error('A conversão compatível desta foto não pôde ser concluída.'));
+    const { upload, onSaved } = setup(previous); select();
+    expect(await screen.findByRole('alert')).toHaveTextContent('conversão compatível');
+    expect(screen.getByRole('button', { name: 'Confirmar e enviar foto' })).toBeDisabled();
+    expect(upload).not.toHaveBeenCalled(); expect(onSaved).not.toHaveBeenCalled();
+    const input = screen.getByLabelText('Selecionar foto principal') as HTMLInputElement;
+    const click = vi.spyOn(input, 'click');
+    fireEvent.click(screen.getByRole('button', { name: 'Escolher outra foto' }));
+    expect(click).toHaveBeenCalledOnce(); expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
 });

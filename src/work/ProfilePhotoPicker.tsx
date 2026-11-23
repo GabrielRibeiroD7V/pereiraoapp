@@ -14,6 +14,7 @@ export function ProfilePhotoPicker({ businessId, path, repository, onSaved, acti
   const [processing, setProcessing] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [preparationNote, setPreparationNote] = useState('');
   const generation = useRef(0), busy = useRef(false);
   const expectedPath = useRef(path);
   useEffect(() => () => { generation.current++; }, []);
@@ -29,15 +30,20 @@ export function ProfilePhotoPicker({ businessId, path, repository, onSaved, acti
   }
   function cancel() {
     if (busy.current) return;
-    generation.current++; setOpen(false); setSelection(null); setProcessing(false); setError('');
+    generation.current++; setOpen(false); setSelection(null); setProcessing(false); setError(''); setPreparationNote('');
   }
   async function prepare(file?: File) {
     if (!file) return; // Cancelamento do seletor não muda foto ou estado persistido.
     const token = ++generation.current;
     expectedPath.current = path;
-    setOpen(true); setProcessing(true); setSelection(null); setError('');
+    setOpen(true); setProcessing(true); setSelection(null); setError(''); setPreparationNote('');
     try {
-      const optimized = await optimizeImage(file);
+      const optimized = await optimizeImage(file, reason => {
+        if (generation.current !== token) return;
+        setPreparationNote(reason === 'native-format' ? 'O navegador gerou outro formato. Usando conversão WebP compatível neste aparelho.'
+          : reason === 'native-null' ? 'O navegador não gerou a imagem. Usando conversão WebP compatível neste aparelho.'
+          : 'A exportação do navegador falhou. Usando conversão WebP compatível neste aparelho.');
+      });
       if (generation.current === token) setSelection({ id: crypto.randomUUID(), file: optimized });
     } catch (cause) {
       if (generation.current === token) setError(cause instanceof Error ? cause.message : 'Não foi possível preparar esta imagem.');
@@ -59,19 +65,21 @@ export function ProfilePhotoPicker({ businessId, path, repository, onSaved, acti
         : 'Não foi possível confirmar o envio. Tente novamente para verificar o resultado, sem duplicar a fotografia.');
     } finally { busy.current = false; setPending(false); }
   }
+  const picker = <input ref={input} type="file" hidden aria-label="Selecionar foto principal" accept="image/jpeg,image/png,image/webp" onChange={event => void prepare(event.target.files?.[0])} />;
   return <>
-    <input ref={input} type="file" hidden aria-label="Selecionar foto principal" accept="image/jpeg,image/png,image/webp" onChange={event => void prepare(event.target.files?.[0])} />
+    {!open && picker}
     <button type="button" className="profile-photo-trigger" aria-label="Alterar foto principal" disabled={pending || processing} onClick={choose}>
       <ManagedBusinessAvatar path={path} />
     </button>
     <button type="button" className="button button--secondary" disabled={pending || processing} onClick={choose}>{actionLabel}</button>
     {open && <Modal title="Confirmar foto principal" locked={pending} onClose={cancel}>
-      <div aria-busy={pending || processing}><p>Esta é a foto do seu perfil. Ela não será adicionada aos trabalhos ou às publicações.</p>
+      {picker}<div aria-busy={pending || processing}><p>Esta é a foto do seu perfil. Ela não será adicionada aos trabalhos ou às publicações.</p>
       {processing && <p role="status">Preparando imagem…</p>}
       {preview && <img className="upload-preview profile-photo-preview" src={preview} alt="Prévia da nova foto principal" />}
+      {preparationNote && <p role="status" className="field-help">{preparationNote}</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
       <p className="field-help">A foto será visível publicamente somente quando seu perfil estiver publicado. JPEG, PNG ou WebP, até 10 MB antes da otimização.</p>
-      <div className="work-actions"><button type="button" className="button button--secondary" disabled={pending} onClick={cancel}>Cancelar</button>
+      <div className="work-actions">{error && !pending && !processing && <button type="button" className="button button--secondary" onClick={choose}>Escolher outra foto</button>}<button type="button" className="button button--secondary" disabled={pending} onClick={cancel}>Cancelar</button>
         <button type="button" className="button button--primary" disabled={pending || processing || !selection} onClick={() => void save()}>{pending ? 'Enviando…' : 'Confirmar e enviar foto'}</button></div></div>
     </Modal>}
   </>;
