@@ -27,7 +27,9 @@ Regressão falha na main para canvas→PNG, passa após correção. Casos separa
 1. Safari/iPhone: abrir o Preview deste PR com a conta legítima e o rascunho consentido. Registrar origem e versão exibidas se houver suspeita de aba antiga; não limpar dados.
 2. Tocar na foto, selecionar JPEG/PNG/WebP consentido. Anotar se aparece a nota de outro formato, resultado vazio ou erro nativo. Se não aparece nota e prepara, houve caminho nativo.
 3. Conferir orientação/proporção e prévia; cancelar primeiro não altera nada.
-4. Selecionar novamente e confirmar somente a imagem consentida. Conferir persistência após recarga e novo login e ausência do retrato no portfólio. Essa execução depende do titular; não foi realizada nesta revisão.
+4. Nesta rodada, parar na prévia e cancelar: não há autorização para alterar dados remotos. O upload operacional, persistência após recarga/novo login e separação do portfólio exigem ensaio posterior autorizado com a imagem consentida. Não foram realizados nesta revisão.
 5. Se falhar, informar a mensagem e a nota da preparação. Sem senha, token, foto ou dados privados no chat.
 
 Sem migração, publicação de prestador, gratuidade, cobrança ou merge.
+
+Ensaio adicional: Worker executado de fato no navegador local de desktop com pixels sintéticos; carregou WASM do servidor local, gerou WebP de 80 bytes e decodificou em 32×16. Nenhum upload remoto. Não é Safari/iPhone físico.
