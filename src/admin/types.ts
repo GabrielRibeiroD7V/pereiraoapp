@@ -87,7 +87,16 @@ export interface AdminPhoto {
   caption: string | null;
   media_state: string;
 }
+export interface ReviewCategory { id: string; name: string; active: boolean }
+export interface ReviewCity { id: string; name: string; stateCode: string; active: boolean }
+export interface AdminReviewCatalog {
+  primaryCategory: ReviewCategory | null;
+  additionalSpecialties: ReviewCategory[];
+  originCity: ReviewCity | null;
+  serviceCities: ReviewCity[];
+}
 export interface AdminDetail {
+  reviewCatalog?: AdminReviewCatalog | null;
   profilePhoto?: string | null;
   servicesHasNext: boolean;
   photosHasNext: boolean;

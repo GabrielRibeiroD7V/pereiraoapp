@@ -112,9 +112,13 @@ export function createAdminHandler(
         if (body.section === 'detail' && !result.error && result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
           const target = (filters as Record<string, unknown>).id;
           if (typeof target !== 'string' || !validId(target)) return reply(400, { code: 'INVALID_INPUT' });
-          const photo = await client.rpc('admin_profile_photo', { target_business: target });
+          const [photo, catalog] = await Promise.all([
+            client.rpc('admin_profile_photo', { target_business: target }),
+            client.rpc('admin_review_catalog', { target_business: target }),
+          ]);
+          if (catalog.error && !['PGRST202','42883'].includes(catalog.error.code)) return rpcFailure(catalog.error.code);
           if (photo.error && !['PGRST202','42883'].includes(photo.error.code)) return rpcFailure(photo.error.code);
-          return reply(200, { data: { ...result.data, profilePhoto: photo.error ? null : photo.data } });
+          return reply(200, { data: { ...result.data, profilePhoto: photo.error ? null : photo.data, reviewCatalog: catalog.error ? null : catalog.data } });
         }
         return result.error
           ? rpcFailure(result.error.code)
