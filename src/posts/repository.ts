@@ -1,3 +1,4 @@
+import { effectiveAvatarPath } from '../lib/mediaPath';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, WorkPostRow } from "../lib/database.types";
 import type {
@@ -183,6 +184,7 @@ interface RawPublicPost {
     name: string;
     slug: string;
     avatar_path: string | null;
+    profile_avatar_path?: string | null;
     city: { name: string; state_code: string } | null;
     category: { name: string } | null;
   };
@@ -202,7 +204,7 @@ function publicPost(row: RawPublicPost): PublishedWork {
       id: row.business.id,
       name: row.business.name,
       slug: row.business.slug,
-      avatarPath: row.business.avatar_path,
+      avatarPath: effectiveAvatarPath(row.business),
       category: row.business.category?.name ?? "Serviços locais",
       city: row.business.city
         ? `${row.business.city.name}/${row.business.city.state_code}`
@@ -213,28 +215,36 @@ function publicPost(row: RawPublicPost): PublishedWork {
 export function createPublicPosts(
   client: SupabaseClient<Database>,
 ): PublicPosts {
+  let profileReady = true;
+  const fields = () => profileReady ? PUBLIC_POST_FIELDS.replace('slug,avatar_path,', 'slug,avatar_path,profile_avatar_path,') : PUBLIC_POST_FIELDS;
+  const missingProfile = (error: { code: string; message: string } | null) => error && ['42703','PGRST204'].includes(error.code) && error.message.includes('profile_avatar_path');
   return {
     async list(cursor, businessId, signal) {
       if (cursor && !validCursor(cursor)) fail("INVALID_CURSOR");
       if (businessId && !validId(businessId)) fail("INVALID_INPUT");
-      let query = client
-        .from("work_posts")
-        .select(PUBLIC_POST_FIELDS)
-        .eq("status", "published")
-        .eq("business.status", "published");
-      if (businessId) query = query.eq("business_id", businessId);
-      if (cursor)
-        query = query.or(
-          `published_at.lt."${cursor.publishedAt}",and(published_at.eq."${cursor.publishedAt}",id.lt.${cursor.id})`,
-        );
-      const { data, error } = await query
-        .order("published_at", { ascending: false })
-        .order("id", { ascending: false })
-        .order("sort_order", { referencedTable: "images" })
-        .limit(1, { referencedTable: "images" })
-        .limit(7)
-        .abortSignal(signal ?? new AbortController().signal)
-        .overrideTypes<RawPublicPost[], { merge: false }>();
+      const read = () => {
+        let query = client
+          .from("work_posts")
+          .select(fields())
+          .eq("status", "published")
+          .eq("business.status", "published");
+        if (businessId) query = query.eq("business_id", businessId);
+        if (cursor)
+          query = query.or(
+            `published_at.lt."${cursor.publishedAt}",and(published_at.eq."${cursor.publishedAt}",id.lt.${cursor.id})`,
+          );
+        return query
+          .order("published_at", { ascending: false })
+          .order("id", { ascending: false })
+          .order("sort_order", { referencedTable: "images" })
+          .limit(1, { referencedTable: "images" })
+          .limit(7)
+          .abortSignal(signal ?? new AbortController().signal)
+          .overrideTypes<RawPublicPost[], { merge: false }>();
+      };
+      let result = await read();
+      if (missingProfile(result.error)) { profileReady = false; result = await read(); }
+      const { data, error } = result;
       if (error) {
         if (missingPosts(error)) return null;
         throw error;
@@ -251,9 +261,9 @@ export function createPublicPosts(
     },
     async get(id, signal) {
       if (!validId(id)) return null;
-      const { data, error } = await client
+      const read = () => client
         .from("work_posts")
-        .select(PUBLIC_POST_FIELDS)
+        .select(fields())
         .eq("id", id)
         .eq("status", "published")
         .eq("business.status", "published")
@@ -262,6 +272,9 @@ export function createPublicPosts(
         .abortSignal(signal ?? new AbortController().signal)
         .maybeSingle()
         .overrideTypes<RawPublicPost | null, { merge: false }>();
+      let result = await read();
+      if (missingProfile(result.error)) { profileReady = false; result = await read(); }
+      const { data, error } = result;
       if (error) {
         if (missingPosts(error)) return null;
         throw error;

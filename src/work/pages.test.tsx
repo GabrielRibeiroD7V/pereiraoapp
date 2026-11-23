@@ -57,13 +57,11 @@ describe('gerenciamento de serviços e fotografias', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(await screen.findByText('Nova foto local')).toBeInTheDocument(); expect(upload).toHaveBeenCalledOnce(); expect(revoke).toHaveBeenCalledWith('blob:local-only');
   });
-  it('escolhe uma foto real do portfólio para a imagem principal do perfil', async () => {
-    const fixtures = open('trabalhos'); const select = vi.spyOn(fixtures.work, 'setProfilePhoto');
-    const buttons = await screen.findAllByRole('button', { name: 'Usar como foto principal' });
-    fireEvent.click(buttons[0]!);
-    await waitFor(() => expect(select).toHaveBeenCalledWith(fixtureBusinessId, fixtures.snapshot().photos[0]?.id));
-    expect(await screen.findByRole('button', { name: 'Foto principal' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Remover foto principal' })).toBeInTheDocument();
+  it('não oferece fotos de trabalhos como retrato automaticamente', async () => {
+    open('trabalhos');
+    expect(await screen.findByText('Instalação residencial')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Usar como foto principal' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Estas fotos são trabalhos realizados/)).toBeInTheDocument();
   });
   it('mantém a confirmação e os dados quando excluir fotografia falha', async () => {
     const fixtures = open('trabalhos'); const remove = vi.spyOn(fixtures.work, 'deletePhoto').mockRejectedValueOnce(new Error('local failure'));

@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database, Json } from "../src/lib/database.types.ts";
 import { checkAsaasSandbox } from "./asaas.ts";
-import { imagePath, validId } from "../src/lib/mediaPath.ts";
+import { imageBucket, validId } from "../src/lib/mediaPath.ts";
 type Env = Record<string, string | undefined>;
 export const adminClient = (env: Env, authorization: string) =>
   createClient<Database>(
@@ -109,6 +109,13 @@ export function createAdminHandler(
                 section: body.section,
                 filters: filters as Json,
               });
+        if (body.section === 'detail' && !result.error && result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
+          const target = (filters as Record<string, unknown>).id;
+          if (typeof target !== 'string' || !validId(target)) return reply(400, { code: 'INVALID_INPUT' });
+          const photo = await client.rpc('admin_profile_photo', { target_business: target });
+          if (photo.error && !['PGRST202','42883'].includes(photo.error.code)) return rpcFailure(photo.error.code);
+          return reply(200, { data: { ...result.data, profilePhoto: photo.error ? null : photo.data } });
+        }
         return result.error
           ? rpcFailure(result.error.code)
           : reply(200, { data: result.data });
@@ -140,17 +147,18 @@ export function createAdminHandler(
       if (body.action === "image") {
         const id = String(body.businessId ?? ""),
           path = String(body.path ?? "");
-        if (!validId(id) || !imagePath(id, path))
+        const bucket = imageBucket(id, path);
+        if (!validId(id) || !bucket)
           return reply(400, { code: "INVALID_INPUT" });
         const result = await client.storage
-          .from("business-portfolio")
+          .from(bucket)
           .createSignedUrl(path, 60);
         if (result.error) return reply(404, { code: "NOT_FOUND" });
         const url = new URL(result.data.signedUrl);
         if (
           url.origin !== "https://yazdjiwaksamizrbqewq.supabase.co" ||
           url.pathname !==
-            "/storage/v1/object/sign/business-portfolio/" + path ||
+            `/storage/v1/object/sign/${bucket}/` + path ||
           url.username ||
           url.password ||
           url.hash

@@ -57,3 +57,10 @@
   [aria-selected=true] { color: var(--color-navy); &::after { content: ''; position: absolute; bottom: -1px; height: 3px; left: 0; right: 0; background: var(--color-primary); border-radius: var(--radius-pill); } }
   [role=tabpanel] { padding-top: .25rem; }
 }
+
+.profile-photo-controls { display: flex; flex-direction: column; align-items: center; gap: .5rem; flex-shrink: 0; width: clamp(5.5rem, 24vw, 8.5rem); }
+.profile-photo-controls > .button { font-size: .75rem; padding: .4rem .5rem; min-height: 2.75rem; }
+.profile-photo-trigger { appearance: none; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 50%; }
+.profile-photo-trigger:focus-visible { outline: 2px solid #0b1739; outline-offset: 4px; }
+.profile-photo-trigger:disabled { cursor: wait; }
+.profile-photo-preview { object-fit: contain; }

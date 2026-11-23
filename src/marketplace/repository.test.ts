@@ -12,7 +12,7 @@ function setup(response: unknown = [], status = 200, missingSchema = false) {
     calls.push({ url: new URL(String(input)), method: init?.method ?? 'GET', body: typeof init?.body === 'string' ? JSON.parse(init.body) : null });
     const url = calls[calls.length - 1]!.url;
     const missing = missingSchema && (url.pathname.includes('/rpc/search_public_businesses') || (url.searchParams.get('select') ?? '').includes('additional_categories:'));
-    return new Response(JSON.stringify(missing ? { code: url.pathname.includes('/rpc/') ? 'PGRST202' : 'PGRST200', message: url.pathname.includes('/rpc/') ? 'search_public_businesses not found' : 'business_categories relationship not found' } : response), { status: missing ? 404 : status, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify(missing ? { code: url.pathname.includes('/rpc/') ? 'PGRST202' : 'PGRST200', message: url.pathname.includes('/rpc/') ? `${url.pathname.split('/').pop()} not found` : 'business_categories relationship not found' } : response), { status: missing ? 404 : status, headers: { 'Content-Type': 'application/json' } });
   } } });
   return { repository: createPublicMarketplace(client), calls, client };
 }
@@ -24,7 +24,7 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
     expect(result.items).toHaveLength(20); expect(result.hasNext).toBe(true);
     expect(result.items[0]).not.toHaveProperty('owner_id'); expect(result.items[0]).not.toHaveProperty('legal_name');
     const url = calls[0]!.url;
-    expect(url.pathname).toBe('/rest/v1/rpc/search_public_businesses');
+    expect(url.pathname).toBe('/rest/v1/rpc/search_public_businesses_profile');
     expect(url.searchParams.get('p_page')).toBe('2');
     expect(url.searchParams.get('p_category')).toBe(''); expect(calls.every((c) => c.method === 'GET')).toBe(true);
   });
@@ -46,7 +46,7 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
     const spy = vi.spyOn(client.auth, 'getUser');
     expect((await repository.getProvider(p.slug))?.id).toBe(p.id);
     expect(calls[0]?.url.searchParams.get('slug')).toBe(`eq.${p.slug}`);
-    expect(calls[0]?.url.searchParams.get('status')).toBe('eq.published'); expect(calls[0]?.url.searchParams.get('select')).toBe(PUBLIC_COLUMNS); expect(spy).not.toHaveBeenCalled();
+    expect(calls[0]?.url.searchParams.get('status')).toBe('eq.published'); expect(calls[0]?.url.searchParams.get('select')).toBe(PUBLIC_COLUMNS + ',profile_avatar_path'); expect(spy).not.toHaveBeenCalled();
     expect(await repository.getProvider('../private')).toBeNull(); expect(calls).toHaveLength(1);
   });
   it('aplica parent published, active e ready em consultas independentes paginadas', async () => {
@@ -78,11 +78,12 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
   it('mantém busca e perfil anteriores disponíveis enquanto a migração está pendente', async () => {
     const { repository, calls } = setup([raw], 200, true);
     expect((await repository.search({ ...filters, categoryId: 'climatizacao', cityId: 'guaira-pr' }, 1)).items).toHaveLength(1);
-    expect(calls[1]?.url.searchParams.get('select')).toContain(LEGACY_PUBLIC_COLUMNS);
-    expect(calls[1]?.url.searchParams.get('category_id')).toBe('eq.climatizacao');
-    expect(calls[1]?.url.searchParams.get('area_matches.city_id')).toBe('eq.guaira-pr');
+    const fallback = calls.find(call => call.url.pathname.endsWith('/businesses'))!;
+    expect(fallback.url.searchParams.get('select')).toContain(LEGACY_PUBLIC_COLUMNS);
+    expect(fallback.url.searchParams.get('category_id')).toBe('eq.climatizacao');
+    expect(fallback.url.searchParams.get('area_matches.city_id')).toBe('eq.guaira-pr');
     await repository.search(filters, 1);
-    expect(calls.filter(call => call.url.pathname.includes('/rpc/'))).toHaveLength(1);
+    expect(calls.filter(call => call.url.pathname.includes('/rpc/'))).toHaveLength(2);
     expect((await repository.getProvider(p.slug))?.additionalSpecialties).toEqual([]);
   });
   it('não oculta falhas de permissão com fallback para outra consulta', async () => {
@@ -94,4 +95,42 @@ describe('marketplace com SDK real e HTTP interceptado', () => {
     const { repository } = setup({ message: 'unavailable', code: '400' }, 400);
     await expect(repository.search(filters, 1)).rejects.toBeDefined();
   });
+});
+
+it('assina retrato no bucket próprio e recusa resposta com bucket trocado', async () => {
+  const path = `${p.id}/profile/${photoFixtureId}.webp`;
+  const f = setup({ signedURL: `/object/sign/business-profile/${path}?token=synthetic` });
+  expect(await f.repository.getImageUrl(p.id, path)).toContain('/object/sign/business-profile/');
+  expect(f.calls[0]?.url.pathname).toContain('/sign/business-profile/');
+  const wrong = setup({ signedURL: `/object/sign/business-portfolio/${path}?token=synthetic` });
+  await expect(wrong.repository.getImageUrl(p.id, path)).rejects.toThrow('Invalid image response');
+});
+
+it('perfil público usa retrato novo quando existe, sem perder fallback legado', async () => {
+  const path = `${p.id}/profile/${photoFixtureId}.webp`;
+  const f = setup([{ ...raw, profile_avatar_path: path, avatar_path: `${p.id}/portfolio/${photoFixtureId}.webp` }]);
+  expect((await f.repository.getProvider(p.slug))?.avatarPath).toBe(path);
+});
+it('cliente novo recua para RPC antiga quando a expansão ainda não existe', async () => {
+  const calls: string[] = [];
+  const client = createClient<Database>('https://yazdjiwaksamizrbqewq.supabase.co','sb_publishable_test',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async input=>{
+    const url = new URL(String(input)); calls.push(url.pathname);
+    const missing = url.pathname.endsWith('/search_public_businesses_profile');
+    return new Response(JSON.stringify(missing ? { code:'PGRST202', message:'search_public_businesses_profile not found' } : [raw]),{status:missing?404:200,headers:{'Content-Type':'application/json'}});
+  }}});
+  const repository = createPublicMarketplace(client);
+  expect((await repository.search(filters,1)).items).toHaveLength(1);
+  expect(calls).toEqual(['/rest/v1/rpc/search_public_businesses_profile','/rest/v1/rpc/search_public_businesses']);
+  await repository.search(filters,1); expect(calls.at(-1)).toBe('/rest/v1/rpc/search_public_businesses');
+  expect(calls.filter(c=>c.endsWith('_profile'))).toHaveLength(1);
+});
+it('perfil público recua somente da coluna nova ausente, mantendo adicionais', async () => {
+  const projections: string[] = [];
+  const client = createClient<Database>('https://yazdjiwaksamizrbqewq.supabase.co','sb_publishable_test',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async input=>{
+    const select = new URL(String(input)).searchParams.get('select') ?? ''; projections.push(select);
+    const missing = select.includes('profile_avatar_path');
+    return new Response(JSON.stringify(missing ? { code:'42703',message:'column profile_avatar_path does not exist' } : [raw]),{status:missing?400:200,headers:{'Content-Type':'application/json'}});
+  }}});
+  expect((await createPublicMarketplace(client).getProvider(p.slug))?.name).toBe(p.name);
+  expect(projections).toHaveLength(2); expect(projections[1]).toContain('additional_categories:'); expect(projections[1]).not.toContain('profile_avatar_path');
 });

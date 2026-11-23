@@ -14,6 +14,7 @@ function setup(
     error?: boolean;
     rows?: unknown;
     rpcFail?: boolean;
+    missingProfile?: boolean;
   } = {},
 ) {
   const calls: { url: URL; method: string; body: unknown }[] = [];
@@ -42,6 +43,8 @@ function setup(
               ? { code: "23514", message: "not publishable" }
               : { id: pid, status: "draft" };
             status = options.rpcFail ? 400 : 200;
+          } else if (options.missingProfile && url.searchParams.get('select')?.includes('profile_avatar_path')) {
+            result = { code: '42703', message: 'column profile_avatar_path does not exist' }; status = 400;
           } else if (options.missing) {
             result = { code: "PGRST205", message: "schema not ready" };
             status = 404;
@@ -194,4 +197,20 @@ describe("publicações: SDK real com transporte interceptado", () => {
     ).rejects.toBeDefined();
     expect(calls).toHaveLength(0);
   });
+});
+
+it('publicações novas usam o retrato separado, sem mudar a coleção de trabalhos', async () => {
+  const profile = `${bid}/profile/00000000-0000-4000-8000-000000000111.webp`;
+  const row = { id: pid, business_id: bid, title: 'Trabalho', description: '', published_at: '2026-11-20T00:00:00Z', images: [], business: { id:bid,name:'Negócio',slug:'negocio',avatar_path:null,profile_avatar_path:profile,city:null,category:null } };
+  const { publicPosts } = setup({ rows:[row] });
+  expect((await publicPosts.get(pid))?.business.avatarPath).toBe(profile);
+  expect((await publicPosts.list())?.items[0]?.business.avatarPath).toBe(profile);
+});
+it('publicações mantêm funcionamento antes da expansão, sem ocultar outros erros', async () => {
+  const f = setup({ rows:[],missingProfile:true });
+  expect((await f.publicPosts.list())?.items).toEqual([]);
+  expect(f.calls).toHaveLength(2);
+  expect(f.calls[0]?.url.searchParams.get('select')).toContain('profile_avatar_path');
+  expect(f.calls[1]?.url.searchParams.get('select')).not.toContain('profile_avatar_path');
+  expect(await f.publicPosts.get(pid)).toBeNull(); expect(f.calls).toHaveLength(3);
 });

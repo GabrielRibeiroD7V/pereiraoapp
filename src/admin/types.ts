@@ -88,6 +88,7 @@ export interface AdminPhoto {
   media_state: string;
 }
 export interface AdminDetail {
+  profilePhoto?: string | null;
   servicesHasNext: boolean;
   photosHasNext: boolean;
   business: AdminBusiness;

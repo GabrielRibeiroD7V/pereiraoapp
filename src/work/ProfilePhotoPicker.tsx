@@ -1,0 +1,78 @@
+import { useEffect, useRef, useState } from 'react';
+import { Modal } from '../components/Modal';
+import { ManagedBusinessAvatar } from './ManagedBusinessAvatar';
+import { optimizeImage } from './images';
+import type { WorkRepository } from './types';
+
+export function ProfilePhotoPicker({ businessId, path, repository, onSaved }: {
+  businessId: string; path: string | null; repository: WorkRepository; onSaved: (path: string | null) => void;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [selection, setSelection] = useState<{ id: string; file: Blob } | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+  const generation = useRef(0), busy = useRef(false);
+  const expectedPath = useRef(path);
+  useEffect(() => () => { generation.current++; }, []);
+  useEffect(() => {
+    if (!selection) { setPreview(null); return; }
+    const url = URL.createObjectURL(selection.file); setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selection]);
+  function choose() {
+    if (busy.current || processing) return;
+    // Chamada síncrona no gesto do usuário: preserva ativação para Safari/iOS.
+    if (input.current) { input.current.value = ''; input.current.click(); }
+  }
+  function cancel() {
+    if (busy.current) return;
+    generation.current++; setOpen(false); setSelection(null); setProcessing(false); setError('');
+  }
+  async function prepare(file?: File) {
+    if (!file) return; // Cancelamento do seletor não muda foto ou estado persistido.
+    const token = ++generation.current;
+    expectedPath.current = path;
+    setOpen(true); setProcessing(true); setSelection(null); setError('');
+    try {
+      const optimized = await optimizeImage(file);
+      if (generation.current === token) setSelection({ id: crypto.randomUUID(), file: optimized });
+    } catch (cause) {
+      if (generation.current === token) setError(cause instanceof Error ? cause.message : 'Não foi possível preparar esta imagem.');
+    } finally { if (generation.current === token) setProcessing(false); }
+  }
+  async function save() {
+    if (!selection || processing || busy.current) return;
+    const token = generation.current;
+    busy.current = true; setPending(true); setError('');
+    try {
+      const next = await repository.uploadProfilePhoto(businessId, selection.id, selection.file, expectedPath.current);
+      if (generation.current !== token) return;
+      onSaved(next); setOpen(false); setSelection(null);
+    } catch (cause) {
+      if (generation.current !== token) return;
+      const code = cause && typeof cause === 'object' && 'code' in cause ? cause.code : '';
+      setError(code === '40001' ? 'A foto foi alterada em outra sessão. Cancele e recarregue antes de tentar novamente.'
+        : ['PGRST202','42P01','SETUP_REQUIRED'].includes(String(code)) ? 'A foto principal aguarda a ativação do armazenamento. Nenhuma foto foi alterada.'
+        : 'Não foi possível confirmar o envio. Tente novamente para verificar o resultado, sem duplicar a fotografia.');
+    } finally { busy.current = false; setPending(false); }
+  }
+  return <>
+    <input ref={input} type="file" hidden aria-label="Selecionar foto principal" accept="image/jpeg,image/png,image/webp" onChange={event => void prepare(event.target.files?.[0])} />
+    <button type="button" className="profile-photo-trigger" aria-label="Alterar foto principal" disabled={pending || processing} onClick={choose}>
+      <ManagedBusinessAvatar path={path} />
+    </button>
+    <button type="button" className="button button--secondary" disabled={pending || processing} onClick={choose}>Adicionar fotografia</button>
+    {open && <Modal title="Confirmar foto principal" locked={pending} onClose={cancel}>
+      <div aria-busy={pending || processing}><p>Esta é a foto do seu perfil. Ela não será adicionada aos trabalhos ou às publicações.</p>
+      {processing && <p role="status">Preparando imagem…</p>}
+      {preview && <img className="upload-preview profile-photo-preview" src={preview} alt="Prévia da nova foto principal" />}
+      {error && <p role="alert" className="form-error">{error}</p>}
+      <p className="field-help">A foto será visível publicamente somente quando seu perfil estiver publicado. JPEG, PNG ou WebP, até 10 MB antes da otimização.</p>
+      <div className="work-actions"><button type="button" className="button button--secondary" disabled={pending} onClick={cancel}>Cancelar</button>
+        <button type="button" className="button button--primary" disabled={pending || processing || !selection} onClick={() => void save()}>{pending ? 'Enviando…' : 'Confirmar e enviar foto'}</button></div></div>
+    </Modal>}
+  </>;
+}
