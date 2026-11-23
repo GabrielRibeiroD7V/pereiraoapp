@@ -20,6 +20,11 @@ export async function optimizeImage(file: File, onFallback?: (reason: ImagePrepa
       if (!context) throw new Error('Canvas unavailable');
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
     } catch { throw new Error('Seu navegador não conseguiu desenhar esta foto. Nenhuma foto foi alterada; escolha outra imagem.'); }
+    return await encodeCanvasWebp(canvas, onFallback);
+  } finally { image.close(); }
+}
+
+export async function encodeCanvasWebp(canvas: HTMLCanvasElement, onFallback?: (reason: ImagePreparationNotice) => void): Promise<Blob> {
     let blob: Blob | null = null, reason: ImagePreparationNotice | undefined;
     try {
       blob = await new Promise<Blob | null>((resolve, reject) => {
@@ -41,5 +46,4 @@ export async function optimizeImage(file: File, onFallback?: (reason: ImagePrepa
     if (!blob || blob.type !== 'image/webp' || !blob.size) throw new Error('A conversão não gerou uma foto WebP válida. Escolha outra imagem.');
     if (blob.size > MAX_UPLOAD_BYTES) throw new Error('A foto preparada ultrapassou o limite de 5 MB. Escolha uma imagem com menos detalhes ou resolução menor.');
     return blob;
-  } finally { image.close(); }
 }
