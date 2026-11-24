@@ -40,6 +40,16 @@ select test.expect_error(format('insert into public.business_subscriptions(busin
 select test.assert_true(private.subscription_snapshot(:'a',now()+interval '1000 days')->>'accessPhase'='initial_free' and private.subscription_snapshot(:'a',now()+interval '1000 days')->>'state'='awaiting_activation','free: fase não isenta não expira sozinha');
 insert into private.billing_exempt_accounts(user_id,reason) values('00000000-0000-4000-8000-000000009802','Isenção local preservada');
 select test.assert_true(private.subscription_snapshot(:'a',now())->>'state'='exempt','free: isenção continua distinta');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009802';
+select public.create_business('Isento local antes da aprovação','free-exempt-local','autonomo','mundo-novo-ms') as e \gset
+update public.businesses set category_id='climatizacao',description='Descrição completa local',whatsapp='67999999999' where id=:'e';
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000009801';
+select public.admin_action('business',:'e','publish','Aprovação local de isento','draft');
+reset role;
+select test.assert_true(private.subscription_snapshot(:'e',now())->>'state'='exempt' and (select count(*)=1 from private.billing_exempt_accounts),'free: isenção anterior à publicação preservada');
+select test.assert_true((select count(*)=0 from public.business_subscriptions) and (select count(*)=0 from private.subscription_activations),'free: aprovação de isento não cria assinatura nem prazo');
+
 select test.assert_true(private.subscription_snapshot(:'a',now()+interval '1000 days')->>'trialStartedAt' is null,'free: passagem de tempo não cria prazo');
 select test.assert_true((select not checkout_enabled and not enforcement_enabled from private.subscription_settings),'free: sem checkout ou bloqueio');
 select test.assert_true((select count(*)>0 from pg_policies where tablename='businesses'),'free: políticas de negócios intactas');
