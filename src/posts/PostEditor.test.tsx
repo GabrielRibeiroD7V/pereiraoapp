@@ -84,3 +84,46 @@ it("mantém legenda, IDs e prévia depois de falha para recuperar sem duplicar",
     upload.mock.calls[1]?.slice(0, 3),
   );
 });
+it.each([1, 2, 3, 6])(
+  "permite %i fotos antes da legenda e cancelar não envia",
+  async (count) => {
+    const { managed, save } = setup(count),
+      upload = vi.spyOn(managed, "uploadPostPhoto");
+    await screen.findByAltText(`Prévia da foto ${count}`);
+    expect(
+      screen.getByText(`${count} de 6 fotos selecionadas`),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    expect(
+      screen
+        .getByRole("region", { name: "Todas as fotos da prévia" })
+        .querySelectorAll("img"),
+    ).toHaveLength(count);
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(upload).not.toHaveBeenCalled();
+    expect(save).not.toHaveBeenCalled();
+  },
+);
+it("acrescenta fotos ainda na legenda e permite voltar para remover e ordenar", async () => {
+  setup();
+  await screen.findByAltText("Prévia da foto 1");
+  fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+  expect(
+    screen.getByRole("button", { name: "Adicionar outras fotos" }),
+  ).toBeVisible();
+  fireEvent.change(screen.getByLabelText("Fotos da publicação"), {
+    target: { files: [new File(["test"], "outra.png", { type: "image/png" })] },
+  });
+  await screen.findByText("2 de 6 fotos selecionadas");
+  expect(
+    screen.getByLabelText("Legenda ou descrição da publicação"),
+  ).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Voltar às fotos" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Mover imagem 2 para antes" }),
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Remover imagem 1 da seleção" }),
+  );
+  expect(screen.getByText("1 de 6 fotos selecionadas")).toBeInTheDocument();
+});

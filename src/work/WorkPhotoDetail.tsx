@@ -7,6 +7,7 @@ export function WorkPhotoDetail({
   serviceAssociated = false,
   onClose,
   onEdit,
+  onCreatePost,
 }: {
   image: ReactNode;
   caption: string | null;
@@ -14,6 +15,7 @@ export function WorkPhotoDetail({
   serviceAssociated?: boolean;
   onClose: () => void;
   onEdit?: () => void;
+  onCreatePost?: () => void;
 }) {
   return (
     <Modal title="Foto de trabalho" onClose={onClose}>
@@ -31,6 +33,15 @@ export function WorkPhotoDetail({
               ? "Serviço não disponível nesta visualização."
               : "Nenhum serviço associado.")}
         </p>
+        {onCreatePost && (
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={onCreatePost}
+          >
+            Usar esta foto em uma publicação
+          </button>
+        )}
         {onEdit && (
           <button
             type="button"
