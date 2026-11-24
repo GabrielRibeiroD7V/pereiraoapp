@@ -1,4 +1,4 @@
-import { PhotoCarousel } from "../components/PhotoCarousel";
+import { PostContent } from "./PostContent";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Modal } from "../components/Modal";
@@ -323,27 +323,8 @@ export function PostEditor({
               aria-label="Prévia da publicação"
             >
               <h3>Prévia no perfil e em Trabalhos recentes</h3>
-              <p>
-                <strong>{businessName ?? "Perfil do negócio"}</strong>
-              </p>
-              <p className="field-help">
-                Rascunho privado. Ainda não foi publicado.
-              </p>
-              <PhotoCarousel
-                label="Todas as fotos da prévia"
-                items={photos.map((photo, i) => ({
-                  id: photo.id,
-                  content: photo.preview ? (
-                    <img src={photo.preview} alt={`Prévia da foto ${i + 1}`} />
-                  ) : photo.mediaState === "pending" ? (
-                    <p>Foto pendente de envio</p>
-                  ) : (
-                    <ManagedPhoto businessId={businessId} photo={photo} />
-                  ),
-                }))}
-              />
-              <strong>{title || "Título da publicação"}</strong>
-              <p>{description || "Sua legenda aparecerá aqui."}</p>
+              <PostContent carouselLabel="Todas as fotos da prévia" author={businessName ?? 'Perfil do negócio'} title={title || 'Título da publicação'} description={description || 'Sua legenda aparecerá aqui.'} visibility="Rascunho privado. Ainda não foi publicado."
+                images={photos.map((photo,i)=>({id:photo.id,content:photo.preview ? <img src={photo.preview} alt={`Prévia da foto ${i+1}`}/> : photo.mediaState==='pending' ? <p>Foto pendente de envio</p> : <ManagedPhoto businessId={businessId} photo={photo}/>}))}/>
               <p className="field-help">
                 A primeira foto será a capa. Deslize ou use as setas para
                 conferir todas antes de salvar.

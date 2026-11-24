@@ -83,7 +83,12 @@ describe('experiência pessoal e profissional', () => {
   it('mostra projetos do negócio apenas ao dono e mantém o rascunho privado', async () => {
     const posts = { load: vi.fn(async () => ({ business: { id: first.id, name: first.name, status: 'draft' }, posts: { items: [{ id: 'post-1', title: 'Reforma da cozinha', description: 'Projeto concluído', status: 'draft', images: [] }], next: null } })) } as unknown as ManagedPosts;
     setup('/conta', [first], undefined, undefined, posts);
-    expect(await screen.findByRole('link', { name: 'Gerenciar projeto Reforma da cozinha' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar?secao=conteudo&conteudo=publicacoes`);
+    const cover = await screen.findByRole('button', { name: 'Abrir publicação Reforma da cozinha' });
+    expect(cover).toHaveTextContent('Rascunho — só você vê');
+    fireEvent.click(cover);
+    expect(screen.getByRole('dialog', { name: 'Publicação' })).toHaveTextContent('Projeto concluído');
+    expect(screen.getByRole('button', { name: 'Editar publicação' })).toBeVisible();
+    expect(screen.queryByRole('link', { name: 'Conversar' })).not.toBeInTheDocument();
     expect(screen.getByText(/Só você pode ver este perfil/)).toBeInTheDocument();
     expect(posts.load).toHaveBeenCalledWith(first.id, 1);
   });
