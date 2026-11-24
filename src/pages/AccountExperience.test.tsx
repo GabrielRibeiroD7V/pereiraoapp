@@ -1,6 +1,6 @@
 import {beforeEach} from 'vitest';
-import {profileViews} from '../posts/postReturn';
-beforeEach(()=>profileViews.clear());
+import {profileViews,profileBusinessSelections} from '../posts/postReturn';
+beforeEach(()=>{profileViews.clear();profileBusinessSelections.clear();});
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -96,6 +96,20 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.queryByRole('link', { name: 'Conversar' })).not.toBeInTheDocument();
     expect(screen.getByText('Rascunho — só você vê')).toBeInTheDocument();
     expect(posts.load).toHaveBeenCalledWith(first.id, 1);
+  });
+
+  it('volta do post para o mesmo negócio selecionado na Conta',async()=>{
+    const post={id:'00000000-0000-4000-8000-000000009971',business_id:second.id,title:'Projeto de segundo perfil',description:'Conteúdo de teste local',status:'draft',images:[]};
+    const posts={get:async()=>post,load:async(bid:string)=>({business:{id:bid,name:second.name,status:'draft'},posts:{items:bid===second.id?[post]:[],page:1,hasNext:false}})} as unknown as ManagedPosts;
+    setup('/conta',[first,second],undefined,undefined,posts);
+    await screen.findByRole('heading',{name:first.name});
+    fireEvent.change(screen.getByLabelText('Perfil que você está vendo'),{target:{value:second.id}});
+    fireEvent.click(await screen.findByRole('link',{name:'Abrir publicação Projeto de segundo perfil'}));
+    await screen.findByRole('heading',{level:1,name:post.title});
+    fireEvent.click(screen.getByRole('button',{name:'Voltar'}));
+    await screen.findByRole('heading',{name:second.name});
+    expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(second.id);
+    expect(screen.getByRole('link',{name:'Editar perfil'})).toHaveAttribute('href',`/conta/profissional/${second.id}/editar`);
   });
 
   it('oferece recuperação existente no contexto pessoal', async () => {
