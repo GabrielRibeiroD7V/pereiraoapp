@@ -1,3 +1,4 @@
+import {useSectionAnchor} from '../hooks/useSectionAnchor';
 import {WorkPhotoDetail} from '../work/WorkPhotoDetail';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { usePresentation } from '../presentation/PresentationProvider';
@@ -24,7 +25,8 @@ function PagedSection<T>({ title, load, render, empty }: { title: string; load: 
   const [page, setPage] = useState(1);
   const fetchPage = useCallback((signal: AbortSignal) => load(page, signal), [load, page]);
   const state = usePublicQuery(`${title}:${page}`, fetchPage);
-  return <section className="public-profile-section" aria-label={title}><h2>{title}</h2><QueryStatus {...state} />{state.data && <>{state.data.items.length ? render(state.data.items) : <p className="field-help">{empty}</p>}<Pagination page={page} hasNext={state.data.hasNext} onChange={setPage} label={title} /></>}</section>;
+  useSectionAnchor(title === 'Serviços e preços' && !!state.data);
+  return <section id={title==='Serviços e preços'?'servicos':undefined} className="public-profile-section" aria-label={title}><h2>{title}</h2><QueryStatus {...state} />{state.data && <>{state.data.items.length ? render(state.data.items) : <p className="field-help">{empty}</p>}<Pagination page={page} hasNext={state.data.hasNext} onChange={setPage} label={title} /></>}</section>;
 }
 function ProfileContent({ provider }: { provider: PublicProvider }) {
   const repository = useMarketplace()!;
@@ -47,7 +49,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
-    <PublishedWorks key={provider.id} businessId={provider.id}/>
+    <PublishedWorks key={provider.id} businessId={provider.id} coversOnly/>
     <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
       </> },
       { id: 'sobre', label: 'Sobre', content: <>

@@ -79,9 +79,9 @@ it("capa de rascunho abre autor, título, legenda e todas as imagens em ordem", 
     }),
   );
   const dialog = screen.getByRole("dialog", {
-    name: "Trabalho demonstrativo local",
+    name: "Publicação",
   });
-  expect(dialog).toHaveTextContent("Rascunho privado");
+  expect(dialog).toHaveTextContent("Rascunho — só você vê");
   expect(dialog).toHaveTextContent(
     "Descrição simulada de um trabalho concluído",
   );

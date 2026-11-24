@@ -140,7 +140,7 @@ describe("publicações: SDK real com transporte interceptado", () => {
       setup({ error: true }).publicPosts.list(),
     ).rejects.toBeDefined();
   });
-  it("mantém microssegundos no cursor e limita resultado e capa no servidor", async () => {
+  it("mantém microssegundos no cursor e limita resultado e seis fotos do carrossel no servidor", async () => {
     const { publicPosts, calls } = setup();
     const cursor = { publishedAt: "2026-11-20T21:00:00.123456+00:00", id: pid };
     await publicPosts.list(cursor, bid);
@@ -150,7 +150,7 @@ describe("publicações: SDK real com transporte interceptado", () => {
     expect(q.get("business.status")).toBe("eq.published");
     expect(q.get("business_id")).toBe(`eq.${bid}`);
     expect(q.get("limit")).toBe("7");
-    expect(q.get("images.limit")).toBe("1");
+    expect(q.get("images.limit")).toBe("6");
     expect(q.get("select")).not.toMatch(/user_id|tax_id|\*/);
   });
   it("rejeita cursores maliciosos e IDs inválidos antes de consultar", async () => {
@@ -213,4 +213,9 @@ it('publicações mantêm funcionamento antes da expansão, sem ocultar outros e
   expect(f.calls[0]?.url.searchParams.get('select')).toContain('profile_avatar_path');
   expect(f.calls[1]?.url.searchParams.get('select')).not.toContain('profile_avatar_path');
   expect(await f.publicPosts.get(pid)).toBeNull(); expect(f.calls).toHaveLength(3);
+});
+it('detalhe público mantém os dois filtros e exclui fotos diretas pendentes ou apenas preparadas',async()=>{
+ const direct=[{id:'ready',storage_path:'ready',media_state:'ready',selected:true,staged:false,sort_order:0},{id:'pending',storage_path:'pending',media_state:'pending',selected:false,staged:true,sort_order:null},{id:'staged',storage_path:'staged',media_state:'ready',selected:false,staged:true,sort_order:null}];
+ const row={id:pid,business_id:bid,title:'Post público',description:'',published_at:'2026-11-20T00:00:00Z',images:[],uploaded_images:direct,business:{id:bid,name:'Negócio local',slug:'local',avatar_path:null,city:null,category:null}};
+ const {publicPosts,calls}=setup({rows:[row]});const post=await publicPosts.get(pid);expect(post?.images.map(p=>p.id)).toEqual(['ready']);const params=calls[0]!.url.searchParams;expect(params.get('status')).toBe('eq.published');expect(params.get('business.status')).toBe('eq.published');expect(calls.every(call=>call.method==='GET')).toBe(true);
 });

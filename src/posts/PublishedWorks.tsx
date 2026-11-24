@@ -1,3 +1,4 @@
+import {useReturnRevision} from '../hooks/useReturnRevision';
 import {PhotoCarousel} from '../components/PhotoCarousel';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -5,7 +6,11 @@ import { UserRound } from "lucide-react";
 import { usePosts } from "./PostsProvider";
 import { PublicImage } from "../marketplace/PublicImage";
 import type { PublishedWork, WorkCursor } from "./types";
-export function WorkCard({ post }: { post: PublishedWork }) {
+export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; coversOnly?: boolean }) {
+  if(coversOnly) return <article className="profile-post-public-tile"><Link className="profile-post-tile" to={`/trabalhos/${post.id}`} aria-label={`Abrir trabalho ${post.title}`}>
+    {post.images[0] && <PublicImage businessId={post.businessId} path={post.images[0].path} alt={post.images[0].caption ?? post.title}/>}
+    <span className="profile-post-tile__kind">Publicação{post.images.length>1?` · ${post.images.length} fotos`:''}</span><strong>{post.title}</strong>
+  </Link></article>;
   return (
     <article className="published-work">
       <header>
@@ -37,13 +42,15 @@ export function WorkCard({ post }: { post: PublishedWork }) {
       {post.description && (
         <p className="published-work-summary">{post.description}</p>
       )}
+      <div className="post-card-actions"><Link to={`/prestadores/${post.business.slug}`}>Ver perfil</Link><Link to={`/prestadores/${post.business.slug}#servicos`}>Conferir serviços</Link></div>
       <time dateTime={post.publishedAt}>
         {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
       </time>
     </article>
   );
 }
-export function PublishedWorks({ businessId }: { businessId?: string }) {
+export function PublishedWorks({ businessId, coversOnly = false }: { businessId?: string; coversOnly?: boolean }) {
+  const resume = useReturnRevision();
   const { publicPosts } = usePosts();
   const request = useRef<AbortController | null>(null),
     busy = useRef(false);
@@ -103,7 +110,7 @@ export function PublishedWorks({ businessId }: { businessId?: string }) {
       request.current?.abort();
       busy.current = false;
     };
-  }, [load]);
+  }, [load,resume]);
   if (!publicPosts || (!state.available && !state.error && !state.loading))
     return null;
   return (
@@ -120,9 +127,9 @@ export function PublishedWorks({ businessId }: { businessId?: string }) {
       {state.available && state.items.length === 0 && !state.loading && (
         <p className="field-help">Novos trabalhos em breve.</p>
       )}
-      <div className="published-works-grid">
+      <div className={coversOnly ? "profile-post-grid" : "published-works-grid"}>
         {state.items.map((post) => (
-          <WorkCard key={post.id} post={post} />
+          <WorkCard key={post.id} post={post} coversOnly={coversOnly}/>
         ))}
       </div>
       {state.error ? (

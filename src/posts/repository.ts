@@ -215,7 +215,7 @@ function publicPost(row: RawPublicPost): PublishedWork {
     title: row.title,
     description: row.description,
     publishedAt: row.published_at,
-    images: combinedImages(row.images,row.uploaded_images),
+    images: combinedImages(row.images,row.uploaded_images?.filter(photo=>photo.selected && photo.media_state==='ready')),
     business: {
       id: row.business.id,
       name: row.business.name,
@@ -253,7 +253,7 @@ export function createPublicPosts(
           .order("published_at", { ascending: false })
           .order("id", { ascending: false })
           .order("sort_order", { referencedTable: "images" })
-          .limit(1, { referencedTable: "images" })
+          .limit(6, { referencedTable: "images" })
           .limit(7)
           .abortSignal(signal ?? new AbortController().signal)
           .overrideTypes<RawPublicPost[], { merge: false }>();
