@@ -20,10 +20,12 @@ export function MessagesInboxPage() {
     let live = true;
     setItems([]); setError(''); setLoading(true);
     if (!repository) { setLoading(false); return; }
+    let revision = 0;
     const load = async () => {
-      try { const data = await repository.list(); if (live) { setItems(data); setError(''); } }
-      catch (cause) { if (live) setError(messageError(cause)); }
-      finally { if (live) setLoading(false); }
+      const request = ++revision;
+      try { const data = await repository.list(); if (live && request === revision) { setItems(data); setError(''); } }
+      catch (cause) { if (live && request === revision) setError(messageError(cause)); }
+      finally { if (live && request === revision) setLoading(false); }
     };
     void load();
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 20000);
@@ -86,25 +88,28 @@ export function ConversationPage() {
   const [error, setError] = useState('');
   const busy = useRef(false);
   const showingOlder = useRef(false);
+  const loadRevision = useRef(0);
   const load = useCallback(async (quiet = false) => {
     if (!repository) { setLoading(false); return; }
+    const request = ++loadRevision.current;
     try {
       const [conversations, page] = await Promise.all([repository.list(), repository.messages(conversationId)]);
+      if (request !== loadRevision.current) return;
       const current = conversations.find(item => item.id === conversationId);
       if (!current) throw { code: '42501' };
       setConversation(current);
       setItems(previous => quiet && showingOlder.current ? [...previous.filter(message => !page.items.some(fresh => fresh.id === message.id)), ...page.items] : page.items);
       if (!quiet || !showingOlder.current) setOlder(page.hasMore);
       setError('');
-    } catch (cause) { setError(messageError(cause)); }
-    finally { setLoading(false); }
+    } catch (cause) { if (request === loadRevision.current) setError(messageError(cause)); }
+    finally { if (request === loadRevision.current) setLoading(false); }
   }, [repository, conversationId]);
   useEffect(() => {
     showingOlder.current = false;
     setItems([]); setConversation(null); setLoading(true); setOlder(false);
     void load();
     const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void load(true); }, 12000);
-    return () => window.clearInterval(timer);
+    return () => { loadRevision.current++; window.clearInterval(timer); };
   }, [load, session?.user.id]);
   async function loadOlder() {
     if (!repository || !items[0] || pending) return;

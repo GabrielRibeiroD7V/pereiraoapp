@@ -49,3 +49,20 @@ describe('mensagens internas e WhatsApp', () => {
     expect(screen.queryByText('private data')).not.toBeInTheDocument();
   });
 });
+
+it('uma atualização antiga não apaga a resposta confirmada mais recente', async () => {
+  const repo=fixture();let finish!: (page: Awaited<ReturnType<MessageRepository['messages']>>) => void;
+  let poll: (()=>void)|undefined;
+  const original=window.setInterval.bind(window);
+  const spy=vi.spyOn(window,'setInterval').mockImplementation(((callback:()=>void,ms:number)=>{if(ms===12000)poll=callback;return original(callback,ms);}) as typeof window.setInterval);
+  const page=await repo.messages(conversationId);
+  vi.mocked(repo.messages).mockClear().mockResolvedValueOnce(page).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;})).mockResolvedValue({...page,items:[...page.items,{id:'new-message',senderId:'customer-1',body:'Resposta confirmada',createdAt:'2026-11-22T12:01:00Z'}]});
+  try {
+    open(`/mensagens/${conversationId}`,repo);await screen.findByText('Olá');
+    poll!();await waitFor(()=>expect(finish).toBeDefined());
+    fireEvent.change(screen.getByLabelText('Responder'),{target:{value:'Resposta confirmada'}});fireEvent.click(screen.getByRole('button',{name:'Enviar'}));
+    await screen.findByText('Resposta confirmada');
+    await import('@testing-library/react').then(({act})=>act(async()=>finish(page)));
+    expect(screen.getByText('Resposta confirmada')).toBeInTheDocument();
+  } finally {spy.mockRestore();}
+});
