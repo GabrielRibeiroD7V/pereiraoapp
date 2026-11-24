@@ -398,3 +398,14 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .work-modal__body { min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom,0px); }
 .work-modal__body .work-actions { position: sticky; bottom: 0; padding-block: .75rem .25rem; background: white; z-index: 1; }
 .work-modal__body input, .work-modal__body textarea { scroll-margin-block: 1rem; }
+
+.post-composer { display: grid; gap: .75rem; min-width: 0; }
+.post-composer__photos { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; }
+.post-composer__photos figure { min-width: 0; margin: 0; padding: .375rem; background: var(--color-surface); border-radius: .5rem; }
+.post-composer__photos img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+.post-composer__photos figcaption { font-size: .75rem; }
+.post-composer__photo-actions { display: flex; flex-wrap: wrap; gap: .25rem; }
+.post-composer__photo-actions button { min-height: 2.75rem; min-width: 2.75rem; font-size: .75rem; }
+.post-composer__preview { border: 1px solid var(--color-border); padding: .75rem; border-radius: .75rem; min-width: 0; }
+.post-composer__preview img { width: 100%; max-height: 18rem; object-fit: contain; }
+.post-composer__preview p, .post-composer__preview strong { overflow-wrap: anywhere; white-space: pre-wrap; }

@@ -1,6 +1,8 @@
 import type { WorkPostRow } from "../lib/database.types";
 import type { PublicPage } from "../marketplace/types";
 export interface PostPhoto {
+  kind?: "post" | "portfolio";
+  mediaState?: "pending" | "ready";
   id: string;
   path: string;
   caption: string | null;
@@ -46,6 +48,9 @@ export interface PublicPosts {
   get(id: string, signal?: AbortSignal): Promise<PublishedWork | null>;
 }
 export interface ManagedPosts {
+  directPhotosAvailable?():Promise<boolean>;
+  uploadPostPhoto?(businessId:string,postId:string,id:string,file:Blob,input:PostInput):Promise<void>;
+
   load(
     businessId: string,
     page: number,

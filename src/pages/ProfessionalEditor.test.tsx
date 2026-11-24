@@ -182,6 +182,9 @@ describe('área central do perfil existente', () => {
   it('abre o editor de publicações e cancela dentro da central', async () => {
     open('?secao=conteudo&conteudo=publicacoes');
     fireEvent.click(await screen.findByRole('button', { name: 'Nova publicação' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Selecionar fotos para nova publicação'),{target:{files:[new File(['synthetic'],'post.png',{type:'image/png'})]}});
+    await screen.findByRole('dialog');
     expect(document.querySelector('form form')).toBeNull();
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancelar' }));
     expect(screen.getByRole('tab', { name: 'Publicações' })).toHaveAttribute('aria-selected', 'true');

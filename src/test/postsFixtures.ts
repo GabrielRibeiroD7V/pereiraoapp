@@ -33,6 +33,8 @@ export function postsFixtures(businessStatus = "published", empty = false) {
     if (id !== fixtureBusinessId) throw { code: "NOT_MANAGER" };
   };
   const managed: ManagedPosts = {
+    directPhotosAvailable: async()=>true,
+    uploadPostPhoto: async()=>{},
     load: async (id, page) => {
       check(id);
       return {

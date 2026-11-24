@@ -1,0 +1,48 @@
+begin;
+insert into auth.users(id) values('00000000-0000-4000-8000-000000000094'),('00000000-0000-4000-8000-000000000095');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000094';
+select public.create_business('Post sintético','post-direto-sintetico','autonomo','mundo-novo-ms') as bid \gset
+select gen_random_uuid() as pid,gen_random_uuid() as photo \gset
+select public.prepare_work_post_photo(:'bid',:'pid',:'photo',123,'Rascunho de teste','Legenda sintética') as ticket \gset
+select test.assert_true((select status='draft' from public.work_posts where id=:'pid'),'preparation never publishes');
+select test.assert_true((select count(*)=0 from public.portfolio_items where business_id=:'bid'),'post photos not in portfolio');
+select test.assert_true((public.prepare_work_post_photo(:'bid',:'pid',:'photo',123,'Rascunho de teste','Legenda sintética')->>'id')=:'photo','preparation idempotent');
+select test.expect_error(format('select public.finalize_work_post_photo(%L,%L)',:'bid',:'photo'),'22023','finalization needs object');
+insert into storage.objects(bucket_id,name,metadata) values('business-posts',:'ticket'::jsonb->>'storage_path','{"size":123,"mimetype":"image/webp"}');
+select public.finalize_work_post_photo(:'bid',:'photo');
+select public.finalize_work_post_photo(:'bid',:'photo');
+select public.save_work_post_composition(:'bid',:'pid','Título final','Legenda final',jsonb_build_array(jsonb_build_object('id',:'photo','kind','post')));
+select test.assert_true((select media_state='ready' and selected and not staged from public.work_post_photos where id=:'photo'),'finalized and selected');
+select test.assert_true((select status='draft' from public.work_posts where id=:'pid'),'save remains draft');
+select test.assert_true((select status='draft' from public.businesses where id=:'bid'),'business remains draft');
+select test.expect_error(format('select public.work_post_command(%L,%L,%L)','publish',:'bid',:'pid'),'23514','draft business cannot publish');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000095';
+select test.assert_true((select count(*)=0 from public.work_post_photos),'third party cannot read draft photos');
+select test.expect_error(format('select public.finalize_work_post_photo(%L,%L)',:'bid',:'photo'),'42501','third party cannot finalize');
+select test.assert_true((select count(*)=0 from storage.objects where bucket_id='business-posts'),'third party cannot sign object');
+set local role anon;
+set local request.jwt.claim.sub='';
+select test.assert_true((select count(*)=0 from public.work_post_photos),'anonymous cannot read draft photos');
+select test.assert_true((select count(*)=0 from storage.objects where bucket_id='business-posts'),'anonymous cannot sign draft object');
+reset role;
+alter table public.businesses disable trigger business_first_activation_trial;
+update public.businesses set status='published' where id=:'bid';
+alter table public.businesses enable trigger business_first_activation_trial;
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000094';
+select public.work_post_command('publish',:'bid',:'pid');
+set local role anon;
+set local request.jwt.claim.sub='';
+select test.assert_true((select count(*)=1 from public.work_posts),'published post readable');
+select test.assert_true((select count(*)=1 from public.work_post_photos),'published post image readable');
+select test.assert_true((select count(*)=1 from storage.objects where bucket_id='business-posts'),'published post object signable');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000094';
+select public.work_post_command('unpublish',:'bid',:'pid');
+select test.assert_true((select selected from public.work_post_photos where id=:'photo'),'withdrawal preserves composition');
+select public.work_post_command('publish',:'bid',:'pid');
+select public.work_post_command('save',:'bid',:'pid','Edição legada','',array[]::uuid[]);
+select test.assert_true((select not selected from public.work_post_photos where id=:'photo'),'legacy save does not silently retain unknown images');
+select test.assert_true((select status='unpublished' from public.work_posts where id=:'pid'),'editing withdraws published post');
+rollback;

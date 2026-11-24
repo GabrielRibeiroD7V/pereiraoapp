@@ -29,9 +29,12 @@ f.work.uploadProfilePhoto = async (...args) => { const path = await uploadProfil
 f.work.saveService = async (...args) => { await saveService(...args); record('serviços'); };
 f.work.imageUrl = async () => new URL('./synthetic-photo.png', import.meta.url).href;
 const posts = postsFixtures('draft', true);
+const postBlobs=new Map<string,string>();
+posts.managed.directPhotosAvailable=async()=>true;
+posts.managed.uploadPostPhoto=async(businessId,postId,id,blob)=>{if(businessId!==bid)throw new Error('QA business');const path=`${businessId}/posts/${id}.webp`;if(!postBlobs.has(path))postBlobs.set(path,URL.createObjectURL(blob));};
 const savePost = posts.managed.save;
 posts.managed.save = async (...args) => { await savePost(...args); record('publicações'); };
-posts.managed.imageUrl = f.work.imageUrl;
+posts.managed.imageUrl = async(businessId,path)=>postBlobs.get(path)??f.work.imageUrl(path);
 posts.managed.photos = async (id, page) => {
   if (id !== bid) throw { code: 'NOT_MANAGER' };
   return { items: f.snapshot().photos.filter(row => row.media_state === 'ready').map(row => ({ id: row.id, path: row.storage_path, caption: row.caption })), page, hasNext: false };
