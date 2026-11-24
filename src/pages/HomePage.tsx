@@ -1,3 +1,4 @@
+import {InstallAppAccess} from '../pwa/PwaProvider';
 import { BriefcaseBusiness } from 'lucide-react';
 import { CategoryTile } from '../components/CategoryTile';
 import { PageHeader } from '../components/PageHeader';
@@ -12,6 +13,7 @@ export function HomePage() {
     <div className="home-page">
       <PageHeader title="O que você está procurando?" />
       <SearchField />
+      <InstallAppAccess />
       <section className="home-section" aria-labelledby="categories-title">
         <h2 id="categories-title">Categorias populares</h2>
         <ul className="category-grid">
