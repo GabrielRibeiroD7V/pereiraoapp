@@ -1,3 +1,6 @@
+import {MemoryRouter} from 'react-router-dom';
+import {App} from '../app/App';
+import {createWorkFixtures} from '../test/workFixtures';
 import {render,screen,waitFor} from '@testing-library/react';
 import {expect,it} from 'vitest';
 import {createClient} from '@supabase/supabase-js';
@@ -12,3 +15,5 @@ it('compatível com produção anterior à migração, sem afirmar fase ativa',a
 it('rejeita resposta que ligue cobrança, relógio, bloqueio ou conversão',async()=>{for(const field of ['checkoutAvailable','trialClockRunning','enforcementEnabled','automaticConversion']){await expect(repository({...phase,[field]:true}).repo.accessStatus!()).rejects.toMatchObject({code:'INVALID_RESPONSE'});}});
 it('texto usa estado confirmado, sem preço definitivo nem recurso premium inventado',async()=>{render(<SubscriptionProvider repository={repository().repo}><InitialFreeNotice/></SubscriptionProvider>);const region=await screen.findByRole('region',{name:'Fase inicial gratuita'});expect(region).toHaveTextContent('Os 90 dias não estão correndo');expect(region).toHaveTextContent('opcional');expect(region).toHaveTextContent('revisão administrativa');expect(region).not.toHaveTextContent(/19,9|premium|Contratar agora/);});
 it('erro de rede não fabrica gratuidade ou oferta',async()=>{render(<SubscriptionProvider repository={{accessStatus:async()=>{throw new Error('offline');},list:async()=>({items:[],hasNext:false})}}><InitialFreeNotice/></SubscriptionProvider>);expect(screen.queryByRole('region',{name:'Fase inicial gratuita'})).not.toBeInTheDocument();});
+
+it('criação de conta apresenta política confirmada antes do formulário, sem exigir contratação',async()=>{render(<MemoryRouter initialEntries={['/criar-conta']}><App authGateway={createWorkFixtures(false,true).gateway} subscriptionRepository={repository().repo}/></MemoryRouter>);await screen.findByRole('heading',{name:'Criar conta'});expect(await screen.findByRole('region',{name:'Fase inicial gratuita'})).toHaveTextContent('opcional');expect(screen.queryByText(/Contratar agora|19,99|19,90/)).not.toBeInTheDocument();});

@@ -13,7 +13,7 @@ Arquivo proposto: `20261124163000_initial_free_phase.sql`. SHA-256: `af1aa1217b8
 - Migração `20261124163000_initial_free_phase.sql`: política privada de fase gratuita, sem data final ou troca de estado via API; suspende criação automática de trial, protege inserção/conversão de contratos reais, RPC pública só de estado da fase e snapshot privado que preserva a prioridade de isenção.
 - A migração exige zero assinaturas/ativações e checkout/enforcement false. Caso o estado mude, ABORTA sem alterar registros. Locks curtos serializam com a publicação concorrente; timeout aborta tudo.
 - Não altera negócios, posts, preços, isenções, RLS existente, serviços, mensagens ou contratos Sandbox. Não há publicação, cobrança nem reinício de relógio.
-- Cadastro/Conta/Situação mostram “Fase inicial gratuita” SOMENTE se a RPC confirmar. Sem a migração ou com erro, não afirmam que o backend já mudou. Perfil básico, serviços, publicações e conversas são gratuitos; assinatura futura opcional, benefícios a definir com uso real, nenhuma conversão automática e nenhum preço anunciado.
+- Criação de conta/Cadastro profissional/Conta/Situação mostram “Fase inicial gratuita” SOMENTE se a RPC confirmar. Sem a migração ou com erro, não afirmam que o backend já mudou. Perfil básico, serviços, publicações e conversas são gratuitos; assinatura futura opcional, benefícios a definir com uso real, nenhuma conversão automática e nenhum preço anunciado.
 - Encerrar a fase será OUTRA decisão e implementação. Nem passagem do tempo nem futura republicação ativam uma assinatura. Não prometer 90 dias adicionais futuros sem definição comercial.
 
 ## Preflight para futura autorização
@@ -35,9 +35,9 @@ Arquivo proposto: `20261124163000_initial_free_phase.sql`. SHA-256: `af1aa1217b8
 
 | Indicador | O que já se pode contar | Próxima instrumentação e cuidado |
 |---|---|---|
-| Profissionais publicados | Negócios published distintos; separar cidade de origem e cidade atendida, sem somar como negócios diferentes | “Ativo” exige atividade definida e persistida; não confundir serviço ativo com uso recente da conta |
+| Profissionais publicados | Negócios published distintos; separar cidade de origem e cidade atendida, sem somar como negócios diferentes | Definir ativo como publicado, proprietário habilitado e ao menos uma ação do responsável no negócio nos últimos 30 dias (serviço/post salvo ou resposta legítima). Excluir ações administrativas e testes. Ainda não há evento unificado para contar isso; não usar updated_at nem serviço ativo como substituto |
 | Buscas | Não há eventos persistidos confiáveis de pesquisa | Evento por pesquisa confirmada, cidade/filtro/categoria, deduplicação, janela temporal, exclusão de testes/bots; não registrar texto livre pessoal |
-| Visualizações | Não há evento confiável de visita | Visita única por sessão/perfil/dia, sem autoacesso do dono ou admin, visitante pseudônimo e retenção limitada |
+| Visualizações | Não há evento confiável de visita | Visita única por sessão/perfil/dia, sem autoacesso do dono ou admin, visitante pseudônimo e retenção proposta de 90 dias para eventos mínimos, com agregados semanais; decisão de privacidade antes da instrumentação |
 | Interesse/contato | Conversa legítima iniciada e mensagens já têm registros; origem da cidade pesquisada não está persistida | Contar novos contatos de terceiros e respostas separadamente; clique WhatsApp é intenção, NUNCA prova de mensagem entregue |
 
 Sem tráfego não usar zero inventado como medida de demanda; mostrar indisponível quando a coleta não existe. Proposta inicial: acompanhar semanalmente publicados por cidade, buscas únicas, visitas de terceiros, novos contatos, taxa de resposta e retorno em 7/30 dias. Exigir amostra suficiente por cidade antes de definir benefícios opcionais. Os eventos/privacidade/abuso exigem outro modelo e autorização de migração; não foram implementados neste PR.
