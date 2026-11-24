@@ -41,6 +41,8 @@ describe('convite contextual de instalação', () => {
     expect(invitation()).toBeVisible();
     act(() => screen.getByRole('button', { name: 'Ação importante' }).focus());
     expect(invitation()).not.toBeInTheDocument();
+    act(()=>vi.advanceTimersByTime(3001));
+    expect(invitation()).toBeVisible();
     f.controller.dispose();
   });
   it('oferece também na Conta autenticada, mas não em cadastro ou edição', () => {

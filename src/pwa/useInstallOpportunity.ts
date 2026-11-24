@@ -21,24 +21,27 @@ export function useInstallOpportunity(pathname: string) {
     };
   }, [publicPage]);
   useEffect(() => {
-    const check = () => {
+    let importantUntil=0, idle: ReturnType<typeof setTimeout> | undefined;
+    const check = (event?:Event) => {
       const active = document.activeElement;
       const editing = active?.matches('input,textarea,select,[contenteditable=true]') ?? false;
-      const importantAction = Boolean(active?.matches('button,a') && active.closest('main') && !active.closest('.pwa-install'));
+      const actionFocused = Boolean(active?.matches('button,a') && active.closest('main') && !active.closest('.pwa-install'));
+      if(event?.type==='focusin' && actionFocused){importantUntil=Date.now()+3000;clearTimeout(idle);idle=setTimeout(check,3001);}
+      const importantAction = actionFocused && Date.now()<importantUntil;
       const viewport = window.visualViewport;
       const keyboard = Boolean(viewport && window.innerHeight - viewport.height > 150);
       const overlay = [...document.querySelectorAll('dialog[open], [role="dialog"], [aria-busy="true"]')].some(node => !node.closest(".pwa-install-help"));
       setObstructed(editing || importantAction || keyboard || overlay || document.visibilityState === "hidden");
     };
     check();
-    const observer = new MutationObserver(check);
+    const observer = new MutationObserver(()=>check());
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["open", "aria-busy"] });
     document.addEventListener("visibilitychange", check);
     document.addEventListener('focusin', check);
     document.addEventListener('focusout', check);
     window.visualViewport?.addEventListener('resize', check);
     return () => {
-      observer.disconnect();
+      clearTimeout(idle);observer.disconnect();
       document.removeEventListener("visibilitychange", check);
       document.removeEventListener('focusin', check);
       document.removeEventListener('focusout', check);

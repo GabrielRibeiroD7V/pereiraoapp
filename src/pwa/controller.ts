@@ -1,6 +1,6 @@
 import { workerVersion } from './workerVersion';
 import type { PwaDiagnostics } from './workerVersion';
-import { installDismissed, INSTALL_DISMISS_KEY, INSTALL_SEEN_KEY } from './installPolicy';
+import { installDismissed, INSTALL_DISMISS_KEY, INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS, INSTALL_COOLDOWN_MS } from './installPolicy';
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -391,10 +391,22 @@ export class PwaController {
   }
   offerInstallInvitation() {
     try {
-      if (installDismissed(this.browser.localStorage, Date.now(), INSTALL_SEEN_KEY)) return false;
-      this.browser.localStorage.setItem(INSTALL_SEEN_KEY, String(Date.now()));
+      const storage = this.browser.localStorage;
+      if (installDismissed(storage, Date.now(), INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS)) return false;
+      // Confere disponibilidade sem registrar uma exibição antes de ela acontecer.
+      storage.setItem(INSTALL_SEEN_KEY, storage.getItem(INSTALL_SEEN_KEY) ?? '0');
       return true;
-    } catch { return false; } // Sem preferência persistente, manter somente o acesso manual.
+    } catch { return false; }
+  }
+  markInstallInvitationSeen() {
+    try { this.browser.localStorage.setItem(INSTALL_SEEN_KEY, String(Date.now())); return true; } catch { return false; }
+  }
+  installDiagnostics() {
+    const until = (key: string, duration: number) => {
+      try { const stamp = Number(this.browser.localStorage.getItem(key)); return stamp > 0 && stamp <= Date.now() && stamp + duration > Date.now() ? new Date(stamp + duration).toISOString() : null; } catch { return null; }
+    };
+    return { installed: this.state.installed, ios: this.state.ios, safari: this.state.safari, nativePrompt: this.state.canInstall,
+      dismissedUntil: until(INSTALL_DISMISS_KEY, INSTALL_COOLDOWN_MS), automaticUntil: until(INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS) };
   }
   dismiss() {
     try {
