@@ -20,14 +20,15 @@ function open(path: string, authenticated = false) {
   return repository;
 }
 describe('acesso global às mensagens', () => {
-  it.each(['/', '/buscar', '/prestadores/prestador-simulado', '/conta'])('oferece um único atalho no cabeçalho de %s, sem contador fictício', async path => {
+  it.each(['/', '/buscar', '/prestadores/prestador-simulado', '/conta', '/mensagens'])('mantém acesso único na barra em %s, sem duplicar no cabeçalho ou inventar contador', async path => {
     open(path, true);
     await waitFor(() => expect(screen.queryByText('Verificando sua sessão…')).not.toBeInTheDocument());
     const header = document.querySelector('.app-header') as HTMLElement;
-    const messages = within(header).getByRole('link', { name: 'Abrir mensagens' });
+    const messages = within(screen.getByRole('navigation', { name: 'Navegação principal' })).getByRole('link', { name: 'Conversas' });
+    expect(header.querySelector('a[href="/mensagens"]')).toBeNull();
     expect(messages).toHaveAttribute('href', '/mensagens');
-    expect(messages).toHaveTextContent('');
-    expect(screen.getAllByRole('link', { name: 'Abrir mensagens' })).toHaveLength(1);
+    expect(messages).toHaveTextContent('Conversas');
+    expect(screen.getAllByRole('link', { name: 'Conversas' })).toHaveLength(1);
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
     expect(within(header).getByRole('img', { name: 'PEREIRÃO' })).toBeInTheDocument();
   });
@@ -35,22 +36,22 @@ describe('acesso global às mensagens', () => {
     const f = createWorkFixtures();
     render(<MemoryRouter initialEntries={[`/conta/profissional/${fixtureBusinessId}/perfil`]}><App authGateway={f.gateway} professionalRepository={f.professional} workRepository={f.work} /></MemoryRouter>);
     await screen.findByRole('link', { name: 'Editar perfil' });
-    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(2);
-    expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toBeVisible();
+    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Conversas' })).toBeVisible();
   });
   it('encaminha o visitante ao login com retorno à caixa, sem consultar conversas privadas', async () => {
     const repository = open('/');
-    fireEvent.click(screen.getByRole('link', { name: 'Abrir mensagens' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Conversas' }));
     expect(await screen.findByRole('heading', { name: 'Entrar' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/criar-conta?next=%2Fmensagens');
     expect(repository.list).not.toHaveBeenCalled();
   });
   it('abre a caixa autenticada e mantém o estado vazio real', async () => {
     const repository = open('/buscar', true);
-    fireEvent.click(screen.getByRole('link', { name: 'Abrir mensagens' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Conversas' }));
     expect(await screen.findByRole('heading', { name: 'Mensagens' })).toBeInTheDocument();
     await waitFor(() => expect(repository.list).toHaveBeenCalled());
-    expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Conversas' })).toHaveAttribute('aria-current', 'page');
   });
 });
 

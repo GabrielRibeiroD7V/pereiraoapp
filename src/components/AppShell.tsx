@@ -1,7 +1,7 @@
 import {usePostScrollReturn} from '../posts/postReturn';
 import { Suspense, useEffect, useRef } from 'react';
-import { MapPin, MessageCircle } from 'lucide-react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { RouteBoundary } from './RouteBoundary';
 import { LoadingState } from './LoadingState';
 import { Brand } from './Brand';
@@ -34,18 +34,15 @@ export function AppShell() {
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
       <header className="app-header">
         <div className="app-header__inner">
-          <MainNavigation />
           <Brand />
           <div className="app-header__actions">
             <div className="location" aria-label="Cidade inicial: Mundo Novo, Mato Grosso do Sul">
               <MapPin size={18} aria-hidden="true" /><span>Mundo Novo, MS</span>
             </div>
-            <Link to="/mensagens" className="app-header__messages" aria-label="Abrir mensagens" aria-current={pathname === '/mensagens' || pathname.startsWith('/mensagens/') ? 'page' : undefined}>
-              <MessageCircle size={22} strokeWidth={1.8} aria-hidden="true" />
-            </Link>
           </div>
         </div>
       </header>
+      <MainNavigation />
       <main id="main-content" className="page-container" tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
       {new URLSearchParams(search).get('pwa-diagnostico') === '1' && <VersionDiagnostics />}
