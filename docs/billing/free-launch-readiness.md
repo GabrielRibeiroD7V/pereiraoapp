@@ -1,5 +1,7 @@
 # Direção de lançamento e prontidão financeira — 24/11/2026
 
+> Atualização posterior: o provider GET e o receptor Production foram publicados desligados no #68, e a migração de fundação foi aplicada com autorização. O texto abaixo preserva o diagnóstico histórico; para o estado vigente e os bloqueios de provisionamento, consultar [production-foundation.md](production-foundation.md). Não usar as pendências históricas como ordem para reaplicar SQL.
+
 ## Decisão de produto
 
 Concluir e validar perfil, publicações, busca e conversas com usuários legítimos antes de monetizar. Nenhuma oferta de preço, prazo ou benefício premium hipotético na interface. A assinatura futura será uma decisão própria, opcional e consentida; não há conversão automática. Fase gratuita, isenção e proteções atuais permanecem intactas. Não criar outra chave: a existente chama-se “pereirao - sandbox”. Nenhuma chave foi solicitada ou lida nesta rodada.
