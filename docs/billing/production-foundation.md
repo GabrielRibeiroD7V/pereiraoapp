@@ -20,7 +20,7 @@ Token próprio do webhook → JSON limitado → projeção mínima sem dados pes
 
 ## Migração proposta — NÃO aplicada
 
-`20261124182023_production_billing_foundation.sql`, criada pelo CLI em modo local. Seis tabelas novas privadas: keys, nonces, bindings, events, payments e audit. RLS habilitada, sem privilégios diretos de anon/authenticated. RPC de máquina exige HMAC com segredo independente, comando+JSON exato, nonce único e janela de 90s. Não usa service_role nem JWT simulado. Prova Production não reutiliza chave de assinatura Sandbox; nenhum segredo inicial é provisionado pela migração.
+`20261124182023_production_billing_foundation.sql`, criada pelo CLI em modo local. SHA-256: `4e1b9aec832545e15ca270dee5539dc9065a0712ea634ee3e6de528a432d84e4`. Seis tabelas novas privadas: keys, nonces, bindings, events, payments e audit. RLS habilitada, sem privilégios diretos de anon/authenticated. RPC de máquina exige HMAC com segredo independente, comando+JSON exato, nonce único e janela de 90s. Não usa service_role nem JWT simulado. Prova Production não reutiliza chave de assinatura Sandbox; nenhum segredo inicial é provisionado pela migração.
 
 Expansão aditiva: não altera tabelas, políticas, funções ou gatilhos operacionais existentes. Dependências: schemas private/public/extensions, pgcrypto, businesses e sandbox_backend_keys já existentes. A nova RPC não é usada no frontend; ausente/não provisionada retorna erro de setup, nunca ACK fictício. Código pode ser publicado desligado antes do SQL.
 
