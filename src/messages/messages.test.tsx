@@ -66,3 +66,35 @@ it('uma atualização antiga não apaga a resposta confirmada mais recente', asy
     expect(screen.getByText('Resposta confirmada')).toBeInTheDocument();
   } finally {spy.mockRestore();}
 });
+
+
+it('preserva o próximo rascunho digitado enquanto o envio anterior aguarda confirmação', async () => {
+  const repo = fixture(); let finish!: () => void;
+  vi.mocked(repo.send).mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  open(`/mensagens/${conversationId}`, repo);
+  const field = await screen.findByLabelText('Responder');
+  fireEvent.change(field, { target: { value: 'Primeira mensagem' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+  await waitFor(() => expect(finish).toBeDefined());
+  fireEvent.change(field, { target: { value: 'Próximo texto ainda não enviado' } });
+  await import('@testing-library/react').then(({ act }) => act(async () => finish()));
+  expect(field).toHaveValue('Próximo texto ainda não enviado');
+  expect(repo.send).toHaveBeenCalledExactlyOnceWith(conversationId, 'Primeira mensagem');
+  expect(screen.getByRole('button', { name: 'Enviar' })).toBeEnabled();
+});
+
+
+it('uma falha de envio preserva o próximo rascunho sem enviar automaticamente', async () => {
+  const repo = fixture(); let fail!: (reason: unknown) => void;
+  vi.mocked(repo.send).mockImplementation(() => new Promise((_resolve, reject) => { fail = reject; }));
+  open(`/mensagens/${conversationId}`, repo);
+  const field = await screen.findByLabelText('Responder');
+  fireEvent.change(field, { target: { value: 'Mensagem aguardando' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+  await waitFor(() => expect(fail).toBeDefined());
+  fireEvent.change(field, { target: { value: 'Rascunho preservado após falha' } });
+  await import('@testing-library/react').then(({ act }) => act(async () => fail(new Error('offline'))));
+  expect(field).toHaveValue('Rascunho preservado após falha');
+  expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível');
+  expect(repo.send).toHaveBeenCalledOnce();
+});
