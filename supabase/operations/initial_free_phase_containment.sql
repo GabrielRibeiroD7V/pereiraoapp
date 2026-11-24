@@ -6,6 +6,8 @@ set local lock_timeout='5s';
 lock table public.businesses in share row exclusive mode;
 lock table public.business_subscriptions in share row exclusive mode;
 do $$begin
+ if (select count(*) from private.platform_access_policy where singleton and phase='initial_free') <> 1
+ then raise exception 'Rollback policy metadata unavailable: keep safeguards' using errcode='55000'; end if;
  if exists(select 1 from public.businesses where status in ('published','suspended'))
  or exists(select 1 from public.business_subscriptions)
  or exists(select 1 from private.subscription_activations)

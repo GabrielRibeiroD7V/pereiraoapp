@@ -59,7 +59,8 @@ grant execute on function public.platform_access_status() to anon,authenticated;
 create or replace function private.subscription_snapshot(target uuid,at_time timestamptz)
 returns jsonb language sql stable security definer set search_path='' as $$
  select jsonb_build_object('businessId',target,
- 'state',case when private.is_billing_exempt_business(target) then 'exempt' else 'initial_free' end,
+ 'state',case when private.is_billing_exempt_business(target) then 'exempt' else 'awaiting_activation' end,
+ -- Mantém o enum entendido pela produção; a nova interface usa accessPhase.
  'accessPhase','initial_free','trialStartedAt',null,'trialEndsAt',null,'contractedAt',null,
  'billingPeriodStart',null,'billingPeriodEnd',null,'serverNow',at_time,
  'checkoutAvailable',false,'enforcementEnabled',false) from private.platform_access_policy where singleton and phase='initial_free';

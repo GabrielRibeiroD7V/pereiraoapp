@@ -1,4 +1,4 @@
-import {InitialFreeNotice} from './InitialFreeNotice';
+import {InitialFreeNotice,FreePhaseNotice,useInitialFreePhase} from './InitialFreeNotice';
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSubscriptions } from "./SubscriptionProvider";
@@ -174,6 +174,7 @@ export function AdminSubscriptionsPanel({
 }: {
   revision?: number;
 }) {
+  const freePhase=useInitialFreePhase();
   const repo = useAdmin(),
     [page, setPage] = useState(1),
     [query, setQuery] = useState(""),
@@ -186,7 +187,7 @@ export function AdminSubscriptionsPanel({
         return {
           data: await repo.query<AdminSubscriptions>(
             "subscriptions",
-            { page, q: query, status },
+            { page, q: query, status:status==='initial_free'?'awaiting_activation':status },
             signal,
           ),
         };
@@ -202,6 +203,7 @@ export function AdminSubscriptionsPanel({
   );
   return (
     <section aria-label="Situações de gratuidade">
+      {freePhase && <FreePhaseNotice/>}
       <form
         className="admin-filters"
         onSubmit={(e) => {
@@ -228,7 +230,7 @@ export function AdminSubscriptionsPanel({
             }}
           >
             <option value="">Todas</option>
-            {Object.entries(subscriptionLabels).map(([key, label]) => (
+            {Object.entries(subscriptionLabels).filter(([key])=>freePhase?key!=='awaiting_activation':key!=='initial_free').map(([key, label]) => (
               <option value={key} key={key}>
                 {label}
               </option>
@@ -288,7 +290,7 @@ export function AdminSubscriptionsPanel({
                   {state.data.data.items.map((item) => (
                     <tr key={item.businessId}>
                       <td>{item.businessName}</td>
-                      <td>{subscriptionLabels[item.state]}</td>
+                      <td>{subscriptionLabels[freePhase&&item.state==='awaiting_activation'?'initial_free':item.state]}</td>
                       <td>{subscriptionDate(item.trialStartedAt)}</td>
                       <td>{subscriptionDate(item.trialEndsAt)}</td>
                       <td>{item.sameOwnerActivations}</td>

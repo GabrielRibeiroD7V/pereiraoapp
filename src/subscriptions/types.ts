@@ -10,6 +10,7 @@ export type SubscriptionState =
 export interface BusinessSubscription {
   businessId: string;
   businessName: string;
+  accessPhase?: "initial_free";
   state: SubscriptionState;
   trialStartedAt: string | null;
   trialEndsAt: string | null;

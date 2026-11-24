@@ -45,6 +45,7 @@ export function createSubscriptionRepository(
             !validId(i.businessId) ||
             typeof i.businessName !== "string" ||
             !Object.hasOwn(subscriptionLabels, i.state) ||
+            (i.accessPhase !== undefined && (i.accessPhase !== 'initial_free' || !['exempt','awaiting_activation'].includes(i.state) || [i.trialStartedAt,i.trialEndsAt,i.contractedAt,i.billingPeriodStart,i.billingPeriodEnd].some(date=>date!==null))) ||
             !Number.isFinite(Date.parse(i.serverNow)) ||
             [
               i.trialStartedAt,
@@ -60,7 +61,7 @@ export function createSubscriptionRepository(
         )
       )
         throw { code: "INVALID_RESPONSE" };
-      return value;
+      return {...value,items:value.items.map(item=>item.accessPhase==='initial_free' && item.state==='awaiting_activation'?{...item,state:'initial_free' as const}:item)};
     },
   };
 }

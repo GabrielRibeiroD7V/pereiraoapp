@@ -1,3 +1,4 @@
+import {testFreeContainment} from './test-free-containment.mjs';
 import { testSpecialtyConcurrency } from './test-specialty-concurrency.mjs';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
@@ -55,8 +56,7 @@ try {
   await testSpecialtyConcurrency(executable('psql'), args);
   run(executable('psql'), [...args, '-f', resolve('supabase/migrations/20261124163000_initial_free_phase.sql')], true);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/initial_free_phase.sql')]);
-  run(executable('psql'), [...args, '-f', resolve('supabase/operations/initial_free_phase_containment.sql')], true);
-  run(executable('psql'), [...args, '-c', "select test.assert_true(to_regprocedure('public.platform_access_status()') is null and (select count(*)=1 from private.platform_access_policy),'free: contenção anterior à publicação preserva registro técnico');"]);
+  testFreeContainment(executable,args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);
