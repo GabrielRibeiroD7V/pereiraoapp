@@ -20,9 +20,11 @@ describe('Início', () => {
   it('mostra a logo oficial proporcional e uma única busca acessível', () => {
     open();
     const logo = screen.getByRole('img', { name: 'PEREIRÃO' });
-    expect(logo).toHaveAttribute('src', '/images/brand/pereirao-384.png');
-    expect(logo).toHaveAttribute('width', '384');
-    expect(logo).toHaveAttribute('height', '256');
+    expect(logo).toHaveAttribute('viewBox', '20 151 345 87');
+    expect(logo.querySelectorAll('image')).toHaveLength(2);
+    for (const layer of logo.querySelectorAll('image')) {
+      expect(layer).toHaveAttribute('href', '/images/brand/pereirao-384.png');
+    }
     expect(screen.getAllByRole('search')).toHaveLength(1);
     expect(screen.getByRole('searchbox', { name: 'Buscar serviços ou profissionais' })).toHaveAttribute('placeholder', 'Buscar serviços ou profissionais');
     expect(screen.queryByRole('button', { name: /notifica/i })).not.toBeInTheDocument();

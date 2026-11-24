@@ -243,7 +243,7 @@ describe("manifesto e build do PWA", () => {
       start_url: "/?source=pwa",
       scope: "/",
       display: "standalone",
-      theme_color: "#FFD000",
+      theme_color: "#061A3C",
       background_color: "#FFFFFF",
     });
     for (const icon of manifest.icons) {

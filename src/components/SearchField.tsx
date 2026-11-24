@@ -16,6 +16,7 @@ export function SearchField() {
 
   return (
     <form className="search-field" role="search" onSubmit={submit}>
+      <Search className="search-field__leading" size={22} aria-hidden="true" />
       <label className="visually-hidden" htmlFor="home-search">Buscar serviços ou profissionais</label>
       <input id="home-search" type="search" name="q" maxLength={200}
         placeholder="Buscar serviços ou profissionais" enterKeyHint="search" />
