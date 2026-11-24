@@ -19,8 +19,12 @@ export function searchTerm(value: string) {
 }
 export function whatsappLink(value: string | null, name: string) {
   if (!value || !/^[+\d\s().-]+$/.test(value)) return null;
-  const digits = value.replace(/\D/g, '');
+  let digits = value.replace(/\D/g, '');
   if (!/^[1-9][0-9]{9,14}$/.test(digits)) return null;
+  // Compatibilidade de leitura: DDD + número brasileiro salvo sem DDI.
+  // Não altera o registro nem duplica 55; + explícito preserva outro país.
+  const nationalBrazil = /^(?:1[1-9]|2[12478]|3[1-578]|4[1-9]|5[1345]|6[1-9]|7[134579]|8[1-9]|9[1-9])(?:9[0-9]{8}|[2-5][0-9]{7})$/;
+  if (!value.trim().startsWith('+') && nationalBrazil.test(digits)) digits = '55' + digits;
   const message = `Olá! Encontrei o perfil de ${name} no PEREIRÃO e gostaria de saber mais sobre seus serviços.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
