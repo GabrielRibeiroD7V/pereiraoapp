@@ -411,7 +411,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .post-composer__preview p, .post-composer__preview strong { overflow-wrap: anywhere; white-space: pre-wrap; }
 /* Conteúdo salvo: capa abre detalhe, não apenas a imagem. */
 .owner-post-cover { display:block; width:100%; padding:0; border:0; background:transparent; cursor:pointer; }
-.owner-posts { display:grid; gap:1rem; list-style:none; padding:0; }
+.owner-posts { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; list-style:none; padding:0; }
 .owner-posts__project { border:1px solid var(--color-border); border-radius:.875rem; }
 .owner-post-cover img { aspect-ratio:4/3; object-fit:cover; }
 .work-photo-detail p { white-space:pre-wrap; overflow-wrap:anywhere; }
