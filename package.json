@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:sql": "node scripts/test-sql.mjs",
     "test:migrations": "node scripts/check-migration-history.mjs",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "demo:local": "node scripts/social-demo.mjs"
   },
   "dependencies": {
     "@jsquash/webp": "1.5.0",
