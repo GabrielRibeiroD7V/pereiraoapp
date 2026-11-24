@@ -42,7 +42,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('aria-haspopup', 'dialog');
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
-    expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
+    expect(screen.queryByRole('link', { name: /Gratuidade e assinatura/ })).not.toBeInTheDocument();
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
 

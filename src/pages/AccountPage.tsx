@@ -1,7 +1,6 @@
 import {profileBusinessSelections} from '../posts/postReturn';
-import {InitialFreeNotice} from '../subscriptions/InitialFreeNotice';
 import { useEffect, useState } from 'react';
-import { BriefcaseBusiness, CreditCard, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { BriefcaseBusiness, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { InstallAppAccess } from '../pwa/PwaProvider';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -56,14 +55,13 @@ export function AccountPage() {
             {selected && <Link to="/conta/profissional/cadastro"><BriefcaseBusiness size={18} />Cadastrar outro negócio</Link>}
             {selected?.type === 'empresa' && <Link to={`/conta/profissional/${selected.id}/dados-empresariais`}><BriefcaseBusiness size={18} />Dados empresariais privados</Link>}
             <Link to="/conta/seguranca"><ShieldCheck size={18} />Segurança e acesso</Link>
-            <Link to="/conta/assinaturas"><CreditCard size={18} />Gratuidade e assinatura</Link>
             <InstallAppAccess menu />
             <AdminEntry />
             <button type="button" disabled={pending} onClick={() => void signOut()}><LogOut size={18} />{pending ? 'Saindo…' : 'Sair da conta'}</button>
           </nav>
         </details>
       </div></header>
-      <InitialFreeNotice /><p className="owner-account-name">Conta de {profile.displayName}</p>
+      <p className="owner-account-name">Conta de {profile.displayName}</p>
       {location.state?.saved && <p className="form-notice" role="status">Rascunho salvo. Confira sua bio, foto e informações abaixo.</p>}
       {profileError && <p role="status" className="field-help">Não foi possível atualizar seus dados agora.</p>}
       {(error || sessionError) && <p className="form-error" role="alert">{error || sessionError}</p>}

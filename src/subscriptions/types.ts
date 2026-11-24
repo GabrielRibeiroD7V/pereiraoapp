@@ -83,7 +83,7 @@ export function subscriptionError(error: unknown) {
   return ["SETUP_REQUIRED", "PGRST202", "42883", "42P01", "PGRST205"].includes(
     code,
   )
-    ? "A estrutura de gratuidade e assinatura está em preparação. Nenhuma cobrança foi ativada."
+    ? "Consulta indisponível neste momento."
     : code === "42501" || code === "AUTH_REQUIRED"
       ? "Entre com a conta responsável pelo negócio para consultar a situação."
       : "Não foi possível consultar a situação. Verifique sua conexão e tente novamente.";

@@ -3,7 +3,6 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi } from "vitest";
@@ -49,75 +48,24 @@ function open(
   );
 }
 describe("consulta informativa de assinatura", () => {
-  it("mostra a isenção do dono sem oferecer contratação", async () => {
-    open({ list: async () => ({ items: [{ ...item, state: "exempt" }], hasNext: false }) });
-    expect(await screen.findByText("Isento de assinatura")).toBeInTheDocument();
-    expect(screen.getByText(/não precisa contratar uma assinatura/)).toBeInTheDocument();
-    expect(screen.queryByText(/Período gratuito até|Contratar agora/)).not.toBeInTheDocument();
+  it.each(["exempt", "initial_free", "awaiting_activation", "trial_active", "trial_ended"] as const)("não anuncia condição sem contratação: %s", async state => {
+    open({ list: async () => ({ items: [{ ...item, state }], hasNext: false }) });
+    expect(await screen.findByText("Nenhuma contratação registrada.")).toBeInTheDocument();
+    expect(screen.queryByText(/90 dias|fase inicial gratuita|assinatura futura|contratar|cobrança/i)).not.toBeInTheDocument();
   });
-  it("mantém situações individuais sem oferta ou pagamento", async () => {
-    open({
-      list: vi.fn(async () => ({
-        items: [
-          item,
-          {
-            ...item,
-            businessId: "00000000-0000-4000-8000-000000008102",
-            businessName: "Negócio local B",
-              state: "trial_ended" as const,
-          },
-        ],
-        hasNext: false,
-      })),
-    });
-    expect(await screen.findByText("Gratuidade ativa")).toBeInTheDocument();
-    expect(screen.getByText("Gratuidade encerrada")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Nenhuma cobrança será iniciada/),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/19,99|Pagar|Contratar agora/),
-    ).not.toBeInTheDocument();
-    expect(
-      within(
-        screen.getByRole("navigation", { name: "Navegação principal" }),
-      ).getAllByRole("link"),
-    ).toHaveLength(4);
+  it("mostra apenas uma contratação efetivamente registrada", async () => {
+    open({ list: async () => ({ items: [{ ...item, state: "active", contractedAt: "2026-11-21T12:00:00Z", billingPeriodEnd: "2026-12-21T12:00:00Z" }], hasNext: false }) });
+    expect(await screen.findByText("Assinatura ativa")).toBeInTheDocument();
+    expect(screen.getByText(/Período de faturamento até/)).toBeInTheDocument();
+    expect(screen.queryByText(/90 dias|assinatura futura/i)).not.toBeInTheDocument();
   });
-  it("aguarda a primeira ativação para começar os 90 dias", async () => {
-    open({
-      list: async () => ({
-        items: [
-          {
-            ...item,
-            state: "awaiting_activation",
-            trialStartedAt: null,
-            trialEndsAt: null,
-          },
-        ],
-        hasNext: false,
-      }),
-    });
-    expect(
-      await screen.findByText(/Os 90 dias começam na primeira ativação/),
-    ).toBeInTheDocument();
-  });
-  it("apresenta migração pendente e permite nova tentativa", async () => {
-    const list = vi
-      .fn()
-      .mockRejectedValueOnce({ code: "PGRST202", message: "private-data" })
-      .mockResolvedValue({ items: [], hasNext: false });
+  it("erro de configuração não anuncia plano futuro e permite tentar novamente", async () => {
+    const list = vi.fn().mockRejectedValueOnce({ code: "PGRST202", message: "private-data" }).mockResolvedValue({ items: [], hasNext: false });
     open({ list });
-    expect(
-      await screen.findByText(
-        /estrutura de gratuidade e assinatura está em preparação/,
-      ),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Consulta indisponível neste momento.")).toBeInTheDocument();
     expect(screen.queryByText("private-data")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Tentar novamente" }));
-    expect(
-      await screen.findByText("Nenhum negócio disponível para esta conta."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Nenhuma contratação registrada.")).toBeInTheDocument();
   });
   it("exige sessão e preserva o destino", async () => {
     open(null, "/conta/assinaturas", true);

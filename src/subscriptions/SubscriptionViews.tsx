@@ -1,4 +1,4 @@
-import {InitialFreeNotice,FreePhaseNotice,useInitialFreePhase} from './InitialFreeNotice';
+import {FreePhaseNotice,useInitialFreePhase} from './InitialFreeNotice';
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSubscriptions } from "./SubscriptionProvider";
@@ -21,35 +21,6 @@ function StatusCopy({ item }: { item: BusinessSubscription }) {
   return (
     <div className="subscription-copy">
       <strong>{subscriptionLabels[item.state]}</strong>
-      {item.state === "initial_free" && <p>Perfil básico, serviços, publicações e conversas gratuitos. Os 90 dias não estão correndo; assinatura futura somente por escolha expressa.</p>}
-      {item.state === "exempt" && <p>Este negócio não precisa contratar uma assinatura.</p>}
-      {item.trialEndsAt &&
-        (item.state === "trial_active" || item.state === "trial_ended") && (
-          <p>
-            {item.state === "trial_ended"
-              ? "Gratuidade encerrada em "
-              : "Período gratuito até "}
-            {subscriptionDate(item.trialEndsAt)}
-          </p>
-        )}
-      {item.state === "awaiting_activation" && (
-        <p>
-          Os 90 dias começam na primeira ativação administrativa válida deste
-          negócio.
-        </p>
-      )}
-      {item.state === "trial_ended" && (
-        <p>
-          A contratação será disponibilizada em uma próxima etapa. Nenhuma
-          cobrança será iniciada automaticamente.
-        </p>
-      )}
-      {item.state === "pending_payment" && (
-        <p>
-          Situação informativa. O pagamento pelo aplicativo ainda não está
-          disponível.
-        </p>
-      )}
       {item.state === "active" && item.billingPeriodEnd && (
         <p>
           Período de faturamento até {subscriptionDate(item.billingPeriodEnd)}
@@ -69,7 +40,8 @@ export function BusinessSubscriptionLine({
       async (signal: AbortSignal) => {
         try {
           if (!repo) throw { code: "SETUP_REQUIRED" };
-          return { page: await repo.list(businessId, 1, signal) };
+          const result = await repo.list(businessId, 1, signal);
+          return { page: { ...result, items: result.items.filter(item => item.contractedAt !== null) } };
         } catch (e) {
           return { error: subscriptionError(e) };
         }
@@ -77,13 +49,14 @@ export function BusinessSubscriptionLine({
       [repo, businessId],
     );
   const state = usePublicQuery(businessId, load);
+  if (state.data?.page && state.data.page.items.length === 0) return null;
   return (
     <section
       className="business-subscription-line"
-      aria-label="Gratuidade deste negócio"
+      aria-label="Assinatura deste negócio"
     >
       {state.loading ? (
-        <p role="status">Consultando gratuidade…</p>
+        <p role="status">Consultando assinatura…</p>
       ) : state.data?.error ? (
         <p role="status" className="field-help">
           {state.data.error}
@@ -114,7 +87,8 @@ export function SubscriptionsPage() {
     async (signal: AbortSignal) => {
       try {
         if (!repo) throw { code: "SETUP_REQUIRED" };
-        return { page: await repo.list(undefined, page, signal) };
+        const result = await repo.list(undefined, page, signal);
+        return { page: { ...result, items: result.items.filter(item => item.contractedAt !== null) } };
       } catch (e) {
         return { error: subscriptionError(e) };
       }
@@ -127,9 +101,7 @@ export function SubscriptionsPage() {
       <Link className="back-link" to="/conta">
         Minha conta
       </Link>
-      <InitialFreeNotice /><PageHeader title="Gratuidade e assinatura">
-        <p>Uma situação por negócio, independente da sua conta pessoal.</p>
-      </PageHeader>
+      <PageHeader title="Assinaturas" />
       {state.loading ? (
         <p role="status">Consultando negócios…</p>
       ) : state.data?.error || state.error ? (
@@ -151,7 +123,7 @@ export function SubscriptionsPage() {
               ))}
             </ul>
             {state.data.page.items.length === 0 && (
-              <p>Nenhum negócio disponível para esta conta.</p>
+              <p>Nenhuma contratação registrada.</p>
             )}
             <Pagination
               page={page}
@@ -162,10 +134,7 @@ export function SubscriptionsPage() {
           </>
         )
       )}
-      <p className="field-help subscription-phase">
-        Esta etapa não ativa cobrança nem bloqueio por vencimento. O estado
-        administrativo do perfil é independente da gratuidade.
-      </p>
+
     </div>
   );
 }
