@@ -77,3 +77,11 @@ A documentação oficial exige operação correspondente para gerar eventos no S
 ## Contenção operacional futura
 
 Desabilitar primeiro a entrega na configuração do webhook Asaas e depois a flag de recebimento na Vercel, com redeploy revisado. Se não for possível parar o remetente imediatamente, resposta 403 não confirma entrega e pode gerar retries/pausa: não responder 200 sem persistir. Preservar inbox, tentativas e auditoria para reprocessamento após correção e nova decisão. Conferir erros sanitizados e atraso/volume da fila; monitoramento e responsável operacional ainda precisam ser definidos. Consultar [logs oficiais](https://docs.asaas.com/docs/logs-de-webhooks) sem compartilhar payloads. Não reativar fila antes de corrigir a causa.
+
+## Diagnóstico GET isolado com receptor desligado
+
+`scripts/preflight-asaas-production.mjs`, chamado pelo script de diagnóstico já existente no build, oferece uma consulta pontual de `GET https://api.asaas.com/v3/myAccount/status/` sem executar `productionConfig` nem alterar sua proteção. Exige VERCEL_ENV=production e opt-in `ASAAS_PRODUCTION_PREFLIGHT_READ_ONLY=true`; recusa flag do receptor ativa, qualquer capacidade financeira ativa e chave incompatível/reutilizada do Sandbox. Não usa cliente, pagamento ou assinatura como recurso de teste.
+
+A saída contém apenas estado sanitizado, HTTP e quatro status cadastrais permitidos. Sem payload bruto, identificadores ou valores secretos. Redirects são recusados, timeout de 8s e JSON limitado a 64 KiB. Falha bloqueia esse build e preserva o último deploy saudável; não prova que a chave esteja inválida se houver falha de rede. Um GET bem-sucedido comprova autenticação somente nesse endpoint, não permissões financeiras gerais ou entrega de webhook. Desligar o opt-in após obter a evidência evita consultas em builds futuros. O opt-in não ativa receptor, recuperação ou operação financeira.
+
+O provisionamento autorizado dos dois segredos independentes e do digest HMAC é configuração, não uma migração: não reaplicar a fundação nem alterar RLS. A chave Production é inserida diretamente pelo titular no campo Sensitive da Vercel, somente Production. Webhook e cinco flags financeiras permanecem ausentes/false. Validar metadados e presença do digest sem revelar valores; isso ainda não é teste operacional de HMAC/receptor.
