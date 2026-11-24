@@ -28,7 +28,6 @@ describe('experiência pessoal e profissional', () => {
   it('abre o próprio perfil na aba Conta, com Direct e opções privadas', async () => {
     setup();
     expect(await screen.findByText('Conta de Nome cadastrado')).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Aplicativo PEREIRÃO' })).toBeVisible();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
@@ -38,10 +37,22 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.click(document.querySelector('.owner-settings summary')!);
     expect(screen.getByRole('link', { name: /Cadastrar outro negócio/ })).toHaveAttribute('href', '/conta/profissional/cadastro');
     expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
-    expect(screen.getByRole('link', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('href', '#instalar-aplicativo');
+    expect(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('aria-haspopup', 'dialog');
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+  });
+
+  it('abre a orientação diretamente em Opções da conta, sem âncora nem segundo toque', async () => {
+    setup();
+    await screen.findByText('Conta de Nome cadastrado');
+    fireEvent.click(document.querySelector('.owner-settings summary')!);
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' }));
+    expect(screen.getByRole('dialog', { name: 'Instalar aplicativo' })).toBeVisible();
+    expect(window.location.hash).toBe('');
+    fireEvent.click(screen.getByRole('button', { name: 'Entendi' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Conta de Nome cadastrado')).toBeVisible();
   });
 
   it('edita o nome pessoal e o recupera ao voltar à conta', async () => {
