@@ -81,6 +81,12 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
           {embedded ? <h2>{info.name}</h2> : <h1>{info.name}</h1>}<p>{info.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'} · {city ? `${city.name}/${city.state_code}` : 'Cidade não informada'}</p>
 
         </div></div>
+      {!readOnly && <div className="social-profile-actions owner-profile-actions">
+        <Link className="button button--primary" to={`/conta/profissional/${businessId}/editar`}>Editar perfil</Link>
+        <button type="button" className="button button--secondary" aria-haspopup="dialog" onClick={()=>setAdding(true)}>Adicionar</button>
+        <Link className="button button--secondary" to={`/conta/profissional/${businessId}/previa`}>Ver como cliente</Link>
+        <ContactLinks compact name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} />
+      </div>}
       <PresentationIdentity data={presentation.data} company={info.type === 'empresa'} />
       {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <BusinessStatus status={business.business.status} />
@@ -89,12 +95,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       <p className="public-about social-profile-bio">{info.description || 'Adicione uma descrição para apresentar seu trabalho.'}</p>
       {readOnly && <div className="social-profile-actions"><button type="button" className="button button--secondary" disabled>Mensagem pelo PEREIRÃO</button><ContactLinks compact name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} /></div>}
       {readOnly && <p className="field-help">Prévia: mensagens ficam disponíveis aos visitantes após publicação. Nenhuma conversa é iniciada aqui.</p>}
-      {!readOnly && <div className="social-profile-actions owner-profile-actions">
-        <Link className="button button--primary" to={`/conta/profissional/${businessId}/editar`}>Editar perfil</Link>
-        <button type="button" className="button button--secondary" aria-haspopup="dialog" onClick={()=>setAdding(true)}>Adicionar</button>
-        <Link className="button button--secondary" to={`/conta/profissional/${businessId}/previa`}>Ver como cliente</Link>
-        <ContactLinks compact name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} />
-      </div>}</header>
+</header>
       <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até a aprovação e publicação.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
