@@ -38,6 +38,8 @@ import type { SubscriptionRepository } from "../subscriptions/types";
 import { MessagesProvider } from "../messages/MessagesProvider";
 import type { MessageRepository } from "../messages/repository";
 
+const ManagedPostPage = lazy(() => import("../pages/ManagedPostPage").then(module => ({default: module.ManagedPostPage})));
+
 const AuthPage = lazy(() => import("../pages/AuthPage").then(module => ({ default: module.AuthPage })));
 
 const AuthCallbackPage = lazy(() => import("../pages/AuthCallbackPage").then(module => ({ default: module.AuthCallbackPage })));
@@ -199,6 +201,8 @@ function AppRoutes() {
           />
           <Route path="/conta/profissional/:businessId/dados-empresariais" element={<BusinessPrivateDataPage key={pathname} />} />
           <Route path="/conta/profissional/:businessId/apresentacao" element={<PresentationPage key={pathname} />} />
+          <Route path="/conta/profissional/:businessId/publicacoes/:postId" element={<ManagedPostPage key={pathname}/>}/>
+          <Route path="/conta/profissional/:businessId/previa/publicacoes/:postId" element={<ManagedPostPage key={pathname} readOnly/>}/>
           <Route path="/conta/profissional/:businessId/perfil" element={<ProfilePreviewPage key={pathname} />} />
           <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} readOnly />} />
           <Route

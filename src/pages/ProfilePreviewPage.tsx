@@ -1,3 +1,5 @@
+import {PostLink} from '../posts/PostLink';
+import {profileViews} from '../posts/postReturn';
 import {PostManagementMenu} from '../posts/PostManagementMenu';
 import {PostContent, postVisibility} from '../posts/PostContent';
 import {PostEditor} from '../posts/PostEditor';
@@ -35,15 +37,17 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const { businessId: routeBusinessId = '' } = useParams();
   const businessId = businessIdOverride ?? routeBusinessId;
   const location = useLocation();
-  const resume=useReturnRevision(), lastBusiness=useRef('');
+  const viewKey=`${location.key}:${businessId}:${readOnly}`;
+  const previousView=profileViews.get(viewKey);
+  const resume=useReturnRevision(), lastBusiness=useRef(businessId);
   const [postRefresh,setPostRefresh]=useState(0);
-  const [contentSection,setContentSection]=useState('trabalhos');
+  const [contentSection,setContentSection]=useState(previousView?.tab ?? 'trabalhos');
   const [adding, setAdding] = useState(false);
   const [editingPost, setEditingPost] = useState<ManagedPost | null>(null);
-  const [postPage, setPostPage] = useState(1);
+  const [postPage, setPostPage] = useState(previousView?.page ?? 1);
   const [postsHaveNext, setPostsHaveNext] = useState(false);
   const [postsError, setPostsError] = useState(false);
-  const [project, setProject] = useState<ManagedPost | null>(null);
+  useEffect(()=>{profileViews.set(viewKey,{tab:contentSection,page:postPage});if(profileViews.size>40)profileViews.delete(profileViews.keys().next().value!);},[viewKey,contentSection,postPage]);
   const professional = useProfessionalRepository();
   const presentation = usePresentation(businessId);
   const work = useWorkRepository();
@@ -63,7 +67,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   useEffect(() => {
     let live = true;
     setLoading(true); setError(''); setContentError(false); setPostsError(false);
-    if(lastBusiness.current!==businessId){lastBusiness.current=businessId;setBusiness(null);setCatalog(null);setPosts([]);setPhotos([]);setServices([]);setEnlarged(null);setProject(null);setEditingPost(null);setPostPage(1);}
+    if(lastBusiness.current!==businessId){lastBusiness.current=businessId;setBusiness(null);setCatalog(null);setPosts([]);setPhotos([]);setServices([]);setEnlarged(null);setEditingPost(null);setPostPage(1);}
     if (!professional) { setLoading(false); return; }
     void Promise.all([professional.getEditable(businessId), professional.getCatalog()]).then(async ([result, options]) => {
       if (!live) return;
@@ -77,7 +81,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       if (postsRepository) {
         try {
           const page = await postsRepository.load(businessId, postPage);
-          if (live) {setPosts(page.posts.items);setPostsHaveNext(page.posts.hasNext);setProject(current => current ? page.posts.items.find(post=>post.id===current.id) ?? current : null);}
+          if (live) {setPosts(page.posts.items);setPostsHaveNext(page.posts.hasNext);}
         } catch { if(live) setPostsError(true); }
       }
     }).catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
@@ -91,11 +95,12 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const city = catalog?.cities.find(item => item.id === info?.cityId);
   const profilePath = `/conta/profissional/${businessId}/${readOnly ? 'previa' : 'perfil'}`;
   const postActions = () => <>
-    <Link className="post-action" to={profilePath} onClick={()=>setProject(null)}>Ver perfil</Link>
-    <Link className="post-action" to={`${profilePath}#servicos`} onClick={()=>setProject(null)}>Conferir serviços</Link>
+    <Link className="post-action" to={profilePath}>Ver perfil</Link>
+    <Link className="post-action" to={`${profilePath}#servicos`}>Conferir serviços</Link>
   </>;
-  const renderPost = (post: ManagedPost) => <PostContent avatar={<ManagedBusinessAvatar path={business?effectiveAvatarPath(business.business):null}/>} management={!readOnly && <PostManagementMenu><button type="button" onClick={()=>{setProject(null);setEditingPost(post);}}>Editar publicação</button><Link to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} title={post.title} description={post.description} author={info?.name ?? ''} visibility={postVisibility(post.status)} publishedAt={post.status==='published'?post.published_at:null}
-    images={post.images.filter(image=>image.mediaState!=='pending').map(image=>({id:image.id,content:<ManagedPhoto businessId={businessId} photo={image}/>}))} actions={postActions()} />;
+  const postPath=(post:ManagedPost)=>`/conta/profissional/${businessId}/${readOnly?'previa/':''}publicacoes/${post.id}`;
+  const renderPost = (post: ManagedPost) => <PostContent createdAt={post.created_at} titleNode={<PostLink to={postPath(post)}>{post.title}</PostLink>} avatar={<ManagedBusinessAvatar path={business?effectiveAvatarPath(business.business):null}/>} management={!readOnly && <PostManagementMenu><button type="button" onClick={()=>{setEditingPost(post);}}>Editar publicação</button><Link to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} title={post.title} description={post.description} author={info?.name ?? ''} visibility={postVisibility(post.status)} publishedAt={post.status==='published'?post.published_at:null}
+    images={post.images.filter(image=>image.mediaState!=='pending').map(image=>({id:image.id,content:<PostLink to={postPath(post)} aria-label={`Abrir publicação ${post.title} — foto`}><ManagedPhoto businessId={businessId} photo={image}/></PostLink>}))} actions={postActions()} />;
   const postPaging = <>{postsError && <p role="alert">Não foi possível carregar as publicações. <button type="button" className="text-link" onClick={()=>setPostRefresh(n=>n+1)}>Tentar novamente</button></p>}
     {(postPage>1||postsHaveNext)&&<div className="work-actions"><button type="button" className="button button--secondary" disabled={loading||postPage===1} onClick={()=>setPostPage(n=>n-1)}>Publicações anteriores</button><span>Página {postPage}</span><button type="button" className="button button--secondary" disabled={loading||!postsHaveNext} onClick={()=>setPostPage(n=>n+1)}>Mais publicações</button></div>}</>;
   return <div className="public-profile profile-preview">
@@ -135,18 +140,17 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
         {!readOnly&&<Link className="text-link" to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar todas as publicações</Link>}
         <h3>Publicações</h3>
         {posts.length ? <ul className="profile-post-grid">{posts.map(post => <li key={post.id}>
-          <button type="button" className="profile-post-tile" aria-label={`Abrir publicação ${post.title}`} onClick={()=>setProject(post)}>
+          <PostLink className="profile-post-tile" aria-label={`Abrir publicação ${post.title}`} to={postPath(post)}>
             {post.images.find(image=>image.mediaState!=='pending') ? <ManagedPhoto businessId={businessId} photo={post.images.find(image=>image.mediaState!=='pending')!}/> : <span className="profile-post-tile__empty">Fotos ainda não disponíveis</span>}
             <span className="profile-post-tile__kind">Publicação{post.images.filter(image=>image.mediaState!=='pending').length>1 ? ` · ${post.images.filter(image=>image.mediaState!=='pending').length} fotos` : ''}</span>
             <strong>{post.title}</strong><small>{postVisibility(post.status)}</small>
-          </button>
+          </PostLink>
         </li>)}</ul> : !postsError && <p className="field-help">Nenhuma publicação salva. Fotos de trabalho continuam no portfólio abaixo.</p>}
         {postPaging}
         <h3>Fotos de trabalhos · Portfólio</h3>
         {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={url=>setEnlarged({id:photo.id,url})} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, { id: 'feed', label: 'Meu feed', content: <section className="private-post-feed" aria-label="Meu feed privado"><h2>Meu feed privado</h2><p className="field-help">Você vê aqui seus dados salvos. Rascunhos não aparecem na Home pública.</p>{contentSection==='feed'&&posts.map(post=><div key={post.id}>{renderPost(post)}</div>)}{!posts.length&&!postsError&&<p>Nenhuma publicação salva ainda.</p>}{postPaging}</section> }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />
       {!readOnly && adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><button type="button" onClick={creator.choose}>Adicionar publicação</button>{creator.input}</nav></Modal>}
       {!readOnly && creator.editor}
-      {project && <Modal title="Publicação" onClose={()=>setProject(null)}>{renderPost(project)}</Modal>}
       {!readOnly && editingPost && postsRepository && <PostEditor key={editingPost.id} businessId={businessId} businessName={info.name} initial={editingPost} onClose={()=>setEditingPost(null)} onSave={async(id,input)=>{await postsRepository.save(businessId,id,input);setPostPage(1);setPostRefresh(n=>n+1);}}/>}
       {enlarged && selectedPhoto && <WorkPhotoDetail image={<img className="preview-enlarged" src={enlarged.url} alt={selectedPhoto.caption || 'Foto de trabalho'} referrerPolicy="no-referrer" />} onCreatePost={!readOnly&&postsRepository?()=>{setEnlarged(null);creator.startWithPhoto({id:selectedPhoto.id,path:selectedPhoto.storage_path,caption:selectedPhoto.caption,kind:'portfolio'});}:undefined} caption={selectedPhoto.caption} serviceAssociated={!!selectedPhoto.service_id} service={services.find(s=>s.id===selectedPhoto.service_id)?.name} onClose={()=>setEnlarged(null)} onEdit={!readOnly?()=>{setEditingPhoto(selectedPhoto);setEnlarged(null);}:undefined} />}
       {!readOnly && editingPhoto && work && <PhotoEditor initial={editingPhoto} services={services} onClose={()=>setEditingPhoto(null)} onSave={async(id,_file,caption,serviceId)=>{await work.savePhotoDetails(businessId,id,caption,serviceId);setPostRefresh(n=>n+1);}} />}
