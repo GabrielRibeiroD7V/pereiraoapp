@@ -1,3 +1,4 @@
+import {WorkPhotoDetail} from '../work/WorkPhotoDetail';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { usePresentation } from '../presentation/PresentationProvider';
 import { PresentationSections } from '../presentation/PresentationSections';
@@ -12,7 +13,6 @@ import { ContactLinks } from '../marketplace/ContactLinks';
 import { QueryStatus } from '../marketplace/QueryStatus';
 import { Pagination } from '../marketplace/Pagination';
 import { SectionTabs } from '../components/SectionTabs';
-import { Modal } from '../components/Modal';
 import { PageHeader } from '../components/PageHeader';
 import { formatPrice } from '../work/validation';
 import type { PublicPage, PublicPhoto, PublicProvider, PublicService } from '../marketplace/types';
@@ -54,7 +54,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },
     ]} />
-    {photo && <Modal title="Fotografia do trabalho" onClose={() => setPhoto(null)}><div className="public-enlarged"><PublicImage businessId={provider.id} path={photo.storagePath} alt={photo.caption ?? 'Trabalho do prestador'} /></div>{photo.caption && <p>{photo.caption}</p>}</Modal>}
+    {photo && <WorkPhotoDetail image={<div className="public-enlarged"><PublicImage businessId={provider.id} path={photo.storagePath} alt={photo.caption ?? 'Trabalho do prestador'} /></div>} caption={photo.caption} service={photo.serviceName} serviceAssociated={photo.serviceAssociated} onClose={()=>setPhoto(null)} />}
   </>;
 }
 export function PublicProviderPage() {

@@ -8,7 +8,7 @@ export interface PublicProvider {
   whatsapp: string | null; instagram: string | null;
 }
 export type PublicService = Pick<ServiceRow, 'id' | 'name' | 'description' | 'pricing_type' | 'price_amount_cents'>;
-export interface PublicPhoto { id: string; caption: string | null; storagePath: string }
+export interface PublicPhoto { id: string; caption: string | null; storagePath: string; serviceName?:string|null; serviceAssociated?:boolean }
 export interface PublicPage<T> { items: T[]; page: number; hasNext: boolean }
 export interface PublicFilters { query: string; categoryId: string; cityId: string; type: '' | ProviderType }
 export interface PublicMarketplace {

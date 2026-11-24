@@ -97,11 +97,11 @@ export function createPublicMarketplace(client: SupabaseClient<Database>): Publi
     async getPhotos(id, value, signal) {
       if (!validId(id)) return empty(value);
       const current = pageNumber(value);
-      const { data, error } = await client.from('portfolio_items').select('id,caption,storage_path,business:businesses!inner(status)')
+      const { data, error } = await client.from('portfolio_items').select('id,caption,storage_path,service_id,service:services!portfolio_items_service_id_business_id_fkey(name),business:businesses!inner(status)')
         .eq('business_id', id).eq('media_state', 'ready').eq('business.status', 'published').order('sort_order').order('id')
         .range((current - 1) * DETAIL_SIZE, current * DETAIL_SIZE).abortSignal(signal ?? new AbortController().signal)
-        .overrideTypes<{ id: string; caption: string | null; storage_path: string }[], { merge: false }>();
-      if (error) throw error; return page((data ?? []).map((row) => ({ id: row.id, caption: row.caption, storagePath: row.storage_path })), current, DETAIL_SIZE);
+        .overrideTypes<{ id: string; caption: string | null; storage_path: string;service_id:string|null;service:{name:string}|null }[], { merge: false }>();
+      if (error) throw error; return page((data ?? []).map((row) => ({ id: row.id, caption: row.caption, storagePath: row.storage_path,serviceName:row.service?.name??null,serviceAssociated:!!row.service_id })), current, DETAIL_SIZE);
     },
     async getImageUrl(id, path) {
       const bucket = imageBucket(id, path);
