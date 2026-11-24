@@ -156,6 +156,8 @@ describe("worker: cache explícito e privado por versão", () => {
     "/api/admin",
     "/api/sandbox-billing",
     "/api/asaas-webhook",
+    "/api/asaas-production-webhook",
+    "/api/production-billing-recovery",
     "/api/other",
     "https://yazdjiwaksamizrbqewq.supabase.co/rest/v1/profiles",
     "https://yazdjiwaksamizrbqewq.supabase.co/auth/v1/user",

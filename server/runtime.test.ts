@@ -38,3 +38,9 @@ it("inicializa a API em Node ESM real sem depender do bundler do frontend", () =
   expect(result.status, result.stderr).toBe(0);
   expect(JSON.parse(result.stdout)).toEqual({ code: "METHOD_NOT_ALLOWED" });
 });
+
+it.each(['asaas-production-webhook','production-billing-recovery'])('Production %s inicializa sem segredo e falha fechado',name=>{
+ const code=`const {default:api}=await import('./api/${name}.ts');const response=await api.fetch(new Request('https://pereirao.vercel.app/api/${name}',{method:'POST'}));if(response.status!==403)throw Error('Unexpected status');console.log(await response.text());`;
+ const result=spawnSync(process.execPath,['--experimental-strip-types','--input-type=module','-e',code],{cwd:process.cwd(),env:{},encoding:'utf8'});
+ expect(result.status,result.stderr).toBe(0);expect(JSON.parse(result.stdout)).toEqual({code:'DISABLED'});
+});
