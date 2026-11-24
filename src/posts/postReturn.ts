@@ -1,6 +1,7 @@
 import {useEffect} from 'react';
 import {useLocation,useNavigationType} from 'react-router-dom';
 const positions=new Map<string,number>();
+export const profileBusinessSelections=new Map<string,string>();
 export const profileViews=new Map<string,{tab:string;page:number}>();
 export function rememberPostScroll(key:string,y:number){positions.set(key,y);if(positions.size>40)positions.delete(positions.keys().next().value!);}
 export function usePostScrollReturn(){

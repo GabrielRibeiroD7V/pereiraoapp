@@ -1,3 +1,4 @@
+import {profileBusinessSelections} from '../posts/postReturn';
 import { useEffect, useState } from 'react';
 import { BriefcaseBusiness, CreditCard, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -21,7 +22,7 @@ export function AccountPage() {
   const professional = useProfessionalRepository();
   const location = useLocation();
   const [businesses, setBusinesses] = useState<readonly BusinessRow[]>([]);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedId, setSelectedId] = useState(()=>profileBusinessSelections.get(location.key)??'');
   const [businessesLoading, setBusinessesLoading] = useState(true);
   const [businessesError, setBusinessesError] = useState('');
   const [pending, setPending] = useState(false);
@@ -36,6 +37,7 @@ export function AccountPage() {
     return () => { live = false; };
   }, [session?.user.id, professional]);
   const selected = businesses.find(item => item.id === (selectedId || location.state?.businessId)) ?? businesses[0];
+  useEffect(()=>{if(selected){profileBusinessSelections.set(location.key,selected.id);if(profileBusinessSelections.size>40)profileBusinessSelections.delete(profileBusinessSelections.keys().next().value!);}},[location.key,selected?.id]);
   async function signOut() {
     if (!gateway || pending) return;
     setPending(true); setError(null);
