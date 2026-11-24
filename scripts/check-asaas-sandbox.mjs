@@ -40,3 +40,11 @@ if (process.env.VERCEL_ENV === "preview") {
     );
   }
 }
+
+// Production é um diagnóstico GET separado, sem reutilizar o provider de webhook.
+if (process.env.VERCEL_ENV === 'production' && process.env.ASAAS_PRODUCTION_PREFLIGHT_READ_ONLY === 'true') {
+  const { productionReadOnlyPreflight } = await import('./preflight-asaas-production.mjs');
+  const result = await productionReadOnlyPreflight(process.env);
+  console.log('PEREIRAO_ASAAS_PRODUCTION_READONLY ' + JSON.stringify(result));
+  if (result.state !== 'connected') process.exitCode = 1;
+}
