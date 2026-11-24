@@ -77,3 +77,5 @@
 .professional-declaration { overflow-wrap: anywhere; margin-block: .75rem; }
 .professional-declaration small { display: block; margin-top: .25rem; }
 .professional-linkedin { display: inline-flex; align-items: center; min-height: 2.75rem; overflow-wrap: anywhere; }
+.profile-framing__adjustments { margin-block: .5rem; }
+.profile-framing__adjustments > summary { min-height: 2.75rem; padding-block: .625rem; cursor: pointer; color: var(--color-secondary); font-size: .875rem; }
