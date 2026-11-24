@@ -1,3 +1,4 @@
+import { usePostCreation } from '../posts/usePostCreation';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { BusinessStatus } from '../components/BusinessStatus';
 import { Ellipsis } from 'lucide-react';
@@ -27,6 +28,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const { businessId: routeBusinessId = '' } = useParams();
   const businessId = businessIdOverride ?? routeBusinessId;
   const location = useLocation();
+  const [postRefresh,setPostRefresh]=useState(0);
   const [adding, setAdding] = useState(false);
   const [project, setProject] = useState<ManagedPost | null>(null);
   const professional = useProfessionalRepository();
@@ -42,6 +44,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [contentError, setContentError] = useState(false);
+  const creator=usePostCreation(businessId,()=>setAdding(false),()=>setPostRefresh(n=>n+1),business?.input.name);
   useEffect(() => {
     let live = true;
     setLoading(true); setError(''); setBusiness(null); setCatalog(null); setContentError(false); setPosts([]);
@@ -64,7 +67,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
     }).catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [professional, work, postsRepository, businessId, readOnly]);
+  }, [professional, work, postsRepository, businessId, readOnly,postRefresh]);
   const info = business?.input;
   const category = catalog?.categories.find(item => item.id === info?.categoryId);
   const city = catalog?.cities.find(item => item.id === info?.cityId);
@@ -109,7 +112,8 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
           {!readOnly && <Link to={`/conta/profissional/${businessId}/editar?secao=conteudo&conteudo=publicacoes`} aria-label={`Gerenciar projeto ${post.title}`}>Editar projeto</Link>}
           </div></li>)}</ul>}
         {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={setEnlarged} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />
-      {adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/publicacoes?acao=novo`}>Adicionar publicação</Link></nav></Modal>}
+      {adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><button type="button" onClick={creator.choose}>Adicionar publicação</button>{creator.input}</nav></Modal>}
+      {creator.editor}
       {project && <Modal title={project.title} onClose={()=>setProject(null)}>{project.description && <p>{project.description}</p>}{project.images.map(image=><ManagedPhoto key={image.id} businessId={businessId} photo={image} />)}</Modal>}
       {enlarged && <Modal title="Fotografia do trabalho" onClose={() => setEnlarged(null)}><img className="preview-enlarged" src={enlarged} alt="Fotografia do trabalho" referrerPolicy="no-referrer" /></Modal>}
     </>}

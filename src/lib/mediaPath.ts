@@ -18,8 +18,9 @@ export function profileImagePath(id: string, path: string) {
   return validId(id) && path.startsWith(prefix) && path.endsWith('.webp')
     && validId(path.slice(prefix.length, -5));
 }
-export function imageBucket(id: string, path: string): 'business-profile' | 'business-portfolio' | null {
-  return profileImagePath(id, path) ? 'business-profile' : imagePath(id, path) ? 'business-portfolio' : null;
+export function postImagePath(id:string,path:string) {const prefix=`${id}/posts/`;return validId(id)&&path.startsWith(prefix)&&path.endsWith('.webp')&&validId(path.slice(prefix.length,-5));}
+export function imageBucket(id: string, path: string): 'business-profile' | 'business-portfolio' | 'business-posts' | null {
+  return postImagePath(id,path) ? 'business-posts' : profileImagePath(id, path) ? 'business-profile' : imagePath(id, path) ? 'business-portfolio' : null;
 }
 
 // Compatibilidade com registros anteriores à migração de retratos.

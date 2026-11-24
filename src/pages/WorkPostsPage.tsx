@@ -1,3 +1,4 @@
+import { usePostCreation } from '../posts/usePostCreation';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHeader } from "../components/PageHeader";
@@ -52,6 +53,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
     load,
   );
   useEffect(()=>{if(!embedded && query.get('acao')==='novo' && state.data){setEditor('new');setQuery(current=>{current.delete('acao');return current;},{replace:true});}},[embedded,query,state.data,setQuery]);
+  const creator=usePostCreation(businessId,()=>{},()=>{state.retry();onChanged?.();},state.data?.business.name);
   async function act() {
     if (!confirm || !managed || busy.current) return;
     busy.current = true;
@@ -98,14 +100,14 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
           <button
             className="button button--primary"
             disabled={pending || state.loading}
-            onClick={() => setEditor("new")}
+            onClick={creator.choose}
           >
             Nova publicação
           </button>
+          {creator.input}{creator.editor}
           {state.data.posts.items.length === 0 && (
             <p className="post-empty">
-              Nenhum trabalho publicado ou em rascunho. Escolha fotos do seu
-              portfólio para começar.
+              Nenhum trabalho publicado ou em rascunho. Escolha fotos da Fototeca ou Arquivos para começar.
             </p>
           )}
           <ul className="managed-post-list">
@@ -169,6 +171,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
             <PostEditor
               key={editor === "new" ? "new" : editor.id}
               businessId={businessId}
+              businessName={state.data.business.name}
               initial={editor === "new" ? undefined : editor}
               onClose={() => setEditor(null)}
               onSave={async (id, input) => {

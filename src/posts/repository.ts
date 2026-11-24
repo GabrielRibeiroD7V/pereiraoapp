@@ -1,3 +1,5 @@
+import { uploadDirectPostPhoto } from './directMedia';
+import { postImagePath } from '../lib/mediaPath';
 import { effectiveAvatarPath } from '../lib/mediaPath';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, WorkPostRow } from "../lib/database.types";
@@ -12,6 +14,10 @@ import { imagePath, pageNumber, validId } from "../marketplace/validation";
 import { missingPosts, validatePost, validCursor } from "./validation";
 const POST_FIELDS =
   "id,business_id,title,description,status,created_at,updated_at,published_at";
+const DIRECT_IMAGES = "uploaded_images:work_post_photos!work_post_photos_post_fkey(id,storage_path,media_state,selected,staged,sort_order)";
+type DirectImage={id:string;storage_path:string;media_state:"pending"|"ready";selected:boolean;staged:boolean;sort_order:number|null};
+const missingDirect=(error:{code:string;message:string}|null)=>!!error&&["PGRST200","PGRST204","PGRST205","42703"].includes(error.code)&&/work_post_photos|uploaded_images/.test(error.message);
+function combinedImages(legacy:RawImages, direct:DirectImage[] = [], drafts=false):PostPhoto[]{return [...photos(legacy).map((p,i)=>({...p,sort:legacy.find(v=>v.photo?.id===p.id)?.sort_order??i})),...direct.filter(p=>p.selected||(drafts&&p.staged)).map(p=>({id:p.id,path:p.storage_path,caption:null,kind:"post" as const,mediaState:p.media_state,sort:p.sort_order??6}))].sort((a,b)=>a.sort-b.sort).map(({sort,...p})=>p);}
 const IMAGES =
   "images:work_post_images!work_post_images_post_fkey(sort_order,photo:portfolio_items!work_post_images_portfolio_fkey(id,caption,storage_path))";
 type RawImages = {
@@ -85,6 +91,8 @@ export function createManagedPosts(
       fail("INVALID_RESPONSE");
   }
   return {
+    async directPhotosAvailable(){const {error}=await client.from('work_posts').select(`id,${DIRECT_IMAGES}`).limit(0);if(error&&missingDirect(error))return false;if(error)throw error;return true;},
+    uploadPostPhoto: (bid,postId,id,file,input)=>uploadDirectPostPhoto(client,bid,postId,id,file,input),
     async load(id, value, signal) {
       await manager(id);
       const current = pageNumber(value);
@@ -110,9 +118,13 @@ export function createManagedPosts(
       ]);
       if (business.error) throw business.error;
       if (result.error) throw result.error;
+      let directRows:Record<string,DirectImage[]>={};
+      const withDirect=await client.from('work_posts').select(`id,${DIRECT_IMAGES}`).eq('business_id',id).in('id',(result.data??[]).map(p=>p.id)).overrideTypes<{id:string;uploaded_images:DirectImage[]}[],{merge:false}>();
+      if(withDirect.error&&!missingDirect(withDirect.error))throw withDirect.error;
+      if(!withDirect.error)directRows=Object.fromEntries((withDirect.data??[]).map(p=>[p.id,p.uploaded_images]));
       const items: ManagedPost[] = (result.data ?? [])
         .slice(0, 10)
-        .map((row) => ({ ...row, images: photos(row.images) }));
+        .map((row) => ({ ...row, images: combinedImages(row.images,directRows[row.id],row.status==='draft') }));
       return {
         business: business.data,
         posts: {
@@ -145,6 +157,9 @@ export function createManagedPosts(
     },
     async save(bid, id, input) {
       if (validatePost(input)) fail("22023");
+      if(input.photos.some(p=>p.kind==='post')){
+        const {error}=await client.rpc('save_work_post_composition',{target_business:bid,target_post:id,post_title:input.title.trim(),post_description:input.description,image_refs:input.photos.map(p=>({id:p.id,kind:p.kind??'portfolio'}))});if(error)throw error;return;
+      }
       await command(bid, id, "save", {
         post_title: input.title.trim(),
         post_description: input.description,
@@ -153,10 +168,10 @@ export function createManagedPosts(
     },
     command: (bid, id, name) => command(bid, id, name),
     async imageUrl(id, path) {
-      if (!imagePath(id, path)) fail("INVALID_INPUT");
+      if (!imagePath(id, path) && !postImagePath(id,path)) fail("INVALID_INPUT");
       await manager(id);
       const { data, error } = await client.storage
-        .from("business-portfolio")
+        .from(postImagePath(id,path)?"business-posts":"business-portfolio")
         .createSignedUrl(path, 60);
       if (error) throw error;
       const url = new URL(data.signedUrl);
@@ -165,7 +180,7 @@ export function createManagedPosts(
         url.username ||
         url.password ||
         url.hash ||
-        url.pathname !== `/storage/v1/object/sign/business-portfolio/${path}`
+        url.pathname !== `/storage/v1/object/sign/${postImagePath(id,path)?"business-posts":"business-portfolio"}/${path}`
       )
         fail("INVALID_RESPONSE");
       return data.signedUrl;
@@ -179,6 +194,7 @@ interface RawPublicPost {
   description: string;
   published_at: string;
   images: RawImages;
+  uploaded_images?: DirectImage[];
   business: {
     id: string;
     name: string;
@@ -199,7 +215,7 @@ function publicPost(row: RawPublicPost): PublishedWork {
     title: row.title,
     description: row.description,
     publishedAt: row.published_at,
-    images: photos(row.images),
+    images: combinedImages(row.images,row.uploaded_images),
     business: {
       id: row.business.id,
       name: row.business.name,
@@ -215,8 +231,8 @@ function publicPost(row: RawPublicPost): PublishedWork {
 export function createPublicPosts(
   client: SupabaseClient<Database>,
 ): PublicPosts {
-  let profileReady = true;
-  const fields = () => profileReady ? PUBLIC_POST_FIELDS.replace('slug,avatar_path,', 'slug,avatar_path,profile_avatar_path,') : PUBLIC_POST_FIELDS;
+  let profileReady = true, directReady = true;
+  const fields = () => (profileReady ? PUBLIC_POST_FIELDS.replace('slug,avatar_path,', 'slug,avatar_path,profile_avatar_path,') : PUBLIC_POST_FIELDS)+(directReady?','+DIRECT_IMAGES:'');
   const missingProfile = (error: { code: string; message: string } | null) => error && ['42703','PGRST204'].includes(error.code) && error.message.includes('profile_avatar_path');
   return {
     async list(cursor, businessId, signal) {
@@ -243,6 +259,7 @@ export function createPublicPosts(
           .overrideTypes<RawPublicPost[], { merge: false }>();
       };
       let result = await read();
+      if(missingDirect(result.error)){directReady=false;result=await read();}
       if (missingProfile(result.error)) { profileReady = false; result = await read(); }
       const { data, error } = result;
       if (error) {
@@ -273,6 +290,7 @@ export function createPublicPosts(
         .maybeSingle()
         .overrideTypes<RawPublicPost | null, { merge: false }>();
       let result = await read();
+      if(missingDirect(result.error)){directReady=false;result=await read();}
       if (missingProfile(result.error)) { profileReady = false; result = await read(); }
       const { data, error } = result;
       if (error) {

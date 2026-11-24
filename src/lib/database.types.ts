@@ -192,6 +192,9 @@ export interface Database {
       admin_profile_photo: { Args: { target_business: string }; Returns: string | null };
       profile_photo_command: { Args: { command: string; target_business: string; target_photo?: string; expected_avatar_path?: string | null }; Returns: Json };
 
+      prepare_work_post_photo: { Args: {target_business:string;target_post:string;target_photo:string;image_bytes:number;draft_title:string;draft_description:string}; Returns:Json };
+      finalize_work_post_photo: { Args: {target_business:string;target_photo:string}; Returns:undefined };
+      save_work_post_composition: { Args:{target_business:string;target_post:string;post_title:string;post_description:string;image_refs:Json}; Returns:undefined };
       open_conversation: { Args: { target_business: string; message_body: string }; Returns: string };
       send_conversation_message: { Args: { target_conversation: string; message_body: string }; Returns: string };
       my_conversations: { Args: Record<string, never>; Returns: Json };
