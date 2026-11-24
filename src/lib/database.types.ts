@@ -221,6 +221,7 @@ export interface Database {
         };
         Returns: Json;
       };
+      platform_access_status: { Args: Record<string, never>; Returns: Json };
       my_subscriptions: {
         Args: { target_business?: string; page_number?: number };
         Returns: Json;

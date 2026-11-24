@@ -1,4 +1,5 @@
 export type SubscriptionState =
+  | "initial_free"
   | "exempt"
   | "awaiting_activation"
   | "trial_active"
@@ -9,6 +10,7 @@ export type SubscriptionState =
 export interface BusinessSubscription {
   businessId: string;
   businessName: string;
+  accessPhase?: "initial_free";
   state: SubscriptionState;
   trialStartedAt: string | null;
   trialEndsAt: string | null;
@@ -23,7 +25,16 @@ export interface SubscriptionPage {
   items: BusinessSubscription[];
   hasNext: boolean;
 }
+export interface AccessStatus {
+  phase: "initial_free";
+  effectiveAt: string;
+  trialClockRunning: false;
+  checkoutAvailable: false;
+  enforcementEnabled: false;
+  automaticConversion: false;
+}
 export interface SubscriptionRepository {
+  accessStatus?(): Promise<AccessStatus | null>;
   list(
     businessId?: string,
     page?: number,
@@ -55,6 +66,7 @@ export interface AdminSubscriptions {
   enforcementEnabled: false;
 }
 export const subscriptionLabels: Record<SubscriptionState, string> = {
+  initial_free: "Fase inicial gratuita",
   exempt: "Isento de assinatura",
   awaiting_activation: "Aguardando ativação",
   trial_active: "Gratuidade ativa",

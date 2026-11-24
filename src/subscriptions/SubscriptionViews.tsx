@@ -1,3 +1,4 @@
+import {InitialFreeNotice,FreePhaseNotice,useInitialFreePhase} from './InitialFreeNotice';
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSubscriptions } from "./SubscriptionProvider";
@@ -20,6 +21,7 @@ function StatusCopy({ item }: { item: BusinessSubscription }) {
   return (
     <div className="subscription-copy">
       <strong>{subscriptionLabels[item.state]}</strong>
+      {item.state === "initial_free" && <p>Perfil básico, serviços, publicações e conversas gratuitos. Os 90 dias não estão correndo; assinatura futura somente por escolha expressa.</p>}
       {item.state === "exempt" && <p>Este negócio não precisa contratar uma assinatura.</p>}
       {item.trialEndsAt &&
         (item.state === "trial_active" || item.state === "trial_ended") && (
@@ -125,7 +127,7 @@ export function SubscriptionsPage() {
       <Link className="back-link" to="/conta">
         Minha conta
       </Link>
-      <PageHeader title="Gratuidade e assinatura">
+      <InitialFreeNotice /><PageHeader title="Gratuidade e assinatura">
         <p>Uma situação por negócio, independente da sua conta pessoal.</p>
       </PageHeader>
       {state.loading ? (
@@ -172,6 +174,7 @@ export function AdminSubscriptionsPanel({
 }: {
   revision?: number;
 }) {
+  const freePhase=useInitialFreePhase();
   const repo = useAdmin(),
     [page, setPage] = useState(1),
     [query, setQuery] = useState(""),
@@ -184,7 +187,7 @@ export function AdminSubscriptionsPanel({
         return {
           data: await repo.query<AdminSubscriptions>(
             "subscriptions",
-            { page, q: query, status },
+            { page, q: query, status:status==='initial_free'?'awaiting_activation':status },
             signal,
           ),
         };
@@ -200,6 +203,7 @@ export function AdminSubscriptionsPanel({
   );
   return (
     <section aria-label="Situações de gratuidade">
+      {freePhase && <FreePhaseNotice/>}
       <form
         className="admin-filters"
         onSubmit={(e) => {
@@ -226,7 +230,7 @@ export function AdminSubscriptionsPanel({
             }}
           >
             <option value="">Todas</option>
-            {Object.entries(subscriptionLabels).map(([key, label]) => (
+            {Object.entries(subscriptionLabels).filter(([key])=>freePhase?key!=='awaiting_activation':key!=='initial_free').map(([key, label]) => (
               <option value={key} key={key}>
                 {label}
               </option>
@@ -286,7 +290,7 @@ export function AdminSubscriptionsPanel({
                   {state.data.data.items.map((item) => (
                     <tr key={item.businessId}>
                       <td>{item.businessName}</td>
-                      <td>{subscriptionLabels[item.state]}</td>
+                      <td>{subscriptionLabels[freePhase&&item.state==='awaiting_activation'?'initial_free':item.state]}</td>
                       <td>{subscriptionDate(item.trialStartedAt)}</td>
                       <td>{subscriptionDate(item.trialEndsAt)}</td>
                       <td>{item.sameOwnerActivations}</td>

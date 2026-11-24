@@ -1,4 +1,5 @@
 import {profileBusinessSelections} from '../posts/postReturn';
+import {InitialFreeNotice} from '../subscriptions/InitialFreeNotice';
 import { useEffect, useState } from 'react';
 import { BriefcaseBusiness, CreditCard, Ellipsis, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -62,7 +63,7 @@ export function AccountPage() {
           </nav>
         </details>
       </div></header>
-      <p className="owner-account-name">Conta de {profile.displayName}</p>
+      <InitialFreeNotice /><p className="owner-account-name">Conta de {profile.displayName}</p>
       {location.state?.saved && <p className="form-notice" role="status">Rascunho salvo. Confira sua bio, foto e informações abaixo.</p>}
       {profileError && <p role="status" className="field-help">Não foi possível atualizar seus dados agora.</p>}
       {(error || sessionError) && <p className="form-error" role="alert">{error || sessionError}</p>}

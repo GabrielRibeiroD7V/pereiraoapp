@@ -1,3 +1,4 @@
+import {InitialFreeNotice} from '../subscriptions/InitialFreeNotice';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
@@ -68,6 +69,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       <PageHeader title={titles[mode]}>
         <p>{mode === 'signup' ? 'Uma conta para você e seus futuros perfis profissionais.' : 'Seu acesso ao PEREIRÃO.'}</p>
       </PageHeader>
+      {mode === 'signup' && <InitialFreeNotice />}
       {!gateway && <p className="form-notice" role="status">O acesso à conta ainda está sendo preparado. Você pode continuar explorando os serviços.</p>}
       {loading && <p role="status">Verificando sua sessão…</p>}
       {mode === 'login' && params.get('senha') === 'atualizada' && <p role="status">Senha atualizada. Entre com sua nova senha.</p>}

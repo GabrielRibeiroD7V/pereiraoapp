@@ -1,3 +1,4 @@
+import {testFreeContainment} from './test-free-containment.mjs';
 import { testSpecialtyConcurrency } from './test-specialty-concurrency.mjs';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
@@ -26,6 +27,7 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
+    if (file === '20261124163000_initial_free_phase.sql') continue; // Testa atualização após a arquitetura anterior, abaixo.
     const storageGuard = file === '20261123000107_fix_profile_storage_guard.sql';
     if(storageGuard)run(executable('psql'), [...args, '-v', 'guard_fixed=false', '-f', resolve('supabase/tests/profile_storage_phase.sql')]);
     const specialties = file === '20261121193603_business_specialties.sql';
@@ -52,6 +54,9 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/business_profession_linkedin.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/post_direct_photos.sql')]);
   await testSpecialtyConcurrency(executable('psql'), args);
+  run(executable('psql'), [...args, '-f', resolve('supabase/migrations/20261124163000_initial_free_phase.sql')], true);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/initial_free_phase.sql')]);
+  testFreeContainment(executable,args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

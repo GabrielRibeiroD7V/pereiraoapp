@@ -1,3 +1,4 @@
+import {InitialFreeNotice} from '../subscriptions/InitialFreeNotice';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -112,7 +113,7 @@ export function ProfessionalRegistrationPage() {
       <StepProgress labels={steps} step={step} />
       <div className="registration-section-heading"><span className="step-caption">Etapa {step} de 3</span><h2 ref={heading} tabIndex={-1} className="registration-title">{stepTitles[step - 1]}</h2>
         <p>{step === 1 ? 'Um perfil para apresentar seus serviços na sua cidade.' : step === 2 ? 'As informações que ajudam as pessoas a encontrar você.' : 'Confira seus dados. Você poderá editar tudo depois.'}</p></div>
-      <form className="auth-form" onSubmit={submit} aria-busy={pending}>
+      <InitialFreeNotice /><form className="auth-form" onSubmit={submit} aria-busy={pending}>
         <fieldset disabled={pending} className="registration-fields">
           {step === 1 && <fieldset className="provider-choice"><legend className="visually-hidden">Tipo de prestador</legend>
             <label className={input.type === 'autonomo' ? 'is-selected' : ''}><input aria-label="Profissional autônomo" type="radio" name="provider_type" value="autonomo" checked={input.type === 'autonomo'} onChange={() => change('type', 'autonomo')} /><UserRound size={25} aria-hidden="true" /><strong>Profissional autônomo</strong><span>Seu trabalho, seu nome.</span></label>
