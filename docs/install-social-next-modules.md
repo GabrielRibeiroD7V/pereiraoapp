@@ -2,9 +2,13 @@
 
 ## Regra objetiva de instalação nesta proposta
 
-Acesso inline compacto, sem abertura automática de modal, na Home (visitante ou autenticado) e na Conta autenticada logo após o cabeçalho. A Conta do visitante e o menu Opções mantêm o acesso permanente já existente. Disponível imediatamente, inclusive após criar conta/entrar, independentemente de convite dispensado. Não aparece dentro do formulário de cadastro/publicação; não rouba foco nem interrompe navegação. Não executa instalação sem toque.
+Aba flutuante compacta acima da navegação e da safe area, com animação curta (desativada com movimento reduzido), sem abertura automática de modal. Elegível antes e depois do login: Home, Buscar, perfil/trabalho público, Conta e prévia salva do próprio perfil. Não aparece em autenticação, cadastro/edição, mensagens, administração ou finanças.
 
-O convite flutuante opcional continua com 45 s + interação em página pública, dispensa X/Entendi por 14 dias; não é necessário que reapareça para instalar. Reexibir somente após esse prazo, nas mesmas condições, sem modal automático e sem reiniciar prazo ao fazer login. Mudança de regra de reexibição não altera preferências antigas nesta proposta. Standalone mostra estado instalado em vez de botão. Não se pode detectar com certeza instalação feita noutro navegador/contexto; não afirmar instalado apenas porque houve aceitação do prompt.
+Exigir 45 segundos e interação real; exibir somente com página visível, online, sem campo focado, teclado virtual, modal ou operação aria-busy. O tempo de espera é decorrido na página elegível, não um contador de atenção comprovada. Ao interagir com formulário ou abrir modal, esconder temporariamente o convite; não roubar foco. Apenas o convite aparece automaticamente, nunca as instruções ou prompt.
+
+Registrar uma exposição local por navegador a cada 14 dias, mesmo sem X; navegar, entrar ou recarregar não reinicia esse limite. X/Entendi também dispensa por 14 dias, preservando dispensas anteriores. Acesso manual permanente em Conta → Opções da conta → Aplicativo PEREIRÃO (e na Conta do visitante), independente desse prazo. Sem armazenamento de preferências disponível, suprimir convite automático e manter manual. Nenhuma limpeza de dados ou alteração de sessão.
+
+Standalone/appinstalled suprime convite e informa estado instalado no acesso manual. Não é possível garantir detecção de instalação realizada em outro navegador/contexto. Aceitar prompt não equivale a conclusão da instalação.
 
 iPhone: Safari → Compartilhar → Adicionar à Tela de Início; navegador diferente orienta abrir o endereço no Safari. Android/desktop compatível: beforeinstallprompt nativo no toque; confirmar conclusão somente em appinstalled. Sem evento, orientação manual correta. Não cria atalhos por JavaScript. Mesmos componentes existentes, sem alteração de cache/Storage/financeiro.
 

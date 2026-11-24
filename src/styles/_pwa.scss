@@ -7,9 +7,14 @@ body {
   display: none !important;
 }
 .pwa-install {
-  position: relative;
+  position: fixed;
+  z-index: 40;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + .5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: install-rise .18s ease-out;
   width: min(28rem, calc(100% - 2rem));
-  margin: 0 auto calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 1rem);
+  margin: 0;
   display: flex;
   gap: .625rem;
   border: var(--border-subtle);
@@ -17,12 +22,14 @@ body {
   padding: 1rem;
   align-items: flex-start;
   background: var(--color-background);
-  box-shadow: none;
+  box-shadow: 0 4px 20px #0b173914;
 }
 .pwa-install-close { position: absolute; top: .125rem; right: .125rem; border: 0 !important; background: transparent !important; }
 .pwa-install > div { min-width: 0; padding-top: .125rem; }
 .pwa-install h2 { padding-right: 1.5rem; }
-@media (min-width: 64rem) { .pwa-install { margin-bottom: 1.5rem; } }
+@keyframes install-rise { from { opacity: 0; translate: 0 .5rem; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .pwa-install { animation: none; } }
+@media (min-width: 64rem) { .pwa-install { bottom: 1rem; } }
 .pwa-install > img {
   border-radius: 0.65rem;
   flex-shrink: 0;

@@ -64,22 +64,21 @@ function usePwa() {
 export function InstallInvitation() {
   const { controller, state } = usePwa(),
     [help, setHelp] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, key } = useLocation();
+  const [shownAt, setShownAt] = useState<string | null>(null);
+  const attempted = useRef<string | null>(null);
   const opportunity = useInstallOpportunity(pathname);
-  if (
-    !opportunity ||
-    !state.online ||
-    !controller ||
-    state.installed ||
-    state.dismissed ||
-    (!state.canInstall &&
-      !state.ios &&
-      !state.installing &&
-      !state.installError)
-  )
-    return null;
+  const eligible = opportunity && state.online && controller && !state.installed && !state.dismissed &&
+    (state.canInstall || state.ios || state.installing || state.installError);
+  useEffect(() => {
+    if (!eligible || !controller || attempted.current === key) return;
+    attempted.current = key;
+    if (controller.offerInstallInvitation()) setShownAt(key);
+  }, [eligible, controller, key]);
+  useEffect(() => { setHelp(false); }, [key]);
   return (
-    <section className="pwa-install" aria-label="Instalar PEREIRÃO">
+    <>
+    {eligible && shownAt === key && <section className="pwa-install" aria-label="Instalar PEREIRÃO">
       <button type="button" className="pwa-install-close icon-button" aria-label="Dispensar convite de instalação" onClick={() => controller.dismiss()}><X size={17} aria-hidden="true" /></button>
       <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
       <div>
@@ -112,8 +111,9 @@ export function InstallInvitation() {
           </p>
         )}
       </div>
-      {help && <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} onUnderstood={() => controller.dismiss()} />}
-    </section>
+    </section>}
+    {help && !state.installed && <div className="pwa-install-help"><IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} onUnderstood={() => controller?.dismiss()} /></div>}
+    </>
   );
 }
 function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; onClose: () => void; onUnderstood?: () => void }) {
