@@ -28,3 +28,15 @@ describe('parâmetros e contatos públicos', () => {
     expect(imagePath(id, `https://evil.test/${photo}.webp`)).toBe(false);
   });
 });
+
+it.each([
+  ['(67) 99999-1234','5567999991234'],
+  ['(44) 3333-1234','554433331234'],
+  ['(55) 99999-1234','5555999991234'],
+  ['+55 (67) 99999-1234','5567999991234'],
+  ['5567999991234','5567999991234'],
+  ['+1 (202) 555-0123','12025550123'],
+])('monta WhatsApp internacional sem alterar telefone persistido: %s', (value,expected)=>{
+  expect(new URL(whatsappLink(value,'Perfil local')!).pathname).toBe('/'+expected);
+  expect(new URL(whatsappLink(value,'Perfil local')!).searchParams.get('text')).toContain('Perfil local');
+});
