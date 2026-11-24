@@ -1,4 +1,5 @@
 @use 'tokens';
+@use 'refresh';
 @use 'professional';
 @use 'work';
 @use 'marketplace';
@@ -487,3 +488,5 @@ button, a, input, select, textarea { touch-action: manipulation; }
 
 .post-dates { display:flex; flex-direction:column; gap:.25rem; margin-block:.625rem; color:var(--color-secondary); font-size:.75rem; }
 .post-content__body .post-dates time { margin:0; font-size:inherit; }
+
+@include refresh.styles;

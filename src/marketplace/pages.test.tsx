@@ -105,13 +105,13 @@ describe('navegação do marketplace sem login', () => {
     await act(async () => finish({ items: [{ ...p, name: 'Resposta antiga' }], page: 1, hasNext: false }));
     expect(screen.queryByText('Resposta antiga')).not.toBeInTheDocument();
   });
-  it('oferece carrossel acessível e não apresenta trabalhos recentes ou recursos sociais', async () => {
+  it('oferece carrossel acessível e não inventa recursos sociais', async () => {
     open('/');
     const list = await screen.findByRole('list', { name: 'Profissionais cadastrados' });
     expect(list).toHaveAttribute('tabindex', '0');
     expect(screen.getByRole('button', { name: 'Próximos profissionais' })).toBeInTheDocument();
     expect(within(list).getAllByRole('link', { name: /Ver perfil/ })).toHaveLength(2);
-    expect(screen.queryByText(/Trabalhos recentes|Curtir|Seguidores/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Curtir|Seguidores/)).not.toBeInTheDocument();
   });
   it('omite contato malicioso e apresenta estado vazio sem fixtures públicas', async () => {
     const repository = marketplaceFixture(); repository.getProvider = async () => ({ ...p, whatsapp: 'javascript:bad', instagram: 'https://evil.test/profile' });

@@ -210,15 +210,15 @@ describe("publicações: interface com dados simulados locais", () => {
       screen.queryByText("Trabalho demonstrativo local"),
     ).not.toBeInTheDocument();
   });
-  it("mantém Home funcional e oculta a nova seção antes da migração", async () => {
+  it("mantém Home funcional e informa indisponibilidade sem inventar trabalhos", async () => {
     const posts = postsFixtures();
     const list = vi.spyOn(posts.publicPosts, "list").mockResolvedValue(null);
     open("/", { fixtures: posts });
     await waitFor(() => expect(list).toHaveBeenCalled());
     await waitFor(() =>
       expect(
-        screen.queryByRole("heading", { name: "Trabalhos recentes" }),
-      ).not.toBeInTheDocument(),
+        screen.getByText("Trabalhos indisponíveis neste momento."),
+      ).toBeInTheDocument(),
     );
     expect(
       screen.getByRole("heading", { name: "Categorias populares" }),

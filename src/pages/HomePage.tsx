@@ -1,17 +1,21 @@
-import { BriefcaseBusiness } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness } from 'lucide-react';
 import { CategoryTile } from '../components/CategoryTile';
-import { PageHeader } from '../components/PageHeader';
 import { SearchField } from '../components/SearchField';
 import { HomeProviders } from '../marketplace/HomeProviders';
 import {PublishedWorks} from '../posts/PublishedWorks';
 import { categories } from '../config/categories';
-import { LinkButton } from '../components/LinkButton';
+import { Link } from 'react-router-dom';
 
 export function HomePage() {
   return (
     <div className="home-page">
-      <PageHeader title="O que você está procurando?" />
-      <SearchField />
+      <section className="home-hero" aria-labelledby="page-title">
+        <div className="home-hero__inner">
+          <h1 id="page-title" tabIndex={-1}>O que você está <span>procurando?</span></h1>
+          <SearchField />
+        </div>
+      </section>
+      <div className="home-content">
       <section className="home-section" aria-labelledby="categories-title">
         <h2 id="categories-title">Categorias populares</h2>
         <ul className="category-grid">
@@ -22,16 +26,18 @@ export function HomePage() {
         <h2 id="featured-title">Profissionais cadastrados</h2>
         <HomeProviders />
       </section>
-      <PublishedWorks/>
+      <PublishedWorks showUnavailable/>
       <section className="provider-invite" aria-labelledby="invite-title">
-        <BriefcaseBusiness size={24} aria-hidden="true" />
+        <Link className="provider-invite__entry" to="/conta/profissional/cadastro" aria-label="Anunciar meus serviços">
+        <span className="provider-invite__icon"><BriefcaseBusiness size={30} aria-hidden="true" /></span>
         <div>
           <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
-          <p>Divulgue seus serviços no PEREIRÃO e seja encontrado na sua cidade.</p>
-          <LinkButton to="/conta/profissional/cadastro" variant="secondary">Anunciar meus serviços</LinkButton>
+          <p>Cadastre seu serviço agora no PEREIRÃO.</p>
         </div>
+        <ArrowRight className="provider-invite__arrow" size={24} aria-hidden="true" />
+        </Link>
       </section>
-
+      </div>
     </div>
   );
 }

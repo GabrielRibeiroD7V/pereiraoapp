@@ -32,9 +32,9 @@ export function AppShell() {
   return (
     <>
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
-      <header className="app-header">
+      <header className={`app-header${pathname === '/' ? ' app-header--home' : ''}`}>
         <div className="app-header__inner">
-          <Brand />
+          <Brand inverse />
           <div className="app-header__actions">
             <div className="location" aria-label="Cidade inicial: Mundo Novo, Mato Grosso do Sul">
               <MapPin size={18} aria-hidden="true" /><span>Mundo Novo, MS</span>
@@ -43,7 +43,7 @@ export function AppShell() {
         </div>
       </header>
       <MainNavigation />
-      <main id="main-content" className="page-container" tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
+      <main id="main-content" className={`page-container${pathname === '/' ? ' page-container--home' : ''}`} tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
       {new URLSearchParams(search).get('pwa-diagnostico') === '1' && <VersionDiagnostics />}
     </>

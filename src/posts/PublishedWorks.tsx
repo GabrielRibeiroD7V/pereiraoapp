@@ -49,7 +49,7 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
     </article>
   );
 }
-export function PublishedWorks({ businessId, coversOnly = false }: { businessId?: string; coversOnly?: boolean }) {
+export function PublishedWorks({ businessId, coversOnly = false, showUnavailable = false }: { businessId?: string; coversOnly?: boolean; showUnavailable?: boolean }) {
   const resume = useReturnRevision();
   const { publicPosts } = usePosts();
   const request = useRef<AbortController | null>(null),
@@ -112,7 +112,7 @@ export function PublishedWorks({ businessId, coversOnly = false }: { businessId?
     };
   }, [load,resume]);
   if (!publicPosts || (!state.available && !state.error && !state.loading))
-    return null;
+    return showUnavailable ? <section className="published-works-section" aria-label="Trabalhos recentes"><h2>Trabalhos recentes</h2><p className="field-help">Trabalhos indisponíveis neste momento.</p></section> : null;
   return (
     <section
       className="published-works-section"
