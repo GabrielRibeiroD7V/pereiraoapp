@@ -51,6 +51,7 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/admin_review_catalog.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/business_profession_linkedin.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/post_direct_photos.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/work_post_business_tags.sql')]);
   await testSpecialtyConcurrency(executable('psql'), args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
