@@ -62,7 +62,7 @@ returns jsonb language sql stable security definer set search_path='' as $$
  'state',case when private.is_billing_exempt_business(target) then 'exempt' else 'initial_free' end,
  'accessPhase','initial_free','trialStartedAt',null,'trialEndsAt',null,'contractedAt',null,
  'billingPeriodStart',null,'billingPeriodEnd',null,'serverNow',at_time,
- 'checkoutAvailable',false,'enforcementEnabled',false);
+ 'checkoutAvailable',false,'enforcementEnabled',false) from private.platform_access_policy where singleton and phase='initial_free';
 $$;
 revoke all on function private.subscription_snapshot(uuid,timestamptz) from public,anon,authenticated;
 -- A aprovação permanece exclusivamente em admin_action, com todas as

@@ -6,7 +6,7 @@ Quatro negócios draft, nenhum publicado, zero `business_subscriptions` e zero `
 
 Hoje a primeira transição administrativa válida para published chama `private.start_trial_on_activation`: insere uma assinatura trial, início e término exatos de 2160 horas, ativação e histórico. Conflito por business_id impede reinício. Isenção muda o estado apresentado e proíbe contratação, mas NÃO impede esse primeiro relógio. A aprovação continua na RPC administrativa com justificativa, estado esperado, bio, contato, cidade/categoria ativas, atendimento e proprietário habilitado. Gratuidade e revisão não são a mesma decisão.
 
-Arquivo proposto: `20261124163000_initial_free_phase.sql`. SHA-256: `af1aa1217b85e958240e48d14908e0b1255c7cb36147f3db6b88879cd1b68019`. Nenhum SQL remoto aplicado.
+Arquivo proposto: `20261124163000_initial_free_phase.sql`. SHA-256: `a831379e1f419a4bf91296673129c2d88c950c5c8491b975b7d00c8ffccacc2f`. Nenhum SQL remoto aplicado.
 
 ## Diff proposto
 

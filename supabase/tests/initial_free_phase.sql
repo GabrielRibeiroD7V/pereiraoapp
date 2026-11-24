@@ -38,4 +38,6 @@ select test.assert_true(private.subscription_snapshot(:'a',now()+interval '1000 
 select test.assert_true((select not checkout_enabled and not enforcement_enabled from private.subscription_settings),'free: sem checkout ou bloqueio');
 select test.assert_true((select count(*)>0 from pg_policies where tablename='businesses'),'free: políticas de negócios intactas');
 select test.expect_error('update private.platform_access_policy set phase=''paid''','23514','free: encerramento exige nova migração revisada');
+delete from private.platform_access_policy;
+select test.assert_true(public.platform_access_status() is null and private.subscription_snapshot(:'a',now()) is null,'free: configuração ausente não fabrica estado gratuito');
 rollback;
