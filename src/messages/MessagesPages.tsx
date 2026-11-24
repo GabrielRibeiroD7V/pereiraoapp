@@ -124,8 +124,13 @@ export function ConversationPage() {
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!repository || !body.trim() || busy.current) return;
+    const submittedBody = body;
     busy.current = true; setPending(true); setError('');
-    try { await repository.send(conversationId, body.trim()); setBody(''); await load(true); }
+    try {
+      await repository.send(conversationId, submittedBody.trim());
+      setBody(current => current === submittedBody ? '' : current);
+      await load(true);
+    }
     catch (cause) { setError(messageError(cause)); }
     finally { busy.current = false; setPending(false); }
   }
