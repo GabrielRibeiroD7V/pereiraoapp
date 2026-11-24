@@ -14,6 +14,7 @@ export function Modal({ title, children, onClose, locked = false }: { title: str
     const viewport=window.visualViewport, dialog=ref.current;
     const update=()=>{
       if(!dialog)return;
+      dialog.dataset.shortViewport=String((viewport?.height ?? window.innerHeight)<500);
       dialog.style.setProperty('--visual-height',`${viewport?.height ?? window.innerHeight}px`);
       dialog.style.setProperty('--visual-width',`${viewport?.width ?? window.innerWidth}px`);
       dialog.style.setProperty('--visual-top',`${viewport?.offsetTop ?? 0}px`);
