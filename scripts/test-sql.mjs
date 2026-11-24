@@ -56,6 +56,7 @@ try {
   await testSpecialtyConcurrency(executable('psql'), args);
   run(executable('psql'), [...args, '-f', resolve('supabase/migrations/20261124163000_initial_free_phase.sql')], true);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/initial_free_phase.sql')]);
+  run(executable('psql'), [...args, '-f', resolve('supabase/tests/production_billing.sql')]);
   testFreeContainment(executable,args);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {

@@ -6,12 +6,16 @@
       "maxDuration": 60,
       "includeFiles": "public/images/brand/pereirao-384.png"
     },
-    "api/asaas-webhook.ts": { "maxDuration": 60 }
+    "api/asaas-webhook.ts": { "maxDuration": 60 },
+    "api/asaas-production-webhook.ts": { "maxDuration": 60 },
+    "api/production-billing-recovery.ts": { "maxDuration": 60 }
   },
   "rewrites": [
     { "source": "/api/admin", "destination": "/api/admin" },
     { "source": "/api/sandbox-billing", "destination": "/api/sandbox-billing" },
     { "source": "/api/asaas-webhook", "destination": "/api/asaas-webhook" },
+    { "source": "/api/asaas-production-webhook", "destination": "/api/asaas-production-webhook" },
+    { "source": "/api/production-billing-recovery", "destination": "/api/production-billing-recovery" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
