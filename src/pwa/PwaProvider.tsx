@@ -1,3 +1,4 @@
+import {INSTALL_VISIBLE_MS} from './installPolicy';
 import { createPortal } from 'react-dom';
 import { useInstallOpportunity } from './useInstallOpportunity';
 import {
@@ -67,6 +68,7 @@ export function InstallInvitation() {
   const { pathname, key } = useLocation();
   const [shownAt, setShownAt] = useState<string | null>(null);
   const attempted = useRef<string | null>(null);
+  const invitationRef = useRef<HTMLElement>(null), recorded = useRef<string | null>(null);
   const opportunity = useInstallOpportunity(pathname);
   const eligible = opportunity && state.online && controller && !state.installed && !state.dismissed &&
     (state.canInstall || state.ios || state.installing || state.installError);
@@ -75,10 +77,23 @@ export function InstallInvitation() {
     attempted.current = key;
     if (controller.offerInstallInvitation()) setShownAt(key);
   }, [eligible, controller, key]);
+  useEffect(() => {
+    if (!eligible || shownAt !== key || recorded.current === key || !controller || !invitationRef.current) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const observe = (visible: boolean) => {
+      clearTimeout(timer);
+      if (visible) timer = setTimeout(() => {
+        if (document.visibilityState !== 'hidden' && controller.markInstallInvitationSeen()) recorded.current = key;
+      }, INSTALL_VISIBLE_MS);
+    };
+    const observer = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(entries => observe(entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= .75)), {threshold:.75}) : null;
+    if (observer) observer.observe(invitationRef.current); else observe(true);
+    return () => {clearTimeout(timer);observer?.disconnect();};
+  }, [eligible,shownAt,key,controller]);
   useEffect(() => { setHelp(false); }, [key]);
   return (
     <>
-    {eligible && shownAt === key && <section className="pwa-install" aria-label="Instalar PEREIRÃO">
+    {eligible && shownAt === key && <section ref={invitationRef} className="pwa-install" aria-label="Instalar PEREIRÃO">
       <button type="button" className="pwa-install-close icon-button" aria-label="Dispensar convite de instalação" onClick={() => controller.dismiss()}><X size={17} aria-hidden="true" /></button>
       <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
       <div>
@@ -122,7 +137,7 @@ function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; on
           title="Adicionar à Tela de Início"
           onClose={() => onClose()}
         >
-          <div className="pwa-ios-help">
+          <div className="pwa-ios-help"><InstallOfferInfo/>
             <img src="/images/pwa/icon-192.png" width="48" height="48" alt="Ícone oficial do PEREIRÃO" />
             {!safari && (
               <p>Abra este mesmo endereço no Safari. Depois, siga os passos abaixo; este navegador não disponibiliza a instalação nativa do iPhone.</p>
@@ -173,6 +188,12 @@ function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; on
   );
 }
 
+function InstallOfferInfo() {
+  const {controller,state} = usePwa();
+  const info = controller?.installDiagnostics();
+  return <details className="install-offer-info"><summary>Informações do convite de instalação</summary><p>Versão em execução: {state.runningVersion ?? 'indisponível'}. Publicada: {state.publishedVersion ?? 'ainda não consultada'}.</p><p>{info?.installed ? 'Aberto como aplicativo instalado: convite oculto.' : 'Aberto no navegador: não identificado como standalone.'}</p><p>{info?.dismissedUntil ? `Dispensado explicitamente até ${new Date(info.dismissedUntil).toLocaleString('pt-BR')}.` : 'Sem dispensa explícita de 14 dias ativa.'}</p><p>{info?.automaticUntil ? `Convite visto recentemente: nova oferta após ${new Date(info.automaticUntil).toLocaleString('pt-BR')}.` : 'Sem bloqueio por exibição confirmada.'}</p><p>O convite aguarda 45 segundos e interação em Início, Buscar, Conta ou perfil, sem campo, teclado ou modal aberto. O acesso manual permanece disponível.</p></details>;
+}
+
 /** Always available in Conta, independently of the optional invitation cooldown. */
 export function InstallAppAccess({ menu = false }: { menu?: boolean }) {
   const { controller, state } = usePwa();
@@ -185,7 +206,7 @@ export function InstallAppAccess({ menu = false }: { menu?: boolean }) {
     }}>{menu && <Download size={18} aria-hidden="true" />}{state.installing ? 'Abrindo instalação…' : menu ? 'Aplicativo PEREIRÃO' : state.ios ? 'Adicionar à Tela de Início' : 'Instalar aplicativo'}</button>;
   const helpDialog = help && !state.installed && (state.ios ? <IosInstallHelp safari={state.safari} onClose={() => setHelp(false)} /> :
       <Modal title="Instalar aplicativo" onClose={() => setHelp(false)}>
-        <p>O navegador não disponibilizou a instalação direta nesta página. Se houver uma opção Instalar aplicativo no menu ou na barra de endereço do navegador, use-a.</p>
+        <InstallOfferInfo/><p>O navegador não disponibilizou a instalação direta nesta página. Se houver uma opção Instalar aplicativo no menu ou na barra de endereço do navegador, use-a.</p>
         <p>Se já adicionou o PEREIRÃO, abra pelo ícone existente. Não é necessário criar outro atalho.</p>
         <button type="button" className="button button--primary" onClick={() => setHelp(false)}>Entendi</button>
       </Modal>);
