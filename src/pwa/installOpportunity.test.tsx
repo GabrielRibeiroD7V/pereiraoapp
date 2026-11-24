@@ -43,12 +43,11 @@ describe('convite contextual de instalação', () => {
     expect(invitation()).not.toBeInTheDocument();
     f.controller.dispose();
   });
-  it('não cobre páginas de conta mesmo após engajamento e atraso', () => {
-    const f = mount();
+  it('oferece também na Conta autenticada, mas não em cadastro ou edição', () => {
+    const f = mount('/conta', true);
     fireEvent.pointerDown(document.body);
     act(() => vi.advanceTimersByTime(INSTALL_DELAY_MS));
-    fireEvent.click(screen.getByRole('link', { name: 'Conta privada' }));
-    expect(invitation()).not.toBeInTheDocument();
+    expect(invitation()).toBeVisible();
     f.controller.dispose();
   });
   it('aplica dispensa por 14 dias entre sessões e tolera valores inválidos', () => {

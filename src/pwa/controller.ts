@@ -1,6 +1,6 @@
 import { workerVersion } from './workerVersion';
 import type { PwaDiagnostics } from './workerVersion';
-import { installDismissed, INSTALL_DISMISS_KEY } from './installPolicy';
+import { installDismissed, INSTALL_DISMISS_KEY, INSTALL_SEEN_KEY } from './installPolicy';
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -388,6 +388,13 @@ export class PwaController {
       this.patch({ installing: false });
     }
     // Aceitar o diálogo não é tratado como confirmação de instalação concluída.
+  }
+  offerInstallInvitation() {
+    try {
+      if (installDismissed(this.browser.localStorage, Date.now(), INSTALL_SEEN_KEY)) return false;
+      this.browser.localStorage.setItem(INSTALL_SEEN_KEY, String(Date.now()));
+      return true;
+    } catch { return false; } // Sem preferência persistente, manter somente o acesso manual.
   }
   dismiss() {
     try {
