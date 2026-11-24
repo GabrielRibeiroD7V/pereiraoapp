@@ -1,3 +1,4 @@
+import {PhotoCarousel} from '../components/PhotoCarousel';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserRound } from "lucide-react";
@@ -29,19 +30,7 @@ export function WorkCard({ post }: { post: PublishedWork }) {
           </p>
         </div>
       </header>
-      {post.images[0] && (
-        <Link
-          className="published-work-cover"
-          to={`/trabalhos/${post.id}`}
-          aria-label={`Abrir trabalho ${post.title}`}
-        >
-          <PublicImage
-            businessId={post.businessId}
-            path={post.images[0].path}
-            alt={post.images[0].caption ?? post.title}
-          />
-        </Link>
-      )}
+      <PhotoCarousel label={`Fotos de ${post.title}`} items={post.images.map((photo,index)=>({id:photo.id,content:<Link className="published-work-cover" to={`/trabalhos/${post.id}`} aria-label={index===0?`Abrir trabalho ${post.title}`:`Abrir trabalho ${post.title} — foto ${index+1}`}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></Link>}))}/>
       <h3>
         <Link to={`/trabalhos/${post.id}`}>{post.title}</Link>
       </h3>

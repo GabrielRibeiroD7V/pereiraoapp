@@ -1,3 +1,4 @@
+import { PhotoCarousel } from "../components/PhotoCarousel";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Modal } from "../components/Modal";
@@ -12,6 +13,8 @@ export function PostEditor({
   businessName,
   initial,
   initialFiles = [],
+  initialPhotos = [],
+  initialDescription = "",
   onClose,
   onSave,
 }: {
@@ -19,14 +22,20 @@ export function PostEditor({
   businessName?: string;
   initial?: ManagedPost;
   initialFiles?: File[];
+  initialPhotos?: PostPhoto[];
+  initialDescription?: string;
   onClose: () => void;
   onSave: (id: string, input: PostInput) => Promise<void>;
 }) {
   const { managed } = usePosts();
   const [id] = useState(() => initial?.id ?? crypto.randomUUID());
-  const [photos, setPhotos] = useState<LocalPhoto[]>(initial?.images ?? []),
+  const [photos, setPhotos] = useState<LocalPhoto[]>(
+      initial?.images ?? initialPhotos,
+    ),
     [title, setTitle] = useState(initial?.title ?? ""),
-    [description, setDescription] = useState(initial?.description ?? "");
+    [description, setDescription] = useState(
+      initial?.description ?? initialDescription,
+    );
   const [step, setStep] = useState<"photos" | "details">(
       initial ? "details" : "photos",
     ),
@@ -180,7 +189,7 @@ export function PostEditor({
       onClose={onClose}
       locked={pending}
     >
-      <form className="post-composer" onSubmit={submit}>
+      <form className="post-composer" data-step={step} onSubmit={submit}>
         <p className="field-help">
           {step === "photos" ? "1. Fotos" : "2. Descrição e prévia"} · até seis
           imagens. Foto principal e portfólio não serão alterados.
@@ -201,6 +210,26 @@ export function PostEditor({
             );
           }}
         />
+        <div className="post-composer__photo-toolbar">
+          {" "}
+          <button
+            type="button"
+            className="button button--secondary post-add-photos"
+            disabled={pending || preparing || photos.length >= 6}
+            onClick={() => choose()}
+          >
+            {preparing
+              ? "Preparando fotos…"
+              : photos.length
+                ? "Adicionar outras fotos"
+                : "Escolher uma ou até seis fotos"}
+          </button>
+          <span>{photos.length} de 6 fotos selecionadas</span>
+          <p className="field-help">
+            No seletor do aparelho, selecione uma ou várias fotos. Você controla
+            quais arquivos o site recebe.
+          </p>
+        </div>
         {step === "photos" ? (
           <>
             <div className="post-composer__photos">
@@ -254,18 +283,6 @@ export function PostEditor({
                 </figure>
               ))}
             </div>
-            <button
-              type="button"
-              className="button button--secondary"
-              disabled={pending || preparing || photos.length >= 6}
-              onClick={() => choose()}
-            >
-              {preparing
-                ? "Preparando fotos…"
-                : photos.length
-                  ? "Adicionar outras fotos"
-                  : "Escolher fotos da Fototeca ou Arquivos"}
-            </button>
             <p className="field-help">
               JPEG, PNG ou WebP, até 10 MB por arquivo antes da preparação.
               HEIC/HEIF não é suportado.
@@ -273,6 +290,19 @@ export function PostEditor({
           </>
         ) : (
           <>
+            <div className="form-field">
+              <label htmlFor="post-description">
+                Legenda ou descrição da publicação
+              </label>
+              <textarea
+                id="post-description"
+                value={description}
+                maxLength={3000}
+                rows={3}
+                disabled={pending}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
             <div className="form-field">
               <label htmlFor="post-title">Título do trabalho</label>
               <input
@@ -288,19 +318,6 @@ export function PostEditor({
                 Título obrigatório no modelo atual; não é sua bio.
               </p>
             </div>
-            <div className="form-field">
-              <label htmlFor="post-description">
-                Legenda ou descrição da publicação
-              </label>
-              <textarea
-                id="post-description"
-                value={description}
-                maxLength={3000}
-                rows={3}
-                disabled={pending}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
             <section
               className="post-composer__preview"
               aria-label="Prévia da publicação"
@@ -312,19 +329,24 @@ export function PostEditor({
               <p className="field-help">
                 Rascunho privado. Ainda não foi publicado.
               </p>
-              {photos[0] &&
-                (photos[0].preview ? (
-                  <img
-                    src={photos[0].preview}
-                    alt="Capa da publicação em prévia"
-                  />
-                ) : (
-                  <ManagedPhoto businessId={businessId} photo={photos[0]} />
-                ))}
+              <PhotoCarousel
+                label="Todas as fotos da prévia"
+                items={photos.map((photo, i) => ({
+                  id: photo.id,
+                  content: photo.preview ? (
+                    <img src={photo.preview} alt={`Prévia da foto ${i + 1}`} />
+                  ) : photo.mediaState === "pending" ? (
+                    <p>Foto pendente de envio</p>
+                  ) : (
+                    <ManagedPhoto businessId={businessId} photo={photo} />
+                  ),
+                }))}
+              />
               <strong>{title || "Título da publicação"}</strong>
               <p>{description || "Sua legenda aparecerá aqui."}</p>
               <p className="field-help">
-                A primeira foto será a capa; todas aparecem ao abrir o trabalho.
+                A primeira foto será a capa. Deslize ou use as setas para
+                conferir todas antes de salvar.
               </p>
             </section>
           </>

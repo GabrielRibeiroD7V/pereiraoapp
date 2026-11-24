@@ -118,3 +118,30 @@ it("retorno à aba revalida e revela foto salva em outro dispositivo sem apagar 
     expect(screen.queryByText("Carregando prévia…")).not.toBeInTheDocument(),
   );
 });
+it("reutiliza foto do portfólio em novo rascunho por ação expressa sem reenviar arquivo", async () => {
+  const { f, posts } = open(),
+    upload = vi.spyOn(posts.managed, "uploadPostPhoto"),
+    save = vi.spyOn(posts.managed, "save");
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "Ampliar fotografia Instalação residencial",
+    }),
+  );
+  fireEvent.click(
+    await screen.findByRole("button", {
+      name: "Usar esta foto em uma publicação",
+    }),
+  );
+  await screen.findByRole("dialog", { name: "Nova publicação" });
+  fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+  fireEvent.change(screen.getByLabelText("Título do trabalho"), {
+    target: { value: "Publicação sintética" },
+  });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Confirmar fotos e salvar rascunho" }),
+  );
+  await waitFor(() => expect(save).toHaveBeenCalled());
+  expect(upload).not.toHaveBeenCalled();
+  expect(f.snapshot().photos).toHaveLength(2);
+  expect(save.mock.calls[0]?.[2].photos[0]?.kind).toBe("portfolio");
+});

@@ -28,7 +28,7 @@ f.work.uploadPhoto = async (...args) => { await uploadPhoto(...args); record('up
 f.work.uploadProfilePhoto = async (...args) => { const path = await uploadProfile(...args); record('uploads de retrato'); return path; };
 f.work.saveService = async (...args) => { await saveService(...args); record('serviços'); };
 f.work.imageUrl = async () => new URL('./synthetic-photo.png', import.meta.url).href;
-const posts = postsFixtures('draft', true);
+const posts = postsFixtures('draft', new URLSearchParams(window.location.search).get('posts') !== 'demo');
 const postBlobs=new Map<string,string>();
 posts.managed.directPhotosAvailable=async()=>true;
 posts.managed.uploadPostPhoto=async(businessId,postId,id,blob)=>{if(businessId!==bid)throw new Error('QA business');const path=`${businessId}/posts/${id}.webp`;if(!postBlobs.has(path))postBlobs.set(path,URL.createObjectURL(blob));};

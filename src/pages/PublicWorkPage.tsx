@@ -1,3 +1,4 @@
+import {PhotoCarousel} from '../components/PhotoCarousel';
 import { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PageHeader } from "../components/PageHeader";
@@ -36,24 +37,7 @@ export function PublicWorkPage() {
           <p className="public-about post-full-description">
             {post.description}
           </p>
-          <ul className="public-gallery">
-            {post.images.map((photo) => (
-              <li key={photo.id}>
-                <button
-                  className="public-gallery-open"
-                  aria-label={`Ampliar ${photo.caption ?? "fotografia do trabalho"}`}
-                  onClick={() => setEnlarged(photo)}
-                >
-                  <PublicImage
-                    businessId={post.businessId}
-                    path={photo.path}
-                    alt={photo.caption ?? post.title}
-                  />
-                </button>
-                {photo.caption && <p>{photo.caption}</p>}
-              </li>
-            ))}
-          </ul>
+          <PhotoCarousel items={post.images.map(photo=>({id:photo.id,content:<button type="button" className="public-gallery-open" aria-label={`Ampliar ${photo.caption ?? 'fotografia do trabalho'}`} onClick={()=>setEnlarged(photo)}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></button>}))}/>
           {enlarged && (
             <Modal
               title="Fotografia do trabalho"
