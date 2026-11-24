@@ -12,8 +12,10 @@ import '../../../src/styles/main.scss';
 const f = createWorkFixtures();
 const business = (await f.professional.listMine())[0]!;
 let input: RegistrationInput = { ...emptyRegistration, name: 'Serviços de demonstração sintética', description: 'Instalação e manutenção residencial. Perfil demonstrativo usado apenas nesta revisão.', categoryId: 'climatizacao', additionalCategoryIds: ['eletrica'], cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], whatsapp: '5567999990000', instagram: 'demonstracao_local' };
-let presentation = { ...emptyPresentation, headline: 'Engenharia e instalações — exemplo sintético', experience: 'Demonstração: planejamento e acompanhamento de instalações. Nenhuma experiência real declarada.', education: 'Formação de demonstração, sem instituição ou diploma real.', certifications: 'Exemplo de certificação autodeclarada, não verificada.', professional_registration: '' };
-const presentationRepository = { get: async () => ({ available: true, data: { ...presentation } }), save: async (_id: string, value: typeof presentation) => { presentation = { ...value }; } };
+const presentationKey = 'pereirao.qa.presentation.identity.v1';
+let presentation = { ...emptyPresentation, profession: 'Profissão de demonstração', linkedin_url: 'https://www.linkedin.com/in/exemplo-sintetico', headline: 'Engenharia e instalações — exemplo sintético', experience: 'Demonstração: planejamento e acompanhamento de instalações. Nenhuma experiência real declarada.', education: 'Formação de demonstração, sem instituição ou diploma real.', certifications: 'Exemplo de certificação autodeclarada, não verificada.', professional_registration: '' };
+try { const stored = localStorage.getItem(presentationKey); if (stored) presentation = { ...presentation, ...JSON.parse(stored) }; } catch { /* Synthetic storage only. */ }
+const presentationRepository = { get: async () => ({ available: true, data: { ...presentation } }), save: async (_id: string, value: typeof presentation) => { presentation = { ...value }; localStorage.setItem(presentationKey, JSON.stringify(presentation)); } };
 const calls: Record<string, number> = { 'uploads de retrato': 0, 'uploads de trabalhos': 0, 'serviços': 0, 'publicações': 0, 'perfil': 0 };
 function record(key: string) { calls[key]++; window.dispatchEvent(new Event('synthetic-operation')); }
 const professional = { ...f.professional,
@@ -39,7 +41,7 @@ function DemoNotice() {
   const { pathname, search } = useLocation();
   useEffect(() => { const update = () => setCounts({ ...calls }); window.addEventListener('synthetic-operation', update); return () => window.removeEventListener('synthetic-operation', update); }, []);
   return <aside style={{ padding: '12px', background: '#fff5c4', color: '#0b1739', font: '14px/1.5 system-ui', overflowWrap: 'anywhere' }} aria-label="Demonstração sintética">
-    <strong>Demonstração sintética — sem Supabase</strong><details><summary>Dados e contadores do teste</summary><p>Sem sessão, gravação ou upload no Supabase. Alterações existem somente em memória e somem ao recarregar.</p>
+    <strong>Demonstração sintética — sem Supabase. Não informe dados pessoais.</strong><details><summary>Dados e contadores do teste</summary><p>Sem sessão, gravação ou upload no Supabase. Profissão, LinkedIn e apresentação são salvos apenas neste navegador para testar recarga. Os demais dados são de memória e somem ao recarregar.</p>
     <p>Operações simuladas: {Object.entries(counts).map(([key, value]) => <span key={key} data-demo-counter={key}>{key}: {value}; </span>)}</p>
     <output data-demo-route>{pathname}{search}</output></details>
   </aside>;

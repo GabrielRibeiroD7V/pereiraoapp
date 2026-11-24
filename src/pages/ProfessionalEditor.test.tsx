@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App';
@@ -22,11 +22,28 @@ function open(section = '', visitor = false, company = false, route?: string, pr
   return { ...f, professional };
 }
 describe('área central do perfil existente', () => {
+  it('profissão e LinkedIn salvos aparecem no próprio perfil e em Ver como cliente, sem publicar', async () => {
+    let saved = { profession: '', linkedin_url: '', headline: 'Título independente', experience: '', education: '', certifications: '', professional_registration: '' };
+    const repository = { get: vi.fn(async () => ({ available: true, identityAvailable: true, data: { ...saved } })), save: vi.fn(async (_id: string, value: typeof saved) => { saved = { ...value }; }) };
+    open('', false, false, `/conta/profissional/${bid}/apresentacao`, repository);
+    await waitFor(() => expect(screen.getByLabelText('Título profissional')).toHaveValue('Título independente'));
+    fireEvent.change(screen.getByLabelText('Profissão declarada'), { target: { value: 'Arquiteto' } });
+    fireEvent.change(screen.getByLabelText('LinkedIn (opcional)'), { target: { value: 'https://www.linkedin.com/in/exemplo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar apresentação' }));
+    expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeVisible();
+    expect(await screen.findByText('Arquiteto', { exact: false })).toBeVisible();
+    fireEvent.click(screen.getByRole('link', { name: 'Ver como cliente' }));
+    expect(await screen.findByRole('link', { name: /LinkedIn/ })).toHaveAttribute('href', 'https://www.linkedin.com/in/exemplo');
+    expect(screen.getByText(/Rascunho privado/)).toBeVisible();
+    expect(screen.getByText('Bio salva')).toBeVisible();
+  });
+
   it('edita a apresentação em tela própria e volta ao perfil com dados persistidos', async () => {
-    let saved = { headline: 'Título persistido', experience: '', education: '', certifications: '', professional_registration: '' };
+    let saved = { profession: '', linkedin_url: '', headline: 'Título persistido', experience: '', education: '', certifications: '', professional_registration: '' };
     const repository = { get: vi.fn(async () => ({ available: true, data: { ...saved } })), save: vi.fn(async (_id: string, value: typeof saved) => { saved = { ...value }; }) };
     open('', false, false, `/conta/profissional/${bid}/apresentacao`, repository);
-    fireEvent.change(await screen.findByLabelText('Título profissional'), { target: { value: 'Novo título salvo' } });
+    await waitFor(() => expect(screen.getByLabelText('Título profissional')).toHaveValue('Título persistido'));
+    fireEvent.change(screen.getByLabelText('Título profissional'), { target: { value: 'Novo título salvo' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar apresentação' }));
     expect(await screen.findByRole('heading', { name: 'Perfil salvo' })).toBeVisible();
     expect(await screen.findByText('Novo título salvo')).toBeVisible();

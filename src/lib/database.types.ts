@@ -187,6 +187,7 @@ export interface Database {
     Views: Record<string, never>;
     Functions: {
       admin_review_catalog: { Args: { target_business: string }; Returns: Json };
+      save_business_presentation_identity: { Args: { target_business: string; p_profession: string; p_linkedin_url: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
       save_business_presentation: { Args: { target_business: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
       admin_profile_photo: { Args: { target_business: string }; Returns: string | null };
       profile_photo_command: { Args: { command: string; target_business: string; target_photo?: string; expected_avatar_path?: string | null }; Returns: Json };

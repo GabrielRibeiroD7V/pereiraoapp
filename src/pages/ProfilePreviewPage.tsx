@@ -1,3 +1,4 @@
+import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { BusinessStatus } from '../components/BusinessStatus';
 import { Ellipsis } from 'lucide-react';
 import { ContactLinks } from '../marketplace/ContactLinks';
@@ -79,6 +80,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
           {embedded ? <h2>{info.name}</h2> : <h1>{info.name}</h1>}<p>{info.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'} · {city ? `${city.name}/${city.state_code}` : 'Cidade não informada'}</p>
           <dl className="social-preview-stats" role="group" aria-label="Resumo do perfil"><div><dt>Projetos</dt><dd>{posts.length}</dd></div><div><dt>Fotos</dt><dd>{contentError ? '—' : photos.length}</dd></div><div><dt>Serviços</dt><dd>{contentError ? '—' : services.length}</dd></div></dl>
         </div></div>
+      <PresentationIdentity data={presentation.data} company={info.type === 'empresa'} />
       {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <BusinessStatus status={business.business.status} />
       <p className="field-help">Atende: {catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Locais não informados'}</p>
