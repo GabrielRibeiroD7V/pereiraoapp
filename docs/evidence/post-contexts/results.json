@@ -1,0 +1,87 @@
+{
+  "mode": "Chromium local; dados sintéticos; nenhum teste físico",
+  "rows": [
+    {
+      "width": 320,
+      "left": 8,
+      "right": 312,
+      "top": 8,
+      "bottom": 712.5,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 375,
+      "left": 8,
+      "right": 367,
+      "top": 8,
+      "bottom": 687.75,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 390,
+      "left": 8,
+      "right": 382,
+      "top": 8,
+      "bottom": 699,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 393,
+      "left": 8,
+      "right": 385,
+      "top": 8,
+      "bottom": 701.25,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 430,
+      "left": 8,
+      "right": 422,
+      "top": 8,
+      "bottom": 705,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 768,
+      "left": 80,
+      "right": 688,
+      "top": 8,
+      "bottom": 812.5,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 1280,
+      "left": 336,
+      "right": 944,
+      "top": 8,
+      "bottom": 812.5,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    },
+    {
+      "width": 1440,
+      "left": 416,
+      "right": 1024,
+      "top": 8,
+      "bottom": 812.5,
+      "bodyOverflow": false,
+      "figures": 2,
+      "columns": "none"
+    }
+  ],
+  "errors": [],
+  "blocked": []
+}

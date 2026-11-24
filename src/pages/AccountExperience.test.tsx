@@ -87,6 +87,8 @@ describe('experiência pessoal e profissional', () => {
     expect(cover).toHaveTextContent('Rascunho — só você vê');
     fireEvent.click(cover);
     expect(screen.getByRole('dialog', { name: 'Publicação' })).toHaveTextContent('Projeto concluído');
+    expect(screen.getByRole('button', { name: 'Editar publicação' })).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Opções da publicação' }));
     expect(screen.getByRole('button', { name: 'Editar publicação' })).toBeVisible();
     expect(screen.queryByRole('link', { name: 'Conversar' })).not.toBeInTheDocument();
     expect(screen.getByText(/Só você pode ver este perfil/)).toBeInTheDocument();

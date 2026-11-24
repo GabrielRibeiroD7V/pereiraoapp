@@ -1,3 +1,4 @@
+import {PostManagementMenu} from '../posts/PostManagementMenu';
 import {PostContent, postVisibility} from '../posts/PostContent';
 import {PostEditor} from '../posts/PostEditor';
 import {useSectionAnchor} from '../hooks/useSectionAnchor';
@@ -89,13 +90,12 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   const category = catalog?.categories.find(item => item.id === info?.categoryId);
   const city = catalog?.cities.find(item => item.id === info?.cityId);
   const profilePath = `/conta/profissional/${businessId}/${readOnly ? 'previa' : 'perfil'}`;
-  const postActions = (post: ManagedPost) => <>
-    <Link className="button button--secondary" to={profilePath} onClick={()=>setProject(null)}>Ver perfil</Link>
-    <Link className="button button--secondary" to={`${profilePath}#servicos`} onClick={()=>setProject(null)}>Conferir serviços</Link>
-    {!readOnly && <button type="button" className="button button--primary" onClick={()=>{setProject(null);setEditingPost(post);}}>Editar publicação</button>}
+  const postActions = () => <>
+    <Link className="post-action" to={profilePath} onClick={()=>setProject(null)}>Ver perfil</Link>
+    <Link className="post-action" to={`${profilePath}#servicos`} onClick={()=>setProject(null)}>Conferir serviços</Link>
   </>;
-  const renderPost = (post: ManagedPost) => <PostContent title={post.title} description={post.description} author={info?.name ?? ''} visibility={postVisibility(post.status)} publishedAt={post.status==='published'?post.published_at:null}
-    images={post.images.filter(image=>image.mediaState!=='pending').map(image=>({id:image.id,content:<ManagedPhoto businessId={businessId} photo={image}/>}))} actions={postActions(post)} />;
+  const renderPost = (post: ManagedPost) => <PostContent avatar={<ManagedBusinessAvatar path={business?effectiveAvatarPath(business.business):null}/>} management={!readOnly && <PostManagementMenu><button type="button" onClick={()=>{setProject(null);setEditingPost(post);}}>Editar publicação</button><Link to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} title={post.title} description={post.description} author={info?.name ?? ''} visibility={postVisibility(post.status)} publishedAt={post.status==='published'?post.published_at:null}
+    images={post.images.filter(image=>image.mediaState!=='pending').map(image=>({id:image.id,content:<ManagedPhoto businessId={businessId} photo={image}/>}))} actions={postActions()} />;
   const postPaging = <>{postsError && <p role="alert">Não foi possível carregar as publicações. <button type="button" className="text-link" onClick={()=>setPostRefresh(n=>n+1)}>Tentar novamente</button></p>}
     {(postPage>1||postsHaveNext)&&<div className="work-actions"><button type="button" className="button button--secondary" disabled={loading||postPage===1} onClick={()=>setPostPage(n=>n-1)}>Publicações anteriores</button><span>Página {postPage}</span><button type="button" className="button button--secondary" disabled={loading||!postsHaveNext} onClick={()=>setPostPage(n=>n+1)}>Mais publicações</button></div>}</>;
   return <div className="public-profile profile-preview">
@@ -144,12 +144,12 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
         {postPaging}
         <h3>Fotos de trabalhos · Portfólio</h3>
         {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={url=>setEnlarged({id:photo.id,url})} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, { id: 'feed', label: 'Meu feed', content: <section className="private-post-feed" aria-label="Meu feed privado"><h2>Meu feed privado</h2><p className="field-help">Você vê aqui seus dados salvos. Rascunhos não aparecem na Home pública.</p>{contentSection==='feed'&&posts.map(post=><div key={post.id}>{renderPost(post)}</div>)}{!posts.length&&!postsError&&<p>Nenhuma publicação salva ainda.</p>}{postPaging}</section> }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />
-      {adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><button type="button" onClick={creator.choose}>Adicionar publicação</button>{creator.input}</nav></Modal>}
-      {creator.editor}
+      {!readOnly && adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><button type="button" onClick={creator.choose}>Adicionar publicação</button>{creator.input}</nav></Modal>}
+      {!readOnly && creator.editor}
       {project && <Modal title="Publicação" onClose={()=>setProject(null)}>{renderPost(project)}</Modal>}
-      {editingPost && postsRepository && <PostEditor key={editingPost.id} businessId={businessId} businessName={info.name} initial={editingPost} onClose={()=>setEditingPost(null)} onSave={async(id,input)=>{await postsRepository.save(businessId,id,input);setPostPage(1);setPostRefresh(n=>n+1);}}/>}
+      {!readOnly && editingPost && postsRepository && <PostEditor key={editingPost.id} businessId={businessId} businessName={info.name} initial={editingPost} onClose={()=>setEditingPost(null)} onSave={async(id,input)=>{await postsRepository.save(businessId,id,input);setPostPage(1);setPostRefresh(n=>n+1);}}/>}
       {enlarged && selectedPhoto && <WorkPhotoDetail image={<img className="preview-enlarged" src={enlarged.url} alt={selectedPhoto.caption || 'Foto de trabalho'} referrerPolicy="no-referrer" />} onCreatePost={!readOnly&&postsRepository?()=>{setEnlarged(null);creator.startWithPhoto({id:selectedPhoto.id,path:selectedPhoto.storage_path,caption:selectedPhoto.caption,kind:'portfolio'});}:undefined} caption={selectedPhoto.caption} serviceAssociated={!!selectedPhoto.service_id} service={services.find(s=>s.id===selectedPhoto.service_id)?.name} onClose={()=>setEnlarged(null)} onEdit={!readOnly?()=>{setEditingPhoto(selectedPhoto);setEnlarged(null);}:undefined} />}
-      {editingPhoto && work && <PhotoEditor initial={editingPhoto} services={services} onClose={()=>setEditingPhoto(null)} onSave={async(id,_file,caption,serviceId)=>{await work.savePhotoDetails(businessId,id,caption,serviceId);setPostRefresh(n=>n+1);}} />}
+      {!readOnly && editingPhoto && work && <PhotoEditor initial={editingPhoto} services={services} onClose={()=>setEditingPhoto(null)} onSave={async(id,_file,caption,serviceId)=>{await work.savePhotoDetails(businessId,id,caption,serviceId);setPostRefresh(n=>n+1);}} />}
     </>}
   </div>;
 }

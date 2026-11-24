@@ -21,12 +21,14 @@ it('perfil apresenta capas; abre composição completa e gerenciamento sem conta
  expect(within(dialog).getAllByRole('figure')).toHaveLength(2);expect(dialog).toHaveTextContent('Descrição simulada');
  expect(within(dialog).getByRole('link',{name:'Conferir serviços'})).toHaveAttribute('href',`${ownPath}#servicos`);
  expect(within(dialog).queryByRole('link',{name:'Conversar'})).not.toBeInTheDocument();
+ fireEvent.click(within(dialog).getByRole('button',{name:'Opções da publicação'}));
  fireEvent.click(within(dialog).getByRole('button',{name:'Editar publicação'}));
  await screen.findByRole('dialog',{name:'Editar publicação'});fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(command).not.toHaveBeenCalled();
 });
 it('editar a publicação atualiza imediatamente capa, feed e detalhe; cancelar outra edição não grava',async()=>{
  const {posts}=open();const save=vi.spyOn(posts.managed,'save');
  fireEvent.click(await screen.findByRole('button',{name:'Abrir publicação Trabalho demonstrativo local'}));
+ fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Opções da publicação'}));
  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Editar publicação'}));
  fireEvent.change(await screen.findByLabelText('Título do trabalho'),{target:{value:'Título atualizado no teste'}});
  fireEvent.change(screen.getByLabelText('Legenda ou descrição da publicação'),{target:{value:'Legenda atualizada no teste'}});
@@ -35,6 +37,7 @@ it('editar a publicação atualiza imediatamente capa, feed e detalhe; cancelar 
  fireEvent.click(screen.getByRole('tab',{name:'Meu feed'}));
  const feed=screen.getByRole('region',{name:'Meu feed privado'});expect(feed).toHaveTextContent('Legenda atualizada no teste');expect(feed).toHaveTextContent('Rascunho — só você vê');
  expect(within(feed).getAllByRole('figure')).toHaveLength(2);expect(within(feed).queryByRole('link',{name:'Conversar'})).not.toBeInTheDocument();
+ fireEvent.click(within(feed).getByRole('button',{name:'Opções da publicação'}));
  fireEvent.click(within(feed).getByRole('button',{name:'Editar publicação'}));fireEvent.change(await screen.findByLabelText('Título do trabalho'),{target:{value:'Não salvar'}});fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(save).toHaveBeenCalledOnce();
 });
 it('feed privado revalida no retorno sem converter a foto avulsa nem publicar',async()=>{
@@ -59,7 +62,7 @@ it('detalhe público oferece negócio correto, serviços, WhatsApp e login com d
  expect(screen.getByLabelText('Rota do teste')).toHaveTextContent(`/entrar?next=${encodeURIComponent(`/mensagens/iniciar/${bid}`)}`);
 });
 it('responsável autenticado vê gerenciamento no post público e nenhum contato próprio',async()=>{
- open(`/trabalhos/${pid}`);await screen.findByRole('link',{name:'Gerenciar publicações'});
+ open(`/trabalhos/${pid}`);fireEvent.click(await screen.findByRole('button',{name:'Opções da publicação'}));await screen.findByRole('link',{name:'Gerenciar publicações'});
  expect(screen.queryByRole('link',{name:'Conversar'})).not.toBeInTheDocument();expect(screen.queryByRole('link',{name:/WhatsApp de/})).not.toBeInTheDocument();
  expect(screen.getByRole('link',{name:'Conferir serviços'})).toHaveAttribute('href',`${ownPath}#servicos`);
 });

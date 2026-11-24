@@ -1,3 +1,4 @@
+import {PostManagementMenu} from '../posts/PostManagementMenu';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
@@ -35,12 +36,12 @@ export function PublicWorkPage() {
     <Link className="back-link" to="/">Voltar ao início</Link>
     <QueryStatus {...state}/>
     {post ? <>
-      <PostContent headingLevel="h1" title={post.title} description={post.description} author={post.business.name} meta={`${post.business.category} · ${post.business.city}`} publishedAt={post.publishedAt}
+      <PostContent avatar={post.business.avatarPath ? <PublicImage businessId={post.businessId} path={post.business.avatarPath} alt="" avatar/> : undefined} management={mine && <PostManagementMenu><Link to={`/conta/profissional/${post.businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} headingLevel="h1" title={post.title} description={post.description} author={post.business.name} meta={`${post.business.category} · ${post.business.city}`} publishedAt={post.publishedAt}
         images={post.images.map(photo=>({id:photo.id,content:<button type="button" className="public-gallery-open" aria-label={`Ampliar ${photo.caption ?? 'fotografia do trabalho'}`} onClick={()=>setEnlarged(photo)}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></button>}))}
         actions={<>
-          <Link className="button button--secondary" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>
-          <Link className="button button--secondary" to={`${mine?`/conta/profissional/${post.businessId}/perfil`:profilePath}#servicos`}>Conferir serviços</Link>
-          {mine ? <Link className="button button--primary" to={`/conta/profissional/${post.businessId}/publicacoes`}>Gerenciar publicações</Link> : visitor && <Link className="button button--primary" to={`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
+          <Link className="post-action" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>
+          <Link className="post-action" to={`${mine?`/conta/profissional/${post.businessId}/perfil`:profilePath}#servicos`}>Conferir serviços</Link>
+          {visitor && <Link className="post-action" to={`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
           {visitor && provider.data?.id===post.businessId && <ContactLinks name={post.business.name} whatsapp={provider.data.whatsapp} compact/>}
           {provider.error&&visitor&&<p role="status">Contato por WhatsApp indisponível no momento. Você pode abrir o perfil ou conversar pelo PEREIRÃO.</p>}
         </>}/>

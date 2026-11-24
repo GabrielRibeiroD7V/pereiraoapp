@@ -7,14 +7,14 @@ export function postVisibility(status: ManagedPost['status']) {
 }
 
 /** A mesma composição para o post público, o rascunho privado e a prévia de criação. */
-export function PostContent({ title, description, author, meta, images, visibility, publishedAt, actions, headingLevel = 'h2', carouselLabel }: {
+export function PostContent({ title, description, author, meta, images, visibility, publishedAt, actions, headingLevel = 'h2', carouselLabel, management, avatar }: {
   title: string; description: string; author: string; meta?: string;
   images: { id: string; content: ReactNode }[];
-  visibility?: string; publishedAt?: string | null; actions?: ReactNode; headingLevel?: 'h1' | 'h2'; carouselLabel?: string;
+  visibility?: string; publishedAt?: string | null; actions?: ReactNode; headingLevel?: 'h1' | 'h2'; carouselLabel?: string; management?: ReactNode; avatar?: ReactNode;
 }) {
   const Heading=headingLevel;
   return <article className="post-content">
-    <header className="post-content__author"><strong>{author}</strong>{meta && <p>{meta}</p>}{visibility && <p className="post-content__visibility">{visibility}</p>}</header>
+    <header className="post-content__author">{avatar && <span className="post-content__avatar">{avatar}</span>}<div className="post-content__byline"><strong>{author}</strong>{meta && <p>{meta}</p>}{visibility && <p className="post-content__visibility">{visibility}</p>}</div>{management}</header>
     <div className="post-content__media"><PhotoCarousel label={carouselLabel ?? `Fotos de ${title}`} items={images}/></div>
     <div className="post-content__body"><Heading>{title}</Heading><p className="post-full-description">{description.trim() ? description : 'Esta publicação não tem legenda.'}</p>
       {publishedAt && <time dateTime={publishedAt}>{new Date(publishedAt).toLocaleDateString('pt-BR')}</time>}
