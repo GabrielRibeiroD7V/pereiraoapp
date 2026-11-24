@@ -25,3 +25,18 @@ Uma leitura periódica antiga podia sobrescrever as mensagens recém-confirmadas
 5. Abrir WhatsApp para destinatário consentido; eventual envio depende da autorização do participante.
 
 Acesso à conversa em negócio draft é bloqueio intencional do servidor. Nenhum bloqueio foi contornado para antecipar esse ensaio. Avisos financeiros removidos no #66 não foram reintroduzidos.
+
+## Preparação atual — sem novas operações de usuário
+
+Em 24/11, leitura confirmou quatro negócios draft, um post draft, zero conversas/mensagens, zero assinaturas/ativações e isenção preservada. iPhone indisponível, informado pelo titular: nenhuma conferência física nesta rodada. Não existe nova prova de descoberta pública ou conversa entre duas contas.
+
+### Roteiro mínimo com duas contas legítimas
+
+- Conta A: responsável habilitado pelo negócio; conta B: cliente legítimo distinto, sem vínculo de proprietário/admin/membro com esse negócio. Administrador da plataforma revisa a publicação pelo fluxo próprio; essa função não substitui a conta cliente. Não criar usuários fictícios ou pedir credenciais.
+- **Antes de publicar:** A confere perfil privado, abre o post UFMS, usa Voltar/histórico e retorna à seção anterior; confere serviço legítimo/preço e destino consentido do WhatsApp sem enviar mensagem. No iPhone, registrar separadamente post/carrossel, retorno do histórico, segundo plano e formulário/teclado. Pendente enquanto aparelho indisponível.
+- **Gate:** autorização específica para o negócio e, separadamente, para o post UFMS; explicar conteúdo público, inclusive fotos ready de portfólio. Aprovação não publica automaticamente o post. A fase initial_free preserva isenção e não inicia relógio de 90 dias. Não realizar esse gate durante a preparação.
+- **Depois de publicação autorizada:** B busca categoria principal e especialidades, nas cidades de origem/atendimento; abre perfil, serviço e página do post que estiver publicado. A e B abrem Conversas pela mesma aba e verificam caixa vazia/carregamento/erro quando ocorrerem naturalmente.
+- B envia texto consentido, A responde; respeitar intervalo mínimo de três segundos entre envios. Ambos recarregam e fazem novo login diretamente, conferindo texto, ordem e destinatário. Verificar isolamento com usuário não participante somente se existir conta legítima autorizada; duas contas participantes não provam esse negativo.
+- Conferir destinatário do WhatsApp e abrir o aplicativo; envio externo depende do consentimento dos participantes. Não atribuir entrega ou leitura ao simples clique. Chat atual é texto: não alegar fotos, visualizado ou contagem real de não lidas.
+
+Registrar por etapa: ambiente/versão, conta A/B por papel sem identificadores privados, horário e resultado observado. Resultado de fixtures/SQL não preenche a coluna de ensaio remoto. Sem autorização de publicação, o bloqueio exato permanece a ausência de negócio elegível para descoberta e início da conversa.
