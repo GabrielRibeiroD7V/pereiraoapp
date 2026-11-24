@@ -1,3 +1,6 @@
+import {beforeEach} from 'vitest';
+import {profileViews} from '../posts/postReturn';
+beforeEach(()=>profileViews.clear());
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -81,17 +84,17 @@ describe('experiência pessoal e profissional', () => {
   });
 
   it('mostra projetos do negócio apenas ao dono e mantém o rascunho privado', async () => {
-    const posts = { load: vi.fn(async () => ({ business: { id: first.id, name: first.name, status: 'draft' }, posts: { items: [{ id: 'post-1', title: 'Reforma da cozinha', description: 'Projeto concluído', status: 'draft', images: [] }], next: null } })) } as unknown as ManagedPosts;
+    const posts = { get:async()=>({id:'post-1',business_id:first.id,title:'Reforma da cozinha',description:'Projeto concluído',status:'draft',images:[]}), load: vi.fn(async () => ({ business: { id: first.id, name: first.name, status: 'draft' }, posts: { items: [{ id: 'post-1', title: 'Reforma da cozinha', description: 'Projeto concluído', status: 'draft', images: [] }], next: null } })) } as unknown as ManagedPosts;
     setup('/conta', [first], undefined, undefined, posts);
-    const cover = await screen.findByRole('button', { name: 'Abrir publicação Reforma da cozinha' });
+    const cover = await screen.findByRole('link', { name: 'Abrir publicação Reforma da cozinha' });
     expect(cover).toHaveTextContent('Rascunho — só você vê');
     fireEvent.click(cover);
-    expect(screen.getByRole('dialog', { name: 'Publicação' })).toHaveTextContent('Projeto concluído');
+    expect(await screen.findByRole('article', { name: 'Reforma da cozinha' })).toHaveTextContent('Projeto concluído');
     expect(screen.getByRole('button', { name: 'Editar publicação' })).not.toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Opções da publicação' }));
     expect(screen.getByRole('button', { name: 'Editar publicação' })).toBeVisible();
     expect(screen.queryByRole('link', { name: 'Conversar' })).not.toBeInTheDocument();
-    expect(screen.getByText(/Só você pode ver este perfil/)).toBeInTheDocument();
+    expect(screen.getByText('Rascunho — só você vê')).toBeInTheDocument();
     expect(posts.load).toHaveBeenCalledWith(first.id, 1);
   });
 

@@ -1,3 +1,6 @@
+import {beforeEach} from 'vitest';
+import {profileViews} from '../posts/postReturn';
+beforeEach(()=>profileViews.clear());
 import {
   act,
   fireEvent,
@@ -74,13 +77,11 @@ it("mostra ausência real de legenda e associação na prévia privada, sem edi�
 it("capa de rascunho abre autor, título, legenda e todas as imagens em ordem", async () => {
   open();
   fireEvent.click(
-    await screen.findByRole("button", {
+    await screen.findByRole("link", {
       name: "Abrir publicação Trabalho demonstrativo local",
     }),
   );
-  const dialog = screen.getByRole("dialog", {
-    name: "Publicação",
-  });
+  const dialog = await screen.findByRole("article", {name: "Trabalho demonstrativo local"});
   expect(dialog).toHaveTextContent("Rascunho — só você vê");
   expect(dialog).toHaveTextContent(
     "Descrição simulada de um trabalho concluído",

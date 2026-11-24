@@ -33,6 +33,7 @@ export function postsFixtures(businessStatus = "published", empty = false) {
     if (id !== fixtureBusinessId) throw { code: "NOT_MANAGER" };
   };
   const managed: ManagedPosts = {
+    get: async (bid,id)=>{check(bid);return rows.find(row=>row.id===id)??null;},
     directPhotosAvailable: async()=>true,
     uploadPostPhoto: async()=>{},
     load: async (id, page) => {
@@ -100,6 +101,7 @@ export function postsFixtures(businessStatus = "published", empty = false) {
     description:
       "Descrição simulada de trabalho realizado. Não é um serviço para contratar nem um registro operacional.",
     publishedAt: "2026-11-20T21:00:00.123456+00:00",
+    createdAt: "2026-11-20T20:00:00Z",
     images: [...fixturePostPhotos],
     business: {
       id: fixtureBusinessId,

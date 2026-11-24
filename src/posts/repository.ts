@@ -91,6 +91,15 @@ export function createManagedPosts(
       fail("INVALID_RESPONSE");
   }
   return {
+    async get(businessId, postId, signal) {
+      if(!validId(postId))return null;
+      await manager(businessId);
+      const result=await client.from('work_posts').select(`${POST_FIELDS},${IMAGES}`).eq('business_id',businessId).eq('id',postId).abortSignal(signal??new AbortController().signal).maybeSingle().overrideTypes<WorkPostRow & {images:RawImages}|null,{merge:false}>();
+      if(result.error)throw result.error;if(!result.data)return null;
+      const direct=await client.from('work_posts').select(`id,${DIRECT_IMAGES}`).eq('business_id',businessId).eq('id',postId).abortSignal(signal??new AbortController().signal).maybeSingle().overrideTypes<{uploaded_images:DirectImage[]}|null,{merge:false}>();
+      if(direct.error&&!missingDirect(direct.error))throw direct.error;
+      return {...result.data,images:combinedImages(result.data.images,direct.data?.uploaded_images,result.data.status==='draft')};
+    },
     async directPhotosAvailable(){const {error}=await client.from('work_posts').select(`id,${DIRECT_IMAGES}`).limit(0);if(error&&missingDirect(error))return false;if(error)throw error;return true;},
     uploadPostPhoto: (bid,postId,id,file,input)=>uploadDirectPostPhoto(client,bid,postId,id,file,input),
     async load(id, value, signal) {
@@ -193,6 +202,7 @@ interface RawPublicPost {
   title: string;
   description: string;
   published_at: string;
+  created_at?: string;
   images: RawImages;
   uploaded_images?: DirectImage[];
   business: {
@@ -206,7 +216,7 @@ interface RawPublicPost {
   };
 }
 const PUBLIC_POST_FIELDS =
-  "id,business_id,title,description,published_at,business:businesses!work_posts_business_id_fkey!inner(id,name,slug,avatar_path,city:cities!businesses_city_id_fkey(name,state_code),category:categories!businesses_category_id_fkey(name))," +
+  "id,business_id,title,description,created_at,published_at,business:businesses!work_posts_business_id_fkey!inner(id,name,slug,avatar_path,city:cities!businesses_city_id_fkey(name,state_code),category:categories!businesses_category_id_fkey(name))," +
   IMAGES;
 function publicPost(row: RawPublicPost): PublishedWork {
   return {
@@ -215,6 +225,7 @@ function publicPost(row: RawPublicPost): PublishedWork {
     title: row.title,
     description: row.description,
     publishedAt: row.published_at,
+    createdAt: row.created_at ?? null,
     images: combinedImages(row.images,row.uploaded_images?.filter(photo=>photo.selected && photo.media_state==='ready')),
     business: {
       id: row.business.id,

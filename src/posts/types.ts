@@ -25,6 +25,7 @@ export interface PublishedWork {
   title: string;
   description: string;
   publishedAt: string;
+  createdAt?: string | null;
   images: PostPhoto[];
   business: {
     id: string;
@@ -48,6 +49,7 @@ export interface PublicPosts {
   get(id: string, signal?: AbortSignal): Promise<PublishedWork | null>;
 }
 export interface ManagedPosts {
+  get(businessId: string, postId: string, signal?: AbortSignal): Promise<ManagedPost | null>;
   directPhotosAvailable?():Promise<boolean>;
   uploadPostPhoto?(businessId:string,postId:string,id:string,file:Blob,input:PostInput):Promise<void>;
 

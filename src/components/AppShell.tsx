@@ -1,3 +1,4 @@
+import {usePostScrollReturn} from '../posts/postReturn';
 import { Suspense, useEffect, useRef } from 'react';
 import { MapPin, MessageCircle } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { MainNavigation } from './MainNavigation';
 import { InstallInvitation, VersionDiagnostics } from '../pwa/PwaProvider';
 
 export function AppShell() {
+  usePostScrollReturn();
   const { pathname, search } = useLocation();
   const previousPath = useRef(pathname);
 

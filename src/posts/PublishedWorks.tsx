@@ -1,3 +1,5 @@
+import {PostLink} from './PostLink';
+import {PostDates} from './PostDates';
 import {useReturnRevision} from '../hooks/useReturnRevision';
 import {PhotoCarousel} from '../components/PhotoCarousel';
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,10 +9,10 @@ import { usePosts } from "./PostsProvider";
 import { PublicImage } from "../marketplace/PublicImage";
 import type { PublishedWork, WorkCursor } from "./types";
 export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; coversOnly?: boolean }) {
-  if(coversOnly) return <article className="profile-post-public-tile"><Link className="profile-post-tile" to={`/trabalhos/${post.id}`} aria-label={`Abrir trabalho ${post.title}`}>
+  if(coversOnly) return <article className="profile-post-public-tile"><PostLink className="profile-post-tile" to={`/trabalhos/${post.id}`} aria-label={`Abrir trabalho ${post.title}`}>
     {post.images[0] && <PublicImage businessId={post.businessId} path={post.images[0].path} alt={post.images[0].caption ?? post.title}/>}
     <span className="profile-post-tile__kind">Publicação{post.images.length>1?` · ${post.images.length} fotos`:''}</span><strong>{post.title}</strong>
-  </Link></article>;
+  </PostLink></article>;
   return (
     <article className="published-work">
       <header>
@@ -35,17 +37,15 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
           </p>
         </div>
       </header>
-      <PhotoCarousel label={`Fotos de ${post.title}`} items={post.images.map((photo,index)=>({id:photo.id,content:<Link className="published-work-cover" to={`/trabalhos/${post.id}`} aria-label={index===0?`Abrir trabalho ${post.title}`:`Abrir trabalho ${post.title} — foto ${index+1}`}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></Link>}))}/>
+      <PhotoCarousel label={`Fotos de ${post.title}`} items={post.images.map((photo,index)=>({id:photo.id,content:<PostLink className="published-work-cover" to={`/trabalhos/${post.id}`} aria-label={index===0?`Abrir trabalho ${post.title}`:`Abrir trabalho ${post.title} — foto ${index+1}`}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></PostLink>}))}/>
       <h3>
-        <Link to={`/trabalhos/${post.id}`}>{post.title}</Link>
+        <PostLink to={`/trabalhos/${post.id}`}>{post.title}</PostLink>
       </h3>
       {post.description && (
         <p className="published-work-summary">{post.description}</p>
       )}
       <div className="post-card-actions"><Link to={`/prestadores/${post.business.slug}`}>Ver perfil</Link><Link to={`/prestadores/${post.business.slug}#servicos`}>Conferir serviços</Link></div>
-      <time dateTime={post.publishedAt}>
-        {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
-      </time>
+      <PostDates createdAt={post.createdAt} publishedAt={post.publishedAt}/>
     </article>
   );
 }

@@ -492,3 +492,6 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .post-management nav :is(button,a):hover { background:var(--color-surface); }
 .post-management:not([open]) nav { display:none; }
 .post-content .photo-carousel__controls button { border:var(--border-subtle); background:transparent; border-radius:50%; }
+
+.post-dates { display:flex; flex-direction:column; gap:.25rem; margin-block:.625rem; color:var(--color-secondary); font-size:.75rem; }
+.post-content__body .post-dates time { margin:0; font-size:inherit; }

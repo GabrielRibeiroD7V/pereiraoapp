@@ -1,3 +1,4 @@
+import {PostBackLink} from '../posts/PostBackLink';
 import {PostManagementMenu} from '../posts/PostManagementMenu';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -33,10 +34,10 @@ export function PublicWorkPage() {
   const visitor=!authLoading && (!session || (management?.user===session.user.id && management.business===post?.businessId && !management.allowed));
   const profilePath=post ? `/prestadores/${post.business.slug}` : '';
   return <div className="public-profile public-post-page">
-    <Link className="back-link" to="/">Voltar ao início</Link>
+    <PostBackLink fallback="/"/>
     <QueryStatus {...state}/>
     {post ? <>
-      <PostContent avatar={post.business.avatarPath ? <PublicImage businessId={post.businessId} path={post.business.avatarPath} alt="" avatar/> : undefined} management={mine && <PostManagementMenu><Link to={`/conta/profissional/${post.businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} headingLevel="h1" title={post.title} description={post.description} author={post.business.name} meta={`${post.business.category} · ${post.business.city}`} publishedAt={post.publishedAt}
+      <PostContent avatar={post.business.avatarPath ? <PublicImage businessId={post.businessId} path={post.business.avatarPath} alt="" avatar/> : undefined} management={mine && <PostManagementMenu><Link to={`/conta/profissional/${post.businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} headingLevel="h1" title={post.title} description={post.description} author={post.business.name} meta={`${post.business.category} · ${post.business.city}`} createdAt={post.createdAt} publishedAt={post.publishedAt}
         images={post.images.map(photo=>({id:photo.id,content:<button type="button" className="public-gallery-open" aria-label={`Ampliar ${photo.caption ?? 'fotografia do trabalho'}`} onClick={()=>setEnlarged(photo)}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></button>}))}
         actions={<>
           <Link className="post-action" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>
