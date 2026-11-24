@@ -12,7 +12,7 @@ function open(kind = 'servicos', visitor = false) {
   return fixtures;
 }
 describe('gerenciamento de serviços e fotografias', () => {
-  it('mantém três abas e salva preço fixo pelo negócio selecionado', async () => {
+  it('mantém quatro abas e salva preço fixo pelo negócio selecionado', async () => {
     const fixtures = open(); const save = vi.spyOn(fixtures.work, 'saveService');
     fireEvent.click(await screen.findByRole('button', { name: 'Adicionar serviço' }));
     fireEvent.change(screen.getByLabelText('Nome do serviço'), { target: { value: 'Serviço novo' } });
@@ -22,7 +22,7 @@ describe('gerenciamento de serviços e fotografias', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Salvar serviço' }));
     expect(await screen.findByRole('heading', { name: 'Serviço novo' })).toBeInTheDocument();
     expect(save).toHaveBeenCalledWith(fixtureBusinessId, expect.any(String), expect.objectContaining({ price: '150,99', pricingType: 'fixed' }), true);
-    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
   it('exige confirmação para excluir serviço e mantém as fotografias', async () => {
     const fixtures = open(); const remove = vi.spyOn(fixtures.work, 'deleteService');
@@ -77,3 +77,5 @@ describe('gerenciamento de serviços e fotografias', () => {
     expect(list).not.toHaveBeenCalled();
   });
 });
+
+it('seletor nativo oferece as seis categorias do catálogo, sem filtrar pela principal do perfil',async()=>{open();fireEvent.click(await screen.findByRole('button',{name:'Adicionar serviço'}));const select=screen.getByLabelText('Categoria');expect(within(select).getAllByRole('option').map(option=>option.textContent)).toEqual(['Selecione','Climatização','Pintura','Construção','Elétrica','Marcenaria','Limpeza']);fireEvent.change(select,{target:{value:'construcao'}});expect(select).toHaveValue('construcao');fireEvent.change(select,{target:{value:'eletrica'}});expect(select).toHaveValue('eletrica');fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));});

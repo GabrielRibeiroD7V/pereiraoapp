@@ -77,7 +77,7 @@ describe('área central do perfil existente', () => {
     expect(screen.queryByRole('button', { name: 'Continuar' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('CNPJ')).not.toBeInTheDocument();
     expect(screen.queryByText('Privado')).not.toBeInTheDocument();
-    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
   it('mostra somente dados gravados na prévia até salvar; salva sem criar nem publicar', async () => {
     const f = open();

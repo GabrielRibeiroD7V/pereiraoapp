@@ -28,14 +28,14 @@ describe('acesso global às mensagens', () => {
     expect(messages).toHaveAttribute('href', '/mensagens');
     expect(messages).toHaveTextContent('');
     expect(screen.getAllByRole('link', { name: 'Abrir mensagens' })).toHaveLength(1);
-    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
     expect(within(header).getByRole('img', { name: 'PEREIRÃO' })).toBeInTheDocument();
   });
   it('não duplica o acesso global no perfil do próprio negócio', async () => {
     const f = createWorkFixtures();
     render(<MemoryRouter initialEntries={[`/conta/profissional/${fixtureBusinessId}/perfil`]}><App authGateway={f.gateway} professionalRepository={f.professional} workRepository={f.work} /></MemoryRouter>);
     await screen.findByRole('link', { name: 'Editar perfil' });
-    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(1);
+    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(2);
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toBeVisible();
   });
   it('encaminha o visitante ao login com retorno à caixa, sem consultar conversas privadas', async () => {

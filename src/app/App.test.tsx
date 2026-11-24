@@ -13,7 +13,7 @@ describe('navegação pública', () => {
   it('mantém somente três destinos principais e indica a página atual', () => {
     open();
     const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
-    expect(within(nav).getAllByRole('link')).toHaveLength(3);
+    expect(within(nav).getAllByRole('link')).toHaveLength(4);
     expect(within(nav).getByRole('link', { name: 'Início' })).toHaveAttribute('aria-current', 'page');
     expect(within(nav).getByRole('link', { name: 'Buscar' })).not.toHaveAttribute('aria-current');
   });

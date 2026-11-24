@@ -60,7 +60,7 @@ describe('navegação do marketplace sem login', () => {
     expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer'); expect(whatsapp.getAttribute('href')).toMatch(/^https:\/\/wa.me\//);
     expect(screen.getByRole('link', { name: /Instagram de Prestador/ })).toHaveAttribute('href', 'https://www.instagram.com/perfil.simulado/');
     expect(screen.queryByRole('heading', { name: 'Entrar' })).not.toBeInTheDocument();
-    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(4);
     expect(within(screen.getByRole('navigation')).getByRole('link', { name: 'Buscar' })).toHaveAttribute('aria-current', 'page');
   });
   it('perfil destaca principal e mostra adicionais sem mudar abas ou contatos', async () => {
@@ -71,7 +71,7 @@ describe('navegação do marketplace sem login', () => {
     expect(badges).toHaveTextContent('ConstruçãoPrincipalPinturaElétrica');
     expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
     expect(screen.getByRole('link', { name: /WhatsApp de Prestador/ })).toBeVisible();
-    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(4);
   });
   it('renova a assinatura ao ampliar e fecha a galeria pelo evento cancel do diálogo', async () => {
     const repository = marketplaceFixture(), sign = vi.spyOn(repository, 'getImageUrl');
