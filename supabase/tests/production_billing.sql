@@ -63,4 +63,28 @@ select test.expect_error(format('select test.production_call(''binding'',jsonb_b
 select test.production_call('fail',jsonb_build_object('eventId','evt_local_c','leaseToken',:'fresh','code','UNAVAILABLE'));
 select test.assert_true((select state='pending' and attempts=2 and next_attempt_at>clock_timestamp() and last_error='UNAVAILABLE' from private.production_billing_events where event_id='evt_local_c'),'production: falha durável com backoff');
 select test.assert_true((select count(*)=1 from private.production_billing_bindings),'production: não cria vínculo a partir do evento');
+-- Terminal disposition is durable, idempotent and cannot masquerade as a payment.
+select test.production_call('enqueue','{"eventId":"evt_foreign","eventType":"PAYMENT_RECEIVED","objectId":"pay_foreign","subscriptionId":"sub_foreign","environment":"production"}');
+select test.production_call('claim','{"eventId":"evt_foreign"}')->>'leaseToken' as foreign_lease \gset
+select test.expect_error(format('select test.production_call(''binding'',jsonb_build_object(''eventId'',''evt_foreign'',''leaseToken'',%L,''subscriptionId'',''sub_local''))',:'foreign_lease'),'22023','isolation: notice cannot borrow another binding');
+select test.expect_error(format('select test.production_call(''ignore_unbound'',jsonb_build_object(''eventId'',''evt_foreign'',''leaseToken'',%L))',gen_random_uuid()),'40001','isolation: discard requires valid lease');
+select test.production_call('ignore_unbound',jsonb_build_object('eventId','evt_foreign','leaseToken',:'foreign_lease'));
+select test.assert_true((select state='processed' and last_error='IGNORED_UNBOUND' and processed_at is not null and lease_token is null and binding_id is null from private.production_billing_events where event_id='evt_foreign'),'isolation: terminal reason retained');
+select test.assert_true(not (test.production_call('enqueue','{"eventId":"evt_foreign","eventType":"PAYMENT_RECEIVED","objectId":"pay_foreign","subscriptionId":"sub_foreign","environment":"production"}')->>'retryable')::boolean,'isolation: duplicate ignored event never restarts');
+select test.assert_true(not (test.production_call('claim','{"eventId":"evt_foreign"}')->>'claimed')::boolean,'isolation: recovery cannot claim ignored event');
+select test.assert_true(not (test.production_call('due','{}')->'eventIds' ? 'evt_foreign'),'isolation: ignored event leaves retry queue');
+select test.production_call('enqueue','{"eventId":"evt_no_sub","eventType":"PAYMENT_RECEIVED","objectId":"pay_other","subscriptionId":null,"environment":"production"}');
+select test.production_call('claim','{"eventId":"evt_no_sub"}')->>'leaseToken' as missing_lease \gset
+select test.production_call('ignore_unbound',jsonb_build_object('eventId','evt_no_sub','leaseToken',:'missing_lease'));
+select test.assert_true((select last_error='IGNORED_NO_SUBSCRIPTION_LINK' from private.production_billing_events where event_id='evt_no_sub'),'isolation: incomplete notice retained without provider lookup');
+select test.expect_error(format('select test.production_call(''ignore_unbound'',jsonb_build_object(''eventId'',''evt_local_c'',''leaseToken'',%L))',:'fresh'),'40001','isolation: expired or released lease cannot discard');
+-- Even a valid machine proof cannot discard a notice for a known subscription.
+select test.production_call('enqueue','{"eventId":"evt_bound_guard","eventType":"SUBSCRIPTION_UPDATED","objectId":"sub_local","subscriptionId":"sub_local","environment":"production"}');
+select test.production_call('claim','{"eventId":"evt_bound_guard"}')->>'leaseToken' as bound_lease \gset
+select test.expect_error(format('select test.production_call(''ignore_unbound'',jsonb_build_object(''eventId'',''evt_bound_guard'',''leaseToken'',%L))',:'bound_lease'),'22023','isolation: known binding cannot be ignored');
+select test.assert_true((select count(*)=1 from private.production_billing_payments) and (select count(*)=2 from private.production_billing_audit),'isolation: no financial observation or audit fabricated');
+select test.assert_true((select count(*)=1 from private.production_billing_bindings) and (select status='draft' from public.businesses where id=:'bid') and (select count(*)=0 from public.business_subscriptions) and (select count(*)=0 from private.subscription_activations),'isolation: contracts, rights and trials unchanged');
+set local role anon;
+select test.expect_error($q$select public.production_billing_server('ignore_unbound','{}',extract(epoch from now())::bigint,gen_random_uuid(),repeat('0',64))$q$,'42501','isolation: no discard without HMAC');
+reset role;
 rollback;

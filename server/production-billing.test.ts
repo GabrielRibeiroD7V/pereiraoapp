@@ -48,3 +48,47 @@ describe('conciliação sem direitos reais',()=>{
 it('reprocessamento exige administrador de verdade e não aceita ação de criação',async()=>{const f=fixture(),client={auth:{getUser:vi.fn(async()=>({data:{user:{id:'fixture-admin'}},error:null}))},rpc:vi.fn(async()=>({data:false,error:null}))};const handler=createProductionRecovery(env,()=>f.service,()=>client as never);const request=()=>new Request('https://pereirao.vercel.app/api/production-billing-recovery',{method:'POST',headers:{authorization:'Bearer fixture-session'},body:JSON.stringify({action:'reconcile'})});expect((await handler(request())).status).toBe(403);expect(f.calls).toHaveLength(0);client.rpc.mockResolvedValueOnce({data:true,error:null});expect((await handler(request())).status).toBe(200);});
 
 it('falha ao obter lease tem observabilidade sem expor identificador ou erro bruto',async()=>{const f=fixture();vi.mocked(f.store.call).mockRejectedValueOnce(Error('private upstream'));await expect(f.service.process('evt_fixture')).rejects.toThrow('UNAVAILABLE');expect(f.log).toHaveBeenCalledWith({component:'production-billing',eventHash:expect.stringMatching(/^[a-f0-9]{16}$/),outcome:'claim_unavailable'});expect(JSON.stringify(f.log.mock.calls)).not.toContain('private upstream');});
+
+// No provider access is permitted before a local consented binding is acquired.
+describe('isolamento de eventos da conta compartilhada',()=>{
+ it.each([
+  {...notice,eventType:'SUBSCRIPTION_UPDATED',objectId:'sub_foreign',subscriptionId:'sub_foreign'},
+  {...notice,subscriptionId:'sub_foreign'},
+  {...notice,subscriptionId:null},
+ ])('encerra aviso sem vínculo sem consultar o Asaas: %j',async unknownNotice=>{
+  const f=fixture();
+  vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});
+   return (command==='claim'?{claimed:true,notice:unknownNotice,leaseToken}:null) as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();
+  expect(f.calls.map(x=>x.command)).toEqual(unknownNotice.subscriptionId?['claim','binding','ignore_unbound']:['claim','ignore_unbound']);
+  expect(f.log).toHaveBeenCalledWith({component:'production-billing',eventHash:expect.any(String),outcome:'ignored_unbound'});
+  expect(JSON.stringify(f.log.mock.calls)).not.toMatch(/sub_foreign|pay_fixture/);
+ });
+ it('falha ao consultar vínculo não é confundida com ausência',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockRejectedValueOnce(new Error('unavailable'));
+  await expect(f.service.process('evt_fixture')).rejects.toThrow('UNAVAILABLE');
+  expect(f.read).not.toHaveBeenCalled();
+  expect(f.calls.some(x=>x.command==='ignore_unbound')).toBe(false);
+ });
+ it('falha de binding mantém evento recuperável sem chamar provider',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});if(command==='claim')return {claimed:true,notice,leaseToken} as never;
+   if(command==='binding')throw new ProductionBillingError('UNAVAILABLE');return {} as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();expect(f.calls.map(x=>x.command)).toEqual(['claim','binding','fail']);
+ });
+ it('falha ao persistir descarte não é registrada como descarte concluído',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});if(command==='claim')return {claimed:true,notice,leaseToken} as never;
+   if(command==='binding')return null as never;
+   if(command==='ignore_unbound')throw new ProductionBillingError('UNAVAILABLE');return {} as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();expect(f.calls.at(-1)).toMatchObject({command:'fail',payload:{code:'UNAVAILABLE'}});
+  expect(JSON.stringify(f.log.mock.calls)).not.toContain('ignored_unbound');
+ });
+});

@@ -129,19 +129,21 @@ export class ProductionReconciler {
     let bindingId: string | undefined;
     try {
       const paymentEvent = notice.eventType.startsWith("PAYMENT_");
-      let subscriptionId = notice.subscriptionId;
-      if (paymentEvent && !subscriptionId) {
-        const payment = await this.provider.read("payments", notice.objectId);
-        subscriptionId = id(payment.subscription) ? payment.subscription : null;
+      // Scope comes only from a pre-existing consented local binding. Never resolve
+      // a foreign account payment through the provider just to discover its scope.
+      const subscriptionId = notice.subscriptionId;
+      const binding = subscriptionId
+        ? await this.store.call<Binding | null>("binding", {
+            eventId,
+            leaseToken,
+            subscriptionId,
+          })
+        : null;
+      if (!binding) {
+        await this.store.call("ignore_unbound", { eventId, leaseToken });
+        this.log({ component: "production-billing", eventHash, outcome: "ignored_unbound" });
+        return;
       }
-      if (!subscriptionId)
-        throw new ProductionBillingError("RECONCILIATION_REQUIRED");
-      const binding = await this.store.call<Binding | null>("binding", {
-        eventId,
-        leaseToken,
-        subscriptionId,
-      });
-      if (!binding) throw new ProductionBillingError("RECONCILIATION_REQUIRED");
       bindingId = binding.id;
       // Leituras após o lease do vínculo: um evento antigo nunca aplica o payload do webhook.
       const subscription = await this.provider.read(
