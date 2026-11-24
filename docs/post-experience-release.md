@@ -19,7 +19,7 @@ Não há migração, alteração de RLS/Storage/permissões, comando de publica�
 
 ## Testes e limites
 
-45 testes direcionados de posts, perfil, carrossel e transporte SDK passaram; os cenários afetados pela mudança de rótulo final foram reconferidos (14 testes). Typecheck e build passaram. Existe aviso já conhecido sobre import estático/dinâmico de ProfilePreviewPage; não bloqueia o build.
+45 testes direcionados de posts, perfil, carrossel e transporte SDK passaram; os cenários afetados pela mudança de rótulo final foram reconferidos (14 testes). Um teste legado da Conta ainda procurava o link antigo na lista; foi atualizado para conferir a capa, o detalhe, a edição e a ausência de contato consigo mesmo. Typecheck e build passaram. Existe aviso já conhecido sobre import estático/dinâmico de ProfilePreviewPage; não bloqueia o build.
 
 Nova regressão cobre grade → detalhe → editar/cancelar; save → atualização imediata → feed; retorno à aba; falha/retry; destino dos serviços; login com next da conversa; responsável sem contato próprio; ausência real de WhatsApp; Home sem consulta privada; filtros de publicação e exclusão de imagens pending/staged.
 
