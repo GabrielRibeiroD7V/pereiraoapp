@@ -45,6 +45,8 @@ try {
     });
     assert.equal(state.cards.length, 6);
     assert.equal(state.mainTabs.length, 4);
+    assert.equal(await page.$$eval('.app-header a[href="/mensagens"]',els=>els.length),0);
+    assert.equal(await page.$$eval('a[href="/mensagens"]',els=>els.length),1);
     assert.ok(state.scrollWidth <= width, `overflow: ${width}`);
     assert.ok(state.brandCenterError < 1, `brand center: ${width}`);
     for (const card of state.cards) {
@@ -54,7 +56,12 @@ try {
     assert.equal(new Set(state.cards.map(card => card.top)).size, width < 768 ? 2 : 1);
     for(const tab of state.nav)assert.ok(tab.width>=44&&tab.height>=44&&tab.left>=0&&tab.right<=width+1&&tab.bottom<=900,JSON.stringify(tab));
     if(width<768)assert.ok(state.cards.every(c=>c.height<=112),JSON.stringify(state.cards.map(c=>({width,height:c.height,name:c.name}))));
-    results.push(state);
+    // Teclado real do Chromium emulado: Tab precisa alcançar a única entrada.
+    await page.evaluate(()=>document.activeElement?.blur());
+    let keyboardReached=false;
+    for(let n=0;n<12;n++){await page.keyboard.press('Tab');if(await page.evaluate(()=>document.activeElement?.getAttribute('href')==='/mensagens')){keyboardReached=true;break;}}
+    assert.ok(keyboardReached,'Conversas acessível por Tab em '+width);
+    results.push({...state,keyboardReached});
     if ([393,1280].includes(width)) {
       await page.screenshot({ path: resolve(output, `home-${width}.png`), fullPage: true });
       await (await page.$('.category-grid')).screenshot({ path: resolve(output, `categories-${width}.png`) });

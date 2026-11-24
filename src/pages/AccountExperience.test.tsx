@@ -33,7 +33,7 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByText('Conta de Nome cadastrado')).toBeInTheDocument();
     expect(screen.queryByText('Nome antigo')).not.toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
+    expect(screen.getByRole('link', { name: 'Conversas' })).toHaveAttribute('href', '/mensagens');
     expect(screen.getByLabelText('Perfil que você está vendo')).toHaveValue(first.id);
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${first.id}/editar`);
     expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
@@ -125,8 +125,8 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByRole('link', { name: 'Gerenciar serviços' })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
-    expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
-    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(2);
+    expect(screen.getByRole('link', { name: 'Conversas' })).toHaveAttribute('href', '/mensagens');
+    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(1);
     expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
   });
 
