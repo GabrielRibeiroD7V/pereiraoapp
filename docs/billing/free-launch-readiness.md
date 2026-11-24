@@ -31,6 +31,6 @@ Contas, chaves e URLs Sandbox/produção são separados conforme a [documentaç�
 
 ## Alteração de interface desta entrega
 
-Removidos os avisos na Conta, criação de conta, cadastro profissional, edição e prévia/perfil próprio. Removidos os atalhos de “Gratuidade e assinatura”. A rota antiga `/conta/assinaturas` permanece protegida e sem oferta futura, exibindo apenas contratações persistidas, ou “Nenhuma contratação registrada”. Informações administrativas internas e avisos necessários à simulação Sandbox não são oferta ao público e foram preservados.
+Removidos os avisos na Conta, criação de conta, cadastro profissional, edição, confirmação de apresentação e prévia/perfil próprio. Removidos os atalhos de “Gratuidade e assinatura”. A rota antiga `/conta/assinaturas` permanece protegida e sem oferta futura, exibindo apenas contratações persistidas, ou “Nenhuma contratação registrada”. Informações administrativas internas e avisos necessários à simulação Sandbox não são oferta ao público e foram preservados.
 
 Sem SQL, migração, alteração de provider/API, flags, isenções, publicação de negócios/posts ou habilitação de cobrança. Primeiro avanço operacional continua sendo um serviço legítimo, revisão e autorização de publicação específicas, descoberta e conversa entre duas contas reais.

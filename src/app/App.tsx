@@ -89,7 +89,7 @@ const titles: Record<string, string> = {
   "/conta/dados": "Dados da conta",
   "/conta/seguranca": "Segurança e acesso",
   "/admin": "Administração",
-  "/conta/assinaturas": "Gratuidade e assinatura",
+  "/conta/assinaturas": "Assinaturas",
   "/mensagens": "Mensagens",
 };
 
