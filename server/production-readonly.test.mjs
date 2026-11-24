@@ -21,3 +21,14 @@ it('limita JSON e não reflete estados desconhecidos',async()=>{
  expect((await productionReadOnlyPreflight(env,async()=>Response.json({general:'PRIVATE'}))).account.general).toBe('UNKNOWN');
  expect((await productionReadOnlyPreflight(env,async()=>Response.json({large:'a'.repeat(70000)}))).state).toBe('communication_error');
 });
+
+it.each([
+ [undefined,'missing'],['','missing'],[' $aact_prod_fixture','outer_whitespace'],
+ ['$aact_prod_fixture\n','outer_whitespace'],['"$aact_prod_fixture"','quoted_value'],
+ ['$aact_hmlg_fixture','sandbox_key'],['wallet-id-not-an-api-key','unexpected_prefix'],
+ ['$aact_prod_á','invalid_characters_or_length'],
+])('identifica causa local sem revelar chave: %s',async(key,reason)=>{
+ const request=vi.fn();const result=await productionReadOnlyPreflight({...env,ASAAS_API_KEY_PRODUCTION:key},request);
+ expect(result).toEqual({state:'invalid_key_format',reason});expect(request).not.toHaveBeenCalled();
+ expect(JSON.stringify(result)).not.toMatch(/aact|wallet-id/);
+});
