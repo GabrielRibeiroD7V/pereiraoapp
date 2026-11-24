@@ -1,7 +1,19 @@
 -- PROPOSTA: exige autorização própria antes de qualquer aplicação remota.
--- Nenhuma tabela, política, credencial, vínculo financeiro ou dado comercial é criado/alterado.
+-- Acrescenta auditoria privada de revisão manual. Não altera credenciais ou dados comerciais.
 -- processed + IGNORED_* registra conclusão sem conciliação; não escreve auditoria financeira.
 begin;
+create table private.production_billing_scope_reviews (
+ id uuid primary key default gen_random_uuid(),
+ event_id text not null unique references private.production_billing_events(event_id) on delete restrict,
+ binding_id uuid not null references private.production_billing_bindings(id) on delete restrict,
+ reviewer_id uuid not null references auth.users(id) on delete restrict,
+ reason text not null check(char_length(btrim(reason)) between 10 and 500),
+ original_disposition text not null check(original_disposition in ('IGNORED_UNBOUND','IGNORED_NO_SUBSCRIPTION_LINK')),
+ ignored_at timestamptz not null,
+ reviewed_at timestamptz not null default clock_timestamp()
+);
+alter table private.production_billing_scope_reviews enable row level security;
+revoke all on private.production_billing_scope_reviews from public,anon,authenticated;
 create or replace function private.production_billing_server(command text,raw_payload text,issued_at bigint,nonce uuid,signature text) returns jsonb language plpgsql security definer set search_path='' as $$
 declare key_bytes bytea;p jsonb;e private.production_billing_events;b private.production_billing_bindings;hash bytea;token uuid;pay jsonb;changed integer;rows jsonb;
 begin
@@ -23,12 +35,39 @@ begin
  elsif command='due' then
   select coalesce(jsonb_agg(event_id),'[]'::jsonb) into rows from(select event_id from private.production_billing_events where state<>'processed' and next_attempt_at<=clock_timestamp() and (lease_until is null or lease_until<clock_timestamp()) order by received_at,event_id limit 2) x;
   return jsonb_build_object('eventIds',rows);
+ elsif command in ('scope_target','scope_requeue') then
+  -- HMAC alone never stands in for an enabled administrator at the API boundary.
+  if not exists(select 1 from private.platform_admins where user_id=(p->>'reviewerId')::uuid)
+   or not private.account_enabled((p->>'reviewerId')::uuid) then
+   raise exception 'Administrator required' using errcode='42501';
+  end if;
+  if coalesce(char_length(btrim(p->>'reason')),0) not between 10 and 500 then
+   raise exception 'Review reason required' using errcode='22023';
+  end if;
+  select * into e from private.production_billing_events where event_id=p->>'eventId' for update;
+  if not found or e.state<>'processed' or coalesce(e.last_error,'') not in ('IGNORED_UNBOUND','IGNORED_NO_SUBSCRIPTION_LINK')
+   or e.binding_id is not null or exists(select 1 from private.production_billing_scope_reviews where event_id=e.event_id) then
+   raise exception 'Event not reviewable' using errcode='22023';
+  end if;
+  select * into b from private.production_billing_bindings where subscription_id=p->>'subscriptionId' for update;
+  if not found then raise exception 'Existing consented binding required' using errcode='22023';end if;
+  if e.notice->>'subscriptionId' is not null and e.notice->>'subscriptionId' is distinct from b.subscription_id then
+   raise exception 'Wrong notice subscription' using errcode='22023';
+  end if;
+  if command='scope_target' then
+   return jsonb_build_object('notice',e.notice,'binding',to_jsonb(b)-array['consent_at','terms_version','lease_token','lease_until','observed_status']);
+  end if;
+  insert into private.production_billing_scope_reviews(event_id,binding_id,reviewer_id,reason,original_disposition,ignored_at)
+   values(e.event_id,b.id,(p->>'reviewerId')::uuid,btrim(p->>'reason'),e.last_error,e.processed_at);
+  update private.production_billing_events set state='pending',processed_at=null,last_error=null,
+   next_attempt_at=clock_timestamp(),binding_id=b.id,lease_token=null,lease_until=null where event_id=e.event_id;
+  return '{"requeued":true,"rightsChanged":false}'::jsonb;
  elsif command='claim' then
   token:=gen_random_uuid();
   update private.production_billing_events set state='processing',attempts=attempts+1,lease_token=token,lease_until=clock_timestamp()+interval '45 seconds'
    where event_id=p->>'eventId' and state<>'processed' and next_attempt_at<=clock_timestamp() and (lease_until is null or lease_until<clock_timestamp()) returning * into e;
   if not found then return '{"claimed":false}'::jsonb;end if;
-  return jsonb_build_object('claimed',true,'notice',e.notice,'leaseToken',token);
+  return jsonb_build_object('claimed',true,'notice',case when e.notice->>'subscriptionId' is null and e.binding_id is not null then e.notice||jsonb_build_object('subscriptionId',(select subscription_id from private.production_billing_bindings where id=e.binding_id)) else e.notice end,'leaseToken',token);
  elsif command in ('binding','complete','fail','ignore_unbound') then
   select * into e from private.production_billing_events where event_id=p->>'eventId' for update;
   if not found or e.state<>'processing' or e.lease_token is distinct from (p->>'leaseToken')::uuid or e.lease_until<clock_timestamp() then raise exception 'Stale lease' using errcode='40001';end if;
@@ -45,7 +84,7 @@ begin
     lease_token=null,lease_until=null where event_id=e.event_id;
    return '{"ignored":true,"rightsChanged":false}'::jsonb;
   elsif command='binding' then
-   if p->>'subscriptionId' is distinct from e.notice->>'subscriptionId' then
+   if p->>'subscriptionId' is distinct from coalesce(e.notice->>'subscriptionId',(select subscription_id from private.production_billing_bindings where id=e.binding_id)) then
     raise exception 'Wrong notice subscription' using errcode='22023';
    end if;
    select * into b from private.production_billing_bindings where subscription_id=p->>'subscriptionId' for update;

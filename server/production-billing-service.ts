@@ -226,6 +226,31 @@ export class ProductionReconciler {
       }
     }
   }
+  // Explicit administrative review, never automatically called by delivery/retry.
+  async reviewIgnored(reviewerId: string, eventId: string, subscriptionId: string, reason: string) {
+    if (!id(eventId) || !/^sub_[A-Za-z0-9_-]{1,150}$/.test(subscriptionId) ||
+        !/^[a-f0-9-]{36}$/i.test(reviewerId) || reason.trim().length < 10 || reason.trim().length > 500)
+      throw new ProductionBillingError("INVALID_INPUT");
+    const payload = { reviewerId, eventId, subscriptionId, reason: reason.trim() };
+    const {notice, binding} = await this.store.call<{notice: ProductionNotice; binding: Binding}>("scope_target", payload);
+    // Resolve only the administrator-selected EXISTING binding. Do not search the account.
+    const subscription = await this.provider.read("subscriptions", binding.subscription_id);
+    if (subscription.customer !== binding.customer_id ||
+        subscription.externalReference !== binding.external_reference ||
+        cents(subscription.value) !== binding.amount_cents ||
+        subscription.billingType !== binding.method || subscription.cycle !== binding.cycle)
+      throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    if (notice.eventType.startsWith("PAYMENT_")) {
+      const payment = await this.provider.read("payments", notice.objectId);
+      if (payment.customer !== binding.customer_id || payment.subscription !== binding.subscription_id ||
+          cents(payment.value) !== binding.amount_cents || payment.billingType !== binding.method)
+        throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    } else if (notice.objectId !== binding.subscription_id) {
+      throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    }
+    // Atomic audit + requeue only. Normal reconciliation rechecks API under its lease.
+    return this.store.call<{requeued: boolean; rightsChanged: false}>("scope_requeue", payload);
+  }
   async retry() {
     const result = await this.store.call<{ eventIds: string[] }>("due", {});
     for (const id of result.eventIds) await this.process(id);

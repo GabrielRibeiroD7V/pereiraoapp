@@ -87,4 +87,32 @@ select test.assert_true((select count(*)=1 from private.production_billing_bindi
 set local role anon;
 select test.expect_error($q$select public.production_billing_server('ignore_unbound','{}',extract(epoch from now())::bigint,gen_random_uuid(),repeat('0',64))$q$,'42501','isolation: no discard without HMAC');
 reset role;
+-- Manual recognition after a terminal scope disposition: local fixtures only.
+insert into private.platform_admins(user_id) values('00000000-0000-4000-8000-00000000f101');
+select test.expect_error($q$select test.production_call('scope_target','{"eventId":"evt_no_sub","subscriptionId":"sub_local","reviewerId":"00000000-0000-4000-8000-00000000f999","reason":"Verified consent fixture"}')$q$,'42501','scope review: real enabled administrator required');
+select test.expect_error($q$select test.production_call('scope_target','{"eventId":"evt_no_sub","subscriptionId":"sub_unknown","reviewerId":"00000000-0000-4000-8000-00000000f101","reason":"Verified consent fixture"}')$q$,'22023','scope review: cannot create consented binding');
+select test.expect_error($q$select test.production_call('scope_target','{"eventId":"evt_no_sub","subscriptionId":"sub_local","reviewerId":"00000000-0000-4000-8000-00000000f101","reason":"short"}')$q$,'22023','scope review: reason required');
+select jsonb_build_object('eventId','evt_no_sub','subscriptionId','sub_local','reviewerId','00000000-0000-4000-8000-00000000f101','reason','Verified consent fixture') as review_payload \gset
+select encode(payload_digest,'hex') as original_digest from private.production_billing_events where event_id='evt_no_sub' \gset
+select test.assert_true(test.production_call('scope_target',:'review_payload')->'binding'->>'subscription_id'='sub_local','scope review: target available for official GET without requeue');
+select test.assert_true((select state='processed' from private.production_billing_events where event_id='evt_no_sub') and (select count(*)=0 from private.production_billing_scope_reviews),'scope review: investigation alone changes no event');
+select test.production_call('scope_requeue',:'review_payload');
+select test.assert_true((select state='pending' and processed_at is null and encode(payload_digest,'hex')=:'original_digest' and notice->>'subscriptionId' is null from private.production_billing_events where event_id='evt_no_sub'),'scope review: atomic requeue preserves original notice and digest');
+select test.assert_true((select count(*)=1 from private.production_billing_scope_reviews where event_id='evt_no_sub' and original_disposition='IGNORED_NO_SUBSCRIPTION_LINK' and reviewer_id='00000000-0000-4000-8000-00000000f101' and reviewed_at is not null),'scope review: original disposition and reviewer retained');
+select test.expect_error(format('select test.production_call(''scope_requeue'',%L::jsonb)',:'review_payload'),'22023','scope review: duplicate action cannot requeue twice');
+select test.production_call('claim','{"eventId":"evt_no_sub"}') as recovered_claim \gset
+select test.assert_true(:'recovered_claim'::jsonb->'notice'->>'subscriptionId'='sub_local','scope review: claim resolves reviewed binding without rewriting notice');
+select test.production_call('binding',jsonb_build_object('eventId','evt_no_sub','leaseToken',:'recovered_claim'::jsonb->>'leaseToken','subscriptionId','sub_local'));
+select test.production_call('complete',jsonb_set(jsonb_set(jsonb_set(:'snapshot'::jsonb,'{eventId}','"evt_no_sub"'),'{leaseToken}',:'recovered_claim'::jsonb->'leaseToken'),'{payment}',jsonb_build_object('paymentId','pay_other','subscriptionId','sub_local','customerId','cus_local','amountCents',1234,'refundedCents',0,'status','RECEIVED','settled',true)));
+select test.assert_true((select state='processed' and last_error is null from private.production_billing_events where event_id='evt_no_sub') and (select count(*)=1 from private.production_billing_scope_reviews),'scope review: normal reconciliation finishes while review evidence survives');
+select test.expect_error(format('select test.production_call(''scope_requeue'',%L::jsonb)',:'review_payload'),'22023','scope review: paid observation cannot be reopened');
+-- A previously unknown subscription must match the later pre-existing consent exactly.
+insert into private.production_billing_bindings(business_id,customer_id,subscription_id,external_reference,amount_cents,method,cycle,consent_at,terms_version) values(:'bid','cus_foreign','sub_foreign',gen_random_uuid(),1234,'CREDIT_CARD','MONTHLY',now(),'LOCAL-NOT-A-PLAN');
+select test.expect_error($q$select test.production_call('scope_target','{"eventId":"evt_foreign","subscriptionId":"sub_local","reviewerId":"00000000-0000-4000-8000-00000000f101","reason":"Verified consent fixture"}')$q$,'22023','scope review: cannot transfer event to different subscription');
+select test.production_call('scope_requeue','{"eventId":"evt_foreign","subscriptionId":"sub_foreign","reviewerId":"00000000-0000-4000-8000-00000000f101","reason":"Verified consent fixture"}');
+select test.assert_true((select state='pending' from private.production_billing_events where event_id='evt_foreign'),'scope review: late legitimate binding recovers terminal event');
+set local role authenticated;
+select test.expect_error('select * from private.production_billing_scope_reviews','42501','scope review: audit private to machine');
+reset role;
+select test.assert_true((select status='draft' from public.businesses where id=:'bid') and (select count(*)=0 from public.business_subscriptions) and (select count(*)=0 from private.subscription_activations),'scope review: no publication, trial or real rights');
 rollback;
