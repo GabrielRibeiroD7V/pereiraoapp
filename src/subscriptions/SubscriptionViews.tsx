@@ -1,3 +1,4 @@
+import {InitialFreeNotice} from './InitialFreeNotice';
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSubscriptions } from "./SubscriptionProvider";
@@ -20,6 +21,7 @@ function StatusCopy({ item }: { item: BusinessSubscription }) {
   return (
     <div className="subscription-copy">
       <strong>{subscriptionLabels[item.state]}</strong>
+      {item.state === "initial_free" && <p>Perfil básico, serviços, publicações e conversas gratuitos. Os 90 dias não estão correndo; assinatura futura somente por escolha expressa.</p>}
       {item.state === "exempt" && <p>Este negócio não precisa contratar uma assinatura.</p>}
       {item.trialEndsAt &&
         (item.state === "trial_active" || item.state === "trial_ended") && (
@@ -125,7 +127,7 @@ export function SubscriptionsPage() {
       <Link className="back-link" to="/conta">
         Minha conta
       </Link>
-      <PageHeader title="Gratuidade e assinatura">
+      <InitialFreeNotice /><PageHeader title="Gratuidade e assinatura">
         <p>Uma situação por negócio, independente da sua conta pessoal.</p>
       </PageHeader>
       {state.loading ? (
