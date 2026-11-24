@@ -21,6 +21,14 @@ function open(section = '', visitor = false, company = false, route?: string, pr
   render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App presentationRepository={presentationRepository} authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
   return { ...f, professional };
 }
+it('menu Adicionar usa diálogo contido e fecha sem gravar ou trocar de negócio',async()=>{
+ open('',false,false,`/conta/profissional/${bid}/perfil`);
+ fireEvent.click(await screen.findByRole('button',{name:'Adicionar'}));
+ const menu=await screen.findByRole('dialog',{name:'Adicionar ao perfil'});
+ expect(within(menu).getByRole('link',{name:'Adicionar serviço'})).toHaveAttribute('href',`/conta/profissional/${bid}/servicos?acao=novo`);
+ expect(within(menu).getByRole('link',{name:'Adicionar foto de trabalho'})).toHaveAttribute('href',`/conta/profissional/${bid}/trabalhos?acao=novo`);
+ fireEvent.click(within(menu).getByRole('button',{name:'Fechar'}));expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
 describe('área central do perfil existente', () => {
   it('profissão e LinkedIn salvos aparecem no próprio perfil e em Ver como cliente, sem publicar', async () => {
     let saved = { profession: '', linkedin_url: '', headline: 'Título independente', experience: '', education: '', certifications: '', professional_registration: '' };

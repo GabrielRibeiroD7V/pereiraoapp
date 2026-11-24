@@ -40,7 +40,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
       {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <SpecialtyBadges primary={provider.categoryId ? { id: provider.categoryId, name: provider.specialty } : null} additional={provider.additionalSpecialties ?? []} />
       {provider.description && <p className="public-about social-profile-bio">{provider.description}</p>}
-      <div className="social-profile-actions"><Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link><ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} /></div>
+      <div className="social-profile-actions"><Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link><ContactLinks compact name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} /></div>
     </header>
     {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
     <PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
