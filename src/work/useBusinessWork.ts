@@ -1,3 +1,4 @@
+import {useReturnRevision} from '../hooks/useReturnRevision';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -8,6 +9,7 @@ import type { BusinessRow, PortfolioRow, ServiceRow } from '../lib/database.type
 import type { ProfessionalCatalog } from '../professional/types';
 export interface BusinessWork { business: BusinessRow; catalog: ProfessionalCatalog; services: ServiceRow[]; photos: PortfolioRow[]; authUid: string }
 export function useBusinessWork() {
+  const resume=useReturnRevision();
   const { businessId = '' } = useParams();
   const { session } = useAuth();
   const professional = useProfessionalRepository();
@@ -25,6 +27,6 @@ export function useBusinessWork() {
       if (live) setData({ business: editable.business, catalog, ...work, authUid: session?.user.id ?? '' });
     }).catch((cause: unknown) => { if (live) setError(workError(cause)); }).finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [businessId, session?.user.id, professional, repository, version]);
+  }, [businessId, session?.user.id, professional, repository, version,resume]);
   return { businessId, repository, data: data?.business.id === businessId && data.authUid === session?.user.id ? data : null, loading, error, refresh: () => setVersion((value) => value + 1) };
 }

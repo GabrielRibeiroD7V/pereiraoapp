@@ -59,7 +59,7 @@ export function PublicWorkPage() {
               title="Fotografia do trabalho"
               onClose={() => setEnlarged(null)}
             >
-              <div className="public-enlarged">
+              <p><strong>{post.business.name}</strong></p><h3>{post.title}</h3><p className="post-full-description">{post.description || 'Esta publicação não tem legenda.'}</p><div className="public-enlarged">
                 <PublicImage
                   businessId={post.businessId}
                   path={enlarged.path}
