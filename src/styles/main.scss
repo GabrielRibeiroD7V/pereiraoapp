@@ -371,3 +371,30 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .account-install > img { flex: 0 0 32px; }
 .account-install p { margin: .25rem 0 0; }
 .account-install .text-link { background: none; border: 0; padding: .25rem 0; min-height: 44px; font: inherit; cursor: pointer; text-align: left; }
+
+/* Mobile profile actions remain in flow; menus use a viewport-contained dialog. */
+.profile-preview .social-preview-header { border-top: 0; padding-top: .25rem; }
+.profile-preview .social-preview-identity { padding-right: 2.5rem; gap: .75rem; align-items: center; }
+.profile-preview .profile-photo-controls { flex: 0 0 auto; max-width: clamp(5rem,22vw,7rem); }
+.profile-preview .profile-avatar { width: clamp(5rem,22vw,7rem); height: clamp(5rem,22vw,7rem); }
+.profile-preview .social-preview-identity__details { min-width: 0; }
+.profile-preview .social-preview-identity__details p { overflow-wrap: anywhere; }
+.profile-preview .owner-profile-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: .375rem; }
+.profile-preview .owner-profile-actions > .button { min-width: 0; padding: .625rem .25rem; white-space: normal; text-align: center; line-height: 1.25; font-size: .8125rem; }
+.public-contacts--compact { display: flex; gap: .5rem; flex: 0 0 auto !important; }
+.owner-profile-actions > .public-contacts--compact { grid-column: 1 / -1; justify-content: flex-end; margin-top: .25rem; }
+.contact-circle { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: 0 0 2.75rem; border-radius: 50%; color: white; text-decoration: none; }
+.contact-circle--whatsapp { background: #087b39; }
+.contact-circle--instagram { background: #7636ad; }
+.contact-circle:focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; }
+.profile-add-menu { display: grid; min-width: 0; gap: .25rem; }
+.profile-add-menu a, .profile-add-menu button { display: block; min-height: 2.75rem; padding: .875rem; border-radius: .5rem; overflow-wrap: anywhere; text-align: left; }
+.profile-add-menu a:hover { background: var(--color-surface); }
+.work-modal { position: fixed; inset: auto; top: calc(var(--visual-top,0px) + env(safe-area-inset-top,0px) + .5rem); left: calc(var(--visual-left,0px) + var(--visual-width,100vw) / 2); transform: translateX(-50%); margin: 0; box-sizing: border-box; width: min(36rem,calc(var(--visual-width,100vw) - 1rem)); max-width: calc(var(--visual-width,100vw) - 1rem); max-height: calc(var(--visual-height,100dvh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 1rem); padding: 1rem; overflow: hidden; }
+.work-modal[open] { display: flex; flex-direction: column; }
+.work-modal__heading { flex: 0 0 auto; margin-bottom: .75rem; min-width: 0; }
+.work-modal__heading h2 { min-width: 0; overflow-wrap: anywhere; }
+.work-modal__heading button { flex-shrink: 0; }
+.work-modal__body { min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom,0px); }
+.work-modal__body .work-actions { position: sticky; bottom: 0; padding-block: .75rem .25rem; background: white; z-index: 1; }
+.work-modal__body input, .work-modal__body textarea { scroll-margin-block: 1rem; }

@@ -116,15 +116,12 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.queryByText('Dado privado')).not.toBeInTheDocument();
   });
 
-  it('mostra o topo da prévia com foto, números reais e ações de edição', async () => {
+  it('mostra perfil compacto sem números de páginas parciais', async () => {
     const work = { list: vi.fn(async () => ({ services: [{ id: 'servico', active: true }], photos: [{ id: 'foto', media_state: 'ready', storage_path: `${first.id}/portfolio/foto.webp` }] })), imageUrl: vi.fn(async () => 'https://example.invalid/foto.webp') } as unknown as WorkRepository;
     const { repository } = setup(`/conta/profissional/${first.id}/previa`, [first], undefined, work);
     vi.mocked(repository.getEditable).mockResolvedValueOnce({ business: first, input: { ...emptyRegistration, name: first.name, description: 'Atendimento na região.', categoryId: 'eletrica' as const, cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'] } });
     expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument();
-    const summary = await screen.findByRole('group', { name: 'Resumo do perfil' });
-    expect(summary).toHaveTextContent('Fotos1');
-    expect(summary).toHaveTextContent('Serviços1');
-    expect(summary).toHaveTextContent('Projetos0');
+    expect(screen.queryByRole('group', { name: 'Resumo do perfil' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Fotos e trabalhos' })).not.toBeInTheDocument();
     expect(screen.getByText('Atendimento na região.')).toBeInTheDocument();
   });
