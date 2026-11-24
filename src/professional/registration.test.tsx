@@ -96,7 +96,7 @@ describe('cadastro progressivo e espaço profissional', () => {
     expect(saved).not.toHaveProperty('status'); expect(saved).not.toHaveProperty('ownerId');
     expect(await screen.findByText(/Rascunho privado/)).toBeInTheDocument();
     expect(readCheckpoint('registration-user')).toBeNull();
-    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
 
   it.each(['autonomo', 'empresa'] as const)('preserva origem e várias áreas de MS/PR entre etapas (%s)', async type => {

@@ -43,7 +43,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('aria-haspopup', 'dialog');
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.getByRole('link', { name: /Gratuidade e assinatura/ })).toHaveAttribute('href', '/conta/assinaturas');
-    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(3);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
 
   it('abre a orientação diretamente em Opções da conta, sem âncora nem segundo toque', async () => {
@@ -112,7 +112,7 @@ describe('experiência pessoal e profissional', () => {
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
     expect(screen.getByRole('link', { name: 'Gerenciar serviços' })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
     expect(screen.getByRole('link', { name: 'Abrir mensagens' })).toHaveAttribute('href', '/mensagens');
-    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(1);
+    expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(2);
     expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
   });
 

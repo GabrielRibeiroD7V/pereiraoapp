@@ -57,7 +57,7 @@ describe("publicações: interface com dados simulados locais", () => {
       within(
         screen.getByRole("navigation", { name: "Navegação principal" }),
       ).getAllByRole("link"),
-    ).toHaveLength(3);
+    ).toHaveLength(4);
   });
   it('começa pela foto, ordena e salva rascunho sem publicar negócio',async()=>{
     const posts=open(ownerPath,{status:'draft',empty:true}),save=vi.spyOn(posts.managed,'save'),command=vi.spyOn(posts.managed,'command');
@@ -198,7 +198,7 @@ describe("publicações: interface com dados simulados locais", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(
       within(screen.getByRole("navigation")).getAllByRole("link"),
-    ).toHaveLength(3);
+    ).toHaveLength(4);
     expect(
       screen.queryByText(/Curtidas|Seguidores|Comentários/),
     ).not.toBeInTheDocument();

@@ -82,7 +82,7 @@ describe("consulta informativa de assinatura", () => {
       within(
         screen.getByRole("navigation", { name: "Navegação principal" }),
       ).getAllByRole("link"),
-    ).toHaveLength(3);
+    ).toHaveLength(4);
   });
   it("aguarda a primeira ativação para começar os 90 dias", async () => {
     open({

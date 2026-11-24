@@ -1,4 +1,4 @@
-import { House, Search } from 'lucide-react';
+import { House, Search, MessageCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { routes } from '../app/routes';
 import { BrandSymbol } from './Brand';
@@ -6,6 +6,7 @@ import { BrandSymbol } from './Brand';
 const items = [
   { to: routes.home, label: 'Início', Icon: House },
   { to: routes.search, label: 'Buscar', Icon: Search },
+  { to: routes.conversations, label: 'Conversas', Icon: MessageCircle },
   { to: routes.account, label: 'Conta', Icon: null },
 ] as const;
 

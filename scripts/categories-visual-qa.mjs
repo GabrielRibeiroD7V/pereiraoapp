@@ -40,10 +40,11 @@ try {
       });
       return { width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
         brandCenterError: Math.abs(brand.left + brand.width / 2 - innerWidth / 2),
+        nav: [...document.querySelectorAll('.main-nav__link')].map(el=>{const r=el.getBoundingClientRect();return{label:el.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};}),
         mainTabs: [...document.querySelectorAll('.main-nav__link')].map(el => el.textContent), cards };
     });
     assert.equal(state.cards.length, 6);
-    assert.equal(state.mainTabs.length, 3);
+    assert.equal(state.mainTabs.length, 4);
     assert.ok(state.scrollWidth <= width, `overflow: ${width}`);
     assert.ok(state.brandCenterError < 1, `brand center: ${width}`);
     for (const card of state.cards) {
@@ -51,6 +52,8 @@ try {
       assert.match(card.href, /^\/buscar\?categoria=[a-z]+$/);
     }
     assert.equal(new Set(state.cards.map(card => card.top)).size, width < 768 ? 2 : 1);
+    for(const tab of state.nav)assert.ok(tab.width>=44&&tab.height>=44&&tab.left>=0&&tab.right<=width+1&&tab.bottom<=900,JSON.stringify(tab));
+    if(width<768)assert.ok(state.cards.every(c=>c.height<=112),JSON.stringify(state.cards.map(c=>({width,height:c.height,name:c.name}))));
     results.push(state);
     if ([393,1280].includes(width)) {
       await page.screenshot({ path: resolve(output, `home-${width}.png`), fullPage: true });
