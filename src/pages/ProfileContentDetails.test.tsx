@@ -17,6 +17,7 @@ import {
   fixtureBusinessId as bid,
 } from "../test/workFixtures";
 import { postsFixtures } from "../test/postsFixtures";
+async function showPhotos(){fireEvent.click(await screen.findByRole("tab",{name:"Fotos de trabalhos"}));}
 function open(f = createWorkFixtures(), readOnly = false) {
   const posts = postsFixtures("draft");
   render(
@@ -38,6 +39,7 @@ function open(f = createWorkFixtures(), readOnly = false) {
 it("abre imagem, legenda e serviço; edição cancela sem gravar", async () => {
   const { f } = open(),
     save = vi.spyOn(f.work, "savePhotoDetails");
+  await showPhotos();
   fireEvent.click(
     await screen.findByRole("button", {
       name: "Ampliar fotografia Instalação residencial",
@@ -60,6 +62,7 @@ it("mostra ausência real de legenda e associação na prévia privada, sem edi�
     photo = f.snapshot().photos[0]!;
   await f.work.savePhotoDetails(bid, photo.id, "", null);
   open(f, true);
+  await showPhotos();
   fireEvent.click(
     await screen.findByRole("button", {
       name: "Ampliar fotografia do trabalho",
@@ -91,6 +94,7 @@ it("capa de rascunho abre autor, título, legenda e todas as imagens em ordem", 
 });
 it("retorno à aba revalida e revela foto salva em outro dispositivo sem apagar dados", async () => {
   const { f } = open();
+  await showPhotos();
   await screen.findByRole("button", {
     name: "Ampliar fotografia Instalação residencial",
   });
@@ -123,6 +127,7 @@ it("reutiliza foto do portfólio em novo rascunho por ação expressa sem reenvi
   const { f, posts } = open(),
     upload = vi.spyOn(posts.managed, "uploadPostPhoto"),
     save = vi.spyOn(posts.managed, "save");
+  await showPhotos();
   fireEvent.click(
     await screen.findByRole("button", {
       name: "Ampliar fotografia Instalação residencial",

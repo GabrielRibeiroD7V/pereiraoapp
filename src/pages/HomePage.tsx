@@ -18,6 +18,7 @@ export function HomePage() {
         </div>
       </section>
       <div className="home-content">
+        <SocialFeed />
         <section className="home-section" aria-labelledby="categories-title">
           <h2 id="categories-title">Categorias populares</h2>
           <ul className="category-grid">
@@ -32,7 +33,6 @@ export function HomePage() {
           <h2 id="featured-title">Profissionais cadastrados</h2>
           <HomeProviders />
         </section>
-        <SocialFeed />
         <section className="provider-invite" aria-labelledby="invite-title">
           <Link
             className="provider-invite__entry"

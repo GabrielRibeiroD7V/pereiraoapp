@@ -37,8 +37,8 @@ it('editar a publicação atualiza imediatamente capa, feed e detalhe; cancelar 
  fireEvent.change(screen.getByLabelText('Legenda ou descrição da publicação'),{target:{value:'Legenda atualizada no teste'}});
  fireEvent.click(screen.getByRole('button',{name:'Confirmar fotos e salvar rascunho'}));
  await screen.findByRole('heading',{name:'Título atualizado no teste'});fireEvent.click(screen.getByRole('button',{name:'Voltar'}));await screen.findByRole('link',{name:'Abrir publicação Título atualizado no teste'});expect(save).toHaveBeenCalledOnce();
- fireEvent.click(screen.getByRole('tab',{name:'Meu feed'}));
- const feed=screen.getByRole('region',{name:'Meu feed privado'});expect(feed).toHaveTextContent('Legenda atualizada no teste');expect(feed).toHaveTextContent('Rascunho — só você vê');
+ fireEvent.click(screen.getByRole('link',{name:'Abrir publicação Título atualizado no teste'}));
+ const feed=await screen.findByRole('article',{name:'Título atualizado no teste'});expect(feed).toHaveTextContent('Legenda atualizada no teste');expect(feed).toHaveTextContent('Rascunho — só você vê');
  expect(within(feed).getAllByRole('figure')).toHaveLength(2);expect(within(feed).queryByRole('link',{name:'Conversar'})).not.toBeInTheDocument();
  fireEvent.click(within(feed).getByRole('button',{name:'Opções da publicação'}));
  fireEvent.click(within(feed).getByRole('button',{name:'Editar publicação'}));fireEvent.change(await screen.findByLabelText('Título do trabalho'),{target:{value:'Não salvar'}});fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(save).toHaveBeenCalledOnce();
@@ -48,8 +48,7 @@ it('feed privado revalida no retorno sem converter a foto avulsa nem publicar',a
  await posts.managed.save(bid,pid,{title:'Salvo em outra aba',description:'Conteúdo revalidado',photos:posts.snapshot()[0]!.images});
  const command=vi.spyOn(posts.managed,'command');const initial=work.snapshot().photos.length;
  act(()=>window.dispatchEvent(new Event('focus')));
- fireEvent.click(screen.getByRole('tab',{name:'Meu feed'}));
- await waitFor(()=>expect(screen.getByRole('region',{name:'Meu feed privado'})).toHaveTextContent('Salvo em outra aba'));
+ await screen.findByRole('link',{name:'Abrir publicação Salvo em outra aba'});
  expect(work.snapshot().photos).toHaveLength(initial);expect(command).not.toHaveBeenCalled();expect(posts.snapshot()[0]?.status).toBe('draft');
 });
 it('falha no carregamento de posts tem tentativa explícita em vez de parecer feed vazio',async()=>{
@@ -78,7 +77,7 @@ it('contato inexistente não é inventado e visitante autenticado pode conversar
 it('Home reconsulta trabalhos publicados quando a aba retorna, sem consultar posts privados',async()=>{
  const posts=postsFixtures();const load=vi.spyOn(posts.publicPosts,'list').mockResolvedValueOnce({items:[],next:null}).mockResolvedValue({items:[posts.work],next:null});const privateLoad=vi.spyOn(posts.managed,'load');
  open('/',true,posts);await screen.findByText('Novos trabalhos em breve.');act(()=>window.dispatchEvent(new Event('focus')));
- await screen.findByRole('link',{name:'Abrir trabalho Trabalho demonstrativo local'});expect(load).toHaveBeenCalledTimes(2);expect(privateLoad).not.toHaveBeenCalled();
+ await screen.findByRole('link',{name:'Trabalho demonstrativo local'});expect(load).toHaveBeenCalledTimes(2);expect(privateLoad).not.toHaveBeenCalled();
 });
 it('link de serviços aguarda a seção do negócio e posiciona o destino',async()=>{
  const scroll=vi.fn();Element.prototype.scrollIntoView=scroll;

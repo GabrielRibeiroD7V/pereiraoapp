@@ -1,5 +1,5 @@
 import { MapPin, UserRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { PostLink } from '../posts/PostLink';
 import { useRef } from 'react';
 import type { PublicProvider } from '../marketplace/types';
 import { ContactLinks } from '../marketplace/ContactLinks';
@@ -23,20 +23,20 @@ export function ProviderList({ providers, carousel = false }: { providers: reado
       onKeyDown={carousel ? (event) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1); } } : undefined}>
       {providers.map((provider) => (
         <li key={provider.id}>
-          <Link className="provider-item" to={`/prestadores/${encodeURIComponent(provider.slug)}`}
+          <PostLink className="provider-item" to={`/prestadores/${encodeURIComponent(provider.slug)}`}
             aria-label={`Ver perfil de ${provider.name}`}>
             <span className="provider-item__avatar">
               {provider.avatarPath ? <PublicImage businessId={provider.id} path={provider.avatarPath} alt="" avatar /> : <UserRound aria-hidden="true" />}
             </span>
             <span className="provider-item__details">
               <strong>{provider.name}</strong>
-              <span>{provider.specialty} · {provider.type === 'empresa' ? 'Empresa' : 'Autônomo'}</span>
+              <span className="provider-item__classification"><span className="provider-item__specialty">{provider.specialty}</span><span className="provider-item__type">{provider.type === 'empresa' ? 'Empresa' : 'Autônomo'}</span></span>
               <span className="provider-item__location"><MapPin size={14} aria-hidden="true" />{provider.city.name}, {provider.city.state}</span>
               {!!provider.additionalSpecialties?.length && <span aria-label="Especialidades adicionais">{provider.additionalSpecialties.map(item => item.name).join(" · ")}</span>}
               {provider.description && <span className="public-description-preview">{provider.description}</span>}
             </span>
-          </Link>
-          <ContactLinks name={provider.name} whatsapp={provider.whatsapp} />
+          </PostLink>
+          <ContactLinks name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} compact />
         </li>
       ))}
     </ul>

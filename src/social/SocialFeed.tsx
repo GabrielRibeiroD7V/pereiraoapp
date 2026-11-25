@@ -1,7 +1,8 @@
+import {PhotoCarousel} from "../components/PhotoCarousel";
 import { useAuth } from "../auth/AuthProvider";
 import { PublishedWorks } from "../posts/PublishedWorks";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useReturnRevision } from "../hooks/useReturnRevision";
 import { PostLink } from "../posts/PostLink";
 import { PostContent } from "../posts/PostContent";
@@ -10,135 +11,52 @@ import { SocialImage } from "./SocialImage";
 import { useSocial } from "./SocialProvider";
 import { postPath } from "./model";
 import type { SocialCursor, SocialPost } from "./model";
-export function SocialFeed({ authorId }: { authorId?: string }) {
-  const repository = useSocial(),
-    resume = useReturnRevision();
-  const [cursor, setCursor] = useState<SocialCursor | null>(null),
-    [items, setItems] = useState<SocialPost[]>([]),
-    [hasNext, setHasNext] = useState(false),
-    [busy, setBusy] = useState(true),
-    [error, setError] = useState(false),
-    [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    setCursor(null);
-  }, [authorId, resume, attempt]);
-  useEffect(() => {
-    let live = true;
-    setBusy(true);
-    setError(false);
-    if (!cursor) setItems([]);
-    if (!repository) {
-      setBusy(false);
-      return;
-    }
-    void repository
-      .feed(cursor, authorId)
-      .then((page) => {
-        if (live) {
-          setItems((old) =>
-            cursor
-              ? [
-                  ...old,
-                  ...page.items.filter(
-                    (p) => !old.some((v) => v.kind === p.kind && v.id === p.id),
-                  ),
-                ]
-              : page.items,
-          );
-          setHasNext(page.hasNext);
-        }
-      })
-      .catch(() => {
-        if (live) setError(true);
-      })
-      .finally(() => {
-        if (live) setBusy(false);
-      });
-    return () => {
-      live = false;
-    };
-  }, [repository, cursor, authorId, resume, attempt]);
-  const last = items.at(-1);
-  if (!repository && !authorId) return <PublishedWorks showUnavailable />;
-  return (
-    <section className="published-works-section" aria-label="Feed público">
-      <h2>{authorId ? "Publicações do perfil" : "Publicações recentes"}</h2>
-      <p className="field-help">
-        Fotos e projetos de pessoas, profissionais e empresas. Só conteúdo
-        publicado aparece aqui.
-      </p>
-      {busy && <p role="status">Carregando publicações…</p>}
-      {!busy && !error && !items.length && (
-        <p>Ainda não há publicações públicas.</p>
-      )}
-      {error && (
-        <p role="alert">
-          Publicações indisponíveis agora.{" "}
-          <button
-            className="text-link"
-            onClick={() => setAttempt((n) => n + 1)}
-          >
-            Tentar novamente
-          </button>
-        </p>
-      )}
-      <div className="social-feed">
-        {items.map((post) => (
-          <article className="published-work" key={`${post.kind}:${post.id}`}>
-            <header>
-              <div>
-                {post.profileUrl ? (
-                  <Link to={post.profileUrl}>{post.author}</Link>
-                ) : (
-                  <strong>{post.author}</strong>
-                )}
-                <p>
-                  {post.kind === "personal"
-                    ? "Publicação pessoal"
-                    : "Trabalho profissional"}
-                </p>
-              </div>
-            </header>
-            <PostLink
-              to={postPath(post)}
-              aria-label={`Abrir publicação ${post.title || post.author}`}
-            >
-              <div className="social-feed-cover">
-                {post.images[0] && (
-                  <SocialImage
-                    image={post.images[0]}
-                    alt={post.title || "Capa da publicação"}
-                  />
-                )}
-              </div>
-              <h3>{post.title || "Publicação pessoal"}</h3>
-            </PostLink>
-            <p>{post.description}</p>
-            <PostDates
-              createdAt={post.createdAt}
-              publishedAt={post.publishedAt}
-            />
-            <PostContact post={post} />
-            <PostLink to={postPath(post)}>
-              Abrir publicação
-              {post.images.length > 1 ? ` · ${post.images.length} fotos` : ""}
-            </PostLink>
-          </article>
-        ))}
-      </div>
-      {hasNext && last?.publishedAt && (
-        <button
-          className="button button--secondary"
-          disabled={busy}
-          onClick={() =>
-            setCursor({ time: last.publishedAt!, id: last.id, kind: last.kind })
-          }
-        >
-          Mais publicações
-        </button>
-      )}
-    </section>
-  );
+// Só número de páginas por entrada do histórico; sem dados privados ou URLs assinadas.
+export const publicFeedPageCounts=new Map<string,number>();
+export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversOnly?:boolean}){
+ const repository=useSocial(),resume=useReturnRevision(),location=useLocation(),viewKey=`${location.key}:social:${authorId??'all'}`;
+ const [attempt,setAttempt]=useState(0),request=useRef(0),busy=useRef(false);
+ const [state,setState]=useState<{key:string;items:SocialPost[];hasNext:boolean;loading:boolean;error:boolean}>({key:viewKey,items:[],hasNext:false,loading:true,error:false});
+ useEffect(()=>{
+  const revision=++request.current;busy.current=true;
+  setState(old=>old.key===viewKey?{...old,loading:true,error:false}:{key:viewKey,items:[],hasNext:false,loading:true,error:false});
+  if(!repository){busy.current=false;setState({key:viewKey,items:[],hasNext:false,loading:false,error:false});return;}
+  void(async()=>{
+   const desired=publicFeedPageCounts.get(viewKey)??1;let cursor:SocialCursor|null=null,items:SocialPost[]=[],hasNext=false;
+   for(let i=0;i<desired;i++){
+    const page=await repository.feed(cursor,authorId);if(request.current!==revision)return;
+    items.push(...page.items.filter(p=>!items.some(v=>v.kind===p.kind&&v.id===p.id)));hasNext=page.hasNext;
+    const last=page.items.at(-1);if(!hasNext||!last?.publishedAt)break;
+    cursor={time:last.publishedAt,id:last.id,kind:last.kind};
+   }
+   if(request.current===revision)setState({key:viewKey,items,hasNext,loading:false,error:false});
+  })().catch(()=>{if(request.current===revision)setState(old=>({...old,error:true,loading:false}));}).finally(()=>{if(request.current===revision)busy.current=false;});
+  return()=>{request.current++;};
+ },[repository,viewKey,authorId,resume,attempt]);
+ const current=state.key===viewKey?state:{key:viewKey,items:[],hasNext:false,loading:true,error:false},items=current.items,last=items.at(-1);
+ async function more(){
+  if(!repository||busy.current||!last?.publishedAt)return;
+  const revision=++request.current;busy.current=true;setState(old=>({...old,loading:true,error:false}));
+  try{const page=await repository.feed({time:last.publishedAt,id:last.id,kind:last.kind},authorId);if(request.current!==revision)return;
+   setState(old=>({...old,items:[...old.items,...page.items.filter(p=>!old.items.some(v=>v.kind===p.kind&&v.id===p.id))],hasNext:page.hasNext,loading:false,error:false}));
+   publicFeedPageCounts.set(viewKey,(publicFeedPageCounts.get(viewKey)??1)+1);if(publicFeedPageCounts.size>40)publicFeedPageCounts.delete(publicFeedPageCounts.keys().next().value!);
+  }catch{if(request.current===revision)setState(old=>({...old,error:true,loading:false}));}finally{if(request.current===revision)busy.current=false;}
+ }
+ if(!repository&&!authorId)return <PublishedWorks showUnavailable/>;
+ return <section className="published-works-section" aria-label={coversOnly?'Publicações do perfil':'Feed público'}>
+  <h2>{authorId?'Publicações do perfil':'Publicações recentes'}</h2>
+  {current.loading&&<p role="status">{items.length?'Atualizando publicações…':'Carregando publicações…'}</p>}
+  {!current.loading&&!current.error&&!items.length&&<p>Ainda não há publicações públicas.</p>}
+  {current.error&&<p role="alert">Publicações indisponíveis agora. <button className="text-link" onClick={()=>setAttempt(n=>n+1)}>Tentar novamente</button></p>}
+  <div className={coversOnly?'profile-post-grid':'social-feed'}>{items.map(post=>coversOnly?<article key={`${post.kind}:${post.id}`}><PostLink className="profile-post-tile" to={postPath(post)} aria-label={`Abrir publicação ${post.title||post.author}`}>
+   {post.images[0]&&<SocialImage image={post.images[0]} alt={post.title||'Capa da publicação'}/>}<span className="profile-post-tile__kind">{post.images.length>1?`${post.images.length} fotos`:'Publicação'}</span><strong>{post.title||'Publicação pessoal'}</strong>
+  </PostLink></article>:<article className="published-work" key={`${post.kind}:${post.id}`}>
+   <header><div>{post.profileUrl?<PostLink to={post.profileUrl}>{post.author}</PostLink>:<strong>{post.author}</strong>}<p>{post.kind==='personal'?'Publicação pessoal':'Trabalho profissional'}</p></div></header>
+   <PhotoCarousel label={`Fotos de ${post.title||post.author}`} items={post.images.map((image,i)=>({id:image.id,content:<SocialImage image={image} alt={`${post.title||'Fotografia da publicação'} — foto ${i+1}`}/>}))}/>
+   <h3><PostLink to={postPath(post)}>{post.title||'Publicação pessoal'}</PostLink></h3><p>{post.description}</p><PostDates publishedAt={post.publishedAt}/><PostContact post={post}/>
+  </article>)}</div>
+  {current.hasNext&&last?.publishedAt&&<button className="button button--secondary" disabled={current.loading} onClick={()=>void more()}>Mais publicações</button>}
+ </section>;
 }
 export function SocialPostBody({
   post,

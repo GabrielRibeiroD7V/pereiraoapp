@@ -170,7 +170,7 @@ describe("publicações: interface com dados simulados locais", () => {
     await screen.findByRole("alert");
     expect(
       screen.getByRole("link", {
-        name: "Abrir trabalho Trabalho demonstrativo local",
+        name: "Trabalho demonstrativo local",
       }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Tentar novamente" }));

@@ -1,16 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   Link,
   useNavigate,
   useParams,
   useSearchParams,
+  useLocation,
 } from "react-router-dom";
+import { ProfileAvatar } from "../components/ProfileAvatar";
 import { useAuth } from "../auth/AuthProvider";
 import { usePersonalProfile } from "../auth/usePersonalProfile";
 import { usePublicQuery } from "../marketplace/usePublicQuery";
 import { QueryStatus } from "../marketplace/QueryStatus";
 import { Pagination } from "../marketplace/Pagination";
 import { PostBackLink } from "../posts/PostBackLink";
+import {profileViews} from "../posts/postReturn";
 import { PostLink } from "../posts/PostLink";
 import { PostManagementMenu } from "../posts/PostManagementMenu";
 import { ReportContent } from "../components/ReportContent";
@@ -36,12 +39,14 @@ export function PersonalPublishingEntry() {
     </section>
   );
 }
-export function PersonalPostsPage() {
+export function PersonalPostsPage({embedded=false}:{embedded?:boolean}={}) {
   const repository = useSocial(),
     navigate = useNavigate(),
     { profile } = usePersonalProfile(),
-    [page, setPage] = useState(1),
+    location=useLocation(),
+    [page, setPage] = useState(()=>profileViews.get(location.key+':personal')?.page??1),
     [revision, setRevision] = useState(0);
+  useEffect(()=>{profileViews.set(location.key+':personal',{tab:'personal',page});if(profileViews.size>40)profileViews.delete(profileViews.keys().next().value!);},[location.key,page]);
   const load = useCallback(
     () => (repository ? repository.mine(page) : Promise.resolve(null)),
     [repository, page],
@@ -49,21 +54,16 @@ export function PersonalPostsPage() {
   const state = usePublicQuery(`personal:${page}:${revision}`, load);
   return (
     <div>
-      <Link className="back-link" to="/conta">
-        Voltar à Conta
-      </Link>
-      <h1>Meu perfil pessoal</h1>
-      <h2>{profile.displayName}</h2>
+      {!embedded&&<Link className="back-link" to="/conta">Voltar à Conta</Link>}
+      <header className="personal-profile-identity"><ProfileAvatar src={profile.avatarUrl}/><div><h2>{profile.displayName}</h2><p>Perfil pessoal</p></div></header>
       <PersonalPublisher
         onSaved={(id) => {
           setRevision((n) => n + 1);
           navigate(`/publicacoes/${id}`);
         }}
       />
-      <p>
-        Seu perfil pessoal não exige serviços. Rascunhos são privados; publicar
-        é sua decisão.
-      </p>
+      <h2>Publicações</h2>
+      <p className="field-help">Sua grade reúne posts salvos. Rascunhos continuam privados.</p>
       <QueryStatus {...state} />
       {!repository && (
         <p role="status">Publicações indisponíveis no momento.</p>
@@ -115,7 +115,7 @@ export function PersonalProfilePage() {
     <div>
       <PostBackLink fallback="/" />
       <h1>Publicações do perfil</h1>
-      <SocialFeed authorId={authorId} />
+      <SocialFeed authorId={authorId} coversOnly />
     </div>
   );
 }

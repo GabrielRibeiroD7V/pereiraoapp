@@ -124,6 +124,7 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.change(screen.getByLabelText('Perfil que você está vendo'), { target: { value: second.id } });
     expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
+    fireEvent.click(screen.getByRole('tab',{name:'Serviços'}));
     expect(screen.getByRole('link', { name: 'Gerenciar serviços' })).toHaveAttribute('href', `/conta/profissional/${second.id}/servicos`);
     expect(screen.getByRole('link', { name: 'Conversas' })).toHaveAttribute('href', '/mensagens');
     expect(document.querySelectorAll('a[href="/mensagens"]')).toHaveLength(1);
@@ -177,4 +178,12 @@ describe('experiência pessoal e profissional', () => {
     expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Editar perfil' })).toHaveAttribute('href', `/conta/profissional/${second.id}/editar`);
   });
+});
+it('Conta começa pelo retrato e apresentação; a criação pessoal fica secundária e publicações são a aba inicial',async()=>{
+ setup('/conta',[first]);await screen.findByRole('heading',{name:first.name});
+ const profile=document.querySelector('.social-preview-header')!,entry=screen.getByRole('region',{name:'Publicações da sua conta',hidden:true});
+ expect(profile.compareDocumentPosition(entry)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+ expect(screen.getByRole('tab',{name:'Publicações'})).toHaveAttribute('aria-selected','true');
+ expect(screen.getByRole('tab',{name:'Serviços'})).toHaveAttribute('aria-selected','false');
+ expect(entry.closest('details')).not.toHaveAttribute('open');
 });
