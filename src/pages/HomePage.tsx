@@ -18,7 +18,7 @@ export function HomePage() {
         </div>
       </section>
       <div className="home-content">
-        <section className="professional-entry" aria-labelledby="invite-title">
+        <section className="home-professional-entry" aria-labelledby="invite-title">
           <Link to="/conta/profissional/cadastro" aria-label="Anunciar meus serviços">
             <BriefcaseBusiness size={17} aria-hidden="true" />
             <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
