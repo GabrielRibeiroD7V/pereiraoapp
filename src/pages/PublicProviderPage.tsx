@@ -1,6 +1,5 @@
 import {ReportContent} from '../components/ReportContent';
 import {useSectionAnchor} from '../hooks/useSectionAnchor';
-import {WorkPhotoDetail} from '../work/WorkPhotoDetail';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { usePresentation } from '../presentation/PresentationProvider';
 import { PresentationSections } from '../presentation/PresentationSections';
@@ -32,7 +31,6 @@ function PagedSection<T>({ title, load, render, empty }: { title: string; load: 
 function ProfileContent({ provider }: { provider: PublicProvider }) {
   const repository = useMarketplace()!;
   const presentation = usePresentation(provider.id, true);
-  const [photo, setPhoto] = useState<PublicPhoto | null>(null);
   const services = useCallback((page: number, signal: AbortSignal) => repository.getServices(provider.id, page, signal), [repository, provider.id]);
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
   const areas = useCallback((page: number, signal: AbortSignal) => repository.getAreas(provider.id, page, signal), [repository, provider.id]);
@@ -51,13 +49,12 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
     <ReportContent kind="business" id={provider.id}/><PublishedWorks key={provider.id} businessId={provider.id} coversOnly/>
-    <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
+    <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><Link className="public-gallery-open" to={`/prestadores/${provider.slug}/fotos/${item.id}`} aria-label={`Abrir fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></Link>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
       </> },
       { id: 'sobre', label: 'Sobre', content: <>
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },
     ]} />
-    {photo && <WorkPhotoDetail image={<div className="public-enlarged"><PublicImage businessId={provider.id} path={photo.storagePath} alt={photo.caption ?? 'Trabalho do prestador'} /></div>} caption={photo.caption} service={photo.serviceName} serviceAssociated={photo.serviceAssociated} onClose={()=>setPhoto(null)} />}
   </>;
 }
 export function PublicProviderPage() {

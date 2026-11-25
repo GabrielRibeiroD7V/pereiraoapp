@@ -19,6 +19,7 @@ export function marketplaceFixture(): PublicMarketplace {
       { id: 'service-3', name: 'Projeto simulado', description: null, pricing_type: 'quote', price_amount_cents: null },
     ], page, hasNext: false }),
     getPhotos: async (_id, page) => ({ items: [{ id: photoFixtureId, caption: 'Imagem sintética local', storagePath: `${p.id}/portfolio/${photoFixtureId}.webp` }], page, hasNext: false }),
+    getPhoto: async (_id, photoId) => photoId===photoFixtureId ? {id:photoFixtureId,caption:'Imagem sintética local',storagePath:`${p.id}/portfolio/${photoFixtureId}.webp`} : null,
     getImageUrl: async () => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jS1kAAAAASUVORK5CYII=',
   };
 }

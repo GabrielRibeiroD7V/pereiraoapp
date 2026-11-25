@@ -118,6 +118,9 @@ const PublicProviderPage = lazy(() =>
     default: module.PublicProviderPage,
   })),
 );
+const PublicPortfolioPhotoPage = lazy(() =>
+  import("../pages/PublicPortfolioPhotoPage").then((module) => ({default: module.PublicPortfolioPhotoPage})),
+);
 
 const WorkPostsPage = lazy(() =>
   import("../pages/WorkPostsPage").then((module) => ({
@@ -281,6 +284,7 @@ function AppRoutes() {
           path="/prestadores/:slug"
           element={<PublicProviderPage key={pathname} />}
         />
+        <Route path="/prestadores/:slug/fotos/:photoId" element={<PublicPortfolioPhotoPage key={pathname}/>} />
         <Route
           path="/trabalhos/:postId"
           element={<PublicWorkPage key={pathname} />}
