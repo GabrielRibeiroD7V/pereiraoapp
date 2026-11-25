@@ -18,5 +18,6 @@ export interface PublicMarketplace {
   getAreas(id: string, page: number, signal?: AbortSignal): Promise<PublicPage<City>>;
   getServices(id: string, page: number, signal?: AbortSignal): Promise<PublicPage<PublicService>>;
   getPhotos(id: string, page: number, signal?: AbortSignal): Promise<PublicPage<PublicPhoto>>;
+  getPhoto(id: string, photoId: string, signal?: AbortSignal): Promise<PublicPhoto | null>;
   getImageUrl(id: string, path: string): Promise<string>;
 }

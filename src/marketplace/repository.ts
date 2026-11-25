@@ -103,6 +103,16 @@ export function createPublicMarketplace(client: SupabaseClient<Database>): Publi
         .overrideTypes<{ id: string; caption: string | null; storage_path: string;service_id:string|null;service:{name:string}|null }[], { merge: false }>();
       if (error) throw error; return page((data ?? []).map((row) => ({ id: row.id, caption: row.caption, storagePath: row.storage_path,serviceName:row.service?.name??null,serviceAssociated:!!row.service_id })), current, DETAIL_SIZE);
     },
+    async getPhoto(id, photoId, signal) {
+      if (!validId(id) || !validId(photoId)) return null;
+      const {data,error}=await client.from('portfolio_items')
+        .select('id,caption,storage_path,service_id,service:services!portfolio_items_service_id_business_id_fkey(name),business:businesses!inner(status)')
+        .eq('id',photoId).eq('business_id',id).eq('media_state','ready').eq('business.status','published')
+        .abortSignal(signal ?? new AbortController().signal).maybeSingle()
+        .overrideTypes<{id:string;caption:string|null;storage_path:string;service_id:string|null;service:{name:string}|null}|null,{merge:false}>();
+      if(error) throw error;
+      return data ? {id:data.id,caption:data.caption,storagePath:data.storage_path,serviceName:data.service?.name??null,serviceAssociated:!!data.service_id} : null;
+    },
     async getImageUrl(id, path) {
       const bucket = imageBucket(id, path);
       if (!bucket) throw new Error('Invalid image path');

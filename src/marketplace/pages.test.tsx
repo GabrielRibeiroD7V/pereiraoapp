@@ -3,7 +3,7 @@ import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { App } from '../app/App';
 import { regionalCityFixture } from '../test/regionalCities';
-import { marketplaceFixture, publicProviderFixture as p } from '../test/marketplaceFixtures';
+import { marketplaceFixture, photoFixtureId, publicProviderFixture as p } from '../test/marketplaceFixtures';
 import type { PublicPage, PublicProvider } from './types';
 function Location() { const location = useLocation(), navigate = useNavigate(); return <><output aria-label="URL atual">{location.pathname}{location.search}</output><button onClick={() => navigate(-1)}>Histórico voltar</button><button onClick={() => navigate(1)}>Histórico avançar</button></>; }
 function open(path: string, repository = marketplaceFixture()) { render(<MemoryRouter initialEntries={[path]}><App marketplaceRepository={repository} /><Location /></MemoryRouter>); return repository; }
@@ -73,15 +73,17 @@ describe('navegação do marketplace sem login', () => {
     expect(screen.getByRole('link', { name: /WhatsApp de Prestador/ })).toBeVisible();
     expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(4);
   });
-  it('renova a assinatura ao ampliar e fecha a galeria pelo evento cancel do diálogo', async () => {
+  it('abre a foto do portfólio numa página própria, com legenda e navegação', async () => {
     const repository = marketplaceFixture(), sign = vi.spyOn(repository, 'getImageUrl');
     open('/prestadores/prestador-simulado', repository);
-    const enlarge = await screen.findByRole('button', { name: 'Ampliar fotografia Imagem sintética local' });
+    const enlarge = await screen.findByRole('link', { name: 'Abrir fotografia Imagem sintética local' });
     await waitFor(() => expect(sign).toHaveBeenCalledTimes(1));
     fireEvent.click(enlarge);
-    await screen.findByRole('dialog'); await waitFor(() => expect(sign).toHaveBeenCalledTimes(2));
-    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
+    await screen.findByRole('heading', { name: 'Foto de trabalho' });
+    expect(screen.getByLabelText('URL atual')).toHaveTextContent(`/prestadores/prestador-simulado/fotos/${photoFixtureId}`);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Imagem sintética local')).toBeVisible();
+    expect(screen.getByRole('link',{name:'Voltar ao perfil'})).toBeVisible();
   });
   it('não distingue perfil inexistente de rascunho e não mostra dados privados', async () => {
     open('/prestadores/rascunho');
