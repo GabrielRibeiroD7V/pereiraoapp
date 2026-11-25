@@ -18,7 +18,13 @@ export function HomePage() {
         </div>
       </section>
       <div className="home-content">
-        <SocialFeed />
+        <section className="professional-entry" aria-labelledby="invite-title">
+          <Link to="/conta/profissional/cadastro" aria-label="Anunciar meus serviços">
+            <BriefcaseBusiness size={17} aria-hidden="true" />
+            <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+        </section>
         <section className="home-section" aria-labelledby="categories-title">
           <h2 id="categories-title">Categorias populares</h2>
           <ul className="category-grid">
@@ -33,26 +39,7 @@ export function HomePage() {
           <h2 id="featured-title">Profissionais cadastrados</h2>
           <HomeProviders />
         </section>
-        <section className="provider-invite" aria-labelledby="invite-title">
-          <Link
-            className="provider-invite__entry"
-            to="/conta/profissional/cadastro"
-            aria-label="Anunciar meus serviços"
-          >
-            <span className="provider-invite__icon">
-              <BriefcaseBusiness size={30} aria-hidden="true" />
-            </span>
-            <div>
-              <h2 id="invite-title">É profissional ou tem uma empresa?</h2>
-              <p>Cadastre seu serviço agora no PEREIRÃO.</p>
-            </div>
-            <ArrowRight
-              className="provider-invite__arrow"
-              size={24}
-              aria-hidden="true"
-            />
-          </Link>
-        </section>
+        <SocialFeed />
       </div>
     </div>
   );
