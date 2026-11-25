@@ -93,7 +93,8 @@ describe('autenticação e rotas', () => {
     open('/criar-conta', gateway); await ready(); credentials();
     fireEvent.change(screen.getByLabelText('Seu nome'), { target: { value: 'Pessoa de teste' } });
     fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Confira seu e-mail');
+    expect(await screen.findByRole('status')).toHaveTextContent('Enviamos um link de confirmação');
+    expect(screen.getByRole('status')).toHaveTextContent('Confirme seu e-mail');
     expect(gateway.signUp).toHaveBeenCalledWith('test@example.invalid', 'somente-teste-123', 'Pessoa de teste', '/conta');
     expect(screen.getByLabelText('Senha', { exact: true })).toHaveValue('');
   });
