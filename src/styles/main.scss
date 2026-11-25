@@ -524,7 +524,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .photo-carousel__dots button[aria-current] span { background:var(--color-primary); width:8px; height:8px; }
 .social-feed { display:grid; grid-template-columns:minmax(0,1fr); max-width:40rem; margin-inline:auto; }
 .social-feed .published-work { padding:.625rem; overflow:hidden; }
-.social-feed .photo-carousel__slide img { aspect-ratio:1; max-height:55dvh; }
+.social-feed .photo-carousel__slide img { height:auto; aspect-ratio:auto; max-height:55dvh; }
 .home-content > .published-works-section:first-child { margin-top:0; }
 @media(min-width:48rem) { .profile-preview .social-profile-actions .button { font-size:.875rem; } }
 
@@ -541,3 +541,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .provider-item__type { color:#0a5661; background:#e0f6f5; border-radius:999px; padding:.125rem .5rem; font-size:.75rem; font-weight:600; }
 
 button.back-link { display:inline-flex; align-items:center; padding:.625rem 0; background:none; border:0; color:var(--color-navy); font:inherit; cursor:pointer; }
+
+.professional-entry { display:flex; justify-content:flex-end; margin:0 0 1rem; }
+.professional-entry a { display:inline-flex; align-items:center; gap:.375rem; max-width:100%; padding:.5rem .75rem; border:1px solid #b9dfe9; border-radius:999px; background:#ebf9fc; color:#073d69; text-decoration:none; min-height:44px; }
+.professional-entry h2 { font-size:.75rem; font-weight:600; margin:0; }
+.professional-entry svg { flex-shrink:0; }
