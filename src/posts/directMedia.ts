@@ -56,7 +56,7 @@ export async function uploadDirectPostPhoto(
     .upload(path, file, {
       contentType: "image/webp",
       upsert: false,
-      cacheControl: "0",
+      cacheControl: "60",
     });
   if (upload.error) {
     try {
