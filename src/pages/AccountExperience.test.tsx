@@ -40,21 +40,19 @@ describe('experiência pessoal e profissional', () => {
     fireEvent.click(document.querySelector('.owner-settings summary')!);
     expect(screen.getByRole('link', { name: /Cadastrar outro negócio/ })).toHaveAttribute('href', '/conta/profissional/cadastro');
     expect(screen.getAllByRole('link', { name: 'Editar perfil' })).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' })).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(screen.queryByRole('button', { name: 'Aplicativo PEREIRÃO' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Dados da conta/ })).toHaveAttribute('href', '/conta/dados');
     expect(screen.queryByRole('link', { name: /Gratuidade e assinatura/ })).not.toBeInTheDocument();
     expect(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getAllByRole('link')).toHaveLength(4);
   });
 
-  it('abre a orientação diretamente em Opções da conta, sem âncora nem segundo toque', async () => {
+  it('não repete um atalho fixo de instalação dentro das opções da conta', async () => {
     setup();
     await screen.findByText('Conta de Nome cadastrado');
     fireEvent.click(document.querySelector('.owner-settings summary')!);
-    fireEvent.click(screen.getByRole('button', { name: 'Aplicativo PEREIRÃO' }));
-    expect(screen.getByRole('dialog', { name: 'Instalar aplicativo' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Aplicativo PEREIRÃO' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Aplicativo PEREIRÃO' })).not.toBeInTheDocument();
     expect(window.location.hash).toBe('');
-    fireEvent.click(screen.getByRole('button', { name: 'Entendi' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByText('Conta de Nome cadastrado')).toBeVisible();
   });
 

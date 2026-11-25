@@ -91,14 +91,28 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
     if(lastBusiness.current!==businessId){lastBusiness.current=businessId;setEnlarged(null);if(!cached){setBusiness(null);setCatalog(null);setPosts([]);setPhotos([]);setServices([]);}setPostPage(1);}
     if (!professional) { setLoading(false); return; }
     void (async()=>{
-      const [result,options]=await Promise.all([professional.getEditable(businessId),professional.getCatalog()]);
+      let nextBusiness=cached?.business,nextCatalog=cached?.catalog;
       let nextServices=cached?.services??[],nextPhotos=cached?.photos??[],nextPosts=cached?.posts??[],nextPostsHaveNext=cached?.postsHaveNext??false;
-      if(work)try{const content=await work.list(businessId);nextServices=content.services;nextPhotos=content.photos.filter(photo=>photo.media_state==='ready');}catch{if(live)setContentError(true);}else if(live)setContentError(true);
-      if(postsRepository)try{const page=await postsRepository.load(businessId,postPage);nextPosts=page.posts.items;nextPostsHaveNext=page.posts.hasNext;}catch{if(live)setPostsError(true);}
-      if(!live)return;
-      const next={business:result,catalog:options,services:nextServices,photos:nextPhotos,posts:nextPosts,postsHaveNext:nextPostsHaveNext};
-      previewCache?.set(cacheKey,next);if(previewCache&&previewCache.size>30)previewCache.delete(previewCache.keys().next().value!);
-      setBusiness(result);setCatalog(options);setServices(nextServices);setPhotos(nextPhotos);setPosts(nextPosts);setPostsHaveNext(nextPostsHaveNext);
+      const businessTask=professional.getEditable(businessId).then(result=>{
+        nextBusiness=result;
+        if(live){setBusiness(result);setLoading(false);}
+      });
+      const catalogTask=professional.getCatalog().then(options=>{
+        nextCatalog=options;
+        if(live)setCatalog(options);
+      }).catch(()=>{if(live)setContentError(true);});
+      const workTask=work?work.list(businessId).then(content=>{
+        nextServices=content.services;nextPhotos=content.photos.filter(photo=>photo.media_state==='ready');
+        if(live){setServices(nextServices);setPhotos(nextPhotos);}
+      }).catch(()=>{if(live)setContentError(true);}):Promise.resolve().then(()=>{if(live)setContentError(true);});
+      const postsTask=postsRepository?postsRepository.load(businessId,postPage).then(page=>{
+        nextPosts=page.posts.items;nextPostsHaveNext=page.posts.hasNext;
+        if(live){setPosts(nextPosts);setPostsHaveNext(nextPostsHaveNext);}
+      }).catch(()=>{if(live)setPostsError(true);}):Promise.resolve();
+      await Promise.all([businessTask,catalogTask,workTask,postsTask]);
+      if(!live||!nextBusiness||!nextCatalog)return;
+      previewCache?.set(cacheKey,{business:nextBusiness,catalog:nextCatalog,services:nextServices,photos:nextPhotos,posts:nextPosts,postsHaveNext:nextPostsHaveNext});
+      if(previewCache&&previewCache.size>30)previewCache.delete(previewCache.keys().next().value!);
     })().catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
