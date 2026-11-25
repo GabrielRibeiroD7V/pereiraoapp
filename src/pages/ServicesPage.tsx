@@ -30,7 +30,7 @@ export function ServicesPage({ embedded = false, onChanged, startNew = false, on
         <div className="service-list__heading"><h2>{service.name}</h2><span className={`service-status${service.active ? ' is-active' : ''}`}>{service.active ? 'Ativo' : 'Inativo'}</span></div>
         <p className="field-help">{state.data!.catalog.categories.find((category) => category.id === service.category_id)?.name || service.category_id}</p>
         {service.description && <p className="service-description">{service.description}</p>}
-        <div className="service-list__bottom"><strong>{formatPrice(service.pricing_type, service.price_amount_cents)}</strong><div className="work-icon-actions">
+        <div className="service-list__bottom"><strong className="service-price">{formatPrice(service.pricing_type, service.price_amount_cents)}</strong><div className="work-icon-actions">
           <button className="icon-button" aria-label={`Editar serviço ${service.name}`} disabled={pending || state.loading} onClick={() => setEditor(service)}><PencilLine size={18} /></button>
           <button className="icon-button" aria-label={`${service.active ? 'Desativar' : 'Ativar'} serviço ${service.name}`} disabled={pending || state.loading} onClick={() => void run(() => state.repository!.setServiceActive(state.businessId, service.id, !service.active))}><Power size={18} /></button>
           <button className="icon-button icon-button--danger" aria-label={`Excluir serviço ${service.name}`} disabled={pending || state.loading} onClick={() => { setError(null); setDeleting(service); }}><Trash2 size={18} /></button>

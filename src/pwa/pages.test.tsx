@@ -92,7 +92,7 @@ describe("experiência de instalação e atualização", () => {
     f.browser.dispatchEvent(installEvent());
     open("/", f);
     fireEvent.click(screen.getByRole("button", { name: "Dispensar convite de instalação" }));
-    expect(f.storage.get("pereirao.install.dismissed")).toBe("1");
+    expect(f.storage.has("pereirao.install.dismissed")).toBe(false);
     expect(
       screen.queryByRole("button", { name: "Instalar PEREIRÃO" }),
     ).not.toBeInTheDocument();

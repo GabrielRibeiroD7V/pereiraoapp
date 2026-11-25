@@ -261,6 +261,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
     font-weight: 500;
     border-radius: var(--radius-small);
     &--active { font-weight: 700; svg { stroke-width: 2.3; } &::after { content: ''; position: absolute; bottom: -.125rem; width: .875rem; height: 2px; border-radius: var(--radius-pill); background: var(--color-primary); } }
+    &--icon-only { gap: 0; }
     &:hover { background: var(--color-surface); }
   }
 }

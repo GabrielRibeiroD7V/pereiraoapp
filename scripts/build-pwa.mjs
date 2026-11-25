@@ -8,10 +8,10 @@ export async function buildPwa(directory = resolve("dist")) {
     "pwa/offline.css",
     "pwa/offline-retry.js",
     "images/brand/pereirao-384.png",
-    "images/pwa/icon-192.png",
-    "images/pwa/icon-512.png",
-    "images/pwa/maskable-512.png",
-    "images/pwa/apple-touch-icon.png",
+    "images/pwa/pereirao-v2-192.png",
+    "images/pwa/pereirao-v2-512.png",
+    "images/pwa/pereirao-v2-maskable-512.png",
+    "images/pwa/pereirao-v2-apple-180.png",
   ];
   const built = await readdir(resolve(directory, "assets"));
   staticFiles.push(

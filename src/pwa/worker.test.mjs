@@ -13,7 +13,7 @@ const paths = [
   "/assets/app-123.js",
   "/assets/app-123.css",
   "/offline.html",
-  "/images/pwa/icon-192.png",
+  "/images/pwa/pereirao-v2-192.png",
 ];
 function mime(path) {
   return path.endsWith(".html")
@@ -255,7 +255,7 @@ describe("manifesto e build do PWA", () => {
         png.readUInt32BE(16) + "x" + png.readUInt32BE(20),
       );
     }
-    const apple = await readFile("public/images/pwa/apple-touch-icon.png");
+    const apple = await readFile("public/images/pwa/pereirao-v2-apple-180.png");
     expect(apple.readUInt32BE(16)).toBe(180);
     expect(apple.readUInt32BE(20)).toBe(180);
     expect(manifest.icons.some((i) => i.purpose === "maskable")).toBe(true);

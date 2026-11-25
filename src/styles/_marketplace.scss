@@ -43,6 +43,7 @@
   .public-about { white-space: pre-wrap; overflow-wrap: anywhere; }
   .public-areas { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; padding: 0; margin: 0; li { padding: var(--space-2) var(--space-3); border-radius: var(--radius-small); background: var(--color-surface); font-size: var(--font-small); } }
   .public-services { list-style: none; padding: 0; margin: 0; li { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: var(--space-2) var(--space-4); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border); > div { flex: 1 1 15rem; min-width: 0; } } h3 { margin: 0; font-size: var(--font-body); overflow-wrap: anywhere; } p { color: var(--color-secondary); font-size: var(--font-small); white-space: pre-wrap; overflow-wrap: anywhere; } strong { font-size: var(--font-small); } }
+  .service-price { color: #16803c; font-weight: 800; white-space: nowrap; }
   .public-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .2rem; list-style: none; padding: 0; margin: 0; p { margin-top: .25rem; font-size: .75rem; overflow-wrap: anywhere; } }
   .public-gallery-open { display: block; padding: 0; border: 0; width: 100%; aspect-ratio: 1; background: var(--color-surface); overflow: hidden; cursor: pointer; img { width: 100%; height: 100%; object-fit: cover; } }
   .public-image-fallback { display: grid; place-items: center; width: 100%; height: 100%; min-height: 5rem; padding: var(--space-2); color: var(--color-secondary); font-size: var(--font-small); }
@@ -53,7 +54,7 @@
 .section-tabs {
   margin-top: var(--space-6);
   &__list { display: flex; border-bottom: var(--border-subtle); gap: var(--space-6); }
-  [role=tab] { position: relative; border: 0; padding: .875rem .125rem; min-height: var(--touch-target); color: var(--color-secondary); background: transparent; font-size: .875rem; font-weight: 600; }
+  [role=tab] { position: relative; display: inline-flex; align-items: center; gap: .375rem; border: 0; padding: .875rem .125rem; min-height: var(--touch-target); color: var(--color-secondary); background: transparent; font-size: .875rem; font-weight: 600; }
   [aria-selected=true] { color: var(--color-navy); &::after { content: ''; position: absolute; bottom: -1px; height: 3px; left: 0; right: 0; background: var(--color-primary); border-radius: var(--radius-pill); } }
   [role=tabpanel] { padding-top: .25rem; }
 }

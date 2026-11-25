@@ -18,7 +18,7 @@ export function ManagedPhoto({
     [managed, businessId, photo.path],
   );
   const [failed, setFailed] = useState<string | null>(null);
-  const state = usePublicQuery(`${businessId}:${photo.path}`, load);
+  const state = usePublicQuery(`managed-image:${businessId}:${photo.path}`, load, true, 45_000);
   return state.data && failed !== state.data ? (
     <img
       src={state.data}

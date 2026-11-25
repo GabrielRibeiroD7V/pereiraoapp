@@ -17,7 +17,7 @@ import {
   fixtureBusinessId as bid,
 } from "../test/workFixtures";
 import { postsFixtures } from "../test/postsFixtures";
-async function showPhotos(){fireEvent.click(await screen.findByRole("tab",{name:"Fotos de trabalhos"}));}
+async function showPhotos(){fireEvent.click(await screen.findByRole("tab",{name:"Trabalhos"}));}
 function open(f = createWorkFixtures(), readOnly = false) {
   const posts = postsFixtures("draft");
   render(
