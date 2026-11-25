@@ -561,3 +561,19 @@ button.back-link { display:inline-flex; align-items:center; padding:.625rem 0; b
 .feed-author .post-provider-avatar { width:2.5rem; height:2.5rem; }
 .feed-contact-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.5rem; }
 .feed-contact-actions a { display:inline-flex; align-items:center; min-height:44px; padding:.375rem .625rem; border:1px solid #c5deee; border-radius:999px; color:#0756a8; font-size:.8125rem; font-weight:600; text-decoration:none; }
+
+.working-hours-editor { margin-top:1rem; padding-top:1rem; border-top:1px solid var(--color-border); }
+.working-hours-fields { min-width:0; margin:.75rem 0; padding:0; border:0; }
+.working-hours-fields legend { font-weight:650; margin-bottom:.625rem; }
+.hours-check { display:flex; align-items:center; gap:.625rem; min-height:44px; font-size:.9375rem; }
+.hours-check input { width:1.125rem; height:1.125rem; flex-shrink:0; }
+.hours-day { border-bottom:1px solid var(--color-border); padding:.375rem 0 .625rem; }
+.hours-period { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; margin:.5rem 0; }
+.hours-period label { min-width:0; font-size:.875rem; }
+.hours-period input { display:block; width:100%; min-width:0; min-height:44px; font-size:1rem; padding:.5rem; border:1px solid var(--color-border); border-radius:.5rem; background:var(--color-background); color:var(--color-navy); }
+.hours-period > p,.hours-period > button { grid-column:1/-1; }
+.hours-list { margin:.75rem 0; }
+.hours-list > div { display:grid; grid-template-columns:minmax(6.75rem,1fr) minmax(0,2fr); gap:.75rem; padding:.5rem 0; border-bottom:1px solid var(--color-border); }
+.hours-list dd { margin:0; overflow-wrap:anywhere; }
+.hours-status { font-weight:650; color:#536276; }.hours-status--open { color:#14683c; }
+.registration-hours summary { cursor:pointer; min-height:44px; padding-block:.625rem; font-weight:600; }

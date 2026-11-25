@@ -94,6 +94,7 @@ export type WorkPostRow = {
 export interface Database {
   public: {
     Tables: {
+      business_working_hours: Table<{business_id:string;enabled:boolean;timezone:string;schedule:Json;accepts_outside_hours:boolean;updated_at:string}>;
       business_presentations: Table<
         import("../presentation/model").Presentation & { business_id: string }
       >;
@@ -193,6 +194,7 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      save_business_working_hours:{Args:{target_business:string;p_enabled:boolean;p_timezone:string;p_schedule:Json;p_accepts_outside_hours:boolean;p_expected_updated_at?:string|null};Returns:undefined};
       open_account_conversation: {
         Args: {
           message_body: string;

@@ -27,6 +27,8 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
+    if (file.endsWith('_business_working_hours.sql')) continue; // Depende dos helpers de publicação aberta, aplicados abaixo.
+    if (file.endsWith('_realtime_messaging_and_notifications.sql')) continue; // Vault/pg_net/Realtime hospedados: não simulamos entrega no PostgreSQL nativo. Horários não dependem deles.
     if (file.endsWith('_owner_publication.sql') || file.endsWith('_personal_posts.sql') || file.endsWith('_account_conversations.sql')) continue;
     if (file === '20261124163000_initial_free_phase.sql') continue; // Testa atualização após a arquitetura anterior, abaixo.
     const storageGuard = file === '20261123000107_fix_profile_storage_guard.sql';
@@ -63,6 +65,8 @@ try {
     run(executable('psql'), [...args,'-f',resolve('supabase/migrations',file)],true);
     run(executable('psql'), [...args,'-f',resolve('supabase/tests',file.endsWith('_owner_publication.sql')?'owner_publication.sql':file.endsWith('_personal_posts.sql')?'personal_posts.sql':'account_conversations.sql')]);
   }
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261125181733_business_working_hours.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/business_working_hours.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

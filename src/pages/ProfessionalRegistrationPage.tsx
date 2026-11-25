@@ -1,3 +1,6 @@
+import{HoursFields}from'../hours/WorkingHours';
+import{useHoursRepository}from'../hours/HoursProvider';
+import{emptyHours,validateHours}from'../hours/model';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +24,8 @@ const steps = ['Identificação', 'Seu negócio', 'Contatos'];
 const stepTitles = ['Como você quer anunciar?', 'Conte sobre seu trabalho', 'Contatos e revisão'];
 export function ProfessionalRegistrationPage() {
   const repository = useProfessionalRepository();
+  const hoursRepository=useHoursRepository();
+  const[hours,setHours]=useState(()=>emptyHours()),[hoursAvailable,setHoursAvailable]=useState(false),[hoursLoadError,setHoursLoadError]=useState(false);
   const { session } = useAuth();
   const uid = session?.user.id ?? '';
   const { businessId } = useParams();
@@ -45,7 +50,12 @@ export function ProfessionalRegistrationPage() {
       const saved = businessId ? null : readCheckpoint(uid);
       const id = businessId ?? saved?.businessId;
       const existing = id ? await repository!.getEditable(id) : null;
+      let hoursAvailable=false,hoursData:import('../hours/model').WorkingHours|null=null,hoursFailed=false;
+      try{hoursAvailable=hoursRepository?await hoursRepository.available():false;if(hoursAvailable&&id)hoursData=(await hoursRepository!.get(id)).data;}catch{hoursFailed=true;}
+
       if (!live) return;
+      setHoursAvailable(hoursAvailable&&!hoursFailed);setHoursLoadError(hoursFailed);
+      setHours(hoursData??emptyHours(values.cities.find(c=>c.id===existing?.input.cityId)?.state_code));
       checkpoint.current = saved;
       setSavedId(id ?? null);
       setCatalog(values);
@@ -55,11 +65,12 @@ export function ProfessionalRegistrationPage() {
     void load().catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [repository, businessId, uid, search]);
+  }, [repository, hoursRepository, businessId, uid, search]);
   useEffect(() => { if (step > 1) heading.current?.focus(); }, [step]);
 
   function change<K extends keyof RegistrationInput>(name: K, value: RegistrationInput[K]) {
     setInput((current) => ({ ...current, [name]: value }));
+    if(name==='cityId'&&!hours.enabled&&!hours.updatedAt)setHours(emptyHours(catalog?.cities.find(c=>c.id===value)?.state_code));
     setError(null);
   }
   function choosePrimary(id: CategoryId) {
@@ -77,8 +88,10 @@ export function ProfessionalRegistrationPage() {
     const message = validateRegistration(input, catalog, step);
     if (message) { setError(message); return; }
     if (step < 3) { setStep(step + 1); return; }
+    const hoursError=validateHours(hours);if(hoursError){setError(hoursError);return;}
     submitting.current = true; setPending(true); setError(null);
     const normalized = normalizeRegistration(input);
+    let savingHours=false;
     try {
       const attempt = checkpoint.current ?? { slug: createRegistrationSlug(input.name) };
       checkpoint.current = attempt;
@@ -88,13 +101,14 @@ export function ProfessionalRegistrationPage() {
       checkpoint.current = { ...attempt, businessId: id };
       if (!businessId) writeCheckpoint(uid, checkpoint.current);
       await repository.saveDraft(id, normalized);
+      if(hours.enabled||hours.updatedAt){savingHours=true;if(!hoursRepository||!hoursAvailable)throw Error('Horários indisponíveis. O rascunho do perfil foi preservado.');await hoursRepository.save(id,hours);}
       if (!businessId || readCheckpoint(uid)?.businessId === id) clearCheckpoint(uid);
       navigate('/conta', { replace: true, state: { saved: true, businessId: id } });
     } catch (cause) {
       if (typeof cause === 'object' && cause !== null && 'code' in cause && cause.code === '23505' && !checkpoint.current?.businessId) {
         checkpoint.current = null; clearCheckpoint(uid);
       }
-      setError(professionalError(cause));
+      setError(savingHours?'O rascunho do perfil foi preservado, mas não foi possível confirmar os horários. Recarregue o cadastro salvo antes de tentar novamente.':professionalError(cause));
     } finally { submitting.current = false; setPending(false); }
   }
 
@@ -132,6 +146,7 @@ export function ProfessionalRegistrationPage() {
           {step === 3 && <>
             <FormField id="business-whatsapp" label="WhatsApp" type="tel" autoComplete="tel" placeholder="55 + DDD + número" value={input.whatsapp} maxLength={24} onChange={(event) => change('whatsapp', event.target.value)} />
             <p className="field-help">Obrigatório antes da publicação. Você pode completar depois, no rascunho.</p>
+            <details className="registration-hours"><summary>Horários de atendimento (opcional)</summary><p className="field-help">Empresas e autônomos podem informar os horários. Sem preencher, o perfil mostra “Horário não informado”.</p><HoursFields value={hours} onChange={setHours} disabled={!hoursAvailable}/>{!hoursAvailable&&<p className="field-help">{hoursLoadError?'Horários indisponíveis agora. O perfil pode ser salvo sem alterar horários existentes.':'Horários aguardam ativação. Você pode continuar o cadastro.'}</p>}</details>
             <FormField id="business-instagram" label="Instagram (opcional)" placeholder="usuario" value={input.instagram} maxLength={31} onChange={(event) => change('instagram', event.target.value)} />
             {input.type === 'empresa' && <details className="private-details" open={Boolean(input.legalName || input.taxId) || undefined}><summary><ShieldCheck size={18} aria-hidden="true" />Dados empresariais privados <span>Opcional</span></summary>
               <fieldset className="legal-fields"><legend className="visually-hidden">Dados empresariais privados</legend><p className="field-help">Razão social e CNPJ não aparecem no perfil público.</p>

@@ -29,8 +29,8 @@ function repository(): ProfessionalRepository {
   return { getCatalog: vi.fn(async () => catalog), listMine: vi.fn(async () => [business]),
     getEditable: vi.fn(async () => ({ business, input })), createDraft: vi.fn(async () => bid), saveDraft: vi.fn(async () => {}) };
 }
-function open(repo: ProfessionalRepository, path = '/conta/profissional/cadastro', auth = gateway()) {
-  return render(<MemoryRouter initialEntries={[path]}><App authGateway={auth} professionalRepository={repo} /></MemoryRouter>);
+function open(repo: ProfessionalRepository, path = '/conta/profissional/cadastro', auth = gateway(), hoursRepository?: import('../hours/model').HoursRepository) {
+  return render(<MemoryRouter initialEntries={[path]}><App authGateway={auth} professionalRepository={repo} hoursRepository={hoursRepository} /></MemoryRouter>);
 }
 async function details(company = false) {
   await screen.findByRole('radio', { name: 'Empresa' });
@@ -294,4 +294,16 @@ describe('normalização e validação', () => {
   it('gera slug estável a partir do sufixo da tentativa', () => {
     expect(createRegistrationSlug('João & Cia', 'abc')).toBe('joao-cia-abc');
   });
+});
+
+it.each([false,true])('horários opcionais preservam ida/volta e gravam somente no negócio criado (empresa=%s)',async company=>{
+ const repo=repository(),hours:import('../hours/model').HoursRepository={available:vi.fn(async()=>true),get:vi.fn(async()=>({available:true,data:null})),save:vi.fn(async()=>{})};
+ open(repo,undefined,undefined,hours);await details(company);await finalStep();fireEvent.click(screen.getByText('Horários de atendimento (opcional)',{selector:'summary'}));
+ fireEvent.click(screen.getByLabelText('Informar dias e horários'));fireEvent.click(screen.getByLabelText('Segunda-feira'));fireEvent.change(screen.getByLabelText('Início de Segunda-feira, intervalo 1'),{target:{value:'09:30'}});
+ fireEvent.click(screen.getByRole('button',{name:'Voltar'}));await finalStep();fireEvent.click(screen.getByText('Horários de atendimento (opcional)',{selector:'summary'}));expect(screen.getByLabelText('Início de Segunda-feira, intervalo 1')).toHaveValue('09:30');expect(hours.save).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'Salvar rascunho'}));await screen.findByRole('heading',{name:'Meu perfil',level:1});expect(hours.save).toHaveBeenCalledWith(bid,expect.objectContaining({enabled:true,schedule:[[],[{start:'09:30',end:'18:00'}],[],[],[],[],[]]}));expect(repo.createDraft).toHaveBeenCalledOnce();expect(repo.saveDraft).toHaveBeenCalledOnce();
+});
+
+it('indisponibilidade opcional dos horários não impede cadastro nem grava valores vazios sobre dados existentes',async()=>{
+ const repo=repository(),hours:import('../hours/model').HoursRepository={available:vi.fn(async()=>{throw Error('offline');}),get:vi.fn(),save:vi.fn()};open(repo,undefined,undefined,hours);await details();await finalStep();fireEvent.click(screen.getByRole('button',{name:'Salvar rascunho'}));await screen.findByRole('heading',{name:'Meu perfil',level:1});expect(repo.saveDraft).toHaveBeenCalledOnce();expect(hours.save).not.toHaveBeenCalled();
 });

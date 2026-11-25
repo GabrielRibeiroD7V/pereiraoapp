@@ -1,3 +1,4 @@
+import{WorkingHoursEditor}from'../hours/WorkingHours';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -44,6 +45,7 @@ export function ProfessionalEditorPage() {
   const [revision, setRevision] = useState(0);
   const [formVersion, setFormVersion] = useState(0);
   const [leave, setLeave] = useState<string | null>(null);
+  const [hoursDirty,setHoursDirty]=useState(false),[hoursBusy,setHoursBusy]=useState(false);
   const busy = useRef(false);
   const epoch = useRef(0);
   const dirty = !!input && !!saved && JSON.stringify(input) !== JSON.stringify(saved.input);
@@ -60,7 +62,7 @@ export function ProfessionalEditorPage() {
   }, [repository, businessId, session?.user.id]);
   // Preserve edits when following links (including the bottom navigation) or reloading.
   useEffect(() => {
-    if (!dirty && !pending) return;
+    if (!dirty && !pending && !hoursDirty && !hoursBusy) return;
     const unload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
     const follow = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -69,12 +71,12 @@ export function ProfessionalEditorPage() {
       const url = new URL(link.href);
       if (url.origin !== window.location.origin) return;
       event.preventDefault(); event.stopPropagation();
-      if (!pending) setLeave(url.pathname + url.search + url.hash);
+      if (!pending && !hoursBusy) setLeave(url.pathname + url.search + url.hash);
     };
     window.addEventListener('beforeunload', unload);
     document.addEventListener('click', follow, true);
     return () => { window.removeEventListener('beforeunload', unload); document.removeEventListener('click', follow, true); };
-  }, [dirty, pending]);
+  }, [dirty, pending, hoursDirty, hoursBusy]);
   function change<K extends keyof RegistrationInput>(key: K, value: RegistrationInput[K]) {
     setInput(current => current ? { ...current, [key]: value } : current); setError(''); setNotice('');
   }
@@ -88,6 +90,7 @@ export function ProfessionalEditorPage() {
   async function save(event: FormEvent) {
     event.preventDefault();
     if (!input || !catalog || !repository || busy.current || !dirty) return;
+    if(hoursDirty||hoursBusy){setError('Salve ou cancele os horários antes de salvar os demais dados do perfil.');return;}
     const message = validateRegistration(input, catalog, 3);
     if (message) { setError(message); return; }
     const requestEpoch = epoch.current;
@@ -133,7 +136,7 @@ export function ProfessionalEditorPage() {
       <div className="profile-editor__service-entry" hidden={section === 'previa' || (section === 'conteudo' && contentSection === 'servicos')}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', 'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
       <p hidden={section !== 'perfil'} className="field-help">Foto principal é o retrato do perfil. Ela não é adicionada às fotografias de trabalhos.</p>
       <div className="auth-form profile-editor__form" aria-busy={pending}>
-        <p className="profile-editor__save-state" role="status">{dirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
+        <p className="profile-editor__save-state" role="status">{dirty||hoursDirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
         <SectionTabs label="Editar conteúdo profissional" selectedId={section} onSelect={selectSection} sections={[
           { id: 'perfil', label: 'Perfil', content: <form id="profile-identity-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Identidade e especialidades</legend>
             <div className="form-field"><label htmlFor="edit-provider-type">Tipo de prestador</label><select id="edit-provider-type" value={input.type} onChange={event => change('type', event.target.value as RegistrationInput['type'])}><option value="autonomo">Profissional autônomo</option><option value="empresa">Empresa</option></select></div>
@@ -142,13 +145,13 @@ export function ProfessionalEditorPage() {
             <div className="form-field"><label htmlFor="edit-category">Categoria principal</label><select id="edit-category" value={input.categoryId} onChange={event => primary(event.target.value as CategoryId)} required><option value="" disabled>Selecione</option>{catalog.categories.map(value => <option key={value.id} value={value.id}>{value.name}</option>)}</select></div>
             {catalog.specialtiesAvailable !== false ? <SpecialtyPicker categories={catalog.categories} primaryId={input.categoryId} selected={input.additionalCategoryIds} onChange={ids => change('additionalCategoryIds', ids)} /> : <p className="field-help">Especialidades adicionais indisponíveis. A categoria principal foi preservada.</p>}
           </fieldset></form> },
-          { id: 'atendimento', label: 'Atendimento', content: <form id="profile-coverage-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Cidades e contatos públicos</legend>
+          { id: 'atendimento', label: 'Atendimento', content: <><form id="profile-coverage-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Cidades e contatos públicos</legend>
             <CitySelect id="edit-city" label="Cidade de origem" cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
             <ServiceAreaPicker cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
             <FormField id="edit-whatsapp" label="WhatsApp" type="tel" value={input.whatsapp} maxLength={24} onChange={event => change('whatsapp', event.target.value)} />
-            <p className="field-help">Informe país e DDD. Obrigatório antes da publicação administrativa.</p>
+            <p className="field-help">Informe país e DDD. Necessário para publicar o perfil profissional.</p>
             <FormField id="edit-instagram" label="Instagram (opcional)" value={input.instagram} maxLength={31} onChange={event => change('instagram', event.target.value)} />
-          </fieldset></form> },
+          </fieldset></form><WorkingHoursEditor key={businessId} businessId={businessId} state={catalog.cities.find(c=>c.id===input.cityId)?.state_code} onDirty={setHoursDirty} onBusy={setHoursBusy} onSaved={()=>setRevision(n=>n+1)}/></> },
           { id: 'conteudo', label: 'Conteúdo', content: <section className="profile-editor__content" aria-label="Gerenciar conteúdo salvo">
             <h2>Conteúdo do perfil</h2><p className="field-help">Gerencie o conteúdo deste negócio aqui. Cada operação tem sua própria confirmação; Salvar alterações é apenas para os dados do perfil.</p>
             <SectionTabs label="Gerenciar serviços, fotos e publicações" selectedId={contentSection} onSelect={id => setQuery(current => { current.set('conteudo', id); return current; }, { replace: true })} sections={[
