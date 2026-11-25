@@ -34,6 +34,7 @@ describe("envio direto de postagem", () => {
       }
       expect(path).toContain("/storage/v1/object/business-posts/");
       expect(new Headers(init?.headers).get("x-upsert")).toBe("false");
+      expect(new Headers(init?.headers).get("cache-control")).toBe("max-age=60");
       return new Response(JSON.stringify({ message: "network failure" }), {
         status: 500,
       });
