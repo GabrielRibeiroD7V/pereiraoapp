@@ -4,6 +4,6 @@ import { useLocation } from 'react-router-dom';
 export function useSectionAnchor(ready: boolean) {
   const { hash, key } = useLocation();
   useEffect(() => {
-    if (ready && hash === '#servicos') document.getElementById('servicos')?.scrollIntoView?.({ block: 'start' });
+    if (ready && ['#servicos','#horarios'].includes(hash)) document.getElementById(hash.slice(1))?.scrollIntoView?.({ block: 'start' });
   }, [hash, key, ready]);
 }

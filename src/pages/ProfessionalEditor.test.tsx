@@ -10,7 +10,7 @@ import { emptyRegistration } from '../professional/validation';
 vi.mock('../work/images', async original => ({ ...await original<typeof import('../work/images')>(), optimizeImage: vi.fn(async () => new Blob(['synthetic'], { type: 'image/webp' })) }));
 afterEach(() => vi.unstubAllGlobals());
 
-function open(section = '', visitor = false, company = false, route?: string, presentationRepository?: import('../presentation/model').PresentationRepository) {
+function open(section = '', visitor = false, company = false, route?: string, presentationRepository?: import('../presentation/model').PresentationRepository, hoursRepository?: import('../hours/model').HoursRepository) {
   const f = createWorkFixtures(false, visitor);
   let input: RegistrationInput = { ...emptyRegistration, type: company ? 'empresa' : 'autonomo', name: 'Perfil salvo', description: 'Bio salva', categoryId: 'climatizacao', cityId: 'mundo-novo-ms', areaCityIds: ['mundo-novo-ms'], legalName: 'Privado', taxId: '12345678000199' };
   const business = { id: bid, name: input.name, type: input.type, slug: 'local', city_id: input.cityId, category_id: 'climatizacao' as const, status: 'draft' as const, description: input.description, whatsapp: null, instagram: null, avatar_path: null, created_at: '', updated_at: '' };
@@ -18,7 +18,7 @@ function open(section = '', visitor = false, company = false, route?: string, pr
     if (id !== bid) throw { code: 'NOT_MANAGER' };
     return { business: { ...business, name: input.name, description: input.description, type: input.type }, input: { ...input } };
   }), createDraft: vi.fn(), saveDraft: vi.fn(async (_id: string, value: RegistrationInput) => { input = { ...value }; }) };
-  render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App presentationRepository={presentationRepository} authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[route ?? `/conta/profissional/${bid}/editar${section}`]}><App hoursRepository={hoursRepository} presentationRepository={presentationRepository} authGateway={f.gateway} professionalRepository={professional} workRepository={f.work} managedPosts={postsFixtures('draft', true).managed} /></MemoryRouter>);
   return { ...f, professional };
 }
 it('menu Adicionar usa diálogo contido e fecha sem gravar ou trocar de negócio',async()=>{
@@ -209,4 +209,11 @@ describe('área central do perfil existente', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('permissão');
     expect(screen.queryByLabelText('Bio')).not.toBeInTheDocument();
   });
+});
+
+it('horários em Atendimento preservam dados ao trocar abas e bloqueiam saída sem decisão',async()=>{
+ const hours:import('../hours/model').HoursRepository={available:async()=>true,get:vi.fn(async()=>({available:true,data:null})),save:vi.fn(async()=>{})};const f=open('?secao=atendimento',false,false,undefined,undefined,hours);
+ await waitFor(()=>expect(screen.getByLabelText('Informar dias e horários')).toBeEnabled());fireEvent.click(screen.getByLabelText('Informar dias e horários'));fireEvent.click(screen.getByLabelText('Segunda-feira'));fireEvent.click(screen.getByRole('tab',{name:'Perfil'}));fireEvent.click(screen.getByRole('tab',{name:'Atendimento'}));expect(screen.getByLabelText('Segunda-feira')).toBeChecked();
+ fireEvent.click(screen.getByRole('link',{name:'Voltar ao perfil'}));await screen.findByRole('dialog',{name:'Descartar alterações não salvas?'});fireEvent.click(screen.getByRole('button',{name:'Continuar editando'}));expect(hours.save).not.toHaveBeenCalled();expect(f.professional.saveDraft).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'Cancelar horários'}));expect(screen.getByLabelText('Informar dias e horários')).not.toBeChecked();
 });

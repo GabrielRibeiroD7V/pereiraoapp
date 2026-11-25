@@ -1,3 +1,4 @@
+import{WorkingHoursDisplay}from'../hours/WorkingHours';
 import {PostBackLink,validPostOrigin} from '../posts/PostBackLink';
 import {profileViews} from '../posts/postReturn';
 import {ReportContent} from '../components/ReportContent';
@@ -33,9 +34,9 @@ function PagedSection<T>({ title, load, render, empty }: { title: string; load: 
 function ProfileContent({ provider }: { provider: PublicProvider }) {
   const repository = useMarketplace()!;
   const location=useLocation(),viewKey=`${location.key}:public:${provider.id}`;
-  const [tab,setTab]=useState(location.hash==='#servicos'?'servicos':profileViews.get(viewKey)?.tab??'trabalhos');
+  const [tab,setTab]=useState(location.hash==='#servicos'?'servicos':location.hash==='#horarios'?'sobre':profileViews.get(viewKey)?.tab??'trabalhos');
   useEffect(()=>{profileViews.set(viewKey,{tab,page:1});},[viewKey,tab]);
-  useEffect(()=>{if(location.hash==='#servicos')setTab('servicos');},[location.hash]);
+  useEffect(()=>{if(location.hash==='#servicos')setTab('servicos');else if(location.hash==='#horarios')setTab('sobre');},[location.hash]);
   const presentation = usePresentation(provider.id, true);
   const services = useCallback((page: number, signal: AbortSignal) => repository.getServices(provider.id, page, signal), [repository, provider.id]);
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
@@ -57,6 +58,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
       </> },
       {id:'servicos',label:'Serviços',icon:<Wrench size={16} aria-hidden="true" />,content:<PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong className="service-price">{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />},
       { id: 'sobre', label: 'Sobre', content: <>
+    {tab==='sobre'&&<WorkingHoursDisplay businessId={provider.id} publicOnly/>}
     <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },

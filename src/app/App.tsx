@@ -1,3 +1,5 @@
+import{HoursProvider}from'../hours/HoursProvider';
+import type{HoursRepository}from'../hours/model';
 import "../social/social.scss";
 import { PresentationProvider } from "../presentation/PresentationProvider";
 import type { PresentationRepository } from "../presentation/model";
@@ -215,6 +217,7 @@ export function App({
   billingRepository,
   messageRepository,
   presentationRepository,
+  hoursRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -227,6 +230,7 @@ export function App({
   billingRepository?: SandboxBillingRepository | null;
   messageRepository?: MessageRepository | null;
   presentationRepository?: PresentationRepository | null;
+  hoursRepository?: HoursRepository | null;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -238,9 +242,9 @@ export function App({
                 <SubscriptionProvider repository={subscriptionRepository}>
                   <BillingProvider repository={billingRepository}>
                     <PresentationProvider value={presentationRepository}>
-                      <MessagesProvider repository={messageRepository}>
+                      <HoursProvider repository={hoursRepository}><MessagesProvider repository={messageRepository}>
                         <AppRoutes />
-                      </MessagesProvider>
+                      </MessagesProvider></HoursProvider>
                     </PresentationProvider>
                   </BillingProvider>
                 </SubscriptionProvider>
