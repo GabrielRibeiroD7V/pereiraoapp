@@ -1,3 +1,5 @@
+import {OffersPage} from '../offers/OfferViews';
+import {useOffers} from '../offers/OffersProvider';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -25,6 +27,7 @@ import { ProfilePreviewPage } from './ProfilePreviewPage';
 
 const sections = ['perfil', 'atendimento', 'conteudo', 'previa'];
 export function ProfessionalEditorPage() {
+  const offers=useOffers(true);
   const { businessId = '' } = useParams();
   const { session } = useAuth();
   const repository = useProfessionalRepository();
@@ -130,7 +133,7 @@ export function ProfessionalEditorPage() {
         }} /> : <ManagedBusinessAvatar path={effectiveAvatarPath(saved.business)} />}</div>
         <div><strong>{saved.input.name}</strong><p>{saved.input.type === 'empresa' ? 'Empresa' : 'Profissional autônomo'}</p><BusinessStatus status={saved.business.status} /></div>
       </header>
-      <div className="profile-editor__service-entry" hidden={section === 'previa' || (section === 'conteudo' && contentSection === 'servicos')}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', 'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
+      <div className="profile-editor__service-entry" hidden={section === 'previa' || (section === 'conteudo' && contentSection === 'servicos')}><div><strong>Serviços e preços</strong><p className="field-help">Apresente o que você oferece e quanto cobra.</p></div><button type="button" className="button button--primary" disabled={pending} onClick={() => setQuery(current => { current.set('secao', 'conteudo'); current.set('conteudo', 'servicos'); current.set('acao', offers?'servico':'adicionar-servico'); return current; }, { replace: true })}>Adicionar serviço</button></div>
       <p hidden={section !== 'perfil'} className="field-help">Foto principal é o retrato do perfil. Ela não é adicionada às fotografias de trabalhos.</p>
       <div className="auth-form profile-editor__form" aria-busy={pending}>
         <p className="profile-editor__save-state" role="status">{dirty ? 'Há alterações não salvas. A prévia continua mostrando a versão gravada.' : 'Você está editando os dados salvos.'}</p>
@@ -146,13 +149,13 @@ export function ProfessionalEditorPage() {
             <CitySelect id="edit-city" label="Cidade de origem" cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
             <ServiceAreaPicker cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
             <FormField id="edit-whatsapp" label="WhatsApp" type="tel" value={input.whatsapp} maxLength={24} onChange={event => change('whatsapp', event.target.value)} />
-            <p className="field-help">Informe país e DDD. Obrigatório antes da publicação administrativa.</p>
+            <p className="field-help">Informe país e DDD. Obrigatório antes de colocar o perfil no ar.</p>
             <FormField id="edit-instagram" label="Instagram (opcional)" value={input.instagram} maxLength={31} onChange={event => change('instagram', event.target.value)} />
           </fieldset></form> },
           { id: 'conteudo', label: 'Conteúdo', content: <section className="profile-editor__content" aria-label="Gerenciar conteúdo salvo">
             <h2>Conteúdo do perfil</h2><p className="field-help">Gerencie o conteúdo deste negócio aqui. Cada operação tem sua própria confirmação; Salvar alterações é apenas para os dados do perfil.</p>
             <SectionTabs label="Gerenciar serviços, fotos e publicações" selectedId={contentSection} onSelect={id => setQuery(current => { current.set('conteudo', id); return current; }, { replace: true })} sections={[
-              { id: 'servicos', label: 'Serviços e preços', content: section === 'conteudo' && contentSection === 'servicos' && <ServicesPage embedded onChanged={contentChanged} startNew={query.get('acao') === 'adicionar-servico'} onStartNew={() => setQuery(current => { current.delete('acao'); return current; }, { replace: true })} /> },
+              { id: 'servicos', label: offers?'Serviços e produtos':'Serviços e preços', content: section === 'conteudo' && contentSection === 'servicos' && (offers?<OffersPage embedded/>:<ServicesPage embedded onChanged={contentChanged} startNew={query.get('acao') === 'adicionar-servico'} onStartNew={() => setQuery(current => { current.delete('acao'); return current; }, { replace: true })} />) },
               { id: 'fotos', label: 'Fotos de trabalhos', content: section === 'conteudo' && contentSection === 'fotos' && <PortfolioPage embedded onChanged={contentChanged} /> },
               { id: 'publicacoes', label: 'Publicações', content: section === 'conteudo' && contentSection === 'publicacoes' && <WorkPostsPage embedded onChanged={contentChanged} /> },
             ]} />

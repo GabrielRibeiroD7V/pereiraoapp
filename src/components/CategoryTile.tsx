@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrushCleaning, Hammer, HardHat, PaintRoller, Snowflake, Zap } from 'lucide-react';
+import { BrushCleaning, Hammer, HardHat, PaintRoller, Snowflake, Zap, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Category, CategoryId } from '../types/domain';
 import type { LucideIcon } from 'lucide-react';
@@ -12,7 +12,7 @@ const icons: Record<CategoryId, LucideIcon> = {
 
 export function CategoryTile({ category }: { category: Category }) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
-  const Icon = icons[category.id];
+  const Icon = icons[category.id] ?? Wrench;
   const image = category.officialImage;
   return (
     <Link className={`category-tile category-tile--${category.id}`} to={`${routes.search}?${new URLSearchParams({ categoria: category.id })}`}>

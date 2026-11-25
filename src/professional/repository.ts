@@ -3,7 +3,6 @@ import { activeCities } from '../locations/catalog';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import type { CategoryId } from '../types/domain';
-import { categories } from '../config/categories';
 import type { ProfessionalCatalog, ProfessionalRepository, RegistrationInput } from './types';
 import { normalizeRegistration, validateRegistration } from './validation';
 
@@ -37,7 +36,6 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
     if (categoryRows.error) throw categoryRows.error;
     if (specialties.error && !missingSpecialties(specialties.error)) throw specialties.error;
     return { cities, specialtiesAvailable: !specialties.error, categories: (categoryRows.data ?? [])
-      .filter((item) => categories.some((category) => category.id === item.id))
       .map((item) => ({ ...item, id: item.id as CategoryId })) };
   }
   async function ownBusinessBySlug(slug: string) {

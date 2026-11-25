@@ -193,6 +193,12 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      set_post_offer:{Args:{post_kind:string;target_post:string;target_offer?:string;offer_source?:string};Returns:undefined};
+      get_post_offer:{Args:{post_kind:string;target_post:string};Returns:Json};
+      offers_catalog: {Args: Record<string,never>;Returns:Json};
+      offers_query: {Args:{target_business?:string;target_offer?:string;include_private?:boolean};Returns:Json};
+      offer_command: {Args:{target_business:string;target_offer:string;command:string;data?:Json};Returns:Json};
+      search_unified: {Args:{p_query?:string;p_city?:string;p_area?:string;p_kind?:string;p_page?:number;p_provider_type?:string};Returns:Json};
       open_account_conversation: {
         Args: {
           message_body: string;

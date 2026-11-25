@@ -1,3 +1,5 @@
+import {useOffers} from '../offers/OffersProvider';
+import {UnifiedSearch} from '../offers/UnifiedSearch';
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -36,7 +38,7 @@ function FilterForm({ params, onSubmit }: { params: URLSearchParams; onSubmit: (
     {cities.error && <p role="status" className="field-help">Não foi possível atualizar as cidades. <button className="text-link" type="button" onClick={cities.retry}>Tentar novamente</button></p>}
   </form>;
 }
-export function SearchPage() {
+function LegacySearchPage() {
   const [params, setParams] = useSearchParams(), repository = useMarketplace();
   const { query, categoryId, cityId, type } = readFilters(params), current = pageNumber(params.get('pagina'));
   const category = categories.find((item) => item.id === categoryId);
@@ -49,3 +51,5 @@ export function SearchPage() {
     {!repository ? <p className="form-notice">A busca está sendo preparada. Tente novamente em breve.</p> : <><QueryStatus {...state} />{state.data && <section aria-label="Resultados da busca" aria-live="polite"><p className="field-help">{state.data.items.length ? 'Profissionais e empresas · ordem alfabética' : 'Nenhum profissional encontrado para estes filtros.'}</p><ProviderList providers={state.data.items} /><Pagination page={current} hasNext={state.data.hasNext} onChange={turn} label="resultados" /></section>}</>}
   </div>;
 }
+
+export function SearchPage(){const offers=useOffers();return offers?<UnifiedSearch/>:<LegacySearchPage/>;}

@@ -1,3 +1,4 @@
+import {PostOffer} from '../offers/PostOffer';
 import {ReportContent} from '../components/ReportContent';
 import {PostBackLink} from '../posts/PostBackLink';
 import {PostManagementMenu} from '../posts/PostManagementMenu';
@@ -47,7 +48,7 @@ export function PublicWorkPage() {
           {visitor && post.business.profilePublic!==false && provider.data?.id===post.businessId && <ContactLinks name={post.business.name} whatsapp={provider.data.whatsapp} compact/>}
           {provider.error&&visitor&&<p role="status">Contato por WhatsApp indisponível no momento. Você pode abrir o perfil ou conversar pelo PEREIRÃO.</p>}
         </>}/>
-      <ReportContent kind="post" id={post.id}/>{enlarged && <Modal title="Fotografia do trabalho" onClose={()=>setEnlarged(null)}><div className="public-enlarged"><PublicImage businessId={post.businessId} path={enlarged.path} alt={enlarged.caption ?? post.title}/></div><p><strong>{post.business.name}</strong></p><p className="post-full-description">{post.description || 'Esta publicação não tem legenda.'}</p></Modal>}
+      <PostOffer post={postId} kind="professional"/><ReportContent kind="post" id={post.id}/>{enlarged && <Modal title="Fotografia do trabalho" onClose={()=>setEnlarged(null)}><div className="public-enlarged"><PublicImage businessId={post.businessId} path={enlarged.path} alt={enlarged.caption ?? post.title}/></div><p><strong>{post.business.name}</strong></p><p className="post-full-description">{post.description || 'Esta publicação não tem legenda.'}</p></Modal>}
     </> : !state.loading&&!state.error&&<><PageHeader title="Trabalho indisponível"/><p>Esta publicação não está disponível publicamente.</p></>}
   </div>;
 }

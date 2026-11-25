@@ -1,3 +1,8 @@
+import '../offers/offers.scss';
+import {OffersProvider} from '../offers/OffersProvider';
+import type {OffersRepository} from '../offers/model';
+const OffersPage=lazy(()=>import('../offers/OfferViews').then(m=>({default:m.OffersPage})));
+const OfferPage=lazy(()=>import('../offers/OfferViews').then(m=>({default:m.OfferPage})));
 import "../social/social.scss";
 import { PresentationProvider } from "../presentation/PresentationProvider";
 import type { PresentationRepository } from "../presentation/model";
@@ -215,6 +220,7 @@ export function App({
   billingRepository,
   messageRepository,
   presentationRepository,
+  offersRepository,
 }: {
   authGateway?: AuthGateway | null;
   professionalRepository?: ProfessionalRepository | null;
@@ -227,6 +233,7 @@ export function App({
   billingRepository?: SandboxBillingRepository | null;
   messageRepository?: MessageRepository | null;
   presentationRepository?: PresentationRepository | null;
+  offersRepository?: OffersRepository;
 }) {
   return (
     <AuthProvider gateway={authGateway}>
@@ -239,7 +246,7 @@ export function App({
                   <BillingProvider repository={billingRepository}>
                     <PresentationProvider value={presentationRepository}>
                       <MessagesProvider repository={messageRepository}>
-                        <AppRoutes />
+                        <OffersProvider repository={offersRepository}><AppRoutes /></OffersProvider>
                       </MessagesProvider>
                     </PresentationProvider>
                   </BillingProvider>
@@ -279,6 +286,7 @@ function AppRoutes() {
       </Route>
       <Route element={<AppShell />}>
         <Route path={routes.home} element={<HomePage />} />
+        <Route path="/ofertas/:source/:offerId" element={<OfferPage key={pathname}/>} />
         <Route path={routes.search} element={<SearchPage />} />
         <Route
           path="/prestadores/:slug"
@@ -301,6 +309,9 @@ function AppRoutes() {
         />
         <Route path="/auth/retorno" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
+          <Route path="/conta/profissional/:businessId/perfil/ofertas/:source/:offerId" element={<OfferPage key={pathname} privateView/>}/>
+          <Route path="/conta/profissional/:businessId/previa/ofertas/:source/:offerId" element={<OfferPage key={pathname} privateView readOnly/>}/>
+          <Route path="/conta/profissional/:businessId/ofertas" element={<OffersPage key={pathname}/>} />
           <Route path="/conta/publicacoes" element={<PersonalPostsPage />} />
           <Route path="/mensagens" element={<MessagesInboxPage />} />
           <Route
