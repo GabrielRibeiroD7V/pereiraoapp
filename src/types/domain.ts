@@ -1,7 +1,6 @@
 /** Contratos de domínio, independentes do formato futuro das tabelas Supabase. */
-export type CategoryId =
-  | 'climatizacao' | 'pintura' | 'construcao'
-  | 'eletrica' | 'marcenaria' | 'limpeza';
+// IDs vêm do catálogo ativo; as seis ilustrações da Home são um recorte editorial.
+export type CategoryId = string;
 
 export interface City {
   id: string;

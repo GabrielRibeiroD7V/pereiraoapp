@@ -1,3 +1,4 @@
+import {PostOffer} from '../offers/PostOffer';
 import {useCallback,useState} from 'react';
 import {Link,useParams} from 'react-router-dom';
 import {useProfessionalRepository} from '../professional/ProfessionalProvider';
@@ -27,7 +28,7 @@ export function ManagedPostPage({readOnly=false}:{readOnly?:boolean}){
     management={!readOnly&&<PostManagementMenu><button type="button" onClick={()=>setEditing(true)}>Editar publicação</button><Link to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>}
     images={data.post.images.filter(photo=>photo.mediaState!=='pending').map(photo=>({id:photo.id,content:<ManagedPhoto businessId={businessId} photo={photo}/>}))}
     actions={<><Link className="post-action" to={profile}>Ver perfil</Link><Link className="post-action" to={`${profile}#servicos`}>Conferir serviços</Link></>}/>
-    {!readOnly&&editing&&<PostEditor businessId={businessId} businessName={data.business.input.name} initial={data.post} onClose={()=>setEditing(false)} onSave={async(id,input)=>{await managed!.save(businessId,id,input);state.retry();}}/>}
+    <PostOffer post={postId} kind="professional" business={businessId} manage={!readOnly}/>{!readOnly&&editing&&<PostEditor businessId={businessId} businessName={data.business.input.name} initial={data.post} onClose={()=>setEditing(false)} onSave={async(id,input)=>{await managed!.save(businessId,id,input);state.retry();}}/>}
   </>:!state.loading&&!state.error&&<p>Publicação indisponível para esta conta.</p>}
  </div>;
 }

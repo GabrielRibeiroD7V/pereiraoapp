@@ -1,3 +1,4 @@
+import {PostOffer} from '../offers/PostOffer';
 import { useCallback, useState, useEffect } from "react";
 import {
   Link,
@@ -228,7 +229,8 @@ export function PersonalPostPage() {
               }}
             />
           )}
-          {action && mine && (
+          {post&&<PostOffer post={postId} kind="personal" manage={mine}/>}
+      {action && mine && (
             <Modal
               title={
                 action === "delete"
