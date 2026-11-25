@@ -1,3 +1,4 @@
+import {FeedIdentity,ProfessionalFeedContact,useFeedProfiles} from './FeedIdentity';
 import {PhotoCarousel} from "../components/PhotoCarousel";
 import { useAuth } from "../auth/AuthProvider";
 import { PublishedWorks } from "../posts/PublishedWorks";
@@ -34,6 +35,7 @@ export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversO
   return()=>{request.current++;};
  },[repository,viewKey,authorId,resume,attempt]);
  const current=state.key===viewKey?state:{key:viewKey,items:[],hasNext:false,loading:true,error:false},items=current.items,last=items.at(-1);
+ const identities=useFeedProfiles(items);
  async function more(){
   if(!repository||busy.current||!last?.publishedAt)return;
   const revision=++request.current;busy.current=true;setState(old=>({...old,loading:true,error:false}));
@@ -51,9 +53,9 @@ export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversO
   <div className={coversOnly?'profile-post-grid':'social-feed'}>{items.map(post=>coversOnly?<article key={`${post.kind}:${post.id}`}><PostLink className="profile-post-tile" to={postPath(post)} aria-label={`Abrir publicação ${post.title||post.author}`}>
    {post.images[0]&&<SocialImage image={post.images[0]} alt={post.title||'Capa da publicação'}/>}<span className="profile-post-tile__kind">{post.images.length>1?`${post.images.length} fotos`:'Publicação'}</span><strong>{post.title||'Publicação pessoal'}</strong>
   </PostLink></article>:<article className="published-work" key={`${post.kind}:${post.id}`}>
-   <header><div>{post.profileUrl?<PostLink to={post.profileUrl}>{post.author}</PostLink>:<strong>{post.author}</strong>}<p>{post.kind==='personal'?'Publicação pessoal':'Trabalho profissional'}</p></div></header>
+   <FeedIdentity post={post} provider={post.profileUrl?identities.profiles[post.profileUrl]:undefined}/>
    <PhotoCarousel label={`Fotos de ${post.title||post.author}`} items={post.images.map((image,i)=>({id:image.id,content:<SocialImage image={image} alt={`${post.title||'Fotografia da publicação'} — foto ${i+1}`}/>}))}/>
-   <h3><PostLink to={postPath(post)}>{post.title||'Publicação pessoal'}</PostLink></h3><p>{post.description}</p><PostDates publishedAt={post.publishedAt}/><PostContact post={post}/>
+   <h3><PostLink to={postPath(post)}>{post.title||'Publicação pessoal'}</PostLink></h3><p>{post.description}</p><PostDates publishedAt={post.publishedAt} absolute/>{identities.canContact(post)&&<><PostContact post={post}/><ProfessionalFeedContact post={post} provider={post.profileUrl?identities.profiles[post.profileUrl]:undefined}/></>}
   </article>)}</div>
   {current.hasNext&&last?.publishedAt&&<button className="button button--secondary" disabled={current.loading} onClick={()=>void more()}>Mais publicações</button>}
  </section>;
