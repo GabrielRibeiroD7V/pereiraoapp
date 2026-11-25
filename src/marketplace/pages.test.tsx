@@ -51,6 +51,7 @@ describe('navegação do marketplace sem login', () => {
   it('mostra perfil, preços e contatos seguros sem exigir autenticação', async () => {
     open('/prestadores/prestador-simulado');
     await screen.findByRole('heading', { name: 'Prestador simulado' });
+    fireEvent.click(screen.getByRole('tab',{name:'Serviços'}));
     expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
     expect(await screen.findByText('Instalação simulada')).toBeVisible();
     expect(screen.getByText(/R\$\s*180,00/)).toBeInTheDocument();
@@ -69,6 +70,7 @@ describe('navegação do marketplace sem login', () => {
     open('/prestadores/prestador-simulado', repository);
     const badges = await screen.findByRole('list', { name: 'Especialidades selecionadas' });
     expect(badges).toHaveTextContent('ConstruçãoPrincipalPinturaElétrica');
+    fireEvent.click(screen.getByRole('tab',{name:'Serviços'}));
     expect(screen.getByRole('region', { name: 'Serviços e preços' })).toBeVisible();
     expect(screen.getByRole('link', { name: /WhatsApp de Prestador/ })).toBeVisible();
     expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(4);
@@ -76,6 +78,7 @@ describe('navegação do marketplace sem login', () => {
   it('abre a foto do portfólio numa página própria, com legenda e navegação', async () => {
     const repository = marketplaceFixture(), sign = vi.spyOn(repository, 'getImageUrl');
     open('/prestadores/prestador-simulado', repository);
+    fireEvent.click(await screen.findByRole('tab',{name:'Fotos de trabalhos'}));
     const enlarge = await screen.findByRole('link', { name: 'Abrir fotografia Imagem sintética local' });
     await waitFor(() => expect(sign).toHaveBeenCalledTimes(1));
     fireEvent.click(enlarge);
@@ -121,4 +124,20 @@ describe('navegação do marketplace sem login', () => {
     await screen.findByRole('heading', { name: p.name });
     expect(screen.queryByRole('link', { name: /WhatsApp|Instagram/ })).not.toBeInTheDocument();
   });
+});
+
+it('busca apresenta categoria, tipo e ambos os contatos configurados, sem ranking inventado',async()=>{
+ open('/buscar');const results=await screen.findByRole('region',{name:'Resultados da busca'});
+ expect(within(results).getByRole('link',{name:/Instagram de Prestador/})).toHaveAttribute('href','https://www.instagram.com/perfil.simulado/');
+ expect(within(results).getByRole('link',{name:/WhatsApp de Prestador/})).toHaveAttribute('href',expect.stringContaining('https://wa.me/'));
+ expect(results.querySelector('.provider-item__specialty')).toHaveTextContent('Climatização');expect(results.querySelector('.provider-item__type')).toHaveTextContent('Autônomo');
+ expect(results).toHaveTextContent('ordem alfabética');expect(results).not.toHaveTextContent('melhores profissionais');
+});
+
+it('nome no resultado abre perfil com Publicações primeiro e Voltar recupera a busca',async()=>{
+ open('/buscar');fireEvent.click(await screen.findByRole('link',{name:'Ver perfil de Prestador simulado'}));
+ await screen.findByRole('heading',{name:'Prestador simulado'});expect(screen.getByRole('tab',{name:'Publicações'})).toHaveAttribute('aria-selected','true');
+ fireEvent.click(screen.getByRole('tab',{name:'Serviços'}));await screen.findByText('Instalação simulada');
+ fireEvent.click(screen.getByRole('button',{name:'Voltar'}));await screen.findByRole('heading',{name:'Buscar'});
+ expect(screen.getByRole('region',{name:'Resultados da busca'})).toBeInTheDocument();
 });

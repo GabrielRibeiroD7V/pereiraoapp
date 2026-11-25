@@ -1,10 +1,12 @@
+import {PostBackLink,validPostOrigin} from '../posts/PostBackLink';
+import {profileViews} from '../posts/postReturn';
 import {ReportContent} from '../components/ReportContent';
 import {useSectionAnchor} from '../hooks/useSectionAnchor';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { usePresentation } from '../presentation/PresentationProvider';
 import { PresentationSections } from '../presentation/PresentationSections';
-import { useCallback, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useCallback, useState, useEffect } from 'react';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { MessageCircle, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useMarketplace } from '../marketplace/MarketplaceProvider';
@@ -30,6 +32,10 @@ function PagedSection<T>({ title, load, render, empty }: { title: string; load: 
 }
 function ProfileContent({ provider }: { provider: PublicProvider }) {
   const repository = useMarketplace()!;
+  const location=useLocation(),viewKey=`${location.key}:public:${provider.id}`;
+  const [tab,setTab]=useState(location.hash==='#servicos'?'servicos':profileViews.get(viewKey)?.tab??'trabalhos');
+  useEffect(()=>{profileViews.set(viewKey,{tab,page:1});},[viewKey,tab]);
+  useEffect(()=>{if(location.hash==='#servicos')setTab('servicos');},[location.hash]);
   const presentation = usePresentation(provider.id, true);
   const services = useCallback((page: number, signal: AbortSignal) => repository.getServices(provider.id, page, signal), [repository, provider.id]);
   const photos = useCallback((page: number, signal: AbortSignal) => repository.getPhotos(provider.id, page, signal), [repository, provider.id]);
@@ -44,24 +50,26 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
       <div className="social-profile-actions"><Link className="button button--secondary" to={`/mensagens/iniciar/${provider.id}`}><MessageCircle size={18} aria-hidden="true" />Mensagem pelo PEREIRÃO</Link><ContactLinks compact name={provider.name} whatsapp={provider.whatsapp} instagram={provider.instagram} /></div>
     </header>
     {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
-    <PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />
-    <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
-    <SectionTabs label="Conteúdo do perfil" sections={[
-      { id: 'trabalhos', label: 'Trabalhos', content: <>
+    <SectionTabs label="Conteúdo do perfil" selectedId={tab} onSelect={setTab} sections={[
+      { id: 'trabalhos', label: 'Publicações', content: <>
     <ReportContent kind="business" id={provider.id}/><PublishedWorks key={provider.id} businessId={provider.id} coversOnly/>
+      </> }, {id:'fotos',label:'Fotos de trabalhos',content:<>
     <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><Link className="public-gallery-open" to={`/prestadores/${provider.slug}/fotos/${item.id}`} aria-label={`Abrir fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></Link>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
       </> },
+      {id:'servicos',label:'Serviços',content:<PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong>{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />},
       { id: 'sobre', label: 'Sobre', content: <>
+    <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },
     ]} />
   </>;
 }
 export function PublicProviderPage() {
+  const entry=useLocation();
   const { slug = '' } = useParams(), repository = useMarketplace();
   const load = useCallback((signal: AbortSignal) => repository ? repository.getProvider(slug, signal) : Promise.resolve(null), [repository, slug]);
-  const state = usePublicQuery(slug, load);
-  return <div className="public-profile"><Link className="back-link" to="/buscar">Voltar à busca</Link>
+  const state = usePublicQuery(slug, load, true);
+  return <div className="public-profile">{validPostOrigin(entry.state?.postOrigin)?<PostBackLink fallback="/buscar"/>:<Link className="back-link" to="/buscar">Voltar à busca</Link>}
     {!repository ? <><PageHeader title="Perfil indisponível" /><p>Tente novamente em breve.</p></> : <><QueryStatus {...state} />{state.data ? <ProfileContent key={state.data.id} provider={state.data} /> : !state.loading && !state.error && <><PageHeader title="Perfil não encontrado" /><p>Este perfil não está disponível publicamente.</p></>}</>}
   </div>;
 }

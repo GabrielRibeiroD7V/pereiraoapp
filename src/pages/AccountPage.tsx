@@ -1,4 +1,4 @@
-import { PersonalPublishingEntry } from "../social/PersonalPages";
+import { PersonalPublishingEntry, PersonalPostsPage } from "../social/PersonalPages";
 import { profileBusinessSelections } from "../posts/postReturn";
 import { useEffect, useState } from "react";
 import {
@@ -161,23 +161,10 @@ export function AccountPage() {
           {!businessesLoading && !businessesError && !professional && (
             <p role="status">Perfil profissional indisponível neste momento.</p>
           )}
-          {!businessesLoading &&
-            !businessesError &&
-            professional &&
-            businesses.length === 0 && (
-              <section className="owner-empty">
-                <ProfileAvatar src={profile.avatarUrl} />
-                <h2>{profile.displayName}</h2>
-                <p>
-                  Você ainda não cadastrou um perfil profissional. Crie um
-                  rascunho para adicionar bio, foto, serviços e trabalhos.
-                </p>
-                <LinkButton to="/conta/profissional/cadastro">
-                  Criar perfil profissional
-                </LinkButton>
-              </section>
-            )}
-          <PersonalPublishingEntry />
+          {!businessesLoading && !businessesError && businesses.length === 0 && <>
+            <PersonalPostsPage embedded />
+            <Link className="text-link personal-professional-entry" to="/conta/profissional/cadastro">Criar perfil profissional</Link>
+          </>}
           {selected && (
             <>
               {businesses.length > 1 && (
@@ -203,6 +190,7 @@ export function AccountPage() {
                 businessIdOverride={selected.id}
                 embedded
               />
+              <details className="personal-publications-access"><summary>Publicações da conta pessoal</summary><PersonalPublishingEntry /></details>
             </>
           )}
         </>

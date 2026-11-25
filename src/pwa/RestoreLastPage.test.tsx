@@ -28,3 +28,14 @@ describe('retorno ao app instalado',()=>{
     expect(screen.getByLabelText('Rota')).toHaveTextContent('/');
   });
 });
+
+it.each(['/publicacoes/00000000-0000-4000-8000-000000000001','/pessoas/00000000-0000-4000-8000-000000000002'])('recupera rota pessoal %s ao reabrir pela start_url',async path=>{
+ const original=visit(path);original.unmount();visit('/?source=pwa');
+ await waitFor(()=>expect(screen.getByLabelText('Rota')).toHaveTextContent(path));
+});
+it('focus, visibilitychange e BFCache não navegam da rota atual para Home',()=>{
+ visit('/publicacoes/00000000-0000-4000-8000-000000000001');
+ window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));
+ const event=new Event('pageshow');Object.defineProperty(event,'persisted',{value:true});window.dispatchEvent(event);
+ expect(screen.getByLabelText('Rota')).toHaveTextContent('/publicacoes/00000000-0000-4000-8000-000000000001');
+});

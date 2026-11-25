@@ -257,7 +257,7 @@ export function PersonalPublisher({
   return (
     <>
       <button
-        className="button button--primary"
+        className="button button--secondary"
         type="button"
         onClick={() => input.current?.click()}
       >

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "../auth/AuthProvider";
 import { createWorkFixtures } from "../test/workFixtures";
 import { SocialProvider } from "./SocialProvider";
 import { PersonalComposer, PersonalPublisher } from "./PersonalComposer";
-import { SocialFeed } from "./SocialFeed";
+import { SocialFeed,publicFeedPageCounts } from "./SocialFeed";
+import {PostBackLink} from "../posts/PostBackLink";
 import { PersonalPostPage, PersonalPublishingEntry } from "./PersonalPages";
 import type { SocialPost, SocialRepository } from "./model";
 vi.mock("../work/images", () => ({
@@ -62,6 +63,7 @@ function open(content: React.ReactNode, repository = fixture(), path = "/") {
   return repository;
 }
 beforeEach(() => {
+  publicFeedPageCounts.clear();
   vi.stubGlobal(
     "URL",
     Object.assign(URL, {
@@ -215,4 +217,24 @@ it("feed único pagina com cursor de data/ID/tipo e revalida no retorno", async 
       r.feed.mock.calls.filter(([cursor]) => cursor === null),
     ).toHaveLength(2),
   );
+});
+
+it('volta da página própria à mesma quantidade de capas carregadas no feed',async()=>{
+ const r=fixture(),a={...post,status:'published' as const,publishedAt:'2026-11-24T10:00:00Z'},b={...post,id:'00000000-0000-4000-8000-000000000222',title:'Segundo projeto',status:'published' as const,publishedAt:'2026-11-23T10:00:00Z'};
+ r.feed.mockImplementation(async cursor=>cursor?{items:[b],hasNext:false}:{items:[a],hasNext:true});
+ open(<Routes><Route path="/" element={<SocialFeed/>}/><Route path="/publicacoes/:id" element={<PostBackLink fallback="/conta"/>}/></Routes>,r);
+ fireEvent.click(await screen.findByRole('button',{name:'Mais publicações'}));
+ fireEvent.click(await screen.findByRole('link',{name:'Segundo projeto'}));
+ fireEvent.click(await screen.findByRole('button',{name:'Voltar'}));
+ await screen.findByRole('link',{name:'Segundo projeto'});expect(r.feed).toHaveBeenCalledTimes(4);
+});
+
+it('feed mostra legenda e carrossel diretamente; o nome abre o perfil correto sem obrigar abrir post',async()=>{
+ const r=fixture(),value={...post,status:'published' as const,publishedAt:'2026-11-24T10:00:00Z',profileUrl:'/pessoas/'+post.authorId,images:[...post.images,{...post.images[0]!,id:'segunda-imagem'}]};
+ r.feed.mockResolvedValue({items:[value],hasNext:false});open(<SocialFeed/>,r);
+ const author=await screen.findByRole('link',{name:value.author});expect(author).toHaveAttribute('href',value.profileUrl);
+ expect(screen.getByText(value.description)).toBeVisible();
+ const photos=screen.getByRole('region',{name:'Fotos de '+value.title});expect(within(photos).getAllByRole('figure')).toHaveLength(2);
+ expect(within(photos).queryByRole('link')).not.toBeInTheDocument();expect(within(photos).getByRole('button',{name:'Próxima foto'})).toBeVisible();
+ expect(screen.queryByRole('link',{name:/Abrir publicação/})).not.toBeInTheDocument();
 });

@@ -1,9 +1,10 @@
+import {publicPostPageCounts} from './postReturn';
 import {PostLink} from './PostLink';
 import {PostDates} from './PostDates';
 import {useReturnRevision} from '../hooks/useReturnRevision';
 import {PhotoCarousel} from '../components/PhotoCarousel';
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { UserRound } from "lucide-react";
 import { usePosts } from "./PostsProvider";
 import { PublicImage } from "../marketplace/PublicImage";
@@ -35,7 +36,7 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
           </p>
         </div>
       </header>
-      <PhotoCarousel label={`Fotos de ${post.title}`} items={post.images.map((photo,index)=>({id:photo.id,content:<PostLink className="published-work-cover" to={`/trabalhos/${post.id}`} aria-label={index===0?`Abrir trabalho ${post.title}`:`Abrir trabalho ${post.title} — foto ${index+1}`}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></PostLink>}))}/>
+      <PhotoCarousel label={`Fotos de ${post.title}`} items={post.images.map((photo,index)=>({id:photo.id,content:<PublicImage businessId={post.businessId} path={photo.path} alt={`${photo.caption ?? post.title} — foto ${index+1}`}/>}))}/>
       <h3>
         <PostLink to={`/trabalhos/${post.id}`}>{post.title}</PostLink>
       </h3>
@@ -43,12 +44,13 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
         <p className="published-work-summary">{post.description}</p>
       )}
       {post.business.profilePublic!==false&&<div className="post-card-actions"><Link to={`/prestadores/${post.business.slug}`}>Ver perfil</Link><Link to={`/prestadores/${post.business.slug}#servicos`}>Conferir serviços</Link></div>}
-      <PostDates createdAt={post.createdAt} publishedAt={post.publishedAt}/>
+      <PostDates publishedAt={post.publishedAt}/>
     </article>
   );
 }
 export function PublishedWorks({ businessId, coversOnly = false, showUnavailable = false }: { businessId?: string; coversOnly?: boolean; showUnavailable?: boolean }) {
   const resume = useReturnRevision();
+  const location=useLocation(),viewKey=`${location.key}:works:${businessId??'all'}`;
   const { publicPosts } = usePosts();
   const request = useRef<AbortController | null>(null),
     busy = useRef(false);
@@ -70,12 +72,18 @@ export function PublishedWorks({ businessId, coversOnly = false, showUnavailable
         ...old,
         loading: true,
         error: false,
-        ...(!cursor ? { items: [], available: false } : {}),
+
       }));
       try {
-        const page = publicPosts
-          ? await publicPosts.list(cursor, businessId, controller.signal)
-          : null;
+        let page = publicPosts ? await publicPosts.list(cursor,businessId,controller.signal) : null;
+        if(page&&!cursor){
+          const desired=publicPostPageCounts.get(viewKey)??1;
+          for(let n=1;n<desired&&page?.next;n++){
+            const extra=await publicPosts!.list(page.next,businessId,controller.signal);if(controller.signal.aborted)return;if(!extra){page=null;break;}
+            page={items:[...page.items,...extra.items.filter(p=>!page!.items.some(v=>v.id===p.id))],next:extra.next};
+          }
+        }
+        if(page&&cursor&&!controller.signal.aborted){publicPostPageCounts.set(viewKey,(publicPostPageCounts.get(viewKey)??1)+1);if(publicPostPageCounts.size>40)publicPostPageCounts.delete(publicPostPageCounts.keys().next().value!);}
         if (!controller.signal.aborted)
           setState((old) => ({
             items: page
@@ -100,7 +108,7 @@ export function PublishedWorks({ businessId, coversOnly = false, showUnavailable
         if (request.current === controller) busy.current = false;
       }
     },
-    [publicPosts, businessId],
+    [publicPosts, businessId, viewKey],
   );
   useEffect(() => {
     void load();

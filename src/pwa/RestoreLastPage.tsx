@@ -2,7 +2,7 @@ import {useEffect,useRef} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 
 const KEY='pereirao.last-page';
-const SAFE=/^\/(?:conta(?:\/[^?#]*)?|buscar(?:\/[^?#]*)?|mensagens(?:\/[^?#]*)?|prestadores\/[^/?#]+(?:\/fotos\/[a-f0-9-]+)?|trabalhos\/[a-f0-9-]+)$/;
+const SAFE=/^\/(?:conta(?:\/[^?#]*)?|buscar(?:\/[^?#]*)?|mensagens(?:\/[^?#]*)?|prestadores\/[^/?#]+(?:\/fotos\/[a-f0-9-]+)?|trabalhos\/[a-f0-9-]+|publicacoes\/[a-f0-9-]+|pessoas\/[a-f0-9-]+)$/;
 
 // Quando o sistema reabre o ícone instalado pela start_url, recupera a última
 // página da mesma sessão. Navegação explícita para Início continua intacta.

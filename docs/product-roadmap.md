@@ -31,3 +31,7 @@ Cada módulo terá critérios para iPhone/Safari, Android/Chrome e desktop: nave
 Somente registrar dependências e critérios. Não criar telas, tabelas, notificações, dados demonstrativos ou PRs das etapas 2–5. Antes de cada módulo, alinhar escopo, modelo de dados, permissões, retenção, moderação e testes; qualquer SQL remoto exige preflight e autorização específica.
 
 Próxima entrega concreta: concluir os PRs da base de publicação aberta e do visual azul/turquesa, apresentar os preflights SQL e, após as autorizações pertinentes, validar o ciclo real com duas contas. Não alterar Asaas, fase gratuita, isenção, assinatura ou cobrança.
+
+## Descoberta e destaque de profissionais
+
+Direção solicitada: valorizar profissionais a partir de resultados reais (projetos concluídos e ações de interesse). Ainda não é ranking implementado. Antes de trocar a ordem alfabética, definir o que comprova conclusão, coleta persistida de visitas/contatos, deduplicação e prevenção de manipulação, privacidade, janela temporal e critérios transparentes. Não inferir qualidade de número de posts nem apresentar “melhores” sem evidência. Nenhuma nova tabela ou contador foi criada nesta entrega.
