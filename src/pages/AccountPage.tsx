@@ -9,7 +9,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { InstallAppAccess } from "../pwa/PwaProvider";
 import { ProfileAvatar } from "../components/ProfileAvatar";
 import { usePersonalProfile } from "../auth/usePersonalProfile";
 import { LinkButton } from "../components/LinkButton";
@@ -137,7 +136,6 @@ export function AccountPage() {
                     <ShieldCheck size={18} />
                     Segurança e acesso
                   </Link>
-                  <InstallAppAccess menu />
                   <AdminEntry />
                   <button
                     type="button"
@@ -241,7 +239,6 @@ export function AccountPage() {
           </Link>
         </>
       )}
-      {!session && <InstallAppAccess />}
     </div>
   );
 }

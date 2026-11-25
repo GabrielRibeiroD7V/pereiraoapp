@@ -36,6 +36,18 @@ function open(f = createWorkFixtures(), readOnly = false) {
   );
   return { f, posts };
 }
+it("exibe a identidade do perfil sem esperar serviços, fotos e publicações", async () => {
+  const f = createWorkFixtures();
+  const content = await f.work.list(bid);
+  let finishContent!: () => void;
+  vi.spyOn(f.work, "list").mockImplementation(() => new Promise(resolve => {
+    finishContent = () => resolve(content);
+  }));
+  open(f);
+  expect(await screen.findByRole("heading", { name: "Negócio de demonstração local" })).toBeVisible();
+  expect(screen.queryByText("Carregando prévia…")).not.toBeInTheDocument();
+  await act(async () => { finishContent(); });
+});
 it("abre imagem, legenda e serviço; edição cancela sem gravar", async () => {
   const { f } = open(),
     save = vi.spyOn(f.work, "savePhotoDetails");
