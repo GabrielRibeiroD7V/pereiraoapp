@@ -47,7 +47,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         const result = await gateway.signUp(email, password, name, next);
         if (result.confirmationRequired) {
           form.reset();
-          setNotice('Confira seu e-mail para confirmar a conta. Se já possui uma conta, entre ou recupere sua senha.');
+          setNotice('Enviamos um link de confirmação para o e-mail informado. Abra a mensagem e toque em Confirmar conta. Confira também a pasta de spam. Se já possui uma conta, entre ou recupere sua senha.');
         } else navigate(next, { replace: true });
       } else if (mode === 'recovery') {
         await gateway.requestReset(email, next);
@@ -72,7 +72,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       {loading && <p role="status">Verificando sua sessão…</p>}
       {mode === 'login' && params.get('senha') === 'atualizada' && <p role="status">Senha atualizada. Entre com sua nova senha.</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
-      {notice && <p className="form-notice" role="status">{notice}</p>}
+      {notice && <div className="form-notice auth-confirmation" role="status"><strong>{mode === 'signup' ? 'Confirme seu e-mail' : 'Confira seu e-mail'}</strong><p>{notice}</p></div>}
       <form className="auth-form" onSubmit={submit} aria-busy={pending}>
         {mode === 'signup' && <FormField id="auth-name" name="display_name" label="Seu nome" autoComplete="name" minLength={2} maxLength={100} required />}
         {mode !== 'password' && <FormField id="auth-email" name="email" label="E-mail" type="email" autoComplete="email" maxLength={254} required />}
