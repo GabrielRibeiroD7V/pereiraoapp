@@ -70,7 +70,7 @@ describe("publicações: interface com dados simulados locais", () => {
     expect(screen.getByRole('region',{name:'Prévia da publicação'})).toHaveTextContent('Rascunho privado');
     fireEvent.click(screen.getByRole('button',{name:'Confirmar fotos e salvar rascunho'}));
     await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());expect(save.mock.calls[0]?.[2].photos).toHaveLength(2);
-    expect(await screen.findByRole('button',{name:'Publicar trabalho'})).toBeDisabled();expect(command).not.toHaveBeenCalled();
+    expect(await screen.findByRole('button',{name:'Publicar trabalho'})).toBeEnabled();expect(command).not.toHaveBeenCalled();
   });
   it("exige confirmação para publicar, retirar e excluir; preserva fotos", async () => {
     const posts = open(),

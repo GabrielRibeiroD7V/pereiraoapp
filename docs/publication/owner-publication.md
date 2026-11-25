@@ -3,13 +3,13 @@
 Projeto: `yazdjiwaksamizrbqewq`. Base: main `99875a5` (fundação #74 já integrada externamente).
 
 Migração: `20261125004446_owner_publication.sql`.
-SHA-256: `1a24c3981f8a9d22cc7e19d88068ca100a8670ee0472a79b3a395866405dfb31`.
+SHA-256: `eca2e53116b3a87f2b9adb6f05e638a56f235ab8f091af1949209850940990c0`.
 
 ## Regra
 
-Dono com conta habilitada e e-mail confirmado publica o próprio perfil pelo app, sem aprovação administrativa. Perfil completo exige bio, WhatsApp, categoria, cidade e área ativas. Serviço é opcional. Publicar o perfil divulga apresentação/contatos, serviços ativos e portfólio ready; não publica posts em rascunho. Cada post tem ação própria e exige mídia íntegra. Até 10 transições de publicação por hora por conta, serializadas com a moderação.
+Dono com conta habilitada e e-mail confirmado publica o próprio perfil pelo app, sem aprovação administrativa. Perfil completo exige bio, WhatsApp, categoria, cidade e área ativas. Serviço é opcional. Publicar o perfil divulga apresentação/contatos, serviços ativos e portfólio ready; não publica posts em rascunho. Cada post tem ação própria e exige mídia íntegra. Post profissional independe do estado público do negócio: publicar o post torna somente sua composição e identificação de autor públicas, sem expor bio, contato ou serviços de um negócio draft. RPC de projeção pública evita JOIN que revele o negócio privado. Só as fotos do portfólio explicitamente selecionadas em um post público recebem leitura pública. Até 10 transições de publicação por hora por conta, serializadas com a moderação.
 
-Editar conteúdo publicado retorna o post a não publicado e exige republicação explícita. Retirar perfil retira seus posts públicos; republicar não os restaura automaticamente. Excluir perfil é retirada lógica, mantendo vínculos/conversas/histórico; o texto da confirmação informa isso. Excluir post segue o ciclo existente, preservando fotografias originais do portfólio. Limpeza definitiva dos arquivos é um procedimento próprio, sem exclusão direta de storage.objects.
+Editar conteúdo publicado retorna o post a não publicado e exige republicação explícita. Retirar perfil remove seus dados e serviços da busca; os posts continuam públicos até sua retirada separada. Excluir perfil retira seus posts, preservando histórico. Moderação de conta/negócio retira os posts; remover a suspensão não os republica. Excluir perfil é retirada lógica, mantendo vínculos/conversas/histórico; o texto da confirmação informa isso. Excluir post segue o ciclo existente, preservando fotografias originais do portfólio. Limpeza definitiva dos arquivos é um procedimento próprio, sem exclusão direta de storage.objects.
 
 Gestão de conteúdo profissional passa a ser somente owner; papel de administrador interno de negócio não dá gestão nem acesso a rascunhos. Administrador da plataforma mantém revisão/moderação por RPCs próprias, com justificativa e auditoria, sem editar/publicar como dono. Retirar suspensão deixa o negócio não publicado, para nova ação do dono. E-mail confirmado é verificado no banco, não por user_metadata editável.
 

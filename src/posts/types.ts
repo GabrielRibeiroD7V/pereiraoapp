@@ -28,6 +28,7 @@ export interface PublishedWork {
   createdAt?: string | null;
   images: PostPhoto[];
   business: {
+    profilePublic?: boolean;
     id: string;
     slug: string;
     name: string;

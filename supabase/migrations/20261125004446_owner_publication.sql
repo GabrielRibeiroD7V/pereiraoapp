@@ -44,7 +44,7 @@ begin
   next_state:='unpublished';
  else raise exception 'Invalid command' using errcode='22023';end if;
  update public.businesses set status=next_state,deleted_at=case when command='delete' then clock_timestamp() else deleted_at end where id=b.id;
- if command in ('unpublish','delete') then update public.work_posts set status='unpublished',updated_at=clock_timestamp() where business_id=b.id and status='published';end if;
+ if command='delete' then update public.work_posts set status='unpublished',updated_at=clock_timestamp() where business_id=b.id and status='published';end if;
  if command<>'publish' then insert into private.publication_actions(actor_id,target_type,target_id,action) values(auth.uid(),'business',b.id,command);end if;
  return jsonb_build_object('status',next_state,'deleted',command='delete');
 end;$$;
@@ -102,7 +102,7 @@ begin
       if not private.public_actor_enabled(auth.uid()) then raise exception 'EMAIL_CONFIRMATION_REQUIRED' using errcode='42501';end if;
       perform 1 from public.portfolio_items p join public.work_post_images i on i.portfolio_item_id=p.id
         where i.post_id=item.id order by p.id for key share of p;
-      if not private.business_is_public(target_business) or not private.work_post_images_ready(item.id) then
+      if not private.work_post_images_ready(item.id) then
         raise exception 'Business or images not publishable' using errcode='23514';
       end if;
       if item.status<>'published' then
@@ -130,7 +130,7 @@ revoke all on function public.work_post_command(text,uuid,uuid,text,text,uuid[])
 grant execute on function public.work_post_command(text,uuid,uuid,text,text,uuid[]) to authenticated;
 
 create or replace function private.work_post_is_public(target_post uuid) returns boolean language sql stable security definer set search_path='' as $$
- select exists(select 1 from public.work_posts w where w.id=target_post and w.status='published' and private.business_is_public(w.business_id) and private.work_post_images_ready(w.id) and not exists(select 1 from private.post_moderation m where m.post_id=w.id and blocked));
+ select exists(select 1 from public.work_posts w where w.id=target_post and w.status='published' and exists(select 1 from public.businesses b join public.business_members m on m.business_id=b.id and m.role='owner' where b.id=w.business_id and b.deleted_at is null and private.public_actor_enabled(m.user_id) and not exists(select 1 from private.business_moderation where business_id=b.id and suspended)) and private.work_post_images_ready(w.id) and not exists(select 1 from private.post_moderation m where m.post_id=w.id and blocked));
 $$;
 create or replace function private.admin_action(kind text,target uuid,command text,reason text,expected_state text) returns jsonb
 language plpgsql security definer set search_path='' as $$
@@ -160,6 +160,7 @@ begin
    elsif command='suspend' and previous<>'suspended' then
      next_state:='suspended'; insert into private.business_moderation values(target,true) on conflict(business_id) do update set suspended=true;
      update public.businesses set status='unpublished' where id=target;
+     update public.work_posts set status='unpublished',updated_at=clock_timestamp() where business_id=target and status='published';
    else raise exception 'Invalid transition' using errcode='23514'; end if;
  elsif kind='user' then
    if command not in ('suspend','reactivate') then raise exception 'Invalid command' using errcode='22023'; end if;
@@ -177,6 +178,7 @@ begin
        select auth.uid(),'business',id,'owner_suspended',btrim(reason),status,'suspended' from public.businesses where id=affected;
        insert into private.business_moderation values(affected,true) on conflict(business_id) do update set suspended=true;
        update public.businesses set status='unpublished' where id=affected;
+       update public.work_posts set status='unpublished',updated_at=clock_timestamp() where business_id=affected and status='published';
      end loop;
    end if;
  elsif kind='post' then
@@ -296,6 +298,30 @@ language sql stable security invoker set search_path='' as $$
 $$;
 revoke all on function public.search_public_businesses(text,text,text,text,integer) from public,anon,authenticated;
 grant execute on function public.search_public_businesses(text,text,text,text,integer) to anon,authenticated;
+
+
+-- Only the selected ready portfolio photo can become public through a public post.
+create function private.portfolio_photo_in_public_post(target uuid) returns boolean language sql stable security definer set search_path='' as $$
+ select exists(select 1 from public.work_post_images i where i.portfolio_item_id=target and private.work_post_is_public(i.post_id));
+$$;
+revoke all on function private.portfolio_photo_in_public_post(uuid) from public,anon,authenticated;
+grant execute on function private.portfolio_photo_in_public_post(uuid) to anon,authenticated;
+create policy portfolio_selected_public_post on public.portfolio_items for select to anon,authenticated using(media_state='ready' and private.portfolio_photo_in_public_post(id));
+-- Safe projection: a public post never grants SELECT of its draft business row.
+create function public.public_work_posts(target_post uuid default null,business_filter uuid default null,before_time timestamptz default null,before_id uuid default null)
+returns jsonb language sql stable security definer set search_path='' as $$
+ select coalesce(jsonb_agg(x.payload order by x.published_at desc,x.id desc),'[]') from (
+ select w.id,w.published_at,jsonb_build_object('id',w.id,'businessId',w.business_id,'title',w.title,'description',w.description,'publishedAt',w.published_at,'createdAt',w.created_at,
+ 'images',coalesce((select jsonb_agg(j.photo order by j.ord) from (
+  select i.sort_order ord,jsonb_build_object('id',p.id,'path',p.storage_path,'caption',p.caption,'kind','portfolio') photo from public.work_post_images i join public.portfolio_items p on p.id=i.portfolio_item_id where i.post_id=w.id
+  union all select p.sort_order,jsonb_build_object('id',p.id,'path',p.storage_path,'caption',null,'kind','post') from public.work_post_photos p where p.post_id=w.id and p.selected and p.media_state='ready')j),'[]'),
+ 'business',jsonb_build_object('id',b.id,'name',b.name,'slug',case when private.business_is_public(b.id) then b.slug else '' end,'profilePublic',private.business_is_public(b.id),'avatarPath',case when private.business_is_public(b.id) then coalesce(b.profile_avatar_path,b.avatar_path) else null end,'category',case when b.type='empresa' then 'Empresa' else 'Profissional autônomo' end,'city','')) payload
+ from public.work_posts w join public.businesses b on b.id=w.business_id
+ where private.work_post_is_public(w.id) and (target_post is null or w.id=target_post) and (business_filter is null or w.business_id=business_filter)
+ and (before_time is null or (w.published_at,w.id)<(before_time,before_id)) order by w.published_at desc,w.id desc limit 7)x;
+$$;
+revoke all on function public.public_work_posts(uuid,uuid,timestamptz,uuid) from public,anon,authenticated;
+grant execute on function public.public_work_posts(uuid,uuid,timestamptz,uuid) to anon,authenticated;
 
 notify pgrst,'reload schema';
 commit;

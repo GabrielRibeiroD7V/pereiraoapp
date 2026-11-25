@@ -187,6 +187,7 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      public_work_posts: {Args:{target_post?:string|null;business_filter?:string|null;before_time?:string|null;before_id?:string|null};Returns:Json};
       report_content: { Args:{kind:string;target:string;reason:string}; Returns:undefined };
       resolve_content_report: {Args:{target:string;reason:string};Returns:undefined};
       owner_business_command: { Args: { target_business: string; command: string; expected_state: string }; Returns: Json };

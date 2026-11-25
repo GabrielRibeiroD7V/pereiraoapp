@@ -21,8 +21,15 @@ select public.portfolio_command('prepare',:'bid','00000000-0000-4000-8000-000000
 insert into storage.objects(bucket_id,name,metadata) select 'business-portfolio',storage_path,'{"size":100,"mimetype":"image/webp"}'::jsonb from public.portfolio_items where business_id=:'bid';
 select public.portfolio_command('finalize',:'bid','00000000-0000-4000-8000-00000000a010');
 select public.work_post_command('save',:'bid','00000000-0000-4000-8000-00000000a020','Fixture post','Saved caption',array['00000000-0000-4000-8000-00000000a010']::uuid[]);
+select public.work_post_command('publish',:'bid','00000000-0000-4000-8000-00000000a020');
+set local role anon;set local request.jwt.claim.sub='';
+select test.assert_true(jsonb_array_length(public.public_work_posts())=1,'visitor: post public immediately even with draft business');
+select test.assert_true((select count(*)=0 from public.businesses where id=:'bid'),'visitor: public post never leaks draft business');
+select test.assert_true((select count(*)=1 from storage.objects where bucket_id='business-portfolio'),'visitor: only selected photo available');
+set local role authenticated;set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
+select public.work_post_command('unpublish',:'bid','00000000-0000-4000-8000-00000000a020');
 select public.owner_business_command(:'bid','publish','draft');
-select test.assert_true((select status='draft' from public.work_posts where business_id=:'bid'),'owner: profile publication never publishes draft post');
+select test.assert_true((select status='unpublished' from public.work_posts where business_id=:'bid'),'owner: profile publication never publishes draft post');
 set local role anon;
 set local request.jwt.claim.sub='';
 select test.assert_true((select count(*)=1 from public.businesses where id=:'bid'),'visitor: profile public immediately');
@@ -50,9 +57,9 @@ select public.admin_action('post','00000000-0000-4000-8000-00000000a020','releas
 set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
 select public.work_post_command('publish',:'bid','00000000-0000-4000-8000-00000000a020');
 select public.owner_business_command(:'bid','unpublish','published');
-select test.assert_true((select status='unpublished' from public.work_posts where business_id=:'bid'),'owner: withdrawing profile withdraws live posts');
+select test.assert_true((select status='published' from public.work_posts where business_id=:'bid'),'owner: post remains public independently of profile');
 select public.owner_business_command(:'bid','publish','unpublished');
-select test.assert_true((select status='unpublished' from public.work_posts where business_id=:'bid'),'owner: republishing profile does not restore post');
+select test.assert_true((select status='published' from public.work_posts where business_id=:'bid'),'owner: profile status does not gate post');
 select public.owner_business_command(:'bid','delete','published');
 set local role anon;set local request.jwt.claim.sub='';
 select test.assert_true((select count(*)=0 from public.businesses where id=:'bid'),'visitor: deleted profile hidden');

@@ -43,7 +43,7 @@ export function postError(error: unknown) {
   if (["42501", "NOT_MANAGER", "AUTH_REQUIRED"].includes(code))
     return "Entre com a conta responsável pelo negócio para continuar.";
   if (code === "23514")
-    return "Confira se o perfil está publicado e se as fotografias continuam disponíveis. Seu rascunho foi preservado.";
+    return "Confira se as fotografias estão prontas e se o conteúdo não está bloqueado pela moderação. Seu rascunho foi preservado.";
   if (code === "22023")
     return "Revise o título, a descrição e a seleção de fotografias.";
   return "Não foi possível concluir. Verifique sua conexão e tente novamente.";

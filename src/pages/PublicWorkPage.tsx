@@ -23,7 +23,7 @@ export function PublicWorkPage() {
   const [management, setManagement] = useState<{user:string; business:string; allowed:boolean}|null>(null);
   const load = useCallback((signal:AbortSignal) => publicPosts ? publicPosts.get(postId,signal) : Promise.resolve(null), [publicPosts,postId]);
   const state = usePublicQuery(postId,load), post = state.data;
-  const loadProvider = useCallback((signal:AbortSignal)=> post && marketplace ? marketplace.getProvider(post.business.slug,signal) : Promise.resolve(null),[marketplace,post?.business.slug]);
+  const loadProvider = useCallback((signal:AbortSignal)=> post && post.business.profilePublic!==false && marketplace ? marketplace.getProvider(post.business.slug,signal) : Promise.resolve(null),[marketplace,post?.business.slug]);
   const provider = usePublicQuery(post?.businessId ?? '',loadProvider);
   useEffect(()=>{
     let live=true;
@@ -41,10 +41,10 @@ export function PublicWorkPage() {
       <PostContent avatar={post.business.avatarPath ? <PublicImage businessId={post.businessId} path={post.business.avatarPath} alt="" avatar/> : undefined} management={mine && <PostManagementMenu><Link to={`/conta/profissional/${post.businessId}/publicacoes`}>Gerenciar publicações</Link></PostManagementMenu>} headingLevel="h1" title={post.title} description={post.description} author={post.business.name} meta={`${post.business.category} · ${post.business.city}`} createdAt={post.createdAt} publishedAt={post.publishedAt}
         images={post.images.map(photo=>({id:photo.id,content:<button type="button" className="public-gallery-open" aria-label={`Ampliar ${photo.caption ?? 'fotografia do trabalho'}`} onClick={()=>setEnlarged(photo)}><PublicImage businessId={post.businessId} path={photo.path} alt={photo.caption ?? post.title}/></button>}))}
         actions={<>
-          <Link className="post-action" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>
-          <Link className="post-action" to={`${mine?`/conta/profissional/${post.businessId}/perfil`:profilePath}#servicos`}>Conferir serviços</Link>
-          {visitor && <Link className="post-action" to={`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
-          {visitor && provider.data?.id===post.businessId && <ContactLinks name={post.business.name} whatsapp={provider.data.whatsapp} compact/>}
+          {(mine||post.business.profilePublic!==false)&&<Link className="post-action" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>}
+          {(mine||post.business.profilePublic!==false)&&<Link className="post-action" to={`${mine?`/conta/profissional/${post.businessId}/perfil`:profilePath}#servicos`}>Conferir serviços</Link>}
+          {visitor && post.business.profilePublic!==false && <Link className="post-action" to={`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
+          {visitor && post.business.profilePublic!==false && provider.data?.id===post.businessId && <ContactLinks name={post.business.name} whatsapp={provider.data.whatsapp} compact/>}
           {provider.error&&visitor&&<p role="status">Contato por WhatsApp indisponível no momento. Você pode abrir o perfil ou conversar pelo PEREIRÃO.</p>}
         </>}/>
       <ReportContent kind="post" id={post.id}/>{enlarged && <Modal title="Fotografia do trabalho" onClose={()=>setEnlarged(null)}><div className="public-enlarged"><PublicImage businessId={post.businessId} path={enlarged.path} alt={enlarged.caption ?? post.title}/></div><p><strong>{post.business.name}</strong></p><p className="post-full-description">{post.description || 'Esta publicação não tem legenda.'}</p></Modal>}

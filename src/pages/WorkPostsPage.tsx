@@ -93,7 +93,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
           <p className="field-help">{state.data.business.name}</p>
           {state.data.business.status !== "published" && (
             <p className="form-notice">
-              Você publica seu perfil e seus trabalhos separadamente. <Link to={`/conta/profissional/${businessId}/perfil`}>Publicar meu perfil</Link> para tornar os trabalhos profissionais visíveis.
+              Seu perfil profissional está fora do ar. Você pode publicar seus posts independentemente. <Link to={`/conta/profissional/${businessId}/perfil`}>Gerenciar meu perfil</Link>.
             </p>
           )}
           <button
@@ -140,7 +140,6 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
                       className="button button--secondary"
                       disabled={
                         pending ||
-                        state.data!.business.status !== "published" ||
                         post.images.length === 0
                       }
                       onClick={() => setConfirm({ post, command: "publish" })}
