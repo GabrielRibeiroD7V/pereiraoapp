@@ -1,3 +1,4 @@
+import {ReportContent} from '../components/ReportContent';
 import {useSectionAnchor} from '../hooks/useSectionAnchor';
 import {WorkPhotoDetail} from '../work/WorkPhotoDetail';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
@@ -49,7 +50,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
     <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <SectionTabs label="Conteúdo do perfil" sections={[
       { id: 'trabalhos', label: 'Trabalhos', content: <>
-    <PublishedWorks key={provider.id} businessId={provider.id} coversOnly/>
+    <ReportContent kind="business" id={provider.id}/><PublishedWorks key={provider.id} businessId={provider.id} coversOnly/>
     <PagedSection<PublicPhoto> title="Portfólio" load={photos} empty="O prestador ainda não adicionou fotografias públicas." render={(items) => <ul className="public-gallery">{items.map((item) => <li key={item.id}><button className="public-gallery-open" onClick={() => setPhoto(item)} aria-label={`Ampliar fotografia ${item.caption ?? 'do trabalho'}`}><PublicImage businessId={provider.id} path={item.storagePath} alt={item.caption ?? 'Trabalho do prestador'} /></button>{item.caption && <p>{item.caption}</p>}</li>)}</ul>} />
       </> },
       { id: 'sobre', label: 'Sobre', content: <>

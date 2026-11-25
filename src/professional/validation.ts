@@ -37,6 +37,10 @@ export function createRegistrationSlug(name: string, suffix: string = crypto.ran
   return `${base}-${suffix}`;
 }
 export function professionalError(error: unknown) {
+  const message = error && typeof error === 'object' && 'message' in error ? String(error.message) : '';
+  if(message.includes('EMAIL_CONFIRMATION_REQUIRED'))return 'Confirme seu e-mail antes de publicar.';
+  if(message.includes('PROFILE_INCOMPLETE'))return 'Preencha bio, WhatsApp, categoria, cidade e locais de atendimento antes de publicar.';
+  if(message.includes('PUBLICATION_RATE_LIMIT'))return 'Limite de publicações atingido. Aguarde antes de tentar novamente.';
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
   if (['SETUP_REQUIRED','PGRST202','PGRST205','42P01'].includes(code)) return 'O cadastro profissional aguarda uma atualização do banco. Você pode continuar navegando.';
   if (code === '40001') return 'Outro responsável alterou as especialidades. Recarregue o perfil antes de salvar novamente.';

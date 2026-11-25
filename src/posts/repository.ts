@@ -53,7 +53,7 @@ export function createManagedPosts(
       .select("id")
       .eq("business_id", id)
       .eq("user_id", user.data.user.id)
-      .in("role", ["owner", "admin"])
+      .eq("role", "owner")
       .maybeSingle();
     if (member.error) throw member.error;
     if (!member.data) fail("NOT_MANAGER");
@@ -242,13 +242,22 @@ function publicPost(row: RawPublicPost): PublishedWork {
 export function createPublicPosts(
   client: SupabaseClient<Database>,
 ): PublicPosts {
-  let profileReady = true, directReady = true;
+  let profileReady = true, directReady = true, ownerReadReady=true;
+  async function ownerRead(target:string|null,business:string|null,cursor?:import('./types').WorkCursor|null){
+    if(!ownerReadReady)return undefined;
+    const {data,error}=await client.rpc('public_work_posts',{target_post:target,business_filter:business,before_time:cursor?.publishedAt??null,before_id:cursor?.id??null});
+    if(error){if(['PGRST202','42883'].includes(error.code)){ownerReadReady=false;return undefined;}throw error;}
+    if(!Array.isArray(data))throw {code:'INVALID_RESPONSE'};
+    return data as unknown as PublishedWork[];
+  }
   const fields = () => (profileReady ? PUBLIC_POST_FIELDS.replace('slug,avatar_path,', 'slug,avatar_path,profile_avatar_path,') : PUBLIC_POST_FIELDS)+(directReady?','+DIRECT_IMAGES:'');
   const missingProfile = (error: { code: string; message: string } | null) => error && ['42703','PGRST204'].includes(error.code) && error.message.includes('profile_avatar_path');
   return {
     async list(cursor, businessId, signal) {
       if (cursor && !validCursor(cursor)) fail("INVALID_CURSOR");
       if (businessId && !validId(businessId)) fail("INVALID_INPUT");
+      const scoped=await ownerRead(null,businessId??null,cursor);
+      if(scoped){const items=scoped.slice(0,6),last=items.at(-1);return {items,next:scoped.length>6&&last?{publishedAt:last.publishedAt,id:last.id}:null};}
       const read = () => {
         let query = client
           .from("work_posts")
@@ -289,6 +298,8 @@ export function createPublicPosts(
     },
     async get(id, signal) {
       if (!validId(id)) return null;
+      const scoped=await ownerRead(id,null);
+      if(scoped)return scoped[0]??null;
       const read = () => client
         .from("work_posts")
         .select(fields())

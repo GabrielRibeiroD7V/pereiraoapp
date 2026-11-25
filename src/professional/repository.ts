@@ -16,7 +16,7 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
   }
   async function managerIds() {
     const uid = await currentUid();
-    const { data, error } = await client.from('business_members').select('business_id,role').eq('user_id', uid).in('role', ['owner', 'admin']);
+    const { data, error } = await client.from('business_members').select('business_id,role').eq('user_id', uid).eq('role', 'owner');
     if (error) throw error;
     return (data ?? []).map((row) => row.business_id);
   }
@@ -48,13 +48,17 @@ export function createProfessionalRepository(client: SupabaseClient<Database>): 
     return data?.status === 'draft' ? data.id : null;
   }
   return {
+    async publication(id, command, expectedState) {
+      const {error}=await client.rpc('owner_business_command',{target_business:id,command,expected_state:expectedState});
+      if(error)throw error;
+    },
     getCatalog,
     async listMine() {
       const ids = await managerIds();
       if (!ids.length) return [];
       const { data, error } = await client.from('businesses').select('*').in('id', ids).order('created_at');
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).filter(row => !row.deleted_at);
     },
     async getEditable(id) {
       await requireManager(id);

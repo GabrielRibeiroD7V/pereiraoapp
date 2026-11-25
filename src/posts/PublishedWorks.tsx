@@ -29,9 +29,7 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
           )}
         </span>
         <div>
-          <Link to={`/prestadores/${post.business.slug}`}>
-            {post.business.name}
-          </Link>
+          {post.business.profilePublic===false?<strong>{post.business.name}</strong>:<Link to={`/prestadores/${post.business.slug}`}>{post.business.name}</Link>}
           <p>
             {post.business.category} · {post.business.city}
           </p>
@@ -44,7 +42,7 @@ export function WorkCard({ post, coversOnly = false }: { post: PublishedWork; co
       {post.description && (
         <p className="published-work-summary">{post.description}</p>
       )}
-      <div className="post-card-actions"><Link to={`/prestadores/${post.business.slug}`}>Ver perfil</Link><Link to={`/prestadores/${post.business.slug}#servicos`}>Conferir serviços</Link></div>
+      {post.business.profilePublic!==false&&<div className="post-card-actions"><Link to={`/prestadores/${post.business.slug}`}>Ver perfil</Link><Link to={`/prestadores/${post.business.slug}#servicos`}>Conferir serviços</Link></div>}
       <PostDates createdAt={post.createdAt} publishedAt={post.publishedAt}/>
     </article>
   );
