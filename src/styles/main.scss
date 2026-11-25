@@ -34,9 +34,10 @@ button, a, input, select, textarea { touch-action: manipulation; }
 // O título recebe foco por código ao trocar de rota para anunciar a página.
 // Ele não participa da navegação por Tab e não deve aparecer como um campo selecionado.
 #page-title:focus-visible { outline: none; }
-::selection { background: var(--color-primary); color: var(--color-navy); }
+::selection { background: var(--color-primary); color: #fff; }
 
 .skip-link {
+  color:#fff;
   position: fixed;
   top: -8rem;
   left: var(--space-4);
@@ -112,7 +113,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   input { min-width: 0; flex: 1; width: 100%; min-height: 2.75rem; border: 0; background: transparent; padding: var(--space-2); color: var(--color-navy); }
   input::placeholder { color: var(--color-secondary); opacity: 1; }
   input:focus-visible { outline: none; }
-  button { display: inline-flex; justify-content: center; align-items: center; width: 2.75rem; min-height: 2.75rem; flex-shrink: 0; border: 0; border-radius: var(--radius-small); background: var(--color-primary); color: var(--color-navy); cursor: pointer; }
+  button { display: inline-flex; justify-content: center; align-items: center; width: 2.75rem; min-height: 2.75rem; flex-shrink: 0; border: 0; border-radius: var(--radius-small); background: var(--color-primary); color: #fff; cursor: pointer; }
   button:hover { background: var(--color-primary-hover); }
 }
 
@@ -213,7 +214,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   font-weight: 600;
   color: var(--color-navy);
   text-align: center;
-  &--primary { background: var(--color-primary); &:hover { background: var(--color-primary-hover); } }
+  &--primary { color: #fff; background: var(--color-primary); &:hover { background: var(--color-primary-hover); } }
   &--secondary { border-color: var(--color-border); background: var(--color-background); &:hover { background: var(--color-surface); } }
 }
 

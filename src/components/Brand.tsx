@@ -9,7 +9,7 @@ export function Brand({ inverse = false }: { inverse?: boolean } = {}) {
       {inverse ? <svg className="brand__inverse-image" viewBox="20 151 345 87" width="345" height="87" role="img" aria-label="PEREIRÃO" focusable="false">
         <defs>
           <filter id={`${id}-white`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1 -1 -1 0 2.95"/></filter>
-          <filter id={`${id}-color`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 -1 0 2.95"/></filter>
+          <filter id={`${id}-color`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 .812  0 0 0 0 .871  -1 -1 -1 0 2.95"/></filter>
           <clipPath id={`${id}-letters`}><polygon points="0,166.4 261.1,166.4 265,151 303.4,151 303.4,166.4 384,166.4 384,216 0,216"/></clipPath>
           <clipPath id={`${id}-underline`}><rect x="0" y="216" width="384" height="28"/></clipPath>
         </defs>
