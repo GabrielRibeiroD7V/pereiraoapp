@@ -1,5 +1,7 @@
 # Instalação e módulos sociais posteriores
 
+Direção de produto atualizada: [plano por etapas](product-roadmap.md). A publicação aberta substitui a antiga dependência de aprovação prévia mencionada no histórico abaixo. Propostas de salvar, curtir e comentar continuam futuras; não precedem a validação da base funcional.
+
 ## Regra objetiva de instalação nesta proposta
 
 Aba flutuante compacta acima da navegação e da safe area, com animação curta (desativada com movimento reduzido), sem abertura automática de modal. Elegível antes e depois do login: Home, Buscar, perfil/trabalho público, Conta e prévia salva do próprio perfil. Não aparece em autenticação, cadastro/edição, mensagens, administração ou finanças.

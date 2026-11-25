@@ -1,4 +1,5 @@
 export type AdminSection =
+  | "personal_posts"
   | "reports"
   | "dashboard"
   | "users"
@@ -9,7 +10,11 @@ export type AdminSection =
   | "subscriptions"
   | "sandbox";
 export type SandboxState =
-  "connected" | "missing" | "invalid" | "communication_error" | "not_validated";
+  | "connected"
+  | "missing"
+  | "invalid"
+  | "communication_error"
+  | "not_validated";
 export interface SandboxDiagnostic {
   state: SandboxState;
   httpStatus?: number;
@@ -91,8 +96,17 @@ export interface AdminPhoto {
   caption: string | null;
   media_state: string;
 }
-export interface ReviewCategory { id: string; name: string; active: boolean }
-export interface ReviewCity { id: string; name: string; stateCode: string; active: boolean }
+export interface ReviewCategory {
+  id: string;
+  name: string;
+  active: boolean;
+}
+export interface ReviewCity {
+  id: string;
+  name: string;
+  stateCode: string;
+  active: boolean;
+}
 export interface AdminReviewCatalog {
   primaryCategory: ReviewCategory | null;
   additionalSpecialties: ReviewCategory[];

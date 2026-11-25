@@ -1,6 +1,18 @@
-import {supabase} from '../lib/supabase';
-import { ReviewClassification } from './ReviewClassification';
-import { LayoutDashboard, Users, BriefcaseBusiness, Images, History, CalendarDays, FlaskConical, Activity, ShieldAlert } from 'lucide-react';
+import { SocialPostBody } from "../social/SocialFeed";
+import type { SocialPost } from "../social/model";
+import { supabase } from "../lib/supabase";
+import { ReviewClassification } from "./ReviewClassification";
+import {
+  LayoutDashboard,
+  Users,
+  BriefcaseBusiness,
+  Images,
+  History,
+  CalendarDays,
+  FlaskConical,
+  Activity,
+  ShieldAlert,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -31,6 +43,7 @@ import type {
 const sections = [
   ["dashboard", "Visão geral"],
   ["reports", "Denúncias"],
+  ["personal_posts", "Posts pessoais"],
   ["users", "Usuários"],
   ["businesses", "Prestadores"],
   ["posts", "Publicações"],
@@ -38,7 +51,17 @@ const sections = [
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
 ] as const;
-const sectionIcons = { reports: ShieldAlert, dashboard: LayoutDashboard, users: Users, businesses: BriefcaseBusiness, posts: Images, audit: History, subscriptions: CalendarDays, sandbox: FlaskConical };
+const sectionIcons = {
+  personal_posts: Images,
+  reports: ShieldAlert,
+  dashboard: LayoutDashboard,
+  users: Users,
+  businesses: BriefcaseBusiness,
+  posts: Images,
+  audit: History,
+  subscriptions: CalendarDays,
+  sandbox: FlaskConical,
+};
 const states: Record<string, string> = {
   draft: "Rascunho",
   published: "Publicado",
@@ -161,7 +184,9 @@ function AdminContent() {
   const [search, setSearch] = useState(q),
     [revision, refresh] = useState(0),
     [review, setReview] = useState<string | null>(null);
-  useEffect(()=>{if(params.get('review'))setReview(params.get('review'));},[params]);
+  useEffect(() => {
+    if (params.get("review")) setReview(params.get("review"));
+  }, [params]);
   const [decision, setDecision] = useState<{
     input: Omit<AdminAction, "reason">;
     label: string;
@@ -180,7 +205,8 @@ function AdminContent() {
     status,
     page,
     days,
-    ...(["audit","posts"].includes(section) && params.get("id")
+    ...(["audit", "posts", "personal_posts"].includes(section) &&
+    params.get("id")
       ? { id: params.get("id")! }
       : {}),
   };
@@ -197,295 +223,176 @@ function AdminContent() {
       <nav className="admin-sections" aria-label="Seções administrativas">
         {visibleSections.map(([id, label]) => {
           const Icon = sectionIcons[id];
-          return <button
-            key={id}
-            className={id === section ? "is-active" : ""}
-            aria-current={id === section ? "page" : undefined}
-            onClick={() => {
-              setSearch("");
-              setParams({ sec: id });
-            }}
-          >
-            <Icon size={18} aria-hidden="true" />
-            <span>{label}</span>
-          </button>;
+          return (
+            <button
+              key={id}
+              className={id === section ? "is-active" : ""}
+              aria-current={id === section ? "page" : undefined}
+              onClick={() => {
+                setSearch("");
+                setParams({ sec: id });
+              }}
+            >
+              <Icon size={18} aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          );
         })}
       </nav>
       <div className="admin-content">
-      <div className="admin-section-heading">
-        <h2>{visibleSections.find(([id]) => id === section)?.[1]}</h2>
-        <button
-          className="button button--secondary"
-          onClick={() => refresh((n) => n + 1)}
-        >
-          Atualizar
-        </button>
-      </div>
-      {(section === "dashboard" || section === "users") && (
-        <label className="admin-period">
-          Período de cadastro
-          <select
-            value={days}
-            onChange={(e) => update({ days: e.target.value, page: "" })}
+        <div className="admin-section-heading">
+          <h2>{visibleSections.find(([id]) => id === section)?.[1]}</h2>
+          <button
+            className="button button--secondary"
+            onClick={() => refresh((n) => n + 1)}
           >
-            <option value={0}>Todo o período</option>
-            <option value={7}>Últimos 7 dias</option>
-            <option value={30}>Últimos 30 dias</option>
-            <option value={90}>Últimos 90 dias</option>
-          </select>
-        </label>
-      )}
-      {["users", "businesses", "posts"].includes(section) && (
-        <form
-          className="admin-filters"
-          onSubmit={(e) => {
-            e.preventDefault();
-            update({ q: search.trim().slice(0, 80), page: "" });
-          }}
-        >
-          <label>
-            Pesquisar
-            <input
-              maxLength={80}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={
-                section === "users" ? "Nome ou e-mail" : "Nome ou título"
-              }
-            />
-          </label>
-          <label>
-            Situação
+            Atualizar
+          </button>
+        </div>
+        {(section === "dashboard" || section === "users") && (
+          <label className="admin-period">
+            Período de cadastro
             <select
-              value={status}
-              onChange={(e) => update({ status: e.target.value, page: "" })}
+              value={days}
+              onChange={(e) => update({ days: e.target.value, page: "" })}
             >
-              <option value="">Todas</option>
-              {(section === "users"
-                ? ["active", "suspended"]
-                : section === "businesses"
-                  ? ["draft", "published", "unpublished", "suspended"]
-                  : ["draft", "published", "unpublished"]
-              ).map((s) => (
-                <option key={s} value={s}>
-                  {states[s]}
-                </option>
-              ))}
+              <option value={0}>Todo o período</option>
+              <option value={7}>Últimos 7 dias</option>
+              <option value={30}>Últimos 30 dias</option>
+              <option value={90}>Últimos 90 dias</option>
             </select>
           </label>
-          <button className="button button--primary" type="submit">
-            Pesquisar
-          </button>
-        </form>
-      )}
-      {section === "sandbox" ? (
-        <SandboxFinancePanel key={revision} />
-      ) : section === "subscriptions" ? (
-        <AdminSubscriptionsPanel revision={revision} />
-      ) : section === "reports" ? <ReportsPanel filters={filters}/> : section === "dashboard" ? (
-        <Resource<AdminDashboard>
-          section={section}
-          filters={filters}
-          revision={revision}
-        >
-          {(data) => (
-            <>
-              <div className="admin-metrics">
-                {[
-                  ["Usuários cadastrados", data.users],
-                  ["Cadastros no período", data.newUsers],
-                  ["Autônomos", data.autonomos],
-                  ["Empresas", data.empresas],
-                  ["Prestadores publicados", data.published],
-                  ["Perfis em rascunho", data.drafts],
-                  ["Prestadores suspensos", data.suspended],
-                  ["Publicações de trabalhos", data.posts],
-                  ["Conversas",data.conversations],
-                  ["Denúncias abertas",data.openReports],
-                  ["Assinaturas",data.subscriptions],
-                ].map(([label, value]) => (
-                  <article key={label}>
-                    <Activity size={17} aria-hidden="true" />
-                    <span>{label}</span>
-                    <strong>{value ?? "Indisponível"}</strong>
-                  </article>
-                ))}
-              </div>
-              <p className="field-help">
-                Perfis em rascunho incluem cadastros incompletos e não são uma fila de aprovação. Cada responsável decide quando publicar.
-              </p>
-              <p className="form-notice">
-                Usuários ativos em 7 e 30 dias: indisponível. Ainda não existem
-                eventos confiáveis de atividade.
-              </p>
-              {!data.postsAvailable && (
-                <p className="form-notice">
-                  Publicações aguardam a ativação da migração de trabalhos. Os
-                  demais indicadores permanecem disponíveis.
-                </p>
-              )}
-              <SandboxPanel />
-            </>
-          )}
-        </Resource>
-      ) : section === "businesses" ? (
-        <Resource<Page<AdminBusiness>>
-          section={section}
-          filters={filters}
-          revision={revision}
-        >
-          {(data) => (
-            <>
-              <DataTable
-                empty={data.items.length === 0}
-                headings={["Prestador", "Tipo e local", "Situação", "Ações"]}
+        )}
+        {["users", "businesses", "posts"].includes(section) && (
+          <form
+            className="admin-filters"
+            onSubmit={(e) => {
+              e.preventDefault();
+              update({ q: search.trim().slice(0, 80), page: "" });
+            }}
+          >
+            <label>
+              Pesquisar
+              <input
+                maxLength={80}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={
+                  section === "users" ? "Nome ou e-mail" : "Nome ou título"
+                }
+              />
+            </label>
+            <label>
+              Situação
+              <select
+                value={status}
+                onChange={(e) => update({ status: e.target.value, page: "" })}
               >
-                {data.items.map((b) => (
-                  <tr key={b.id}>
-                    <td>
-                      <strong>{b.name}</strong>
-                      <small>{b.category ?? "Sem categoria"}</small>
-                    </td>
-                    <td>
-                      {b.type === "empresa" ? "Empresa" : "Autônomo"}
-                      <small>{b.city}</small>
-                    </td>
-                    <td>
-                      <Status value={b.suspended ? "suspended" : b.status} />
-                    </td>
-                    <td>
-                      <button
-                        className="text-link"
-                        onClick={() => setReview(b.id)}
-                      >
-                        Analisar perfil
-                        <span className="visually-hidden"> {b.name}</span>
-                      </button>
-                    </td>
-                  </tr>
+                <option value="">Todas</option>
+                {(section === "users"
+                  ? ["active", "suspended"]
+                  : section === "businesses"
+                    ? ["draft", "published", "unpublished", "suspended"]
+                    : ["draft", "published", "unpublished"]
+                ).map((s) => (
+                  <option key={s} value={s}>
+                    {states[s]}
+                  </option>
                 ))}
-              </DataTable>
-              {paged(data.hasNext)}
-            </>
-          )}
-        </Resource>
-      ) : section === "users" ? (
-        <Resource<Page<AdminUser>>
-          section={section}
-          filters={filters}
-          revision={revision}
-        >
-          {(data) => (
-            <>
-              <p className="field-help">
-                Suspender bloqueia a gestão profissional e retira os negócios
-                próprios de circulação. Não exclui a conta nem impede o login no
-                Supabase Auth.
-              </p>
-              <DataTable
-                empty={data.items.length === 0}
-                headings={["Usuário", "Cadastro", "Situação", "Ações"]}
-              >
-                {data.items.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      <strong>{u.display_name || "Sem nome"}</strong>
-                      <small>{u.email ?? "Sem e-mail"}</small>
-                      <small>
-                        {u.confirmed
-                          ? "E-mail confirmado"
-                          : "E-mail não confirmado"}
-                      </small>
-                    </td>
-                    <td>{date(u.created_at)}</td>
-                    <td>
-                      <Status value={u.suspended ? "suspended" : "active"} />
-                    </td>
-                    <td>
-                      <button
-                        className="text-link"
-                        onClick={() =>
-                          decide(
-                            {
-                              kind: "user",
-                              target: u.id,
-                              command: u.suspended ? "reactivate" : "suspend",
-                              expected_state: u.suspended
-                                ? "suspended"
-                                : "active",
-                            },
-                            u.display_name || u.email || u.id,
-                          )
-                        }
-                      >
-                        {u.suspended ? "Reativar" : "Suspender"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </DataTable>
-              {paged(data.hasNext)}
-            </>
-          )}
-        </Resource>
-      ) : section === "posts" ? (
-        <Resource<Page<AdminPost>>
-          section={section}
-          filters={filters}
-          revision={revision}
-        >
-          {(data) =>
-            data.available === false ? (
-              <p role="status" className="form-notice">
-                Publicações aguardam a ativação da migração de trabalhos.
-              </p>
-            ) : (
+              </select>
+            </label>
+            <button className="button button--primary" type="submit">
+              Pesquisar
+            </button>
+          </form>
+        )}
+        {section === "sandbox" ? (
+          <SandboxFinancePanel key={revision} />
+        ) : section === "subscriptions" ? (
+          <AdminSubscriptionsPanel revision={revision} />
+        ) : section === "personal_posts" ? (
+          <PersonalModerationPanel filters={filters} />
+        ) : section === "reports" ? (
+          <ReportsPanel filters={filters} />
+        ) : section === "dashboard" ? (
+          <Resource<AdminDashboard>
+            section={section}
+            filters={filters}
+            revision={revision}
+          >
+            {(data) => (
               <>
-                {!data.moderationAvailable && (
+                <div className="admin-metrics">
+                  {[
+                    ["Usuários cadastrados", data.users],
+                    ["Cadastros no período", data.newUsers],
+                    ["Autônomos", data.autonomos],
+                    ["Empresas", data.empresas],
+                    ["Prestadores publicados", data.published],
+                    ["Perfis em rascunho", data.drafts],
+                    ["Prestadores suspensos", data.suspended],
+                    ["Publicações de trabalhos", data.posts],
+                    ["Conversas", data.conversations],
+                    ["Denúncias abertas", data.openReports],
+                    ["Assinaturas", data.subscriptions],
+                  ].map(([label, value]) => (
+                    <article key={label}>
+                      <Activity size={17} aria-hidden="true" />
+                      <span>{label}</span>
+                      <strong>{value ?? "Indisponível"}</strong>
+                    </article>
+                  ))}
+                </div>
+                <p className="field-help">
+                  Perfis em rascunho incluem cadastros incompletos e não são uma
+                  fila de aprovação. Cada responsável decide quando publicar.
+                </p>
+                <p className="form-notice">
+                  Usuários ativos em 7 e 30 dias: indisponível. Ainda não
+                  existem eventos confiáveis de atividade.
+                </p>
+                {!data.postsAvailable && (
                   <p className="form-notice">
-                    A moderação aguarda sua migração específica.
+                    Publicações aguardam a ativação da migração de trabalhos. Os
+                    demais indicadores permanecem disponíveis.
                   </p>
                 )}
+                <SandboxPanel />
+              </>
+            )}
+          </Resource>
+        ) : section === "businesses" ? (
+          <Resource<Page<AdminBusiness>>
+            section={section}
+            filters={filters}
+            revision={revision}
+          >
+            {(data) => (
+              <>
                 <DataTable
                   empty={data.items.length === 0}
-                  headings={["Trabalho", "Prestador", "Situação", "Ações"]}
+                  headings={["Prestador", "Tipo e local", "Situação", "Ações"]}
                 >
-                  {data.items.map((p) => (
-                    <tr key={p.id}>
+                  {data.items.map((b) => (
+                    <tr key={b.id}>
                       <td>
-                        <strong>{p.title}</strong>
-                        <small>{date(p.created_at)}</small>
+                        <strong>{b.name}</strong>
+                        <small>{b.category ?? "Sem categoria"}</small>
+                      </td>
+                      <td>
+                        {b.type === "empresa" ? "Empresa" : "Autônomo"}
+                        <small>{b.city}</small>
+                      </td>
+                      <td>
+                        <Status value={b.suspended ? "suspended" : b.status} />
                       </td>
                       <td>
                         <button
                           className="text-link"
-                          onClick={() => setReview(p.business_id)}
+                          onClick={() => setReview(b.id)}
                         >
-                          {p.business_name}
-                        </button>
-                      </td>
-                      <td>
-                        <Status value={p.blocked ? "blocked" : p.status} />
-                      </td>
-                      <td>
-                        <button
-                          className="text-link"
-                          disabled={!data.moderationAvailable}
-                          onClick={() =>
-                            decide(
-                              {
-                                kind: "post",
-                                target: p.id,
-                                command: p.blocked ? "release" : "withdraw",
-                                expected_state: p.blocked
-                                  ? "blocked"
-                                  : p.status,
-                              },
-                              p.title,
-                            )
-                          }
-                        >
-                          {p.blocked ? "Liberar" : "Retirar e bloquear"}
+                          Analisar perfil
+                          <span className="visually-hidden"> {b.name}</span>
                         </button>
                       </td>
                     </tr>
@@ -493,54 +400,180 @@ function AdminContent() {
                 </DataTable>
                 {paged(data.hasNext)}
               </>
-            )
-          }
-        </Resource>
-      ) : (
-        <Resource<Page<AuditEntry>>
-          section="audit"
-          filters={filters}
-          revision={revision}
-        >
-          {(data) => (
-            <>
-              <AuditTable items={data.items} />
-              {paged(data.hasNext)}
-              {params.get("id") && (
-                <button
-                  className="text-link"
-                  onClick={() => update({ id: "", page: "" })}
-                >
-                  Ver todo o histórico
-                </button>
-              )}
-            </>
-          )}
-        </Resource>
-      )}
-      {review && (
-        <Modal title="Análise do perfil" onClose={() => setReview(null)}>
-          <BusinessDetails
-            id={review}
+            )}
+          </Resource>
+        ) : section === "users" ? (
+          <Resource<Page<AdminUser>>
+            section={section}
+            filters={filters}
             revision={revision}
-            decide={decide}
-            onHistory={() => {
-              setReview(null);
-              setParams({ sec: "audit", id: review });
+          >
+            {(data) => (
+              <>
+                <p className="field-help">
+                  Suspender bloqueia a gestão profissional e retira os negócios
+                  próprios de circulação. Não exclui a conta nem impede o login
+                  no Supabase Auth.
+                </p>
+                <DataTable
+                  empty={data.items.length === 0}
+                  headings={["Usuário", "Cadastro", "Situação", "Ações"]}
+                >
+                  {data.items.map((u) => (
+                    <tr key={u.id}>
+                      <td>
+                        <strong>{u.display_name || "Sem nome"}</strong>
+                        <small>{u.email ?? "Sem e-mail"}</small>
+                        <small>
+                          {u.confirmed
+                            ? "E-mail confirmado"
+                            : "E-mail não confirmado"}
+                        </small>
+                      </td>
+                      <td>{date(u.created_at)}</td>
+                      <td>
+                        <Status value={u.suspended ? "suspended" : "active"} />
+                      </td>
+                      <td>
+                        <button
+                          className="text-link"
+                          onClick={() =>
+                            decide(
+                              {
+                                kind: "user",
+                                target: u.id,
+                                command: u.suspended ? "reactivate" : "suspend",
+                                expected_state: u.suspended
+                                  ? "suspended"
+                                  : "active",
+                              },
+                              u.display_name || u.email || u.id,
+                            )
+                          }
+                        >
+                          {u.suspended ? "Reativar" : "Suspender"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </DataTable>
+                {paged(data.hasNext)}
+              </>
+            )}
+          </Resource>
+        ) : section === "posts" ? (
+          <Resource<Page<AdminPost>>
+            section={section}
+            filters={filters}
+            revision={revision}
+          >
+            {(data) =>
+              data.available === false ? (
+                <p role="status" className="form-notice">
+                  Publicações aguardam a ativação da migração de trabalhos.
+                </p>
+              ) : (
+                <>
+                  {!data.moderationAvailable && (
+                    <p className="form-notice">
+                      A moderação aguarda sua migração específica.
+                    </p>
+                  )}
+                  <DataTable
+                    empty={data.items.length === 0}
+                    headings={["Trabalho", "Prestador", "Situação", "Ações"]}
+                  >
+                    {data.items.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <strong>{p.title}</strong>
+                          <small>{date(p.created_at)}</small>
+                        </td>
+                        <td>
+                          <button
+                            className="text-link"
+                            onClick={() => setReview(p.business_id)}
+                          >
+                            {p.business_name}
+                          </button>
+                        </td>
+                        <td>
+                          <Status value={p.blocked ? "blocked" : p.status} />
+                        </td>
+                        <td>
+                          <button
+                            className="text-link"
+                            disabled={!data.moderationAvailable}
+                            onClick={() =>
+                              decide(
+                                {
+                                  kind: "post",
+                                  target: p.id,
+                                  command: p.blocked ? "release" : "withdraw",
+                                  expected_state: p.blocked
+                                    ? "blocked"
+                                    : p.status,
+                                },
+                                p.title,
+                              )
+                            }
+                          >
+                            {p.blocked ? "Liberar" : "Retirar e bloquear"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </DataTable>
+                  {paged(data.hasNext)}
+                </>
+              )
+            }
+          </Resource>
+        ) : (
+          <Resource<Page<AuditEntry>>
+            section="audit"
+            filters={filters}
+            revision={revision}
+          >
+            {(data) => (
+              <>
+                <AuditTable items={data.items} />
+                {paged(data.hasNext)}
+                {params.get("id") && (
+                  <button
+                    className="text-link"
+                    onClick={() => update({ id: "", page: "" })}
+                  >
+                    Ver todo o histórico
+                  </button>
+                )}
+              </>
+            )}
+          </Resource>
+        )}
+        {review && (
+          <Modal title="Análise do perfil" onClose={() => setReview(null)}>
+            <BusinessDetails
+              id={review}
+              revision={revision}
+              decide={decide}
+              onHistory={() => {
+                setReview(null);
+                setParams({ sec: "audit", id: review });
+              }}
+            />
+          </Modal>
+        )}
+        {decision && (
+          <DecisionModal
+            decision={decision}
+            onClose={() => setDecision(null)}
+            onSuccess={() => {
+              setDecision(null);
+              refresh((n) => n + 1);
             }}
           />
-        </Modal>
-      )}
-      {decision && (
-        <DecisionModal
-          decision={decision}
-          onClose={() => setDecision(null)}
-          onSuccess={() => {
-            setDecision(null);
-            refresh((n) => n + 1);
-          }}
-        />
-      )}
+        )}
       </div>
     </div>
   );
@@ -666,7 +699,11 @@ function BusinessReview({
       <h3>{b.name}</h3>
       <Status value={state} />
       <p>{b.description || "Descrição não informada."}</p>
-      <ReviewClassification catalog={data.reviewCatalog ?? null} fallbackCategory={b.category} fallbackCity={b.city} />
+      <ReviewClassification
+        catalog={data.reviewCatalog ?? null}
+        fallbackCategory={b.category}
+        fallbackCity={b.city}
+      />
       <p>WhatsApp: {b.whatsapp ?? "Não informado"}</p>
       <div className="work-actions">
         {(b.suspended
@@ -719,7 +756,22 @@ function BusinessReview({
         </ul>
       )}
       <h3>Foto principal do perfil</h3>
-      {data.profilePhoto ? <div className="admin-photo-grid"><AdminPhotoPreview key={data.profilePhoto} businessId={b.id} photo={{ id: 'profile-' + data.profilePhoto, storage_path: data.profilePhoto, caption: 'Foto principal do perfil', media_state: 'ready' }} /></div> : <p>Nenhuma foto principal informada.</p>}
+      {data.profilePhoto ? (
+        <div className="admin-photo-grid">
+          <AdminPhotoPreview
+            key={data.profilePhoto}
+            businessId={b.id}
+            photo={{
+              id: "profile-" + data.profilePhoto,
+              storage_path: data.profilePhoto,
+              caption: "Foto principal do perfil",
+              media_state: "ready",
+            }}
+          />
+        </div>
+      ) : (
+        <p>Nenhuma foto principal informada.</p>
+      )}
       <h3>Fotografias de trabalhos</h3>
       {data.photos.length === 0 ? (
         <p>Nenhuma fotografia cadastrada.</p>
@@ -957,7 +1009,227 @@ function SandboxPanel() {
   );
 }
 
-function ReportsPanel({filters}:{filters:AdminFilters}){
- const [revision,setRevision]=useState(0),[error,setError]=useState(''),[resolving,setResolving]=useState<string|null>(null),[reason,setReason]=useState(''),[busy,setBusy]=useState(false);
- return <><Resource<Page<{id:string;target_type:string;target_id:string;reason:string;created_at:string;resolved_at:string|null}>> section="reports" filters={filters} revision={revision}>{data=><><h2>Denúncias</h2>{!data.items.length&&<p>Nenhuma denúncia registrada.</p>}<ul>{data.items.map(r=><li key={r.id}><p>{r.reason}</p><p>{date(r.created_at)} · {r.resolved_at?'Analisada':'Pendente'}</p><Link to={r.target_type==='business'?`/admin?sec=businesses&review=${r.target_id}`:r.target_type==='personal_post'?`/conta/publicacoes/${r.target_id}`:`/admin?sec=posts&id=${r.target_id}`}>Abrir conteúdo</Link>{!r.resolved_at&&<button className="text-link" onClick={()=>{setResolving(r.id);setReason('');setError('');}}>Concluir análise</button>}</li>)}</ul>{data.hasNext&&<p>Há mais denúncias. Avance a página pelos filtros administrativos.</p>}</>}</Resource>{resolving&&<Modal title="Concluir análise da denúncia" locked={busy} onClose={()=>setResolving(null)}><p>Ocultar conteúdo ou suspender a conta são ações separadas, com justificativa e auditoria. Concluir esta análise não oculta o conteúdo.</p><label>Justificativa<textarea value={reason} maxLength={500} onChange={e=>setReason(e.target.value)}/></label>{error&&<p role="alert">{error}</p>}<button className="button" disabled={busy||reason.trim().length<5} onClick={()=>{if(!supabase)return;setBusy(true);void supabase.rpc('resolve_content_report',{target:resolving,reason:reason.trim()}).then(({error})=>{if(error)setError('Não foi possível concluir a análise.');else{setResolving(null);setRevision(n=>n+1);}setBusy(false);});}}>Concluir análise</button></Modal>}</>;
+function ReportsPanel({ filters }: { filters: AdminFilters }) {
+  const [params, setParams] = useSearchParams();
+  const [revision, setRevision] = useState(0),
+    [error, setError] = useState(""),
+    [resolving, setResolving] = useState<string | null>(null),
+    [reason, setReason] = useState(""),
+    [busy, setBusy] = useState(false);
+  return (
+    <>
+      <Resource<
+        Page<{
+          id: string;
+          target_type: string;
+          target_id: string;
+          reason: string;
+          created_at: string;
+          resolved_at: string | null;
+        }>
+      >
+        section="reports"
+        filters={filters}
+        revision={revision}
+      >
+        {(data) => (
+          <>
+            <h2>Denúncias</h2>
+            {!data.items.length && <p>Nenhuma denúncia registrada.</p>}
+            <ul>
+              {data.items.map((r) => (
+                <li key={r.id}>
+                  <p>{r.reason}</p>
+                  <p>
+                    {date(r.created_at)} ·{" "}
+                    {r.resolved_at ? "Analisada" : "Pendente"}
+                  </p>
+                  <Link
+                    to={
+                      r.target_type === "business"
+                        ? `/admin?sec=businesses&review=${r.target_id}`
+                        : r.target_type === "personal_post"
+                          ? `/admin?sec=personal_posts&id=${r.target_id}`
+                          : `/admin?sec=posts&id=${r.target_id}`
+                    }
+                  >
+                    Abrir conteúdo
+                  </Link>
+                  {!r.resolved_at && (
+                    <button
+                      className="text-link"
+                      onClick={() => {
+                        setResolving(r.id);
+                        setReason("");
+                        setError("");
+                      }}
+                    >
+                      Concluir análise
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <Pagination
+              page={filters.page ?? 1}
+              hasNext={data.hasNext}
+              label="denúncias"
+              onChange={(page) => {
+                const next = new URLSearchParams(params);
+                next.set("page", String(page));
+                setParams(next);
+              }}
+            />
+          </>
+        )}
+      </Resource>
+      {resolving && (
+        <Modal
+          title="Concluir análise da denúncia"
+          locked={busy}
+          onClose={() => setResolving(null)}
+        >
+          <p>
+            Ocultar conteúdo ou suspender a conta são ações separadas, com
+            justificativa e auditoria. Concluir esta análise não oculta o
+            conteúdo.
+          </p>
+          <label>
+            Justificativa
+            <textarea
+              value={reason}
+              maxLength={500}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </label>
+          {error && <p role="alert">{error}</p>}
+          <button
+            className="button"
+            disabled={busy || reason.trim().length < 5}
+            onClick={() => {
+              if (!supabase) return;
+              setBusy(true);
+              void supabase
+                .rpc("resolve_content_report", {
+                  target: resolving,
+                  reason: reason.trim(),
+                })
+                .then(({ error }) => {
+                  if (error) setError("Não foi possível concluir a análise.");
+                  else {
+                    setResolving(null);
+                    setRevision((n) => n + 1);
+                  }
+                  setBusy(false);
+                });
+            }}
+          >
+            Concluir análise
+          </button>
+        </Modal>
+      )}
+    </>
+  );
+}
+
+function PersonalModerationPanel({ filters }: { filters: AdminFilters }) {
+  const [params, setParams] = useSearchParams();
+  const [revision, setRevision] = useState(0),
+    [selected, setSelected] = useState<SocialPost | null>(null),
+    [reason, setReason] = useState(""),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  return (
+    <>
+      <Resource<Page<SocialPost>>
+        section="personal_posts"
+        filters={filters}
+        revision={revision}
+      >
+        {(data) => (
+          <>
+            <h2>Moderação de publicações pessoais</h2>
+            <p>
+              Somente publicações que já ficaram públicas. Rascunhos pessoais
+              nunca publicados não entram nesta revisão.
+            </p>
+            {!data.items.length && (
+              <p>Nenhuma publicação disponível para moderação.</p>
+            )}
+            {data.items.map((post) => (
+              <div key={post.id}>
+                <SocialPostBody post={post} />
+                <p>{post.blocked ? "Bloqueada pela moderação" : post.status}</p>
+                <button
+                  className="button button--secondary"
+                  onClick={() => {
+                    setSelected(post);
+                    setReason("");
+                    setError("");
+                  }}
+                >
+                  {post.blocked ? "Retirar bloqueio" : "Ocultar e bloquear"}
+                </button>
+              </div>
+            ))}
+            <Pagination
+              page={filters.page ?? 1}
+              hasNext={data.hasNext}
+              label="publicações pessoais"
+              onChange={(page) => {
+                const next = new URLSearchParams(params);
+                next.set("page", String(page));
+                setParams(next);
+              }}
+            />
+          </>
+        )}
+      </Resource>
+      {selected && (
+        <Modal
+          title="Decisão de moderação"
+          locked={busy}
+          onClose={() => setSelected(null)}
+        >
+          <p>
+            Retirar um bloqueio não publica o post. O autor precisará publicá-lo
+            novamente.
+          </p>
+          <label>
+            Motivo
+            <textarea
+              value={reason}
+              maxLength={500}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </label>
+          {error && <p role="alert">{error}</p>}
+          <button
+            className="button"
+            disabled={busy || reason.trim().length < 5}
+            onClick={() => {
+              if (!supabase) return;
+              setBusy(true);
+              void supabase
+                .rpc("moderate_personal_post", {
+                  target: selected.id,
+                  command: selected.blocked ? "release" : "withdraw",
+                  reason: reason.trim(),
+                })
+                .then(({ error }) => {
+                  if (error) setError("Não foi possível registrar a decisão.");
+                  else {
+                    setSelected(null);
+                    setRevision((n) => n + 1);
+                  }
+                  setBusy(false);
+                });
+            }}
+          >
+            Confirmar moderação
+          </button>
+        </Modal>
+      )}
+    </>
+  );
 }

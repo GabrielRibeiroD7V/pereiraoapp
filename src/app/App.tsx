@@ -1,5 +1,6 @@
-import { PresentationProvider } from '../presentation/PresentationProvider';
-import type { PresentationRepository } from '../presentation/model';
+import "../social/social.scss";
+import { PresentationProvider } from "../presentation/PresentationProvider";
+import type { PresentationRepository } from "../presentation/model";
 import { lazy, Suspense, useEffect } from "react";
 import { RouteBoundary } from "../components/RouteBoundary";
 import { LoadingState } from "../components/LoadingState";
@@ -38,44 +39,130 @@ import type { SubscriptionRepository } from "../subscriptions/types";
 import { MessagesProvider } from "../messages/MessagesProvider";
 import type { MessageRepository } from "../messages/repository";
 
-const ManagedPostPage = lazy(() => import("../pages/ManagedPostPage").then(module => ({default: module.ManagedPostPage})));
+const ManagedPostPage = lazy(() =>
+  import("../pages/ManagedPostPage").then((module) => ({
+    default: module.ManagedPostPage,
+  })),
+);
 
-const AuthPage = lazy(() => import("../pages/AuthPage").then(module => ({ default: module.AuthPage })));
+const AuthPage = lazy(() =>
+  import("../pages/AuthPage").then((module) => ({ default: module.AuthPage })),
+);
 
-const AuthCallbackPage = lazy(() => import("../pages/AuthCallbackPage").then(module => ({ default: module.AuthCallbackPage })));
+const AuthCallbackPage = lazy(() =>
+  import("../pages/AuthCallbackPage").then((module) => ({
+    default: module.AuthCallbackPage,
+  })),
+);
 
-const PersonalDataPage = lazy(() => import("../pages/PersonalDataPage").then(module => ({ default: module.PersonalDataPage })));
+const PersonalDataPage = lazy(() =>
+  import("../pages/PersonalDataPage").then((module) => ({
+    default: module.PersonalDataPage,
+  })),
+);
 
-const ProfessionalRegistrationPage = lazy(() => import("../pages/ProfessionalRegistrationPage").then(module => ({ default: module.ProfessionalRegistrationPage })));
+const ProfessionalRegistrationPage = lazy(() =>
+  import("../pages/ProfessionalRegistrationPage").then((module) => ({
+    default: module.ProfessionalRegistrationPage,
+  })),
+);
 
-const BusinessPrivateDataPage = lazy(() => import("../pages/BusinessPrivateDataPage").then(module => ({ default: module.BusinessPrivateDataPage })));
+const BusinessPrivateDataPage = lazy(() =>
+  import("../pages/BusinessPrivateDataPage").then((module) => ({
+    default: module.BusinessPrivateDataPage,
+  })),
+);
 
-const ProfessionalEditorPage = lazy(() => import("../pages/ProfessionalEditorPage").then(module => ({ default: module.ProfessionalEditorPage })));
+const ProfessionalEditorPage = lazy(() =>
+  import("../pages/ProfessionalEditorPage").then((module) => ({
+    default: module.ProfessionalEditorPage,
+  })),
+);
 
-const PresentationPage = lazy(() => import("../pages/PresentationPage").then(module => ({ default: module.PresentationPage })));
-const ProfessionalSpacePage = lazy(() => import("../pages/ProfessionalSpacePage").then(module => ({ default: module.ProfessionalSpacePage })));
-const ProfilePreviewPage = lazy(() => import("../pages/ProfilePreviewPage").then(module => ({ default: module.ProfilePreviewPage })));
+const PresentationPage = lazy(() =>
+  import("../pages/PresentationPage").then((module) => ({
+    default: module.PresentationPage,
+  })),
+);
+const ProfessionalSpacePage = lazy(() =>
+  import("../pages/ProfessionalSpacePage").then((module) => ({
+    default: module.ProfessionalSpacePage,
+  })),
+);
+const ProfilePreviewPage = lazy(() =>
+  import("../pages/ProfilePreviewPage").then((module) => ({
+    default: module.ProfilePreviewPage,
+  })),
+);
 
-const AccountSecurityPage = lazy(() => import("../pages/AccountSecurityPage").then(module => ({ default: module.AccountSecurityPage })));
+const AccountSecurityPage = lazy(() =>
+  import("../pages/AccountSecurityPage").then((module) => ({
+    default: module.AccountSecurityPage,
+  })),
+);
 
-const ServicesPage = lazy(() => import("../pages/ServicesPage").then(module => ({ default: module.ServicesPage })));
+const ServicesPage = lazy(() =>
+  import("../pages/ServicesPage").then((module) => ({
+    default: module.ServicesPage,
+  })),
+);
 
-const PortfolioPage = lazy(() => import("../pages/PortfolioPage").then(module => ({ default: module.PortfolioPage })));
+const PortfolioPage = lazy(() =>
+  import("../pages/PortfolioPage").then((module) => ({
+    default: module.PortfolioPage,
+  })),
+);
 
-const PublicProviderPage = lazy(() => import("../pages/PublicProviderPage").then(module => ({ default: module.PublicProviderPage })));
+const PublicProviderPage = lazy(() =>
+  import("../pages/PublicProviderPage").then((module) => ({
+    default: module.PublicProviderPage,
+  })),
+);
 
-const WorkPostsPage = lazy(() => import("../pages/WorkPostsPage").then(module => ({ default: module.WorkPostsPage })));
+const WorkPostsPage = lazy(() =>
+  import("../pages/WorkPostsPage").then((module) => ({
+    default: module.WorkPostsPage,
+  })),
+);
 
-const PublicWorkPage = lazy(() => import("../pages/PublicWorkPage").then(module => ({ default: module.PublicWorkPage })));
+const PublicWorkPage = lazy(() =>
+  import("../pages/PublicWorkPage").then((module) => ({
+    default: module.PublicWorkPage,
+  })),
+);
 
-const AdminPage = lazy(() => import("../admin/AdminPage").then(module => ({ default: module.AdminPage })));
+const AdminPage = lazy(() =>
+  import("../admin/AdminPage").then((module) => ({
+    default: module.AdminPage,
+  })),
+);
 
-const SubscriptionsPage = lazy(() => import("../subscriptions/SubscriptionViews").then(module => ({ default: module.SubscriptionsPage })));
+const SubscriptionsPage = lazy(() =>
+  import("../subscriptions/SubscriptionViews").then((module) => ({
+    default: module.SubscriptionsPage,
+  })),
+);
 
-const SandboxBillingPage = lazy(() => import("../billing/BillingViews").then(module => ({ default: module.SandboxBillingPage })));
-const MessagesInboxPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.MessagesInboxPage })));
-const NewConversationPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.NewConversationPage })));
-const ConversationPage = lazy(() => import("../messages/MessagesPages").then(module => ({ default: module.ConversationPage })));
+const SandboxBillingPage = lazy(() =>
+  import("../billing/BillingViews").then((module) => ({
+    default: module.SandboxBillingPage,
+  })),
+);
+const MessagesInboxPage = lazy(() =>
+  import("../messages/MessagesPages").then((module) => ({
+    default: module.MessagesInboxPage,
+  })),
+);
+const NewConversationPage = lazy(() =>
+  import("../messages/MessagesPages").then((module) => ({
+    default: module.NewConversationPage,
+  })),
+);
+const ConversationPage = lazy(() =>
+  import("../messages/MessagesPages").then((module) => ({
+    default: module.ConversationPage,
+  })),
+);
 
 const titles: Record<string, string> = {
   [routes.home]: "Início",
@@ -93,6 +180,21 @@ const titles: Record<string, string> = {
   "/mensagens": "Mensagens",
 };
 
+const PersonalPostsPage = lazy(() =>
+  import("../social/PersonalPages").then((m) => ({
+    default: m.PersonalPostsPage,
+  })),
+);
+const PersonalPostPage = lazy(() =>
+  import("../social/PersonalPages").then((m) => ({
+    default: m.PersonalPostPage,
+  })),
+);
+const PersonalProfilePage = lazy(() =>
+  import("../social/PersonalPages").then((m) => ({
+    default: m.PersonalProfilePage,
+  })),
+);
 export function App({
   authGateway,
   professionalRepository,
@@ -127,7 +229,11 @@ export function App({
               <AdminProvider repository={adminRepository}>
                 <SubscriptionProvider repository={subscriptionRepository}>
                   <BillingProvider repository={billingRepository}>
-                    <PresentationProvider value={presentationRepository}><MessagesProvider repository={messageRepository}><AppRoutes /></MessagesProvider></PresentationProvider>
+                    <PresentationProvider value={presentationRepository}>
+                      <MessagesProvider repository={messageRepository}>
+                        <AppRoutes />
+                      </MessagesProvider>
+                    </PresentationProvider>
                   </BillingProvider>
                 </SubscriptionProvider>
               </AdminProvider>
@@ -148,7 +254,20 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<RequireAuth />}>
-        <Route path="/admin" element={<RouteBoundary><Suspense fallback={<LoadingState>Carregando administração…</LoadingState>}><AdminPage /></Suspense></RouteBoundary>} />
+        <Route
+          path="/admin"
+          element={
+            <RouteBoundary>
+              <Suspense
+                fallback={
+                  <LoadingState>Carregando administração…</LoadingState>
+                }
+              >
+                <AdminPage />
+              </Suspense>
+            </RouteBoundary>
+          }
+        />
       </Route>
       <Route element={<AppShell />}>
         <Route path={routes.home} element={<HomePage />} />
@@ -173,9 +292,16 @@ function AppRoutes() {
         />
         <Route path="/auth/retorno" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
+          <Route path="/conta/publicacoes" element={<PersonalPostsPage />} />
           <Route path="/mensagens" element={<MessagesInboxPage />} />
-          <Route path="/mensagens/iniciar/:businessId" element={<NewConversationPage />} />
-          <Route path="/mensagens/:conversationId" element={<ConversationPage key={pathname} />} />
+          <Route
+            path="/mensagens/iniciar/:businessId"
+            element={<NewConversationPage />}
+          />
+          <Route
+            path="/mensagens/:conversationId"
+            element={<ConversationPage key={pathname} />}
+          />
           <Route path="/conta/assinaturas" element={<SubscriptionsPage />} />
           <Route
             path="/conta/profissional/:businessId/assinatura"
@@ -199,12 +325,30 @@ function AppRoutes() {
             path="/conta/profissional/:businessId/editar"
             element={<ProfessionalEditorPage key={pathname} />}
           />
-          <Route path="/conta/profissional/:businessId/dados-empresariais" element={<BusinessPrivateDataPage key={pathname} />} />
-          <Route path="/conta/profissional/:businessId/apresentacao" element={<PresentationPage key={pathname} />} />
-          <Route path="/conta/profissional/:businessId/publicacoes/:postId" element={<ManagedPostPage key={pathname}/>}/>
-          <Route path="/conta/profissional/:businessId/previa/publicacoes/:postId" element={<ManagedPostPage key={pathname} readOnly/>}/>
-          <Route path="/conta/profissional/:businessId/perfil" element={<ProfilePreviewPage key={pathname} />} />
-          <Route path="/conta/profissional/:businessId/previa" element={<ProfilePreviewPage key={pathname} readOnly />} />
+          <Route
+            path="/conta/profissional/:businessId/dados-empresariais"
+            element={<BusinessPrivateDataPage key={pathname} />}
+          />
+          <Route
+            path="/conta/profissional/:businessId/apresentacao"
+            element={<PresentationPage key={pathname} />}
+          />
+          <Route
+            path="/conta/profissional/:businessId/publicacoes/:postId"
+            element={<ManagedPostPage key={pathname} />}
+          />
+          <Route
+            path="/conta/profissional/:businessId/previa/publicacoes/:postId"
+            element={<ManagedPostPage key={pathname} readOnly />}
+          />
+          <Route
+            path="/conta/profissional/:businessId/perfil"
+            element={<ProfilePreviewPage key={pathname} />}
+          />
+          <Route
+            path="/conta/profissional/:businessId/previa"
+            element={<ProfilePreviewPage key={pathname} readOnly />}
+          />
           <Route
             path="/conta/profissional/:businessId/servicos"
             element={<ServicesPage key={pathname} />}
@@ -218,6 +362,14 @@ function AppRoutes() {
             element={<WorkPostsPage key={pathname} />}
           />
         </Route>
+        <Route
+          path="/publicacoes/:postId"
+          element={<PersonalPostPage key={pathname} />}
+        />
+        <Route
+          path="/pessoas/:authorId"
+          element={<PersonalProfilePage key={pathname} />}
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

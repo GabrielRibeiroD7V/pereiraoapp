@@ -85,6 +85,7 @@ export function createAdminHandler(
           ![
             "dashboard",
             "reports",
+            "personal_posts",
             "users",
             "businesses",
             "posts",
@@ -110,16 +111,34 @@ export function createAdminHandler(
                 section: body.section,
                 filters: filters as Json,
               });
-        if (body.section === 'detail' && !result.error && result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
+        if (
+          body.section === "detail" &&
+          !result.error &&
+          result.data &&
+          typeof result.data === "object" &&
+          !Array.isArray(result.data)
+        ) {
           const target = (filters as Record<string, unknown>).id;
-          if (typeof target !== 'string' || !validId(target)) return reply(400, { code: 'INVALID_INPUT' });
+          if (typeof target !== "string" || !validId(target))
+            return reply(400, { code: "INVALID_INPUT" });
           const [photo, catalog] = await Promise.all([
-            client.rpc('admin_profile_photo', { target_business: target }),
-            client.rpc('admin_review_catalog', { target_business: target }),
+            client.rpc("admin_profile_photo", { target_business: target }),
+            client.rpc("admin_review_catalog", { target_business: target }),
           ]);
-          if (catalog.error && !['PGRST202','42883'].includes(catalog.error.code)) return rpcFailure(catalog.error.code);
-          if (photo.error && !['PGRST202','42883'].includes(photo.error.code)) return rpcFailure(photo.error.code);
-          return reply(200, { data: { ...result.data, profilePhoto: photo.error ? null : photo.data, reviewCatalog: catalog.error ? null : catalog.data } });
+          if (
+            catalog.error &&
+            !["PGRST202", "42883"].includes(catalog.error.code)
+          )
+            return rpcFailure(catalog.error.code);
+          if (photo.error && !["PGRST202", "42883"].includes(photo.error.code))
+            return rpcFailure(photo.error.code);
+          return reply(200, {
+            data: {
+              ...result.data,
+              profilePhoto: photo.error ? null : photo.data,
+              reviewCatalog: catalog.error ? null : catalog.data,
+            },
+          });
         }
         return result.error
           ? rpcFailure(result.error.code)
@@ -162,8 +181,7 @@ export function createAdminHandler(
         const url = new URL(result.data.signedUrl);
         if (
           url.origin !== "https://yazdjiwaksamizrbqewq.supabase.co" ||
-          url.pathname !==
-            `/storage/v1/object/sign/${bucket}/` + path ||
+          url.pathname !== `/storage/v1/object/sign/${bucket}/` + path ||
           url.username ||
           url.password ||
           url.hash
