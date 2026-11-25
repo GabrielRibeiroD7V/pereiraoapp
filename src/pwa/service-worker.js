@@ -134,8 +134,8 @@ self.addEventListener('push', event => {
   const title = typeof payload.title === 'string' ? payload.title : 'Nova mensagem no PEREIRÃO';
   const options = {
     body: typeof payload.body === 'string' ? payload.body : 'Você recebeu uma nova mensagem.',
-    icon: '/pwa-192x192.png',
-    badge: '/pwa-192x192.png',
+    icon: '/images/pwa/pereirao-v2-192.png',
+    badge: '/images/pwa/pereirao-v2-192.png',
     tag: typeof payload.tag === 'string' ? payload.tag : 'pereirao-message',
     data: { url: typeof payload.url === 'string' && payload.url.startsWith('/mensagens/') ? payload.url : '/mensagens' },
   };
