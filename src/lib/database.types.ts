@@ -94,7 +94,9 @@ export type WorkPostRow = {
 export interface Database {
   public: {
     Tables: {
-      business_presentations: Table<import('../presentation/model').Presentation & { business_id: string }>;
+      business_presentations: Table<
+        import("../presentation/model").Presentation & { business_id: string }
+      >;
       business_subscriptions: Table<BusinessSubscriptionRow, never, never>;
       work_posts: Table<WorkPostRow, never, never>;
       work_post_images: Table<
@@ -145,7 +147,11 @@ export interface Database {
           >
         >
       >;
-      business_categories: Table<{ business_id: string; category_id: string }, never, never>;
+      business_categories: Table<
+        { business_id: string; category_id: string },
+        never,
+        never
+      >;
       business_members: Table<MembershipRow, never, never>;
       business_details: Table<{
         business_id: string;
@@ -187,33 +193,160 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
-      public_work_posts: {Args:{target_post?:string|null;business_filter?:string|null;before_time?:string|null;before_id?:string|null};Returns:Json};
-      report_content: { Args:{kind:string;target:string;reason:string}; Returns:undefined };
-      resolve_content_report: {Args:{target:string;reason:string};Returns:undefined};
-      owner_business_command: { Args: { target_business: string; command: string; expected_state: string }; Returns: Json };
-      admin_review_catalog: { Args: { target_business: string }; Returns: Json };
-      save_business_presentation_identity: { Args: { target_business: string; p_profession: string; p_linkedin_url: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
-      save_business_presentation: { Args: { target_business: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
-      admin_profile_photo: { Args: { target_business: string }; Returns: string | null };
-      profile_photo_command: { Args: { command: string; target_business: string; target_photo?: string; expected_avatar_path?: string | null }; Returns: Json };
+      personal_post_command: {
+        Args: { command: string; target_post: string; data?: Json };
+        Returns: Json;
+      };
+      personal_posts_query: {
+        Args: { scope: string; target?: string | null; page_number?: number };
+        Returns: Json;
+      };
+      publication_feed: {
+        Args: {
+          before_time?: string | null;
+          before_id?: string | null;
+          before_kind?: string | null;
+          author_filter?: string | null;
+        };
+        Returns: Json;
+      };
+      moderate_personal_post: {
+        Args: { target: string; command: string; reason: string };
+        Returns: undefined;
+      };
+      public_work_posts: {
+        Args: {
+          target_post?: string | null;
+          business_filter?: string | null;
+          before_time?: string | null;
+          before_id?: string | null;
+        };
+        Returns: Json;
+      };
+      report_content: {
+        Args: { kind: string; target: string; reason: string };
+        Returns: undefined;
+      };
+      resolve_content_report: {
+        Args: { target: string; reason: string };
+        Returns: undefined;
+      };
+      owner_business_command: {
+        Args: {
+          target_business: string;
+          command: string;
+          expected_state: string;
+        };
+        Returns: Json;
+      };
+      admin_review_catalog: {
+        Args: { target_business: string };
+        Returns: Json;
+      };
+      save_business_presentation_identity: {
+        Args: {
+          target_business: string;
+          p_profession: string;
+          p_linkedin_url: string;
+          p_headline: string;
+          p_experience: string;
+          p_education: string;
+          p_certifications: string;
+          p_registration: string;
+        };
+        Returns: undefined;
+      };
+      save_business_presentation: {
+        Args: {
+          target_business: string;
+          p_headline: string;
+          p_experience: string;
+          p_education: string;
+          p_certifications: string;
+          p_registration: string;
+        };
+        Returns: undefined;
+      };
+      admin_profile_photo: {
+        Args: { target_business: string };
+        Returns: string | null;
+      };
+      profile_photo_command: {
+        Args: {
+          command: string;
+          target_business: string;
+          target_photo?: string;
+          expected_avatar_path?: string | null;
+        };
+        Returns: Json;
+      };
 
-      prepare_work_post_photo: { Args: {target_business:string;target_post:string;target_photo:string;image_bytes:number;draft_title:string;draft_description:string}; Returns:Json };
-      finalize_work_post_photo: { Args: {target_business:string;target_photo:string}; Returns:undefined };
-      save_work_post_composition: { Args:{target_business:string;target_post:string;post_title:string;post_description:string;image_refs:Json}; Returns:undefined };
-      open_conversation: { Args: { target_business: string; message_body: string }; Returns: string };
-      send_conversation_message: { Args: { target_conversation: string; message_body: string }; Returns: string };
+      prepare_work_post_photo: {
+        Args: {
+          target_business: string;
+          target_post: string;
+          target_photo: string;
+          image_bytes: number;
+          draft_title: string;
+          draft_description: string;
+        };
+        Returns: Json;
+      };
+      finalize_work_post_photo: {
+        Args: { target_business: string; target_photo: string };
+        Returns: undefined;
+      };
+      save_work_post_composition: {
+        Args: {
+          target_business: string;
+          target_post: string;
+          post_title: string;
+          post_description: string;
+          image_refs: Json;
+        };
+        Returns: undefined;
+      };
+      open_conversation: {
+        Args: { target_business: string; message_body: string };
+        Returns: string;
+      };
+      send_conversation_message: {
+        Args: { target_conversation: string; message_body: string };
+        Returns: string;
+      };
       my_conversations: { Args: Record<string, never>; Returns: Json };
-      my_conversation_messages: { Args: { target_conversation: string; before_message?: string | null }; Returns: Json };
+      my_conversation_messages: {
+        Args: { target_conversation: string; before_message?: string | null };
+        Returns: Json;
+      };
       set_business_specialties: {
-        Args: { target_business_id: string; primary_category_id: string; additional_category_ids: string[]; expected_primary_category_id: string | null; expected_additional_category_ids: string[] };
+        Args: {
+          target_business_id: string;
+          primary_category_id: string;
+          additional_category_ids: string[];
+          expected_primary_category_id: string | null;
+          expected_additional_category_ids: string[];
+        };
         Returns: undefined;
       };
       search_public_businesses: {
-        Args: { p_query?: string; p_category?: string; p_city?: string; p_type?: string; p_page?: number };
+        Args: {
+          p_query?: string;
+          p_category?: string;
+          p_city?: string;
+          p_type?: string;
+          p_page?: number;
+        };
         Returns: Json[];
       };
       search_public_businesses_profile: {
-        Args: { p_query?: string; p_category?: string; p_city?: string; p_type?: string; p_page?: number };
+        Args: {
+          p_query?: string;
+          p_category?: string;
+          p_city?: string;
+          p_type?: string;
+          p_page?: number;
+        };
         Returns: Json[];
       };
       sandbox_billing_server: {
