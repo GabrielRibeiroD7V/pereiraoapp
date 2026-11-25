@@ -1,0 +1,62 @@
+-- Native disposable database ONLY. No operational publication.
+begin;
+insert into auth.users(id,email,email_confirmed_at) values
+ ('00000000-0000-4000-8000-00000000a001','owner@example.invalid',now()),
+ ('00000000-0000-4000-8000-00000000a002','visitor@example.invalid',now()),
+ ('00000000-0000-4000-8000-00000000a003','admin@example.invalid',now());
+insert into private.platform_admins(user_id) values('00000000-0000-4000-8000-00000000a003');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
+select public.create_business('Owner publication fixture','owner-publication-fixture','autonomo','mundo-novo-ms') as bid \gset
+select test.expect_error(format('select public.owner_business_command(%L,''publish'',''draft'')',:'bid'),'23514','owner: incomplete profile cannot publish');
+reset role;
+update public.businesses set description='Real fixture description',whatsapp='67999999999',category_id='climatizacao' where id=:'bid';
+update auth.users set email_confirmed_at=null where id='00000000-0000-4000-8000-00000000a001';
+set local role authenticated;
+select test.expect_error(format('select public.owner_business_command(%L,''publish'',''draft'')',:'bid'),'42501','owner: confirmation required by server');
+reset role;
+update auth.users set email_confirmed_at=now() where id='00000000-0000-4000-8000-00000000a001';
+set local role authenticated;
+select public.portfolio_command('prepare',:'bid','00000000-0000-4000-8000-00000000a010');
+insert into storage.objects(bucket_id,name,metadata) select 'business-portfolio',storage_path,'{"size":100,"mimetype":"image/webp"}'::jsonb from public.portfolio_items where business_id=:'bid';
+select public.portfolio_command('finalize',:'bid','00000000-0000-4000-8000-00000000a010');
+select public.work_post_command('save',:'bid','00000000-0000-4000-8000-00000000a020','Fixture post','Saved caption',array['00000000-0000-4000-8000-00000000a010']::uuid[]);
+select public.owner_business_command(:'bid','publish','draft');
+select test.assert_true((select status='draft' from public.work_posts where business_id=:'bid'),'owner: profile publication never publishes draft post');
+set local role anon;
+set local request.jwt.claim.sub='';
+select test.assert_true((select count(*)=1 from public.businesses where id=:'bid'),'visitor: profile public immediately');
+select test.assert_true((select count(*)=0 from public.work_posts where business_id=:'bid'),'visitor: draft post isolated');
+select test.assert_true((select count(*)=1 from public.search_public_businesses('','climatizacao','mundo-novo-ms','',1)),'visitor: search finds self-published business');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a002';
+select test.expect_error(format('select public.owner_business_command(%L,''unpublish'',''published'')',:'bid'),'42501','visitor: cannot change another business');
+select test.expect_error(format('select public.work_post_command(''publish'',%L,''00000000-0000-4000-8000-00000000a020'')',:'bid'),'42501','visitor: cannot publish another draft');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
+select public.work_post_command('publish',:'bid','00000000-0000-4000-8000-00000000a020');
+set local role anon;set local request.jwt.claim.sub='';
+select test.assert_true((select count(*)=1 from public.work_posts where business_id=:'bid'),'visitor: published post enters Home query');
+set local role authenticated;set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a002';
+select public.report_content('post','00000000-0000-4000-8000-00000000a020','A genuine local test report');
+select test.expect_error('select * from private.content_reports','42501','visitor: report history private');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a003';
+select test.expect_error(format('select public.admin_action(''business'',%L,''publish'',''Not the owner'',''published'')',:'bid'),'42501','admin: cannot publish instead of owner');
+select public.admin_action('post','00000000-0000-4000-8000-00000000a020','withdraw','Local abuse moderation','published');
+select test.assert_true(jsonb_array_length(public.admin_query('reports')->'items')=1,'admin: real report available');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
+select test.expect_error(format('select public.work_post_command(''publish'',%L,''00000000-0000-4000-8000-00000000a020'')',:'bid'),'42501','owner: cannot bypass post block');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a003';
+select public.admin_action('post','00000000-0000-4000-8000-00000000a020','release','Resolved local issue','blocked');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-00000000a001';
+select public.work_post_command('publish',:'bid','00000000-0000-4000-8000-00000000a020');
+select public.owner_business_command(:'bid','unpublish','published');
+select test.assert_true((select status='unpublished' from public.work_posts where business_id=:'bid'),'owner: withdrawing profile withdraws live posts');
+select public.owner_business_command(:'bid','publish','unpublished');
+select test.assert_true((select status='unpublished' from public.work_posts where business_id=:'bid'),'owner: republishing profile does not restore post');
+select public.owner_business_command(:'bid','delete','published');
+set local role anon;set local request.jwt.claim.sub='';
+select test.assert_true((select count(*)=0 from public.businesses where id=:'bid'),'visitor: deleted profile hidden');
+reset role;
+select test.assert_true((select deleted_at is not null from public.businesses where id=:'bid'),'integrity: soft retirement preserves relationships');
+select test.assert_true((select count(*)=0 from public.business_subscriptions) and (select count(*)=0 from private.subscription_activations),'finance: publication never starts subscription or trial');
+rollback;

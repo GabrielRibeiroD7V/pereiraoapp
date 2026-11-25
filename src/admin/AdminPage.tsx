@@ -1,6 +1,7 @@
+import {supabase} from '../lib/supabase';
 import { ReviewClassification } from './ReviewClassification';
-import { LayoutDashboard, Users, BriefcaseBusiness, Images, History, CalendarDays, FlaskConical, Activity } from 'lucide-react';
-import { useCallback, useRef, useState } from "react";
+import { LayoutDashboard, Users, BriefcaseBusiness, Images, History, CalendarDays, FlaskConical, Activity, ShieldAlert } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Brand } from "../components/Brand";
@@ -29,6 +30,7 @@ import type {
 } from "./types";
 const sections = [
   ["dashboard", "Visão geral"],
+  ["reports", "Denúncias"],
   ["users", "Usuários"],
   ["businesses", "Prestadores"],
   ["posts", "Publicações"],
@@ -36,7 +38,7 @@ const sections = [
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
 ] as const;
-const sectionIcons = { dashboard: LayoutDashboard, users: Users, businesses: BriefcaseBusiness, posts: Images, audit: History, subscriptions: CalendarDays, sandbox: FlaskConical };
+const sectionIcons = { reports: ShieldAlert, dashboard: LayoutDashboard, users: Users, businesses: BriefcaseBusiness, posts: Images, audit: History, subscriptions: CalendarDays, sandbox: FlaskConical };
 const states: Record<string, string> = {
   draft: "Rascunho",
   published: "Publicado",
@@ -46,9 +48,9 @@ const states: Record<string, string> = {
   blocked: "Bloqueado",
 };
 const actionNames: Record<string, string> = {
-  publish: "Aprovar publicação",
+  publish: "Publicação pelo responsável",
   suspend: "Suspender",
-  reactivate: "Reativar",
+  reactivate: "Retirar suspensão",
   withdraw: "Retirar e bloquear",
   release: "Liberar para revisão do prestador",
 };
@@ -159,6 +161,7 @@ function AdminContent() {
   const [search, setSearch] = useState(q),
     [revision, refresh] = useState(0),
     [review, setReview] = useState<string | null>(null);
+  useEffect(()=>{if(params.get('review'))setReview(params.get('review'));},[params]);
   const [decision, setDecision] = useState<{
     input: Omit<AdminAction, "reason">;
     label: string;
@@ -177,7 +180,7 @@ function AdminContent() {
     status,
     page,
     days,
-    ...(section === "audit" && params.get("id")
+    ...(["audit","posts"].includes(section) && params.get("id")
       ? { id: params.get("id")! }
       : {}),
   };
@@ -279,7 +282,7 @@ function AdminContent() {
         <SandboxFinancePanel key={revision} />
       ) : section === "subscriptions" ? (
         <AdminSubscriptionsPanel revision={revision} />
-      ) : section === "dashboard" ? (
+      ) : section === "reports" ? <ReportsPanel filters={filters}/> : section === "dashboard" ? (
         <Resource<AdminDashboard>
           section={section}
           filters={filters}
@@ -294,9 +297,12 @@ function AdminContent() {
                   ["Autônomos", data.autonomos],
                   ["Empresas", data.empresas],
                   ["Prestadores publicados", data.published],
-                  ["Rascunhos para análise", data.drafts],
+                  ["Perfis em rascunho", data.drafts],
                   ["Prestadores suspensos", data.suspended],
                   ["Publicações de trabalhos", data.posts],
+                  ["Conversas",data.conversations],
+                  ["Denúncias abertas",data.openReports],
+                  ["Assinaturas",data.subscriptions],
                 ].map(([label, value]) => (
                   <article key={label}>
                     <Activity size={17} aria-hidden="true" />
@@ -306,8 +312,7 @@ function AdminContent() {
                 ))}
               </div>
               <p className="field-help">
-                Rascunhos para análise incluem cadastros incompletos; não
-                representam solicitações formais de aprovação.
+                Perfis em rascunho incluem cadastros incompletos e não são uma fila de aprovação. Cada responsável decide quando publicar.
               </p>
               <p className="form-notice">
                 Usuários ativos em 7 e 30 dias: indisponível. Ainda não existem
@@ -668,12 +673,12 @@ function BusinessReview({
           ? ["reactivate"]
           : b.status === "published"
             ? ["suspend"]
-            : ["publish", "suspend"]
+            : ["suspend"]
         ).map((command) => (
           <button
             key={command}
             className="button button--secondary"
-            disabled={!data.reviewCatalog && (command === "publish" || command === "reactivate")}
+            disabled={false}
             onClick={() =>
               decide(
                 {
@@ -950,4 +955,9 @@ function SandboxPanel() {
       </p>
     </section>
   );
+}
+
+function ReportsPanel({filters}:{filters:AdminFilters}){
+ const [revision,setRevision]=useState(0),[error,setError]=useState(''),[resolving,setResolving]=useState<string|null>(null),[reason,setReason]=useState(''),[busy,setBusy]=useState(false);
+ return <><Resource<Page<{id:string;target_type:string;target_id:string;reason:string;created_at:string;resolved_at:string|null}>> section="reports" filters={filters} revision={revision}>{data=><><h2>Denúncias</h2>{!data.items.length&&<p>Nenhuma denúncia registrada.</p>}<ul>{data.items.map(r=><li key={r.id}><p>{r.reason}</p><p>{date(r.created_at)} · {r.resolved_at?'Analisada':'Pendente'}</p><Link to={r.target_type==='business'?`/admin?sec=businesses&review=${r.target_id}`:r.target_type==='personal_post'?`/conta/publicacoes/${r.target_id}`:`/admin?sec=posts&id=${r.target_id}`}>Abrir conteúdo</Link>{!r.resolved_at&&<button className="text-link" onClick={()=>{setResolving(r.id);setReason('');setError('');}}>Concluir análise</button>}</li>)}</ul>{data.hasNext&&<p>Há mais denúncias. Avance a página pelos filtros administrativos.</p>}</>}</Resource>{resolving&&<Modal title="Concluir análise da denúncia" locked={busy} onClose={()=>setResolving(null)}><p>Ocultar conteúdo ou suspender a conta são ações separadas, com justificativa e auditoria. Concluir esta análise não oculta o conteúdo.</p><label>Justificativa<textarea value={reason} maxLength={500} onChange={e=>setReason(e.target.value)}/></label>{error&&<p role="alert">{error}</p>}<button className="button" disabled={busy||reason.trim().length<5} onClick={()=>{if(!supabase)return;setBusy(true);void supabase.rpc('resolve_content_report',{target:resolving,reason:reason.trim()}).then(({error})=>{if(error)setError('Não foi possível concluir a análise.');else{setResolving(null);setRevision(n=>n+1);}setBusy(false);});}}>Concluir análise</button></Modal>}</>;
 }

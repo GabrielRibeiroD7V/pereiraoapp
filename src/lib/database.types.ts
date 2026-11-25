@@ -20,6 +20,7 @@ export type MembershipRow = {
   created_at: string;
 };
 export type BusinessRow = {
+  deleted_at?: string | null;
   id: string;
   type: "autonomo" | "empresa";
   name: string;
@@ -186,6 +187,9 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      report_content: { Args:{kind:string;target:string;reason:string}; Returns:undefined };
+      resolve_content_report: {Args:{target:string;reason:string};Returns:undefined};
+      owner_business_command: { Args: { target_business: string; command: string; expected_state: string }; Returns: Json };
       admin_review_catalog: { Args: { target_business: string }; Returns: Json };
       save_business_presentation_identity: { Args: { target_business: string; p_profession: string; p_linkedin_url: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };
       save_business_presentation: { Args: { target_business: string; p_headline: string; p_experience: string; p_education: string; p_certifications: string; p_registration: string }; Returns: undefined };

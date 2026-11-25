@@ -84,6 +84,7 @@ export function createAdminHandler(
           typeof body.section !== "string" ||
           ![
             "dashboard",
+            "reports",
             "users",
             "businesses",
             "posts",

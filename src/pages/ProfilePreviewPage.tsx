@@ -1,3 +1,4 @@
+import {OwnerPublication} from '../professional/OwnerPublication';
 import {PostLink} from '../posts/PostLink';
 import {profileViews} from '../posts/postReturn';
 import {PostManagementMenu} from '../posts/PostManagementMenu';
@@ -125,13 +126,14 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       <PresentationIdentity data={presentation.data} company={info.type === 'empresa'} />
       {presentation.data.headline && <p className="professional-headline">{presentation.data.headline}</p>}
       <BusinessStatus status={business.business.status} />
+      {!readOnly && <OwnerPublication business={business.business} repository={professional} onChanged={()=>setPostRefresh(n=>n+1)} />}
       <p className="field-help">Atende: {catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Locais não informados'}</p>
       <SpecialtyBadges primary={category ?? null} additional={catalog?.categories.filter(item => info.additionalCategoryIds.includes(item.id)) ?? []} />
       <p className="public-about social-profile-bio">{info.description || 'Adicione uma descrição para apresentar seu trabalho.'}</p>
       {readOnly && <div className="social-profile-actions"><button type="button" className="button button--secondary" disabled>Mensagem pelo PEREIRÃO</button><ContactLinks compact name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} /></div>}
       {readOnly && <p className="field-help">Prévia: mensagens ficam disponíveis aos visitantes após publicação. Nenhuma conversa é iniciada aqui.</p>}
 </header>
-      <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até a aprovação e publicação.'}</div>
+      <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil até você publicá-lo.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
       <PresentationSections data={presentation.data} company={info.type === 'empresa'} />

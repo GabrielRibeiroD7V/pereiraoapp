@@ -31,6 +31,9 @@ export function validCursor(cursor: WorkCursor) {
   );
 }
 export function postError(error: unknown) {
+  const message=error&&typeof error==='object'&&'message' in error?String(error.message):'';
+  if(message.includes('EMAIL_CONFIRMATION_REQUIRED'))return 'Confirme seu e-mail antes de publicar.';
+  if(message.includes('PUBLICATION_RATE_LIMIT'))return 'Limite de publicações atingido. Tente mais tarde.';
   const code =
     error && typeof error === "object" && "code" in error
       ? String(error.code)

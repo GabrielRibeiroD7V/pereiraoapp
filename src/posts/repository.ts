@@ -53,7 +53,7 @@ export function createManagedPosts(
       .select("id")
       .eq("business_id", id)
       .eq("user_id", user.data.user.id)
-      .in("role", ["owner", "admin"])
+      .eq("role", "owner")
       .maybeSingle();
     if (member.error) throw member.error;
     if (!member.data) fail("NOT_MANAGER");

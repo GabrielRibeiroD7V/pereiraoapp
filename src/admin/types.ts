@@ -1,4 +1,5 @@
 export type AdminSection =
+  | "reports"
   | "dashboard"
   | "users"
   | "businesses"
@@ -62,6 +63,9 @@ export interface AuditEntry {
   created_at: string;
 }
 export interface AdminDashboard {
+  conversations?: number;
+  subscriptions?: number;
+  openReports?: number;
   users: number;
   newUsers: number;
   autonomos: number;

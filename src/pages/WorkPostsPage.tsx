@@ -93,8 +93,7 @@ export function WorkPostsPage({ embedded = false, onChanged }: { embedded?: bool
           <p className="field-help">{state.data.business.name}</p>
           {state.data.business.status !== "published" && (
             <p className="form-notice">
-              Você pode preparar rascunhos. A publicação de trabalhos estará
-              disponível quando seu perfil estiver publicado.
+              Você publica seu perfil e seus trabalhos separadamente. <Link to={`/conta/profissional/${businessId}/perfil`}>Publicar meu perfil</Link> para tornar os trabalhos profissionais visíveis.
             </p>
           )}
           <button

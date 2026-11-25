@@ -162,7 +162,7 @@ export function ProfessionalEditorPage() {
         {(section === 'perfil' || section === 'atendimento') && <div className="profile-editor__actions"><button type="submit" form={section === 'perfil' ? 'profile-identity-form' : 'profile-coverage-form'} className="button button--primary" disabled={pending || !dirty}>{pending ? 'Salvando…' : 'Salvar alterações'}</button><button type="button" className="button button--secondary" disabled={pending || !dirty} onClick={discard}>Cancelar alterações</button></div>}
       </div>
       <p hidden={section !== 'perfil'}><Link className="button button--secondary" to={`/conta/profissional/${businessId}/apresentacao`}>{input.type === 'empresa' ? 'Atuação, título e LinkedIn' : 'Profissão, título e LinkedIn'}</Link></p>
-      <p className="field-help">Salvar não publica seu negócio. A publicação do perfil depende de aprovação administrativa.</p>
+      <p className="field-help">Salvar não publica seu negócio. Você decide quando publicar seu perfil.</p>
     </>}
     {leave && <Modal title="Descartar alterações não salvas?" onClose={() => setLeave(null)}><p>As informações ainda não salvas não aparecerão na prévia.</p><div className="work-actions"><button type="button" className="button button--secondary" onClick={() => setLeave(null)}>Continuar editando</button><button type="button" className="button button--primary" onClick={() => { const destination = leave; setLeave(null); navigate(destination, { state: { businessId } }); }}>Descartar e sair</button></div></Modal>}
   </div>;

@@ -25,6 +25,7 @@ export interface EditableBusiness {
   input: RegistrationInput;
 }
 export interface ProfessionalRepository {
+  publication?(id: string, command: 'publish' | 'unpublish' | 'delete', expectedState: string): Promise<void>;
   getCatalog(): Promise<ProfessionalCatalog>;
   listMine(): Promise<readonly BusinessRow[]>;
   getEditable(id: string): Promise<EditableBusiness>;

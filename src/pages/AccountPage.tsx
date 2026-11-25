@@ -35,7 +35,7 @@ export function AccountPage() {
       .catch((cause: unknown) => { if (live) setBusinessesError(professionalError(cause)); })
       .finally(() => { if (live) setBusinessesLoading(false); });
     return () => { live = false; };
-  }, [session?.user.id, professional]);
+  }, [session?.user.id, professional, location.key]);
   const selected = businesses.find(item => item.id === (selectedId || location.state?.businessId)) ?? businesses[0];
   useEffect(()=>{if(selected){profileBusinessSelections.set(location.key,selected.id);if(profileBusinessSelections.size>40)profileBusinessSelections.delete(profileBusinessSelections.keys().next().value!);}},[location.key,selected?.id]);
   async function signOut() {
