@@ -158,6 +158,11 @@ const NewConversationPage = lazy(() =>
     default: module.NewConversationPage,
   })),
 );
+const NewAccountConversationPage = lazy(() =>
+  import("../messages/MessagesPages").then((m) => ({
+    default: m.NewAccountConversationPage,
+  })),
+);
 const ConversationPage = lazy(() =>
   import("../messages/MessagesPages").then((module) => ({
     default: module.ConversationPage,
@@ -294,6 +299,14 @@ function AppRoutes() {
         <Route element={<RequireAuth />}>
           <Route path="/conta/publicacoes" element={<PersonalPostsPage />} />
           <Route path="/mensagens" element={<MessagesInboxPage />} />
+          <Route
+            path="/mensagens/pessoa/:authorId"
+            element={<NewAccountConversationPage />}
+          />
+          <Route
+            path="/mensagens/projeto/:workId"
+            element={<NewAccountConversationPage />}
+          />
           <Route
             path="/mensagens/iniciar/:businessId"
             element={<NewConversationPage />}

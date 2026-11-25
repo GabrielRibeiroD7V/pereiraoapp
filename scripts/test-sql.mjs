@@ -27,7 +27,7 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
-    if (file.endsWith('_owner_publication.sql') || file.endsWith('_personal_posts.sql')) continue;
+    if (file.endsWith('_owner_publication.sql') || file.endsWith('_personal_posts.sql') || file.endsWith('_account_conversations.sql')) continue;
     if (file === '20261124163000_initial_free_phase.sql') continue; // Testa atualização após a arquitetura anterior, abaixo.
     const storageGuard = file === '20261123000107_fix_profile_storage_guard.sql';
     if(storageGuard)run(executable('psql'), [...args, '-v', 'guard_fixed=false', '-f', resolve('supabase/tests/profile_storage_phase.sql')]);
@@ -59,9 +59,9 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/initial_free_phase.sql')]);
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/production_billing.sql')]);
   testFreeContainment(executable,args);
-  for (const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('_owner_publication.sql')||f.endsWith('_personal_posts.sql')).sort()){
+  for (const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('_owner_publication.sql')||f.endsWith('_personal_posts.sql')||f.endsWith('_account_conversations.sql')).sort()){
     run(executable('psql'), [...args,'-f',resolve('supabase/migrations',file)],true);
-    run(executable('psql'), [...args,'-f',resolve('supabase/tests',file.endsWith('_owner_publication.sql')?'owner_publication.sql':'personal_posts.sql')]);
+    run(executable('psql'), [...args,'-f',resolve('supabase/tests',file.endsWith('_owner_publication.sql')?'owner_publication.sql':file.endsWith('_personal_posts.sql')?'personal_posts.sql':'account_conversations.sql')]);
   }
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {

@@ -1,3 +1,4 @@
+import { useAuth } from "../auth/AuthProvider";
 import { PublishedWorks } from "../posts/PublishedWorks";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -117,6 +118,7 @@ export function SocialFeed({ authorId }: { authorId?: string }) {
               createdAt={post.createdAt}
               publishedAt={post.publishedAt}
             />
+            <PostContact post={post} />
             <PostLink to={postPath(post)}>
               Abrir publicação
               {post.images.length > 1 ? ` · ${post.images.length} fotos` : ""}
@@ -175,5 +177,27 @@ export function SocialPostBody({
       management={management}
       actions={actions}
     />
+  );
+}
+
+export function PostContact({ post }: { post: SocialPost }) {
+  const { session } = useAuth();
+  if (
+    post.kind !== "personal" ||
+    post.status !== "published" ||
+    session?.user.id === post.authorId
+  )
+    return null;
+  return (
+    <Link
+      className="post-action"
+      to={
+        post.kind === "personal"
+          ? `/mensagens/pessoa/${post.authorId}`
+          : `/mensagens/projeto/${post.id}`
+      }
+    >
+      Conversar
+    </Link>
   );
 }

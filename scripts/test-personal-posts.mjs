@@ -14,5 +14,6 @@ try{
  run('psql',[...args,'-f',resolve('supabase/tests/bootstrap.sql')],true);
  for(const f of readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).sort())run('psql',[...args,'-f',resolve('supabase/migrations',f)],true);
  run('psql',[...args,'-f',resolve('supabase/tests/personal_posts.sql')]);
+ if(readdirSync('supabase/migrations').some(f=>f.endsWith('_account_conversations.sql')))run('psql',[...args,'-f',resolve('supabase/tests/account_conversations.sql')]);
  console.log('Personal posts SQL: passed in disposable native PostgreSQL, no remote access.');
 }finally{if(started)run('pg_ctl',['-D',join(root,'data'),'-m','immediate','-w','stop'],true);rmSync(root,{recursive:true,force:true});}

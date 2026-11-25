@@ -193,6 +193,31 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      open_account_conversation: {
+        Args: {
+          message_body: string;
+          request_id: string;
+          target_author?: string | null;
+          target_work?: string | null;
+        };
+        Returns: string;
+      };
+      account_conversations_query: {
+        Args: Record<never, never>;
+        Returns: Json;
+      };
+      account_conversation_messages: {
+        Args: { target_conversation: string; before_message?: string | null };
+        Returns: Json;
+      };
+      send_account_conversation_message: {
+        Args: {
+          target_conversation: string;
+          message_body: string;
+          request_id: string;
+        };
+        Returns: string;
+      };
       personal_post_command: {
         Args: { command: string; target_post: string; data?: Json };
         Returns: Json;
