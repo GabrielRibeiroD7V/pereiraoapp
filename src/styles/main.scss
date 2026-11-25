@@ -524,7 +524,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .photo-carousel__dots button[aria-current] span { background:var(--color-primary); width:8px; height:8px; }
 .social-feed { display:grid; grid-template-columns:minmax(0,1fr); max-width:40rem; margin-inline:auto; }
 .social-feed .published-work { padding:.625rem; overflow:hidden; }
-.social-feed .photo-carousel__slide img { aspect-ratio:1; max-height:55dvh; }
+.social-feed .photo-carousel__slide img { height:auto; aspect-ratio:auto; max-height:55dvh; }
 .home-content > .published-works-section:first-child { margin-top:0; }
 @media(min-width:48rem) { .profile-preview .social-profile-actions .button { font-size:.875rem; } }
 
