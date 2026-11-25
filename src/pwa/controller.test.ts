@@ -60,13 +60,10 @@ describe("instalação progressiva e sessão", () => {
     a.controller.dispose();
     b.controller.dispose();
   });
-  it("guarda apenas preferência opcional de convite", () => {
+  it("fecha o convite apenas durante a visita atual", () => {
     const f = pwaFixture();
     f.controller.dismiss();
-    expect([...f.storage.entries()]).toEqual([
-      ["pereirao.install.dismissed", "1"],
-      ["pereirao.install.dismissedAt", expect.any(String)],
-    ]);
+    expect([...f.storage.entries()]).toEqual([]);
     expect(f.controller.getSnapshot().dismissed).toBe(true);
     f.controller.dispose();
   });

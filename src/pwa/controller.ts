@@ -1,6 +1,5 @@
 import { workerVersion } from './workerVersion';
 import type { PwaDiagnostics } from './workerVersion';
-import { installDismissed, INSTALL_DISMISS_KEY, INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS, INSTALL_COOLDOWN_MS } from './installPolicy';
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -73,14 +72,7 @@ export class PwaController {
         /iPhone|iPad|iPod/i.test(ua) ||
         (device.platform === "MacIntel" && device.maxTouchPoints > 1);
     this.controlled = Boolean(device.serviceWorker?.controller);
-    let dismissed = false;
-    try {
-      dismissed =
-        browser.sessionStorage.getItem("pereirao.install.dismissed") === "1" ||
-        installDismissed(browser.localStorage);
-    } catch {
-      /* preferência opcional */
-    }
+    const dismissed = false;
     const version = browser.document.querySelector<HTMLMetaElement>('meta[name="pereirao-build"]')?.content;
     this.state = {
       runningVersion: version && /^[a-f0-9]{20}$/.test(version) ? version : null,
@@ -390,31 +382,16 @@ export class PwaController {
     // Aceitar o diálogo não é tratado como confirmação de instalação concluída.
   }
   offerInstallInvitation() {
-    try {
-      const storage = this.browser.localStorage;
-      if (installDismissed(storage, Date.now(), INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS)) return false;
-      // Confere disponibilidade sem registrar uma exibição antes de ela acontecer.
-      storage.setItem(INSTALL_SEEN_KEY, storage.getItem(INSTALL_SEEN_KEY) ?? '0');
-      return true;
-    } catch { return false; }
+    return !this.state.dismissed && !this.state.installed;
   }
   markInstallInvitationSeen() {
-    try { this.browser.localStorage.setItem(INSTALL_SEEN_KEY, String(Date.now())); return true; } catch { return false; }
+    return true;
   }
   installDiagnostics() {
-    const until = (key: string, duration: number) => {
-      try { const stamp = Number(this.browser.localStorage.getItem(key)); return stamp > 0 && stamp <= Date.now() && stamp + duration > Date.now() ? new Date(stamp + duration).toISOString() : null; } catch { return null; }
-    };
     return { installed: this.state.installed, ios: this.state.ios, safari: this.state.safari, nativePrompt: this.state.canInstall,
-      dismissedUntil: until(INSTALL_DISMISS_KEY, INSTALL_COOLDOWN_MS), automaticUntil: until(INSTALL_SEEN_KEY, INSTALL_AUTOMATIC_COOLDOWN_MS) };
+      dismissedUntil: null, automaticUntil: null };
   }
   dismiss() {
-    try {
-      this.browser.sessionStorage.setItem("pereirao.install.dismissed", "1");
-    } catch {
-      /* preferência opcional */
-    }
-    try { this.browser.localStorage.setItem(INSTALL_DISMISS_KEY, String(Date.now())); } catch { /* Preferência opcional; navegação privada pode bloquear storage. */ }
     this.patch({ dismissed: true });
   }
   update(automatic = false) {

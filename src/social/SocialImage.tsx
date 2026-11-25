@@ -17,7 +17,7 @@ export function SocialImage({
         : Promise.reject(Error("Unavailable")),
     [repository, image.path, image.bucket],
   );
-  const state = usePublicQuery(`${image.bucket}:${image.path}`, load);
+  const state = usePublicQuery(`social-image:${image.bucket}:${image.path}`, load, true, 45_000);
   return state.data ? (
     <img
       alt={alt}

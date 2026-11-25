@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Link } from 'react-router-dom';
 import { InstallInvitation, PwaProvider } from './PwaProvider';
 import { pwaFixture, installEvent } from '../test/pwaFixtures';
-import { INSTALL_COOLDOWN_MS, INSTALL_DELAY_MS, INSTALL_DISMISS_KEY, installDismissed } from './installPolicy';
+import { INSTALL_DELAY_MS } from './installPolicy';
 
 afterEach(() => vi.useRealTimers());
 function mount(path = '/', ios = false) {
@@ -18,12 +18,10 @@ function mount(path = '/', ios = false) {
 }
 const invitation = () => screen.queryByRole('region', { name: 'Instalar PEREIRÃO' });
 describe('convite contextual de instalação', () => {
-  it('aguarda 45 segundos e interação, sem aparecer imediatamente na primeira visita', () => {
+  it('aparece automaticamente poucos segundos após a entrada', () => {
     const f = mount();
     expect(invitation()).not.toBeInTheDocument();
     act(() => vi.advanceTimersByTime(INSTALL_DELAY_MS));
-    expect(invitation()).not.toBeInTheDocument();
-    fireEvent.pointerDown(document.body);
     expect(invitation()).toBeVisible();
     expect(f.controller.getSnapshot().installed).toBe(false);
     f.controller.dispose();
@@ -52,19 +50,12 @@ describe('convite contextual de instalação', () => {
     expect(invitation()).toBeVisible();
     f.controller.dispose();
   });
-  it('aplica dispensa por 14 dias entre sessões e tolera valores inválidos', () => {
-    const now = Date.now();
-    const preference = (value: string | null) => ({ getItem: () => value });
-    expect(installDismissed(preference(String(now - 1000)), now)).toBe(true);
-    expect(installDismissed(preference(String(now - INSTALL_COOLDOWN_MS)), now)).toBe(false);
-    expect(installDismissed(preference(null), now)).toBe(false);
-    expect(installDismissed(preference('inválido'), now)).toBe(false);
-    expect(installDismissed(preference(String(now + 1000)), now)).toBe(false);
+  it('dispensa somente a visita atual e não grava bloqueio longo', () => {
     const f = mount('/', true);
     fireEvent.pointerDown(document.body);
     act(() => vi.advanceTimersByTime(INSTALL_DELAY_MS));
     fireEvent.click(screen.getByRole('button', { name: 'Dispensar convite de instalação' }));
-    expect(f.storage.get(INSTALL_DISMISS_KEY)).toBe(String(Date.now()));
+    expect(f.storage.size).toBe(0);
     expect(invitation()).not.toBeInTheDocument();
     f.controller.dispose();
   });

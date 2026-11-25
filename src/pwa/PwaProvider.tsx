@@ -95,9 +95,9 @@ export function InstallInvitation() {
     <>
     {eligible && shownAt === key && <section ref={invitationRef} className="pwa-install" aria-label="Instalar PEREIRÃO">
       <button type="button" className="pwa-install-close icon-button" aria-label="Dispensar convite de instalação" onClick={() => controller.dismiss()}><X size={17} aria-hidden="true" /></button>
-      <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
+      <img src="/images/pwa/pereirao-v2-192.png" width="32" height="32" alt="" />
       <div>
-        <h2>PEREIRÃO na sua tela inicial</h2>
+        <h2>Adicione o PEREIRÃO à sua Tela de Início</h2>
         <div className="pwa-install-actions">
           {state.canInstall || state.installing ? (
             <button
@@ -138,7 +138,7 @@ function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; on
           onClose={() => onClose()}
         >
           <div className="pwa-ios-help"><InstallOfferInfo/>
-            <img src="/images/pwa/icon-192.png" width="48" height="48" alt="Ícone oficial do PEREIRÃO" />
+            <img src="/images/pwa/pereirao-v2-192.png" width="48" height="48" alt="Ícone oficial do PEREIRÃO" />
             {!safari && (
               <p>Abra este mesmo endereço no Safari. Depois, siga os passos abaixo; este navegador não disponibiliza a instalação nativa do iPhone.</p>
             )}
@@ -191,7 +191,7 @@ function IosInstallHelp({ safari, onClose, onUnderstood }: { safari: boolean; on
 function InstallOfferInfo() {
   const {controller,state} = usePwa();
   const info = controller?.installDiagnostics();
-  return <details className="install-offer-info"><summary>Informações do convite de instalação</summary><p>Versão em execução: {state.runningVersion ?? 'indisponível'}. Publicada: {state.publishedVersion ?? 'ainda não consultada'}.</p><p>{info?.installed ? 'Aberto como aplicativo instalado: convite oculto.' : 'Aberto no navegador: não identificado como standalone.'}</p><p>{info?.dismissedUntil ? `Dispensado explicitamente até ${new Date(info.dismissedUntil).toLocaleString('pt-BR')}.` : 'Sem dispensa explícita de 14 dias ativa.'}</p><p>{info?.automaticUntil ? `Convite visto recentemente: nova oferta após ${new Date(info.automaticUntil).toLocaleString('pt-BR')}.` : 'Sem bloqueio por exibição confirmada.'}</p><p>O convite aguarda 45 segundos e interação em Início, Buscar, Conta ou perfil, sem campo, teclado ou modal aberto. O acesso manual permanece disponível.</p></details>;
+  return <details className="install-offer-info"><summary>Informações do convite de instalação</summary><p>Versão em execução: {state.runningVersion ?? 'indisponível'}. Publicada: {state.publishedVersion ?? 'ainda não consultada'}.</p><p>{info?.installed ? 'Aberto como aplicativo instalado: convite oculto.' : 'Aberto no navegador: o convite reaparece em uma nova entrada enquanto não estiver instalado.'}</p><p>O convite aparece poucos segundos após a entrada e se oculta durante campos, teclado ou modal aberto. Fechá-lo vale somente para a visita atual; o acesso manual permanece disponível.</p></details>;
 }
 
 /** Always available in Conta, independently of the optional invitation cooldown. */
@@ -212,7 +212,7 @@ export function InstallAppAccess({ menu = false }: { menu?: boolean }) {
       </Modal>);
   return <>
     {menu ? action : <section className="account-install" aria-label="Aplicativo PEREIRÃO">
-      <img src="/images/pwa/icon-192.png" width="32" height="32" alt="" />
+      <img src="/images/pwa/pereirao-v2-192.png" width="32" height="32" alt="" />
       <div>{action}{!state.installed && <p className="field-help">{nativeAvailable ? 'Instale pelo navegador, sem alterar sua conta.' : 'Veja como adicionar o PEREIRÃO ao seu dispositivo.'}</p>}</div>
     </section>}
     {state.installError && <p role="alert">Não foi possível abrir a instalação. Tente novamente pelo menu do navegador.</p>}

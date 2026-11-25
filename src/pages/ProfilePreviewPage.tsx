@@ -9,7 +9,7 @@ import {PhotoEditor} from '../work/PhotoEditor';
 import { usePostCreation } from '../posts/usePostCreation';
 import { PresentationIdentity } from '../presentation/PresentationIdentity';
 import { BusinessStatus } from '../components/BusinessStatus';
-import { Ellipsis } from 'lucide-react';
+import { Ellipsis, Flame, Wrench } from 'lucide-react';
 import { ContactLinks } from '../marketplace/ContactLinks';
 import { usePresentation } from '../presentation/PresentationProvider';
 import { PresentationSections } from '../presentation/PresentationSections';
@@ -29,8 +29,25 @@ import { formatPrice } from '../work/validation';
 import { usePosts } from '../posts/PostsProvider';
 import type { ManagedPost } from '../posts/types';
 import { ManagedPhoto } from '../posts/ManagedPhoto';
+import { useAuth } from '../auth/AuthProvider';
 import type { EditableBusiness, ProfessionalCatalog } from '../professional/types';
 import type { PortfolioRow, ServiceRow } from '../lib/database.types';
+
+type ProfilePreviewCache = {
+  business: EditableBusiness;
+  catalog: ProfessionalCatalog;
+  services: ServiceRow[];
+  photos: PortfolioRow[];
+  posts: ManagedPost[];
+  postsHaveNext: boolean;
+};
+const profilePreviewCaches = new WeakMap<object, Map<string, ProfilePreviewCache>>();
+function profileCacheFor(repository: object | null) {
+  if(!repository)return null;
+  let cache=profilePreviewCaches.get(repository);
+  if(!cache){cache=new Map();profilePreviewCaches.set(repository,cache);}
+  return cache;
+}
 
 export function ProfilePreviewPage({ businessIdOverride, embedded = false, readOnly = false }: { businessIdOverride?: string; embedded?: boolean; readOnly?: boolean } = {}) {
   const { businessId: routeBusinessId = '' } = useParams();
@@ -44,49 +61,48 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
   useEffect(()=>{if(location.hash==='#servicos')setContentSection('servicos');},[location.hash]);
   const [adding, setAdding] = useState(false);
   const [postPage, setPostPage] = useState(previousView?.page ?? 1);
-  const [postsHaveNext, setPostsHaveNext] = useState(false);
+  const professional = useProfessionalRepository();
+  const {session}=useAuth();
+  const previewCache=profileCacheFor(professional);
+  const cachedPreview = previewCache?.get(`${session?.user.id??'anonymous'}:${businessId}:${previousView?.page ?? 1}`);
+  const [postsHaveNext, setPostsHaveNext] = useState(cachedPreview?.postsHaveNext ?? false);
   const [postsError, setPostsError] = useState(false);
   useEffect(()=>{profileViews.set(viewKey,{tab:contentSection,page:postPage});if(profileViews.size>40)profileViews.delete(profileViews.keys().next().value!);},[viewKey,contentSection,postPage]);
-  const professional = useProfessionalRepository();
   const presentation = usePresentation(businessId);
   const work = useWorkRepository();
   const { managed: postsRepository } = usePosts();
-  const [posts, setPosts] = useState<ManagedPost[]>([]);
-  const [business, setBusiness] = useState<EditableBusiness | null>(null);
-  const [catalog, setCatalog] = useState<ProfessionalCatalog | null>(null);
-  const [services, setServices] = useState<ServiceRow[]>([]);
-  const [photos, setPhotos] = useState<PortfolioRow[]>([]);
+  const [posts, setPosts] = useState<ManagedPost[]>(cachedPreview?.posts ?? []);
+  const [business, setBusiness] = useState<EditableBusiness | null>(cachedPreview?.business ?? null);
+  const [catalog, setCatalog] = useState<ProfessionalCatalog | null>(cachedPreview?.catalog ?? null);
+  const [services, setServices] = useState<ServiceRow[]>(cachedPreview?.services ?? []);
+  const [photos, setPhotos] = useState<PortfolioRow[]>(cachedPreview?.photos ?? []);
   const [enlarged, setEnlarged] = useState<{id:string;url:string} | null>(null);
   const [editingPhoto,setEditingPhoto]=useState<PortfolioRow|null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedPreview);
   const [error, setError] = useState('');
   const [contentError, setContentError] = useState(false);
   useSectionAnchor(!loading && !!business);
   const creator=usePostCreation(businessId,()=>setAdding(false),()=>{setPostPage(1);setPostRefresh(n=>n+1);},business?.input.name);
   useEffect(() => {
     let live = true;
-    setLoading(true); setError(''); setContentError(false); setPostsError(false);
-    if(lastBusiness.current!==businessId){lastBusiness.current=businessId;setBusiness(null);setCatalog(null);setPosts([]);setPhotos([]);setServices([]);setEnlarged(null);setPostPage(1);}
+    const cacheKey=`${session?.user.id??'anonymous'}:${businessId}:${postPage}`,cached=previewCache?.get(cacheKey);
+    setLoading(!cached); setError(''); setContentError(false); setPostsError(false);
+    if(cached){setBusiness(cached.business);setCatalog(cached.catalog);setPosts(cached.posts);setPostsHaveNext(cached.postsHaveNext);setPhotos(cached.photos);setServices(cached.services);}
+    if(lastBusiness.current!==businessId){lastBusiness.current=businessId;setEnlarged(null);if(!cached){setBusiness(null);setCatalog(null);setPosts([]);setPhotos([]);setServices([]);}setPostPage(1);}
     if (!professional) { setLoading(false); return; }
-    void Promise.all([professional.getEditable(businessId), professional.getCatalog()]).then(async ([result, options]) => {
-      if (!live) return;
-      setBusiness(result); setCatalog(options);
-      if (work) {
-        try {
-          const content = await work.list(businessId);
-          if (live) { setServices(content.services); setPhotos(content.photos.filter(photo => photo.media_state === 'ready')); }
-        } catch { if (live) setContentError(true); }
-      } else if (live) setContentError(true);
-      if (postsRepository) {
-        try {
-          const page = await postsRepository.load(businessId, postPage);
-          if (live) {setPosts(page.posts.items);setPostsHaveNext(page.posts.hasNext);}
-        } catch { if(live) setPostsError(true); }
-      }
-    }).catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
+    void (async()=>{
+      const [result,options]=await Promise.all([professional.getEditable(businessId),professional.getCatalog()]);
+      let nextServices=cached?.services??[],nextPhotos=cached?.photos??[],nextPosts=cached?.posts??[],nextPostsHaveNext=cached?.postsHaveNext??false;
+      if(work)try{const content=await work.list(businessId);nextServices=content.services;nextPhotos=content.photos.filter(photo=>photo.media_state==='ready');}catch{if(live)setContentError(true);}else if(live)setContentError(true);
+      if(postsRepository)try{const page=await postsRepository.load(businessId,postPage);nextPosts=page.posts.items;nextPostsHaveNext=page.posts.hasNext;}catch{if(live)setPostsError(true);}
+      if(!live)return;
+      const next={business:result,catalog:options,services:nextServices,photos:nextPhotos,posts:nextPosts,postsHaveNext:nextPostsHaveNext};
+      previewCache?.set(cacheKey,next);if(previewCache&&previewCache.size>30)previewCache.delete(previewCache.keys().next().value!);
+      setBusiness(result);setCatalog(options);setServices(nextServices);setPhotos(nextPhotos);setPosts(nextPosts);setPostsHaveNext(nextPostsHaveNext);
+    })().catch((cause: unknown) => { if (live) setError(professionalError(cause)); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [professional, work, postsRepository, businessId, readOnly,postRefresh,resume,postPage]);
+  }, [professional, work, postsRepository, businessId, readOnly,postRefresh,resume,postPage,session?.user.id,previewCache]);
   const selectedPhoto=photos.find(p=>p.id===enlarged?.id);
   const activeServices=services.filter(service=>service.active);
   const info = business?.input;
@@ -127,7 +143,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil. Seus posts publicados são públicos independentemente; rascunhos de posts continuam só seus.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
-      <SectionTabs label="Conteúdo do perfil" selectedId={contentSection} onSelect={setContentSection} sections={[{ id: 'trabalhos', label: 'Publicações', content: <section className="public-profile-section" aria-label="Projetos e portfólio"><h2>Publicações e projetos</h2><p className="field-help">Foto de trabalho é uma imagem do portfólio. Publicação reúne fotos, título e legenda; salvar rascunho não publica.</p>
+      <SectionTabs label="Conteúdo do perfil" selectedId={contentSection} onSelect={setContentSection} sections={[{ id: 'trabalhos', label: 'Trabalhos', icon: <Flame size={16} aria-hidden="true" />, content: <section className="public-profile-section" aria-label="Trabalhos"><h2>Trabalhos</h2><p className="field-help">Publicações e fotos do seu portfólio reunidas no mesmo lugar.</p>
         {!readOnly&&<Link className="text-link" to={`/conta/profissional/${businessId}/publicacoes`}>Gerenciar todas as publicações</Link>}
         <h3>Publicações</h3>
         {posts.length ? <ul className="profile-post-grid">{posts.map(post => <li key={post.id}>
@@ -138,8 +154,8 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
           </PostLink>
         </li>)}</ul> : !postsError && <p className="field-help">Nenhuma publicação salva. Fotos de trabalho continuam no portfólio abaixo.</p>}
         {postPaging}
-        </section> }, {id:'fotos',label:'Fotos de trabalhos',content:<section className="public-profile-section" aria-label="Fotos de trabalhos"><h2>Fotos de trabalhos · Portfólio</h2>
-        {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={url=>setEnlarged({id:photo.id,url})} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, {id:'servicos',label:'Serviços',content:<section id="servicos" className="public-profile-section" aria-label="Serviços e preços"><div className="work-toolbar"><h2>Serviços e preços</h2>{!readOnly && <Link className="button button--secondary" to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link>}</div><p className="field-help">Valores dos serviços oferecidos pelo profissional.</p>{activeServices.length ? <ul className="public-services">{activeServices.map(service => <li key={service.id}><div><h3>{service.name}</h3>{service.description && <p>{service.description}</p>}</div><strong>{formatPrice(service.pricing_type, service.price_amount_cents)}</strong></li>)}</ul> : <p className="field-help">Nenhum serviço cadastrado.</p>}{!readOnly && <Link className="text-link" to={`/conta/profissional/${businessId}/servicos`}>Gerenciar serviços</Link>}</section> }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2>{!readOnly&&<details className="profile-publication-settings"><summary>Gerenciar publicação do perfil</summary><OwnerPublication business={business.business} repository={professional} onChanged={()=>setPostRefresh(n=>n+1)}/></details>}<PresentationSections data={presentation.data} company={info.type === 'empresa'} /><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />
+        <h3>Fotos de trabalhos</h3>
+        {photos.length && work ? <ul className="portfolio-grid social-preview-grid">{photos.map(photo => <li key={photo.id}><PortfolioPhoto item={photo} repository={work} onOpen={url=>setEnlarged({id:photo.id,url})} />{photo.caption && <div className="portfolio-copy"><p>{photo.caption}</p></div>}</li>)}</ul> : <p className="field-help">Nenhuma fotografia cadastrada. Adicione fotografias de trabalhos pela área de edição.</p>}</section> }, {id:'servicos',label:'Serviços',icon:<Wrench size={16} aria-hidden="true" />,content:<section id="servicos" className="public-profile-section" aria-label="Serviços e preços"><div className="work-toolbar"><h2>Serviços e preços</h2>{!readOnly && <Link className="button button--secondary" to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link>}</div><p className="field-help">Valores dos serviços oferecidos pelo profissional.</p>{activeServices.length ? <ul className="public-services">{activeServices.map(service => <li key={service.id}><div><h3>{service.name}</h3>{service.description && <p>{service.description}</p>}</div><strong className="service-price">{formatPrice(service.pricing_type, service.price_amount_cents)}</strong></li>)}</ul> : <p className="field-help">Nenhum serviço cadastrado.</p>}{!readOnly && <Link className="text-link" to={`/conta/profissional/${businessId}/servicos`}>Gerenciar serviços</Link>}</section> }, { id: 'sobre', label: 'Sobre', content: <section className="public-profile-section" aria-label="Contato e cidades atendidas"><h2>Contato e cidades atendidas</h2>{!readOnly&&<details className="profile-publication-settings"><summary>Gerenciar publicação do perfil</summary><OwnerPublication business={business.business} repository={professional} onChanged={()=>setPostRefresh(n=>n+1)}/></details>}<PresentationSections data={presentation.data} company={info.type === 'empresa'} /><p>{info.whatsapp ? `WhatsApp: ${info.whatsapp}` : 'WhatsApp ainda não informado.'}</p>{info.instagram && <p>Instagram: @{info.instagram}</p>}<p>{catalog?.cities.filter(item => info.areaCityIds.includes(item.id)).map(item => `${item.name}/${item.state_code}`).join(', ') || 'Nenhuma cidade informada.'}</p></section> }]} />
       {!readOnly && adding && <Modal title="Adicionar ao perfil" onClose={()=>setAdding(false)}><nav className="profile-add-menu" aria-label="Adicionar ao perfil"><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/servicos?acao=novo`}>Adicionar serviço</Link><Link onClick={()=>setAdding(false)} to={`/conta/profissional/${businessId}/trabalhos?acao=novo`}>Adicionar foto de trabalho</Link><button type="button" onClick={creator.choose}>Adicionar publicação</button>{creator.input}</nav></Modal>}
       {!readOnly && creator.editor}
       {enlarged && selectedPhoto && <WorkPhotoDetail image={<img className="preview-enlarged" src={enlarged.url} alt={selectedPhoto.caption || 'Foto de trabalho'} referrerPolicy="no-referrer" />} onCreatePost={!readOnly&&postsRepository?()=>{setEnlarged(null);creator.startWithPhoto({id:selectedPhoto.id,path:selectedPhoto.storage_path,caption:selectedPhoto.caption,kind:'portfolio'});}:undefined} caption={selectedPhoto.caption} serviceAssociated={!!selectedPhoto.service_id} service={services.find(s=>s.id===selectedPhoto.service_id)?.name} onClose={()=>setEnlarged(null)} onEdit={!readOnly?()=>{setEditingPhoto(selectedPhoto);setEnlarged(null);}:undefined} />}

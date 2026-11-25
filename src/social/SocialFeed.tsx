@@ -3,7 +3,7 @@ import {PhotoCarousel} from "../components/PhotoCarousel";
 import { useAuth } from "../auth/AuthProvider";
 import { PublishedWorks } from "../posts/PublishedWorks";
 import { useEffect, useState, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useReturnRevision } from "../hooks/useReturnRevision";
 import { PostLink } from "../posts/PostLink";
 import { PostContent } from "../posts/PostContent";
@@ -14,13 +14,15 @@ import { postPath } from "./model";
 import type { SocialCursor, SocialPost } from "./model";
 // Só número de páginas por entrada do histórico; sem dados privados ou URLs assinadas.
 export const publicFeedPageCounts=new Map<string,number>();
+const publicFeedCache=new Map<string,{items:SocialPost[];hasNext:boolean}>();
 export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversOnly?:boolean}){
- const repository=useSocial(),resume=useReturnRevision(),location=useLocation(),viewKey=`${location.key}:social:${authorId??'all'}`;
+ const repository=useSocial(),resume=useReturnRevision();
+ const viewKey=`social:${authorId??'all'}`,restored=publicFeedCache.get(viewKey);
  const [attempt,setAttempt]=useState(0),request=useRef(0),busy=useRef(false);
- const [state,setState]=useState<{key:string;items:SocialPost[];hasNext:boolean;loading:boolean;error:boolean}>({key:viewKey,items:[],hasNext:false,loading:true,error:false});
+ const [state,setState]=useState<{key:string;items:SocialPost[];hasNext:boolean;loading:boolean;error:boolean}>(()=>({key:viewKey,items:restored?.items??[],hasNext:restored?.hasNext??false,loading:!restored,error:false}));
  useEffect(()=>{
   const revision=++request.current;busy.current=true;
-  setState(old=>old.key===viewKey?{...old,loading:true,error:false}:{key:viewKey,items:[],hasNext:false,loading:true,error:false});
+  setState(old=>old.key===viewKey?{...old,loading:old.items.length===0,error:false}:{key:viewKey,items:restored?.items??[],hasNext:restored?.hasNext??false,loading:!restored,error:false});
   if(!repository){busy.current=false;setState({key:viewKey,items:[],hasNext:false,loading:false,error:false});return;}
   void(async()=>{
    const desired=publicFeedPageCounts.get(viewKey)??1;let cursor:SocialCursor|null=null,items:SocialPost[]=[],hasNext=false;
@@ -30,7 +32,7 @@ export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversO
     const last=page.items.at(-1);if(!hasNext||!last?.publishedAt)break;
     cursor={time:last.publishedAt,id:last.id,kind:last.kind};
    }
-   if(request.current===revision)setState({key:viewKey,items,hasNext,loading:false,error:false});
+   if(request.current===revision){publicFeedCache.set(viewKey,{items,hasNext});if(publicFeedCache.size>20)publicFeedCache.delete(publicFeedCache.keys().next().value!);setState({key:viewKey,items,hasNext,loading:false,error:false});}
   })().catch(()=>{if(request.current===revision)setState(old=>({...old,error:true,loading:false}));}).finally(()=>{if(request.current===revision)busy.current=false;});
   return()=>{request.current++;};
  },[repository,viewKey,authorId,resume,attempt]);
@@ -40,14 +42,14 @@ export function SocialFeed({authorId,coversOnly=false}:{authorId?:string;coversO
   if(!repository||busy.current||!last?.publishedAt)return;
   const revision=++request.current;busy.current=true;setState(old=>({...old,loading:true,error:false}));
   try{const page=await repository.feed({time:last.publishedAt,id:last.id,kind:last.kind},authorId);if(request.current!==revision)return;
-   setState(old=>({...old,items:[...old.items,...page.items.filter(p=>!old.items.some(v=>v.kind===p.kind&&v.id===p.id))],hasNext:page.hasNext,loading:false,error:false}));
+   setState(old=>{const next={...old,items:[...old.items,...page.items.filter(p=>!old.items.some(v=>v.kind===p.kind&&v.id===p.id))],hasNext:page.hasNext,loading:false,error:false};publicFeedCache.set(viewKey,{items:next.items,hasNext:next.hasNext});return next;});
    publicFeedPageCounts.set(viewKey,(publicFeedPageCounts.get(viewKey)??1)+1);if(publicFeedPageCounts.size>40)publicFeedPageCounts.delete(publicFeedPageCounts.keys().next().value!);
   }catch{if(request.current===revision)setState(old=>({...old,error:true,loading:false}));}finally{if(request.current===revision)busy.current=false;}
  }
  if(!repository&&!authorId)return <PublishedWorks showUnavailable/>;
  return <section className="published-works-section" aria-label={coversOnly?'Publicações do perfil':'Feed público'}>
   <h2>{authorId?'Publicações do perfil':'Publicações recentes'}</h2>
-  {current.loading&&<p role="status">{items.length?'Atualizando publicações…':'Carregando publicações…'}</p>}
+  {current.loading&&!items.length&&<p role="status">Carregando publicações…</p>}
   {!current.loading&&!current.error&&!items.length&&<p>Ainda não há publicações públicas.</p>}
   {current.error&&<p role="alert">Publicações indisponíveis agora. <button className="text-link" onClick={()=>setAttempt(n=>n+1)}>Tentar novamente</button></p>}
   <div className={coversOnly?'profile-post-grid':'social-feed'}>{items.map(post=>coversOnly?<article key={`${post.kind}:${post.id}`}><PostLink className="profile-post-tile" to={postPath(post)} aria-label={`Abrir publicação ${post.title||post.author}`}>

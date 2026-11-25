@@ -23,32 +23,47 @@ import { professionalError } from "../professional/validation";
 import { ProfilePreviewPage } from "./ProfilePreviewPage";
 import type { BusinessRow } from "../lib/database.types";
 
+const accountBusinessCaches = new WeakMap<object, Map<string, readonly BusinessRow[]>>();
+function accountBusinessCache(repository: object | null) {
+  if (!repository) return null;
+  let cache=accountBusinessCaches.get(repository);
+  if(!cache){cache=new Map();accountBusinessCaches.set(repository,cache);}
+  return cache;
+}
+
 export function AccountPage() {
   const { session, gateway, loading, error: sessionError } = useAuth();
   const { profile, error: profileError } = usePersonalProfile();
   const professional = useProfessionalRepository();
+  const businessCache=accountBusinessCache(professional);
   const location = useLocation();
-  const [businesses, setBusinesses] = useState<readonly BusinessRow[]>([]);
+  const [businesses, setBusinesses] = useState<readonly BusinessRow[]>(() => session ? businessCache?.get(session.user.id) ?? [] : []);
   const [selectedId, setSelectedId] = useState(
     () => profileBusinessSelections.get(location.key) ?? "",
   );
-  const [businessesLoading, setBusinessesLoading] = useState(true);
+  const [businessesLoading, setBusinessesLoading] = useState(() => Boolean(session && !businessCache?.has(session.user.id)));
   const [businessesError, setBusinessesError] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
-    setBusinesses([]);
     setBusinessesError("");
-    setBusinessesLoading(true);
     if (!session || !professional) {
       setBusinessesLoading(false);
       return;
     }
+    const cached = businessCache?.get(session.user.id);
+    if (cached) {
+      setBusinesses(cached);
+      setBusinessesLoading(false);
+    } else setBusinessesLoading(true);
     void professional
       .listMine()
       .then((rows) => {
-        if (live) setBusinesses(rows);
+        if (live) {
+          businessCache?.set(session.user.id, rows);
+          setBusinesses(rows);
+        }
       })
       .catch((cause: unknown) => {
         if (live) setBusinessesError(professionalError(cause));
@@ -59,7 +74,7 @@ export function AccountPage() {
     return () => {
       live = false;
     };
-  }, [session?.user.id, professional, location.key]);
+  }, [session?.user.id, professional, businessCache]);
   const selected =
     businesses.find(
       (item) => item.id === (selectedId || location.state?.businessId),

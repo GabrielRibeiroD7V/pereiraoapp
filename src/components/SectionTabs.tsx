@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-type Section = { id: string; label: string; content: ReactNode };
+type Section = { id: string; label: string; icon?: ReactNode; content: ReactNode };
 /** Abas internas: setas/Home/End movem foco e seleção; painéis mantêm seus dados. */
 export function SectionTabs({ label, sections, selectedId, onSelect }: { label: string; sections: readonly Section[]; selectedId?: string; onSelect?: (id: string) => void }) {
   const prefix = useId();
@@ -22,7 +22,7 @@ export function SectionTabs({ label, sections, selectedId, onSelect }: { label: 
           else if (event.key === 'End') next = sections.length - 1;
           else return;
           event.preventDefault(); setSelected(sections[next]!.id); buttons.current[next]?.focus();
-        }}>{section.label}</button>)}
+        }}>{section.icon}{section.label}</button>)}
     </div>
     {sections.map((section) => <div key={section.id} role="tabpanel" id={`${prefix}-panel-${section.id}`}
       aria-labelledby={`${prefix}-tab-${section.id}`} hidden={selected !== section.id} tabIndex={0}>{section.content}</div>)}

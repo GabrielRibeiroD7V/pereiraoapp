@@ -1,6 +1,6 @@
-export const INSTALL_DELAY_MS = 45_000;
+export const INSTALL_DELAY_MS = 2_500;
 export const INSTALL_LEGACY_SEEN_KEY = 'pereirao.install.shownAt';
-export const INSTALL_SEEN_KEY = 'pereirao.install.visibleAt.v2';
+export const INSTALL_SEEN_KEY = 'pereirao.install.visibleAt.v3';
 export const INSTALL_AUTOMATIC_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 export const INSTALL_VISIBLE_MS = 3000;
 export const INSTALL_DISMISS_KEY = 'pereirao.install.dismissedAt';

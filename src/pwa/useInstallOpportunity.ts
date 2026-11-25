@@ -6,19 +6,12 @@ import { INSTALL_DELAY_MS } from './installPolicy';
 export function useInstallOpportunity(pathname: string) {
   const publicPage = pathname === "/conta" || /^\/conta\/profissional\/[^/]+\/perfil$/.test(pathname) || pathname === '/' || pathname === '/buscar' || pathname.startsWith('/prestadores/') || pathname.startsWith('/trabalhos/');
   const [ready, setReady] = useState(false);
-  const [engaged, setEngaged] = useState(false);
   const [obstructed, setObstructed] = useState(false);
   useEffect(() => {
+    setReady(false);
     if (!publicPage) return;
     const timer = window.setTimeout(() => setReady(true), INSTALL_DELAY_MS);
-    const engage = () => setEngaged(true);
-    window.addEventListener('pointerdown', engage, { once: true });
-    window.addEventListener('keydown', engage, { once: true });
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('pointerdown', engage);
-      window.removeEventListener('keydown', engage);
-    };
+    return () => window.clearTimeout(timer);
   }, [publicPage]);
   useEffect(() => {
     let importantUntil=0, idle: ReturnType<typeof setTimeout> | undefined;
@@ -48,5 +41,5 @@ export function useInstallOpportunity(pathname: string) {
       window.visualViewport?.removeEventListener('resize', check);
     };
   }, []);
-  return publicPage && ready && engaged && !obstructed;
+  return publicPage && ready && !obstructed;
 }
