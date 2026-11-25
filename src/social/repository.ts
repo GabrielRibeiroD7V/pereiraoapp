@@ -105,7 +105,7 @@ export function createSocialRepository(
             .from("personal-posts")
             .upload(plan.path, photo.blob, {
               contentType: "image/webp",
-              cacheControl: "0",
+              cacheControl: "60",
               upsert: false,
             });
           if (uploaded.error) {
