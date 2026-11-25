@@ -18,7 +18,7 @@ import { Modal } from "../components/Modal";
 import { PersonalComposer, PersonalPublisher } from "./PersonalComposer";
 import { useSocial } from "./SocialProvider";
 import { SocialImage } from "./SocialImage";
-import { SocialFeed, SocialPostBody } from "./SocialFeed";
+import { SocialFeed, SocialPostBody, PostContact } from "./SocialFeed";
 import { postError } from "../posts/validation";
 export function PersonalPublishingEntry() {
   const navigate = useNavigate();
@@ -196,6 +196,7 @@ export function PersonalPostPage() {
             }
             actions={
               <>
+                {!mine && <PostContact post={post} />}
                 {mine ? (
                   <Link to={`/publicacoes/${post.id}?visao=visitante`}>
                     Ver como visitante

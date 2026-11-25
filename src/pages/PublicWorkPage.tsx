@@ -43,7 +43,7 @@ export function PublicWorkPage() {
         actions={<>
           {(mine||post.business.profilePublic!==false)&&<Link className="post-action" to={mine?`/conta/profissional/${post.businessId}/perfil`:profilePath} aria-label={`Ver perfil de ${post.business.name}`}>Ver perfil</Link>}
           {(mine||post.business.profilePublic!==false)&&<Link className="post-action" to={`${mine?`/conta/profissional/${post.businessId}/perfil`:profilePath}#servicos`}>Conferir serviços</Link>}
-          {visitor && post.business.profilePublic!==false && <Link className="post-action" to={`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
+          {visitor && <Link className="post-action" to={post.business.profilePublic===false?`/mensagens/projeto/${post.id}`:`/mensagens/iniciar/${post.businessId}`}>Conversar</Link>}
           {visitor && post.business.profilePublic!==false && provider.data?.id===post.businessId && <ContactLinks name={post.business.name} whatsapp={provider.data.whatsapp} compact/>}
           {provider.error&&visitor&&<p role="status">Contato por WhatsApp indisponível no momento. Você pode abrir o perfil ou conversar pelo PEREIRÃO.</p>}
         </>}/>

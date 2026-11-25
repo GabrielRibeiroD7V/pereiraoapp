@@ -4,7 +4,7 @@ export function safeReturnPath(value: string | null) {
   const post =
     /^\/conta\/profissional\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/(?:previa\/)?publicacoes\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const chat =
-    /^\/mensagens\/(?:iniciar\/)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    /^\/mensagens\/(?:(?:iniciar|pessoa|projeto)\/)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return value &&
     ([
       "/admin",

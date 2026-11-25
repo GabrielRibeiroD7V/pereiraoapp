@@ -37,7 +37,7 @@ describe('mensagens internas e WhatsApp', () => {
     expect(await screen.findByText('Olá')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Responder'), { target: { value: 'Obrigado, vamos conversar.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
-    await waitFor(() => expect(repo.send).toHaveBeenCalledWith(conversationId, 'Obrigado, vamos conversar.'));
+    await waitFor(() => expect(repo.send).toHaveBeenCalledWith(conversationId, 'Obrigado, vamos conversar.', expect.any(String)));
   });
   it('não expõe detalhes do erro do banco', async () => {
     const repo = fixture(); repo.send = vi.fn().mockRejectedValue({ code: '42501', message: 'private data' });
@@ -79,7 +79,7 @@ it('preserva o próximo rascunho digitado enquanto o envio anterior aguarda conf
   fireEvent.change(field, { target: { value: 'Próximo texto ainda não enviado' } });
   await import('@testing-library/react').then(({ act }) => act(async () => finish()));
   expect(field).toHaveValue('Próximo texto ainda não enviado');
-  expect(repo.send).toHaveBeenCalledExactlyOnceWith(conversationId, 'Primeira mensagem');
+  expect(repo.send).toHaveBeenCalledExactlyOnceWith(conversationId, 'Primeira mensagem', expect.any(String));
   expect(screen.getByRole('button', { name: 'Enviar' })).toBeEnabled();
 });
 
@@ -97,4 +97,23 @@ it('uma falha de envio preserva o próximo rascunho sem enviar automaticamente',
   expect(field).toHaveValue('Rascunho preservado após falha');
   expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível');
   expect(repo.send).toHaveBeenCalledOnce();
+});
+
+
+it('inicia contato com autor pessoal sem negócio e preserva a mesma requisição após falha',async()=>{
+ const r=fixture(); r.openAccount=vi.fn().mockRejectedValueOnce({code:'NETWORK'}).mockResolvedValueOnce(conversationId);
+ open(`/mensagens/pessoa/${businessId}`,r);
+ fireEvent.change(await screen.findByLabelText('Sua mensagem'),{target:{value:'Mensagem local'}});
+ fireEvent.click(screen.getByRole('button',{name:'Enviar mensagem'})); await screen.findByRole('alert');
+ fireEvent.click(screen.getByRole('button',{name:'Enviar mensagem'}));
+ await waitFor(()=>expect(r.openAccount).toHaveBeenCalledTimes(2));
+ expect(vi.mocked(r.openAccount).mock.calls[0]).toEqual(vi.mocked(r.openAccount).mock.calls[1]);
+ expect(vi.mocked(r.openAccount).mock.calls[0]![0]).toEqual({author:businessId,work:undefined});
+});
+it('mostra conversa pessoal sem inventar empresa ou canal WhatsApp',async()=>{
+ const r=fixture();vi.mocked(r.list).mockResolvedValue([{id:conversationId,businessId:'',businessName:'',businessSlug:'',customerName:'',side:'account',peerId:businessId,peerName:'Pessoa local',updatedAt:'2026-11-22T12:00:00Z',lastMessage:'Olá'}]);
+ open(`/mensagens/${conversationId}`,r);
+ expect(await screen.findByRole('heading',{name:'Pessoa local'})).toBeInTheDocument();
+ expect(screen.getByRole('link',{name:'Ver publicações do perfil'})).toHaveAttribute('href',`/pessoas/${businessId}`);
+ expect(screen.queryByText('Ver perfil profissional e WhatsApp')).not.toBeInTheDocument();
 });
