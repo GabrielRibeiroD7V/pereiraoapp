@@ -133,7 +133,7 @@ export function ProfilePreviewPage({ businessIdOverride, embedded = false, readO
       {readOnly && <div className="social-profile-actions"><button type="button" className="button button--secondary" disabled>Mensagem pelo PEREIRÃO</button><ContactLinks compact name={info.name} whatsapp={info.whatsapp || null} instagram={info.instagram || null} /></div>}
       {readOnly && <p className="field-help">Prévia: mensagens ficam disponíveis aos visitantes após publicação. Nenhuma conversa é iniciada aqui.</p>}
 </header>
-      <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado do perfil. Seus posts publicados são públicos independentemente; rascunhos de posts continuam só seus.'}</div>
+      <div className="form-notice social-preview-notice" role="status">{business.business.status === 'published' ? 'Perfil publicado. Você está vendo sua própria versão.' : 'Rascunho privado. Só você pode ver este perfil. Seus posts publicados são públicos independentemente; rascunhos de posts continuam só seus.'}</div>
       {contentError && <p className="field-help" role="status">Serviços e fotografias indisponíveis nesta prévia. Seus dados de perfil continuam visíveis.</p>}
       {presentation.error && <p role="status">Informações adicionais indisponíveis no momento.</p>}
       <PresentationSections data={presentation.data} company={info.type === 'empresa'} />
