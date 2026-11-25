@@ -542,7 +542,21 @@ button, a, input, select, textarea { touch-action: manipulation; }
 
 button.back-link { display:inline-flex; align-items:center; padding:.625rem 0; background:none; border:0; color:var(--color-navy); font:inherit; cursor:pointer; }
 
-.professional-entry { display:flex; justify-content:flex-end; margin:0 0 1rem; }
-.professional-entry a { display:inline-flex; align-items:center; gap:.375rem; max-width:100%; padding:.5rem .75rem; border:1px solid #b9dfe9; border-radius:999px; background:#ebf9fc; color:#073d69; text-decoration:none; min-height:44px; }
-.professional-entry h2 { font-size:.75rem; font-weight:600; margin:0; }
-.professional-entry svg { flex-shrink:0; }
+.home-professional-entry { display:flex; justify-content:flex-end; margin:0 0 1rem; }
+.home-professional-entry a { display:inline-flex; align-items:center; gap:.375rem; max-width:100%; padding:.5rem .75rem; border:1px solid #b9dfe9; border-radius:999px; background:#ebf9fc; color:#073d69; text-decoration:none; min-height:44px; }
+.home-professional-entry h2 { font-size:.75rem; font-weight:600; margin:0; }
+.home-professional-entry svg { flex-shrink:0; }
+
+/* Compactação moderada da Home, sem reduzir os alvos de toque. */
+.home-professional-entry { margin-bottom:.375rem; }
+.home-professional-entry a { padding:.25rem .625rem; min-height:44px; }
+.home-professional-entry h2 { font-size:.6875rem; }
+.home-content > .home-section { margin-top:1.125rem; }
+.home-content > .home-professional-entry + .home-section { margin-top:.375rem; }
+.home-content > .published-works-section { margin-top:1.125rem; }
+.home-content > .home-section > h2,.home-content > .published-works-section > h2 { margin-bottom:.75rem; }
+.feed-author > a,.feed-author > div { display:flex; gap:.625rem; align-items:center; color:var(--color-navy); text-decoration:none; }
+.feed-author small { display:block; color:#455b75; margin-top:.125rem; font-size:.75rem; }
+.feed-author .post-provider-avatar { width:2.5rem; height:2.5rem; }
+.feed-contact-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.5rem; }
+.feed-contact-actions a { display:inline-flex; align-items:center; min-height:44px; padding:.375rem .625rem; border:1px solid #c5deee; border-radius:999px; color:#0756a8; font-size:.8125rem; font-weight:600; text-decoration:none; }
