@@ -129,19 +129,21 @@ export class ProductionReconciler {
     let bindingId: string | undefined;
     try {
       const paymentEvent = notice.eventType.startsWith("PAYMENT_");
-      let subscriptionId = notice.subscriptionId;
-      if (paymentEvent && !subscriptionId) {
-        const payment = await this.provider.read("payments", notice.objectId);
-        subscriptionId = id(payment.subscription) ? payment.subscription : null;
+      // Scope comes only from a pre-existing consented local binding. Never resolve
+      // a foreign account payment through the provider just to discover its scope.
+      const subscriptionId = notice.subscriptionId;
+      const binding = subscriptionId
+        ? await this.store.call<Binding | null>("binding", {
+            eventId,
+            leaseToken,
+            subscriptionId,
+          })
+        : null;
+      if (!binding) {
+        await this.store.call("ignore_unbound", { eventId, leaseToken });
+        this.log({ component: "production-billing", eventHash, outcome: "ignored_unbound" });
+        return;
       }
-      if (!subscriptionId)
-        throw new ProductionBillingError("RECONCILIATION_REQUIRED");
-      const binding = await this.store.call<Binding | null>("binding", {
-        eventId,
-        leaseToken,
-        subscriptionId,
-      });
-      if (!binding) throw new ProductionBillingError("RECONCILIATION_REQUIRED");
       bindingId = binding.id;
       // Leituras após o lease do vínculo: um evento antigo nunca aplica o payload do webhook.
       const subscription = await this.provider.read(
@@ -223,6 +225,31 @@ export class ProductionReconciler {
         this.log({ component: "production-billing", eventHash, outcome: code });
       }
     }
+  }
+  // Explicit administrative review, never automatically called by delivery/retry.
+  async reviewIgnored(reviewerId: string, eventId: string, subscriptionId: string, reason: string) {
+    if (!id(eventId) || !/^sub_[A-Za-z0-9_-]{1,150}$/.test(subscriptionId) ||
+        !/^[a-f0-9-]{36}$/i.test(reviewerId) || reason.trim().length < 10 || reason.trim().length > 500)
+      throw new ProductionBillingError("INVALID_INPUT");
+    const payload = { reviewerId, eventId, subscriptionId, reason: reason.trim() };
+    const {notice, binding} = await this.store.call<{notice: ProductionNotice; binding: Binding}>("scope_target", payload);
+    // Resolve only the administrator-selected EXISTING binding. Do not search the account.
+    const subscription = await this.provider.read("subscriptions", binding.subscription_id);
+    if (subscription.customer !== binding.customer_id ||
+        subscription.externalReference !== binding.external_reference ||
+        cents(subscription.value) !== binding.amount_cents ||
+        subscription.billingType !== binding.method || subscription.cycle !== binding.cycle)
+      throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    if (notice.eventType.startsWith("PAYMENT_")) {
+      const payment = await this.provider.read("payments", notice.objectId);
+      if (payment.customer !== binding.customer_id || payment.subscription !== binding.subscription_id ||
+          cents(payment.value) !== binding.amount_cents || payment.billingType !== binding.method)
+        throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    } else if (notice.objectId !== binding.subscription_id) {
+      throw new ProductionBillingError("RECONCILIATION_REQUIRED");
+    }
+    // Atomic audit + requeue only. Normal reconciliation rechecks API under its lease.
+    return this.store.call<{requeued: boolean; rightsChanged: false}>("scope_requeue", payload);
   }
   async retry() {
     const result = await this.store.call<{ eventIds: string[] }>("due", {});

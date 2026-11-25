@@ -12,7 +12,7 @@ Token próprio do webhook → JSON limitado → projeção mínima sem dados pes
 
 - Deduplicação por ID + digest da projeção; conflito retorna 409. Não persiste payload bruto.
 - Vínculo financeiro é separado de Sandbox, com negócio, cliente, assinatura, referência, ciclo, método, valor e consentimento. **Nenhum comando desta entrega cria vínculos.** O processo futuro de contratação/registro exigirá implementação e autorização próprias.
-- Evento sem vínculo fica pendente; não cria contrato por confiar no webhook.
+- Proposta de correção em `production-webhook-isolation.md`: encerrar eventos sem vínculo com motivo durável, sem GET especulativo ou retries infinitos. Exige expansão SQL autorizada antes de ativar o receptor; até sua implantação, o comportamento publicado anterior deixa esses eventos pendentes. Não cria contrato por confiar no webhook.
 - Leituras são realizadas após lease do vínculo. Respostas divergentes, 404, dados incompletos, API indisponível e estados desconhecidos permanecem pendentes para revisão, sem fabricar cancelamento/pagamento. Estorno observado não é revertido por fotografia atrasada; leases antigos não gravam.
 - Falhas ficam duráveis com backoff. Admin legítimo (`getUser` + `admin_access`) pode reconciliar até **dois** eventos por chamada, dentro do orçamento de duração da Function. Sem cron/add-on ou custo adicional contratado.
 - Log estruturado: componente, hash do evento e resultado permitido. Não registra token, chave, IDs financeiros, payload, resposta ou erro bruto. Inbox oferece estado, tentativas, próximo retry e erro sanitizado; auditoria registra observação única por evento. Monitoramento/alertas externos ainda precisam ser definidos.

@@ -100,9 +100,12 @@ export function createProductionRecovery(
       if (access.error || access.data !== true)
         return reply(403, { code: "FORBIDDEN" });
       const body = await boundedJson(request, 1024);
-      if (Object.keys(body).length !== 1 || body.action !== "reconcile")
-        return reply(400, { code: "INVALID_INPUT" });
-      return reply(200, await factory(env).retry());
+      if (Object.keys(body).length === 1 && body.action === "reconcile")
+        return reply(200, await factory(env).retry());
+      if (body.action === "review_ignored" && Object.keys(body).length === 4 &&
+          typeof body.eventId === "string" && typeof body.subscriptionId === "string" && typeof body.reason === "string")
+        return reply(200, await factory(env).reviewIgnored(user.data.user.id, body.eventId, body.subscriptionId, body.reason));
+      return reply(400, { code: "INVALID_INPUT" });
     } catch (error) {
       return failure(error);
     }

@@ -48,3 +48,107 @@ describe('conciliação sem direitos reais',()=>{
 it('reprocessamento exige administrador de verdade e não aceita ação de criação',async()=>{const f=fixture(),client={auth:{getUser:vi.fn(async()=>({data:{user:{id:'fixture-admin'}},error:null}))},rpc:vi.fn(async()=>({data:false,error:null}))};const handler=createProductionRecovery(env,()=>f.service,()=>client as never);const request=()=>new Request('https://pereirao.vercel.app/api/production-billing-recovery',{method:'POST',headers:{authorization:'Bearer fixture-session'},body:JSON.stringify({action:'reconcile'})});expect((await handler(request())).status).toBe(403);expect(f.calls).toHaveLength(0);client.rpc.mockResolvedValueOnce({data:true,error:null});expect((await handler(request())).status).toBe(200);});
 
 it('falha ao obter lease tem observabilidade sem expor identificador ou erro bruto',async()=>{const f=fixture();vi.mocked(f.store.call).mockRejectedValueOnce(Error('private upstream'));await expect(f.service.process('evt_fixture')).rejects.toThrow('UNAVAILABLE');expect(f.log).toHaveBeenCalledWith({component:'production-billing',eventHash:expect.stringMatching(/^[a-f0-9]{16}$/),outcome:'claim_unavailable'});expect(JSON.stringify(f.log.mock.calls)).not.toContain('private upstream');});
+
+// No provider access is permitted before a local consented binding is acquired.
+describe('isolamento de eventos da conta compartilhada',()=>{
+ it.each([
+  {...notice,eventType:'SUBSCRIPTION_UPDATED',objectId:'sub_foreign',subscriptionId:'sub_foreign'},
+  {...notice,subscriptionId:'sub_foreign'},
+  {...notice,subscriptionId:null},
+ ])('encerra aviso sem vínculo sem consultar o Asaas: %j',async unknownNotice=>{
+  const f=fixture();
+  vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});
+   return (command==='claim'?{claimed:true,notice:unknownNotice,leaseToken}:null) as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();
+  expect(f.calls.map(x=>x.command)).toEqual(unknownNotice.subscriptionId?['claim','binding','ignore_unbound']:['claim','ignore_unbound']);
+  expect(f.log).toHaveBeenCalledWith({component:'production-billing',eventHash:expect.any(String),outcome:'ignored_unbound'});
+  expect(JSON.stringify(f.log.mock.calls)).not.toMatch(/sub_foreign|pay_fixture/);
+ });
+ it('falha ao consultar vínculo não é confundida com ausência',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockRejectedValueOnce(new Error('unavailable'));
+  await expect(f.service.process('evt_fixture')).rejects.toThrow('UNAVAILABLE');
+  expect(f.read).not.toHaveBeenCalled();
+  expect(f.calls.some(x=>x.command==='ignore_unbound')).toBe(false);
+ });
+ it('falha de binding mantém evento recuperável sem chamar provider',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});if(command==='claim')return {claimed:true,notice,leaseToken} as never;
+   if(command==='binding')throw new ProductionBillingError('UNAVAILABLE');return {} as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();expect(f.calls.map(x=>x.command)).toEqual(['claim','binding','fail']);
+ });
+ it('falha ao persistir descarte não é registrada como descarte concluído',async()=>{
+  const f=fixture();vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});if(command==='claim')return {claimed:true,notice,leaseToken} as never;
+   if(command==='binding')return null as never;
+   if(command==='ignore_unbound')throw new ProductionBillingError('UNAVAILABLE');return {} as never;
+  });
+  await f.service.process('evt_fixture');
+  expect(f.read).not.toHaveBeenCalled();expect(f.calls.at(-1)).toMatchObject({command:'fail',payload:{code:'UNAVAILABLE'}});
+  expect(JSON.stringify(f.log.mock.calls)).not.toContain('ignored_unbound');
+ });
+});
+
+const reviewer='00000000-0000-4000-8000-00000000f101';
+describe('revisão manual de escopo descartado',()=>{
+ function reviewFixture(unknownNotice={...notice,subscriptionId:null} as typeof notice){
+  const f=fixture();
+  vi.mocked(f.store.call).mockImplementation(async(command,payload)=>{
+   f.calls.push({command,payload});
+   return (command==='scope_target'?{notice:unknownNotice,binding}:{requeued:true,rightsChanged:false}) as never;
+  });return f;
+ }
+ it('com vínculo tardio exige leitura oficial e somente recoloca na fila',async()=>{
+  const f=reviewFixture();
+  expect(await f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent')).toEqual({requeued:true,rightsChanged:false});
+  expect(f.calls.map(x=>x.command)).toEqual(['scope_target','scope_requeue']);
+  expect(f.read.mock.calls).toEqual([['subscriptions','sub_fixture'],['payments','pay_fixture']]);
+  expect(f.log).not.toHaveBeenCalled(); // no reason, actor or financial ID logged
+ });
+ it.each([{subscription:'sub_foreign'},{customer:'cus_foreign'},{value:99},{billingType:'PIX'}])('recusa pagamento divergente %j sem reabrir',async mismatch=>{
+  const f=reviewFixture();f.read.mockImplementation(async(kind)=>kind==='payments'?{...payment,...mismatch}:subscription);
+  await expect(f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent')).rejects.toThrow('RECONCILIATION_REQUIRED');
+  expect(f.calls.map(x=>x.command)).toEqual(['scope_target']);
+ });
+ it('sem vínculo elegível não faz GET',async()=>{
+  const f=reviewFixture();vi.mocked(f.store.call).mockRejectedValueOnce(new ProductionBillingError('INVALID_INPUT'));
+  await expect(f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent')).rejects.toThrow('INVALID_INPUT');
+  expect(f.read).not.toHaveBeenCalled();
+ });
+ it('falha de API mantém o descarte original e pode ser tentada depois',async()=>{
+  const f=reviewFixture();f.read.mockRejectedValueOnce(new ProductionBillingError('UNAVAILABLE'));
+  await expect(f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent')).rejects.toThrow('UNAVAILABLE');
+  expect(f.calls.map(x=>x.command)).toEqual(['scope_target']);
+  await f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent');
+  expect(f.calls.at(-1)?.command).toBe('scope_requeue');
+ });
+ it('assinatura declarada divergente não pode ser reaberta',async()=>{
+  const f=reviewFixture({...notice,eventType:'SUBSCRIPTION_UPDATED',objectId:'sub_foreign'});
+  await expect(f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','Verified local consent')).rejects.toThrow('RECONCILIATION_REQUIRED');
+  expect(f.calls.map(x=>x.command)).toEqual(['scope_target']);
+ });
+ it('justificativa inválida é recusada antes de DB/API',async()=>{
+  const f=reviewFixture();await expect(f.service.reviewIgnored(reviewer,'evt_fixture','sub_fixture','short')).rejects.toThrow('INVALID_INPUT');
+  expect(f.calls).toHaveLength(0);expect(f.read).not.toHaveBeenCalled();
+ });
+ it('rota exige administrador legítimo; usa ID da sessão e ignora identidade enviada',async()=>{
+  const f=reviewFixture(),review=vi.spyOn(f.service,'reviewIgnored').mockResolvedValue({requeued:true,rightsChanged:false});
+  const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:reviewer}},error:null}))},rpc:vi.fn(async()=>({data:false,error:null}))};
+  const handler=createProductionRecovery(env,()=>f.service,()=>client as never);
+  const data={action:'review_ignored',eventId:'evt_fixture',subscriptionId:'sub_fixture',reason:'Verified local consent'};
+  const request=(body:unknown=data,origin='https://pereirao.vercel.app')=>new Request('https://pereirao.vercel.app/api/production-billing-recovery',{method:'POST',headers:{authorization:'Bearer fixture-session',origin},body:JSON.stringify(body)});
+  expect((await handler(request())).status).toBe(403);expect(review).not.toHaveBeenCalled();
+  client.rpc.mockResolvedValue({data:true,error:null});
+  expect((await handler(request({...data,reviewerId:'forged'}))).status).toBe(400);
+  expect((await handler(request(data,'https://foreign.invalid'))).status).toBe(403);
+  expect(review).not.toHaveBeenCalled();
+  expect((await handler(request())).status).toBe(200);
+  expect(review).toHaveBeenCalledWith(reviewer,'evt_fixture','sub_fixture','Verified local consent');
+  expect((await createProductionRecovery({...env,ASAAS_PRODUCTION_WEBHOOK_ENABLED:undefined},()=>f.service,()=>client as never)(request())).status).toBe(403);
+  expect(review).toHaveBeenCalledTimes(1);
+ });
+});
