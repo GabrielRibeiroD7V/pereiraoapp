@@ -117,3 +117,13 @@ it('mostra conversa pessoal sem inventar empresa ou canal WhatsApp',async()=>{
  expect(screen.getByRole('link',{name:'Ver publicações do perfil'})).toHaveAttribute('href',`/pessoas/${businessId}`);
  expect(screen.queryByText('Ver perfil profissional e WhatsApp')).not.toBeInTheDocument();
 });
+
+it('mostra mensagens não lidas na navegação e marca a conversa ao abrir', async () => {
+  const r = fixture();
+  r.unreadCount = vi.fn(async () => 2);
+  r.markRead = vi.fn(async () => {});
+  vi.mocked(r.list).mockResolvedValue([{ ...(await r.list())[0]!, unreadCount: 2 }]);
+  open(`/mensagens/${conversationId}`, r);
+  expect(await screen.findByLabelText('2 mensagens não lidas')).toHaveTextContent('2');
+  await waitFor(() => expect(r.markRead).toHaveBeenCalledWith(conversationId));
+});
