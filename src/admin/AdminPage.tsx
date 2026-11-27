@@ -1,4 +1,7 @@
+import { FinanceArea } from "./FinanceArea";
+import { OneoffPanel } from "./OneoffPanel";
 import { MonetizationPanel } from "./MonetizationPanel";
+
 import { SocialPostBody } from "../social/SocialFeed";
 import type { SocialPost } from "../social/model";
 import { supabase } from "../lib/supabase";
@@ -13,6 +16,9 @@ import {
   FlaskConical,
   Activity,
   ShieldAlert,
+  WalletCards,
+  Menu,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -51,7 +57,10 @@ const sections = [
   ["audit", "Histórico"],
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
+  ["oneoff", "Testes avulsos Asaas"],
   ["monetization", "Monetização"],
+  ["finance", "Financeiro"],
+
 ] as const;
 const sectionIcons = {
   personal_posts: Images,
@@ -63,7 +72,10 @@ const sectionIcons = {
   audit: History,
   subscriptions: CalendarDays,
   sandbox: FlaskConical,
+  oneoff: FlaskConical,
   monetization: Activity,
+  finance: WalletCards,
+
 };
 const states: Record<string, string> = {
   draft: "Rascunho",
@@ -170,6 +182,9 @@ export function AdminPage() {
   );
 }
 function AdminContent() {
+  const [menuOpen,setMenuOpen]=useState(false);
+  const menuRef=useRef<HTMLButtonElement>(null);
+  const financialSections=["finance","subscriptions","sandbox","oneoff","monetization"];
   const billing = useBilling();
   const visibleSections = sections.filter(
     ([id]) => id !== "sandbox" || billing?.available,
@@ -223,16 +238,19 @@ function AdminContent() {
   );
   return (
     <div className="admin-workspace">
-      <nav className="admin-sections" aria-label="Seções administrativas">
-        {visibleSections.map(([id, label]) => {
+      <aside className={`admin-navigation ${menuOpen?'is-open':''}`} onKeyDown={e=>{if(e.key==='Escape'){setMenuOpen(false);menuRef.current?.focus();}}}>
+      <button ref={menuRef} className="admin-menu-toggle" aria-expanded={menuOpen} aria-controls="admin-sections" onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X size={20}/>:<Menu size={20}/>}Menu administrativo</button>
+      <nav id="admin-sections" className="admin-sections" aria-label="Seções administrativas">
+        {visibleSections.filter(([id])=>!financialSections.includes(id)||id==="finance").map(([id, label]) => {
           const Icon = sectionIcons[id];
           return (
             <button
               key={id}
-              className={id === section ? "is-active" : ""}
-              aria-current={id === section ? "page" : undefined}
+              className={id === section || id === "finance" && financialSections.includes(section) ? "is-active" : ""}
+              aria-current={id === section || id === "finance" && financialSections.includes(section) ? "page" : undefined}
               onClick={() => {
                 setSearch("");
+                setMenuOpen(false);
                 setParams({ sec: id });
               }}
             >
@@ -241,7 +259,9 @@ function AdminContent() {
             </button>
           );
         })}
+      <p className="admin-navigation-note">PEREIRÃO · Operação e gestão</p>
       </nav>
+      </aside>
       <div className="admin-content">
         <div className="admin-section-heading">
           <h2>{visibleSections.find(([id]) => id === section)?.[1]}</h2>
@@ -309,8 +329,13 @@ function AdminContent() {
             </button>
           </form>
         )}
-        {section === "monetization" ? (
+        {section === "finance" ? (
+          <FinanceArea revision={revision}/>
+        ) : section === "oneoff" ? (
+          <OneoffPanel key={revision} />
+        ) : section === "monetization" ? (
           <MonetizationPanel key={revision} />
+
         ) : section === "sandbox" ? (
           <SandboxFinancePanel key={revision} />
         ) : section === "subscriptions" ? (
