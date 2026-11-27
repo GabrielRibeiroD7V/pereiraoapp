@@ -4,6 +4,7 @@ import { ArrowLeft, Bell, Send } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ProfileAvatar } from "../components/ProfileAvatar";
 import { useAuth } from "../auth/AuthProvider";
+import { useReturnRevision } from "../hooks/useReturnRevision";
 import { PublicImage } from "../marketplace/PublicImage";
 import { useMessages, useMessageStatus } from "./MessagesProvider";
 import { messageError } from "./repository";
@@ -40,10 +41,17 @@ function PushControl() {
 }
 
 export function MessagesInboxPage() {
+  const { session } = useAuth();
+  return <MessagesInbox key={session?.user.id ?? 'signed-out'} />;
+}
+
+function MessagesInbox() {
   const repository = useMessages(), { session } = useAuth(), { revision } = useMessageStatus();
+  const resume = useReturnRevision();
+  const loadRevision = useRef(0);
   const [items, setItems] = useState<Conversation[]>([]), [loading, setLoading] = useState(true), [error, setError] = useState("");
-  const load = useCallback(async () => { if (!repository) { setLoading(false); return; } try { setItems(await repository.list()); setError(""); } catch (cause) { setError(messageError(cause)); } finally { setLoading(false); } }, [repository]);
-  useEffect(() => { setLoading(true); void load(); const timer = window.setInterval(() => { if (document.visibilityState === "visible") void load(); }, 30000); return () => window.clearInterval(timer); }, [load, session?.user.id, revision]);
+  const load = useCallback(async () => { if (!repository) { setLoading(false); return; } const request = ++loadRevision.current; try { const next = await repository.list(); if(request !== loadRevision.current)return; setItems(next); setError(""); } catch (cause) { if(request === loadRevision.current)setError(messageError(cause)); } finally { if(request === loadRevision.current)setLoading(false); } }, [repository]);
+  useEffect(() => { void load(); const timer = window.setInterval(() => { if (document.visibilityState === "visible") void load(); }, 30000); return () => { loadRevision.current++; window.clearInterval(timer); }; }, [load, session?.user.id, revision, resume]);
   return <div className="messages-page inbox-page">
     <header className="inbox-header"><div><h1>Mensagens</h1><p>Conversas no PEREIRÃO</p></div><PushControl /></header>
     {!repository && <p role="status">Mensagens indisponíveis neste momento.</p>}
@@ -76,7 +84,13 @@ export function NewConversationPage() {
 }
 
 export function ConversationPage() {
+  const { session } = useAuth(), { conversationId = '' } = useParams();
+  return <Conversation key={`${session?.user.id ?? 'signed-out'}:${conversationId}`} />;
+}
+
+function Conversation() {
   const { conversationId = "" } = useParams(), repository = useMessages(), { session } = useAuth(), { revision, refresh } = useMessageStatus();
+  const resume = useReturnRevision();
   const [conversation, setConversation] = useState<Conversation | null>(null), [items, setItems] = useState<ChatMessage[]>([]), [older, setOlder] = useState(false), [loading, setLoading] = useState(true), [pending, setPending] = useState(false), [body, setBody] = useState(""), [error, setError] = useState("");
   const busy = useRef(false), request = useRef<{body:string;id:string}|null>(null), bottom = useRef<HTMLDivElement>(null), loadRevision = useRef(0);
   const load = useCallback(async () => {
@@ -88,15 +102,18 @@ export function ConversationPage() {
       const current = conversations.find(item => item.id === conversationId);
       if (!current) throw { code: "42501" };
       setConversation(current); setItems(page.items); setOlder(page.hasMore); setError("");
-      await repository.markRead?.(conversationId); refresh();
+      if (document.visibilityState !== 'hidden') {
+        await repository.markRead?.(conversationId);
+        if(rev === loadRevision.current)refresh();
+      }
     } catch (cause) { if (rev === loadRevision.current) setError(messageError(cause)); }
     finally { if (rev === loadRevision.current) setLoading(false); }
   }, [repository, conversationId, refresh]);
   useEffect(() => {
-    setLoading(true); void load();
+    void load();
     const timer = window.setInterval(() => { if (document.visibilityState === "visible") void load(); }, 12000);
     return () => { loadRevision.current++; window.clearInterval(timer); };
-  }, [load, session?.user.id, revision]);
+  }, [load, session?.user.id, revision, resume]);
   useEffect(() => { if (typeof bottom.current?.scrollIntoView === "function") bottom.current.scrollIntoView({ block: "end" }); }, [items.length]);
   async function loadOlder() {
     if (!repository || !items[0] || pending) return;
