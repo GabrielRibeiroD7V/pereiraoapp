@@ -93,7 +93,7 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/sandbox_monthly_before.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127200512_sandbox_monthly_1990.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/sandbox_monthly_1990.sql')]);
-  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127204538_business_team_location.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127223630_business_team_location.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/business_team_location.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {

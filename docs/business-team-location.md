@@ -27,7 +27,7 @@ Google Maps: `https://www.google.com/maps/dir/?api=1&destination=...`; Apple Map
 
 Projeto: `yazdjiwaksamizrbqewq` (pereiraoapp, Production).
 
-Arquivo: `20261127204538_business_team_location.sql`.
+Arquivo: `20261127223630_business_team_location.sql`.
 
 SHA-256: `ae73aca731ab4d2670a1bb15cba5b6e5e73693b8603df73d78f0b86e8c816488`.
 
@@ -69,3 +69,7 @@ Antes de conter, exportar definições exatas para restauração; validar que bu
 ## Aceite real ainda pendente
 
 Após autorização e expansão: conta legítima confirmada → escolher empresa correta → salvar integrante consentido → recarregar → sair/entrar → editar/ordenar/ocultar/remover; escolher foto consentida no iPhone e Android → prévia → cancelar sem envio → confirmar → testar recuperação de falha sem perder retrato. Conferir endereço privado, confirmação pública e destino real do Maps. Visitante verifica somente empresa publicada. O WhatsApp individual deve abrir o número consentido, e Mensagem pelo PEREIRÃO deve continuar na caixa central existente. Não enviar mensagem ou publicar empresa para antecipar esse ensaio.
+
+## Aplicação e reconciliação de histórico — 27/11/2026
+
+A migração foi aplicada à produção de forma aditiva com o nome `business_team_location` e registrada no histórico remoto como versão `20261127223630`. O arquivo versionado foi renomeado para `20261127223630_business_team_location.sql` para coincidir com a versão remota. O conteúdo SQL é exatamente o mesmo (blob Git preservado); o executor SQL local referencia o novo caminho. Nenhuma segunda aplicação da migração deve ocorrer. O teste HTTP real de upload e o teste físico continuam pendentes.
