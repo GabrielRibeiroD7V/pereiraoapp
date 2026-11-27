@@ -5,6 +5,7 @@ import { HomeProviders } from "../marketplace/HomeProviders";
 import { SocialFeed } from "../social/SocialFeed";
 import { categories } from "../config/categories";
 import { Link } from "react-router-dom";
+import { AllCategories } from '../categories/AllCategories';
 
 export function HomePage() {
   return (
@@ -34,6 +35,7 @@ export function HomePage() {
               </li>
             ))}
           </ul>
+          <AllCategories />
         </section>
         <section className="home-section" aria-labelledby="featured-title">
           <h2 id="featured-title">Profissionais cadastrados</h2>

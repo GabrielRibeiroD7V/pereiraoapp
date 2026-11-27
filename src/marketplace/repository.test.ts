@@ -18,6 +18,13 @@ function setup(response: unknown = [], status = 200, missingSchema = false) {
 }
 const filters = { query: '', categoryId: '', cityId: '', type: '' as const };
 describe('marketplace com SDK real e HTTP interceptado', () => {
+  it('consulta o catálogo ativo em vez de uma lista fixa no frontend',async()=>{
+    const {repository,calls}=setup([{id:'beleza-estetica',name:'Beleza e Estética'}]);
+    expect(await repository.getCategories()).toEqual([{id:'beleza-estetica',name:'Beleza e Estética'}]);
+    expect(calls[0]!.url.pathname).toBe('/rest/v1/categories');
+    expect(calls[0]!.url.searchParams.get('active')).toBe('eq.true');
+    expect(calls[0]!.url.searchParams.get('select')).toBe('id,name');
+  });
   it('projeta somente colunas públicas, pagina no servidor e descarta campos extras', async () => {
     const { repository, calls } = setup(Array.from({ length: 21 }, (_, index) => ({ ...raw, id: `${index}` })));
     const result = await repository.search(filters, 2);

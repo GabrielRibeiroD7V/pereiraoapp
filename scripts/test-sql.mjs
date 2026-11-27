@@ -27,6 +27,7 @@ try {
   const args = ['-X', '-qAt', '-h', socket, '-p', '54329', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
+    if(file.endsWith('_marketplace_sixteen_categories.sql'))continue; // Depende de offers_unified_search, aplicada abaixo.
     if (file.endsWith('_offers_unified_search.sql') || file.endsWith('_realtime_messaging_and_notifications.sql')) continue;
     if (file.endsWith('_owner_publication.sql') || file.endsWith('_personal_posts.sql') || file.endsWith('_account_conversations.sql')) continue;
     if (file === '20261124163000_initial_free_phase.sql') continue; // Testa atualização após a arquitetura anterior, abaixo.
@@ -79,6 +80,10 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/internal_messages.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/account_conversations.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/notifications.sql')]);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_before.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127185515_marketplace_sixteen_categories.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127185515_marketplace_sixteen_categories.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_sixteen.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

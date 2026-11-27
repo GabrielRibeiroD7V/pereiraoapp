@@ -6,7 +6,8 @@ import { useMarketplace } from "../marketplace/MarketplaceProvider";
 import { usePublicQuery } from "../marketplace/usePublicQuery";
 import { QueryStatus } from "../marketplace/QueryStatus";
 import { Pagination } from "../marketplace/Pagination";
-import { pageNumber } from "../marketplace/validation";
+import { pageNumber, readFilters } from "../marketplace/validation";
+import { useCategoryCatalog } from '../categories/catalog';
 import { formatPrice } from "../work/validation";
 import { useOffers, offersError } from "./OffersProvider";
 import { kindLabel } from "./model";
@@ -24,7 +25,7 @@ export function UnifiedSearch() {
     market = useMarketplace();
   const q = (params.get("q") ?? "").trim().slice(0, 200),
     city = params.get("cidade") ?? "mundo-novo-ms",
-    area = params.get("categoria") ?? "",
+    area = readFilters(params).categoryId,
     kind = (
       tabs.some(([id]) => id === params.get("resultado"))
         ? params.get("resultado")
@@ -35,19 +36,14 @@ export function UnifiedSearch() {
       ? params.get("tipo")!
       : "";
   const [term, setTerm] = useState(q),
-    [cityInput, setCityInput] = useState(city === "todas" ? "" : city);
+    [cityInput, setCityInput] = useState(city === "todas" ? "" : city),
+    [areaInput,setAreaInput]=useState(area);
   useEffect(() => {
     setTerm(q);
     setCityInput(city === "todas" ? "" : city);
-  }, [q, city]);
-  const loadCatalog = useCallback(
-    () =>
-      repository
-        ? repository.catalog()
-        : Promise.reject(new Error("Busca indisponível.")),
-    [repository],
-  );
-  const catalog = usePublicQuery("offer-catalog", loadCatalog);
+    setAreaInput(area);
+  }, [q, city, area]);
+  const catalog = useCategoryCatalog();
   const loadCities = useCallback(
     () => (market ? market.getCities() : Promise.resolve([])),
     [market],
@@ -113,9 +109,10 @@ export function UnifiedSearch() {
         </label>
         <label className="form-field">
           Área
-          <select name="area" defaultValue={area}>
+          <select name="area" value={areaInput} onChange={e=>setAreaInput(e.target.value)}>
             <option value="">Todas as áreas</option>
-            {catalog.data?.areas.map((a) => (
+            {areaInput && !catalog.data?.some(a=>a.id===areaInput) && <option value={areaInput}>{catalog.loading?'Carregando categoria…':'Categoria indisponível'}</option>}
+            {catalog.data?.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
               </option>
@@ -157,7 +154,7 @@ export function UnifiedSearch() {
       </nav>
       <QueryStatus {...state} />
       {(catalog.error || state.error) && (
-        <p role="status">{offersError(catalog.error || state.error)}</p>
+        <p role="status">{offersError(catalog.error || state.error)}{catalog.error && <button type="button" className="text-link" onClick={catalog.retry}>Recarregar categorias</button>}</p>
       )}
       {state.data && (
         <>

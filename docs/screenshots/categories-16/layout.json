@@ -1,0 +1,1854 @@
+{
+  "type": "local Chromium emulation; synthetic catalog; no Supabase; no physical devices",
+  "results": [
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Pintura",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Construção",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Elétrica",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Marcenaria",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Limpeza",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Energia solar",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Hidráulica",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Tecnologia",
+          "width": 288,
+          "height": 48,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 288,
+          "height": 50.375,
+          "left": 16,
+          "right": 304
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 375,
+      "scrollWidth": 375,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Pintura",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Construção",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Elétrica",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Marcenaria",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Limpeza",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Energia solar",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Hidráulica",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Tecnologia",
+          "width": 343,
+          "height": 48,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 343,
+          "height": 50.375,
+          "left": 16,
+          "right": 359
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Pintura",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Construção",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Elétrica",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Marcenaria",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Limpeza",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Energia solar",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Hidráulica",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Tecnologia",
+          "width": 358,
+          "height": 48,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 358,
+          "height": 50.375,
+          "left": 16,
+          "right": 374
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 393,
+      "scrollWidth": 393,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Pintura",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Construção",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Elétrica",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Marcenaria",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Limpeza",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Energia solar",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Hidráulica",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Tecnologia",
+          "width": 361,
+          "height": 48,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 361,
+          "height": 50.375,
+          "left": 16,
+          "right": 377
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 430,
+      "scrollWidth": 430,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Pintura",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Construção",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Elétrica",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Marcenaria",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Limpeza",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Energia solar",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Hidráulica",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Tecnologia",
+          "width": 398,
+          "height": 48,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 398,
+          "height": 50.375,
+          "left": 16,
+          "right": 414
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 356.796875,
+          "height": 50.375,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Pintura",
+          "width": 356.8125,
+          "height": 50.375,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Construção",
+          "width": 356.796875,
+          "height": 50.375,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Elétrica",
+          "width": 356.8125,
+          "height": 50.375,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Marcenaria",
+          "width": 356.796875,
+          "height": 50.375,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Limpeza",
+          "width": 356.8125,
+          "height": 50.375,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 356.796875,
+          "height": 48,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Energia solar",
+          "width": 356.8125,
+          "height": 48,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Hidráulica",
+          "width": 356.796875,
+          "height": 48,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 356.8125,
+          "height": 48,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 356.796875,
+          "height": 48,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Tecnologia",
+          "width": 356.8125,
+          "height": 48,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 356.796875,
+          "height": 50.375,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 356.8125,
+          "height": 50.375,
+          "left": 387.1875,
+          "right": 744
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 356.796875,
+          "height": 50.375,
+          "left": 24,
+          "right": 380.796875
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 356.8125,
+          "height": 50.375,
+          "left": 387.1875,
+          "right": 744
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 1024,
+      "scrollWidth": 1024,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 40,
+          "right": 350.40625
+        },
+        {
+          "name": "Pintura",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 356.796875,
+          "right": 667.203125
+        },
+        {
+          "name": "Construção",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 673.59375,
+          "right": 984
+        },
+        {
+          "name": "Elétrica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 40,
+          "right": 350.40625
+        },
+        {
+          "name": "Marcenaria",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 356.796875,
+          "right": 667.203125
+        },
+        {
+          "name": "Limpeza",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 673.59375,
+          "right": 984
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 40,
+          "right": 350.40625
+        },
+        {
+          "name": "Energia solar",
+          "width": 310.40625,
+          "height": 48,
+          "left": 356.796875,
+          "right": 667.203125
+        },
+        {
+          "name": "Hidráulica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 673.59375,
+          "right": 984
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 310.40625,
+          "height": 48,
+          "left": 40,
+          "right": 350.40625
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 310.40625,
+          "height": 48,
+          "left": 356.796875,
+          "right": 667.203125
+        },
+        {
+          "name": "Tecnologia",
+          "width": 310.40625,
+          "height": 48,
+          "left": 673.59375,
+          "right": 984
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 40,
+          "right": 350.40625
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 356.796875,
+          "right": 667.203125
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 673.59375,
+          "right": 984
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 40,
+          "right": 350.40625
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 1280,
+      "scrollWidth": 1280,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 168,
+          "right": 478.40625
+        },
+        {
+          "name": "Pintura",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 484.796875,
+          "right": 795.203125
+        },
+        {
+          "name": "Construção",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 801.59375,
+          "right": 1112
+        },
+        {
+          "name": "Elétrica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 168,
+          "right": 478.40625
+        },
+        {
+          "name": "Marcenaria",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 484.796875,
+          "right": 795.203125
+        },
+        {
+          "name": "Limpeza",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 801.59375,
+          "right": 1112
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 168,
+          "right": 478.40625
+        },
+        {
+          "name": "Energia solar",
+          "width": 310.40625,
+          "height": 48,
+          "left": 484.796875,
+          "right": 795.203125
+        },
+        {
+          "name": "Hidráulica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 801.59375,
+          "right": 1112
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 310.40625,
+          "height": 48,
+          "left": 168,
+          "right": 478.40625
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 310.40625,
+          "height": 48,
+          "left": 484.796875,
+          "right": 795.203125
+        },
+        {
+          "name": "Tecnologia",
+          "width": 310.40625,
+          "height": 48,
+          "left": 801.59375,
+          "right": 1112
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 168,
+          "right": 478.40625
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 484.796875,
+          "right": 795.203125
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 801.59375,
+          "right": 1112
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 168,
+          "right": 478.40625
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1440,
+      "centerError": 0,
+      "popular": 6,
+      "links": [
+        {
+          "name": "Climatização",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 248,
+          "right": 558.40625
+        },
+        {
+          "name": "Pintura",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 564.796875,
+          "right": 875.203125
+        },
+        {
+          "name": "Construção",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 881.59375,
+          "right": 1192
+        },
+        {
+          "name": "Elétrica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 248,
+          "right": 558.40625
+        },
+        {
+          "name": "Marcenaria",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 564.796875,
+          "right": 875.203125
+        },
+        {
+          "name": "Limpeza",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 881.59375,
+          "right": 1192
+        },
+        {
+          "name": "Segurança eletrônica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 248,
+          "right": 558.40625
+        },
+        {
+          "name": "Energia solar",
+          "width": 310.40625,
+          "height": 48,
+          "left": 564.796875,
+          "right": 875.203125
+        },
+        {
+          "name": "Hidráulica",
+          "width": 310.40625,
+          "height": 48,
+          "left": 881.59375,
+          "right": 1192
+        },
+        {
+          "name": "Eventos e decoração",
+          "width": 310.40625,
+          "height": 48,
+          "left": 248,
+          "right": 558.40625
+        },
+        {
+          "name": "Materiais e ferramentas",
+          "width": 310.40625,
+          "height": 48,
+          "left": 564.796875,
+          "right": 875.203125
+        },
+        {
+          "name": "Tecnologia",
+          "width": 310.40625,
+          "height": 48,
+          "left": 881.59375,
+          "right": 1192
+        },
+        {
+          "name": "Serralheria e Metalúrgica",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 248,
+          "right": 558.40625
+        },
+        {
+          "name": "Mecânica e Automotivo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 564.796875,
+          "right": 875.203125
+        },
+        {
+          "name": "Jardinagem e Paisagismo",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 881.59375,
+          "right": 1192
+        },
+        {
+          "name": "Beleza e Estética",
+          "width": 310.40625,
+          "height": 50.375,
+          "left": 248,
+          "right": 558.40625
+        }
+      ],
+      "tabs": 4,
+      "focused": "SUMMARY"
+    }
+  ],
+  "forms": [
+    {
+      "mode": "registration",
+      "width": 320,
+      "scrollWidth": 320,
+      "labels": [
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Climatização"
+        },
+        {
+          "left": 114.65625,
+          "right": 205.328125,
+          "text": "Pintura"
+        },
+        {
+          "left": 213.328125,
+          "right": 303.984375,
+          "text": "Construção"
+        },
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Elétrica"
+        },
+        {
+          "left": 114.65625,
+          "right": 205.328125,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 213.328125,
+          "right": 303.984375,
+          "text": "Limpeza"
+        },
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 114.65625,
+          "right": 205.328125,
+          "text": "Energia solar"
+        },
+        {
+          "left": 213.328125,
+          "right": 303.984375,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 114.65625,
+          "right": 205.328125,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 213.328125,
+          "right": 303.984375,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 114.65625,
+          "right": 205.328125,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 213.328125,
+          "right": 303.984375,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 16,
+          "right": 106.65625,
+          "text": "Beleza e Estética"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Climatização"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Pintura"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Construção"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Elétrica"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Limpeza"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Energia solar"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Beleza e Estética"
+        }
+      ]
+    },
+    {
+      "mode": "editing",
+      "width": 320,
+      "scrollWidth": 320,
+      "labels": [
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Pintura"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Construção"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Elétrica"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Limpeza"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Energia solar"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 166,
+          "right": 304,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 16,
+          "right": 154,
+          "text": "Beleza e Estética"
+        }
+      ]
+    },
+    {
+      "mode": "registration",
+      "width": 393,
+      "scrollWidth": 393,
+      "labels": [
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Climatização"
+        },
+        {
+          "left": 139,
+          "right": 254,
+          "text": "Pintura"
+        },
+        {
+          "left": 262,
+          "right": 377,
+          "text": "Construção"
+        },
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Elétrica"
+        },
+        {
+          "left": 139,
+          "right": 254,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 262,
+          "right": 377,
+          "text": "Limpeza"
+        },
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 139,
+          "right": 254,
+          "text": "Energia solar"
+        },
+        {
+          "left": 262,
+          "right": 377,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 139,
+          "right": 254,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 262,
+          "right": 377,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 139,
+          "right": 254,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 262,
+          "right": 377,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 16,
+          "right": 131,
+          "text": "Beleza e Estética"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Climatização"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Pintura"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Construção"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Elétrica"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Limpeza"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Energia solar"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Beleza e Estética"
+        }
+      ]
+    },
+    {
+      "mode": "editing",
+      "width": 393,
+      "scrollWidth": 393,
+      "labels": [
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Pintura"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Construção"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Elétrica"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Limpeza"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Energia solar"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 202.5,
+          "right": 377,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 16,
+          "right": 190.5,
+          "text": "Beleza e Estética"
+        }
+      ]
+    },
+    {
+      "mode": "registration",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "labels": [
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Climatização"
+        },
+        {
+          "left": 525.328125,
+          "right": 754.65625,
+          "text": "Pintura"
+        },
+        {
+          "left": 762.65625,
+          "right": 991.984375,
+          "text": "Construção"
+        },
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Elétrica"
+        },
+        {
+          "left": 525.328125,
+          "right": 754.65625,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 762.65625,
+          "right": 991.984375,
+          "text": "Limpeza"
+        },
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 525.328125,
+          "right": 754.65625,
+          "text": "Energia solar"
+        },
+        {
+          "left": 762.65625,
+          "right": 991.984375,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 525.328125,
+          "right": 754.65625,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 762.65625,
+          "right": 991.984375,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 525.328125,
+          "right": 754.65625,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 762.65625,
+          "right": 991.984375,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 288,
+          "right": 517.328125,
+          "text": "Beleza e Estética"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Climatização"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Pintura"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Construção"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Elétrica"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Limpeza"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Energia solar"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 288,
+          "right": 634,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 646,
+          "right": 992,
+          "text": "Beleza e Estética"
+        }
+      ]
+    },
+    {
+      "mode": "editing",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "labels": [
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Pintura"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Construção"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Elétrica"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Marcenaria"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Limpeza"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Segurança eletrônica"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Energia solar"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Hidráulica"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Eventos e decoração"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Materiais e ferramentas"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Tecnologia"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Serralheria e Metalúrgica"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Mecânica e Automotivo"
+        },
+        {
+          "left": 646,
+          "right": 1024,
+          "text": "Jardinagem e Paisagismo"
+        },
+        {
+          "left": 256,
+          "right": 634,
+          "text": "Beleza e Estética"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "blocked": []
+}

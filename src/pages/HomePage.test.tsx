@@ -6,6 +6,7 @@ import { categories } from '../config/categories';
 import { CategoryTile } from '../components/CategoryTile';
 import { ProviderList } from '../components/ProviderList';
 import type { PublicProvider } from '../marketplace/types';
+import { marketplaceFixture } from '../test/marketplaceFixtures';
 
 function CurrentLocation() {
   const { pathname, search } = useLocation();
@@ -13,7 +14,9 @@ function CurrentLocation() {
 }
 
 function open(path = '/') {
-  render(<MemoryRouter initialEntries={[path]}><App /><CurrentLocation /></MemoryRouter>);
+  const market=marketplaceFixture();
+  market.search=async(_filters,page)=>({items:[],page,hasNext:false});
+  render(<MemoryRouter initialEntries={[path]}><App marketplaceRepository={market} /><CurrentLocation /></MemoryRouter>);
 }
 
 describe('Início', () => {
@@ -46,12 +49,13 @@ describe('Início', () => {
     expect(screen.getByLabelText('URL atual')).toHaveTextContent(/^\/buscar$/);
   });
 
-  it.each(categories)('navega para a categoria $name', ({ id, name }) => {
+  it.each(categories)('navega para a categoria $name', async ({ id, name }) => {
     open();
-    expect(within(screen.getByRole('region', { name: 'Categorias populares' })).getAllByRole('link')).toHaveLength(6);
-    fireEvent.click(screen.getByRole('link', { name }));
+    const grid=screen.getByRole('region', { name: 'Categorias populares' }).querySelector('.category-grid')!;
+    expect(within(grid as HTMLElement).getAllByRole('link')).toHaveLength(6);
+    fireEvent.click(within(grid as HTMLElement).getByRole('link', { name }));
     expect(screen.getByLabelText('URL atual')).toHaveTextContent(`/buscar?categoria=${id}`);
-    expect(screen.getByLabelText('Sua busca')).toHaveTextContent(`Categoria: ${name}`);
+    expect(await screen.findByText(name,{selector:'strong'})).toBeInTheDocument();
   });
 
   it('mantém estado vazio sem fotos ou avaliações fictícias e convite com destino real', () => {

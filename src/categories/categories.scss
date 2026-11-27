@@ -1,0 +1,12 @@
+.all-categories {
+  margin-top:.6rem;
+  summary { cursor:pointer; width:fit-content; max-width:100%; min-height:44px; padding:.65rem .2rem; color:var(--color-navy); font-weight:650; }
+  summary:focus-visible, a:focus-visible { outline:3px solid var(--color-primary); outline-offset:3px; }
+  ul { list-style:none; margin:.35rem 0 0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:.4rem; }
+  li { min-width:0; }
+  a { display:flex; align-items:center; gap:.5rem; min-height:48px; padding:.45rem .6rem; border:1px solid var(--color-border); border-radius:.65rem; color:var(--color-navy); background:#fff; text-decoration:none; }
+  img { flex:0 0 48px; object-fit:contain; }
+  span { overflow-wrap:anywhere; }
+  @media(min-width:540px) { ul { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(min-width:1024px) { ul { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+}
