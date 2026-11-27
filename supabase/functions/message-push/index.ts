@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.87.1";
 import webpush from "npm:web-push@3.6.7";
+import { sendToPushService } from "./destination.ts";
 
 type PushRequest = {
   recipientId: string;
@@ -69,14 +70,15 @@ Deno.serve(async (request: Request) => {
   await Promise.all(
     subscriptions.map(async (subscription) => {
       try {
-        await webpush.sendNotification(
+        const sent = await sendToPushService(subscription, (target) => webpush.sendNotification(
           {
-            endpoint: subscription.endpoint,
-            keys: { p256dh: subscription.p256dh, auth: subscription.auth },
+            endpoint: target.endpoint,
+            keys: { p256dh: target.p256dh, auth: target.auth },
           },
           notification,
-        );
-        delivered++;
+          { timeout: 10_000 },
+        ));
+        if (sent) delivered++;
       } catch (cause) {
         const statusCode =
           typeof cause === "object" && cause && "statusCode" in cause
