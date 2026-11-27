@@ -82,6 +82,7 @@ declare b public.businesses;m public.business_team_members;l public.business_loc
 begin
  if not private.can_manage_business(target_business) or not private.public_actor_enabled(auth.uid()) then raise exception 'Confirmed owner required' using errcode='42501';end if;
  select * into b from public.businesses where id=target_business for update;
+ if not private.can_manage_business(target_business) then raise exception 'Owner changed while waiting' using errcode='42501';end if;
  if pg_column_size(payload)>20000 then raise exception 'Payload too large' using errcode='22023';end if;
  if command='location' then
   select * into l from public.business_locations where business_id=b.id;
@@ -118,6 +119,7 @@ begin
     if m.id is null then raise exception 'Member unavailable' using errcode='P0002';end if;
     update public.business_team_members set deleted_at=clock_timestamp(),active=false,photo_path=null,whatsapp='',version=version+1 where id=m.id;
    elsif command='photo_clear' then
+    if m.id is null then raise exception 'Member unavailable' using errcode='P0002';end if;
     update public.business_team_members set photo_path=null,version=version+1 where id=m.id;
    elsif command in ('photo_prepare','photo_finish') then
     if m.id is null or payload->>'consent_version' is distinct from 'team-public-v1' then raise exception 'Member and photo authorization required' using errcode='23514';end if;

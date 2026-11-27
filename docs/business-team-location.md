@@ -29,7 +29,7 @@ Projeto: `yazdjiwaksamizrbqewq` (pereiraoapp, Production).
 
 Arquivo: `20261127204538_business_team_location.sql`.
 
-SHA-256: `e4905f9c0d5cca0c301f33941eb5e3a9b927d4f5a656de6cd769e0c5eef2ae42`.
+SHA-256: `ae73aca731ab4d2670a1bb15cba5b6e5e73693b8603df73d78f0b86e8c816488`.
 
 Expansão:
 - `public.business_team_members`: pessoas apresentadas, separadas das associações de acesso; RLS e SELECT somente do titular. Escritas somente pela RPC validada.
