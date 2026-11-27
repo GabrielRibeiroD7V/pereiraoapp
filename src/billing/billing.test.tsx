@@ -31,7 +31,7 @@ describe("contratação expressa de homologação", () => {
     open(f.repo);
     expect(await screen.findByRole("combobox")).toHaveValue("CREDIT_CARD");
     expect(
-      screen.getByRole("option", { name: "Pix — em validação" }),
+      screen.getByRole("option", { name: "Pix mensal manual — em validação" }),
     ).toBeDisabled();
     expect(
       screen.getByText(/contratação por Pix aguarda homologação/),
@@ -139,8 +139,8 @@ describe("cliente HTTP financeiro", () => {
     });
     expect(JSON.parse(String(init?.body))).toMatchObject({
       accepted: true,
-      amountCents: 1999,
-      termsVersion: "sandbox-v1",
+      amountCents: 1990,
+      termsVersion: "sandbox-v2-1990",
     });
     expect(String(init?.body)).not.toMatch(
       /userId|owner|access_token|creditCard/,

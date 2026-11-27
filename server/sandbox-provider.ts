@@ -1,3 +1,4 @@
+import { MONTHLY_AMOUNT_CENTS } from "../src/billing/plan.ts";
 // Exclusivamente servidor. Nunca importar por src/.
 import { readFile } from "node:fs/promises";
 export type PaymentMethod = "PIX" | "CREDIT_CARD";
@@ -230,7 +231,7 @@ export class SandboxProvider {
       customer,
       billingType: "PIX",
       cycle: "MONTHLY",
-      value: 19.99,
+      value: MONTHLY_AMOUNT_CENTS / 100,
       nextDueDate: dueDate,
       pixAutomaticAuthorizationMode: "DISABLED",
       externalReference: requestId,
@@ -268,7 +269,7 @@ export class SandboxProvider {
             name: "PEREIRAO Sandbox",
             description: "Simulacao, sem cobranca real",
             quantity: 1,
-            value: 19.99,
+            value: MONTHLY_AMOUNT_CENTS / 100,
             imageBase64: (
               await readFile(
                 new URL(
