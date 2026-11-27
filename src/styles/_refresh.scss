@@ -127,3 +127,26 @@
     .main-nav { bottom:max(.25rem,env(safe-area-inset-bottom,0px)); min-height:3.5rem; padding:.25rem; &__link { min-height:2.75rem; } }
   }
 }
+
+// #102: independent public team; never the account-permission membership list.
+.business-presence,.presence-editor { min-width:0; overflow-wrap:anywhere; }
+.business-presence section { padding-block:1rem; border-bottom:1px solid #dbe5f0; }
+.team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1rem;list-style:none;padding:0; }
+.team-grid>li {min-width:0;padding:1rem;border:1px solid #dbe5f0;border-radius:12px;background:white;}
+.team-grid h3 {margin-block:.5rem;font-size:1rem;}
+.team-grid p {font-size:.9rem;white-space:pre-line;}
+.team-portrait {width:72px;height:72px;object-fit:cover;border-radius:50%;}
+.team-portrait--empty {display:grid;place-items:center;color:#075bb4;background:#e6f4ff;font-size:1.5rem;}
+.team-profession {font-weight:600;color:#075bb4;}
+.team-actions {display:flex;flex-wrap:wrap;gap:.4rem;}
+.team-actions button {min-height:44px;border:1px solid #dbe5f0;border-radius:8px;background:#f3f8ff;color:#0b1739;padding:.4rem .6rem;}
+.presence-editor fieldset {display:grid;gap:.75rem;min-width:0;border:1px solid #dbe5f0;border-radius:12px;padding:1rem;}
+.presence-editor select,.presence-editor textarea {width:100%;min-width:0;font:inherit;min-height:44px;}
+.presence-consent {display:flex;align-items:flex-start;gap:.75rem;font-size:.95rem;}
+.presence-consent input {width:22px;height:22px;flex-shrink:0;}
+.team-photo-preview {display:block;max-height:40dvh;width:100%;object-fit:contain;}
+
+.presence-editor .team-actions {display:flex;flex-wrap:wrap;gap:.4rem;border:0;padding:0;}
+.presence-editor .team-actions button {flex:0 1 auto;min-width:44px;}
+.presence-editor textarea {padding:.75rem;border:1px solid #dbe5f0;border-radius:10px;background:#f7faff;color:#0b1739;}
+.business-presence a {display:inline-flex;align-items:center;min-height:44px;}

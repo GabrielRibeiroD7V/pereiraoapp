@@ -1,3 +1,7 @@
+import {AttendanceFields} from '../businessPresence/AttendanceFields';
+import {usePresenceSource} from '../businessPresence/PresenceProvider';
+import {emptyLocation,locationError} from '../businessPresence/model';
+import type {Location} from '../businessPresence/model';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -71,11 +75,14 @@ export function ProfessionalRegistrationPage() {
     }));
     setError(null);
   }
+  const presence=usePresenceSource();
+  const [attendance,setAttendance]=useState<Location|null>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!catalog || !repository || submitting.current) return;
     const message = validateRegistration(input, catalog, step);
     if (message) { setError(message); return; }
+    if(step===3&&attendance&&locationError(attendance)){setError(locationError(attendance));return;}
     if (step < 3) { setStep(step + 1); return; }
     submitting.current = true; setPending(true); setError(null);
     const normalized = normalizeRegistration(input);
@@ -88,6 +95,11 @@ export function ProfessionalRegistrationPage() {
       checkpoint.current = { ...attempt, businessId: id };
       if (!businessId) writeCheckpoint(uid, checkpoint.current);
       await repository.saveDraft(id, normalized);
+      if(attendance){
+        if(!presence)throw new Error('Local de atendimento indisponível; o rascunho foi preservado.');
+        const saved=await presence.read(id,true);
+        await presence.command(id,'location',{...attendance,version:saved.location?.version??0});
+      }
       if (!businessId || readCheckpoint(uid)?.businessId === id) clearCheckpoint(uid);
       navigate('/conta', { replace: true, state: { saved: true, businessId: id } });
     } catch (cause) {
@@ -157,7 +169,8 @@ export function ProfessionalRegistrationPage() {
           <button className="button button--primary" type="submit" disabled={pending || catalog.categories.length === 0 || catalog.cities.length === 0}>{pending ? 'Salvando…' : step === 3 ? 'Salvar rascunho' : 'Continuar'}{step < 3 && <ArrowRight size={17} aria-hidden="true" />}</button>
         </div>
       </form>
-      <p className="registration-assurance"><ShieldCheck size={16} aria-hidden="true" />Ao concluir, seu perfil será salvo como rascunho. A publicação depende de revisão administrativa.</p>
+      {step===3&&catalog&&<section aria-label="Local de atendimento no cadastro"><label className="presence-consent"><input type="checkbox" checked={attendance!==null} onChange={e=>setAttendance(e.target.checked?{...emptyLocation}:null)}/>Configurar local de atendimento agora (opcional)</label>{attendance&&<AttendanceFields location={attendance} catalog={catalog} update={(key,value)=>setAttendance(current=>current?{...current,[key]:value,...(key==='mode'&&value==='home'?{public_address:false}:{})}:current)}/>}<p className="field-help">Você também poderá configurar endereço e equipe na edição do perfil após salvar o rascunho.</p></section>}
+      <p className="registration-assurance"><ShieldCheck size={16} aria-hidden="true" />Ao concluir, seu perfil será salvo como rascunho. Você decide quando colocar o perfil no ar.</p>
     </>}
     <Link className="text-link" to="/conta" state={{ businessId: businessId ?? savedId }}>Voltar ao meu perfil</Link>
   </div>;
