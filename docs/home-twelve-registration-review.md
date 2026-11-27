@@ -42,4 +42,4 @@ O histórico financeiro remoto apresenta IDs de #95/#96 diferentes dos arquivos 
 Aceite de legibilidade da grade 4 × 3 no iPhone físico e Android; novo cadastro/login real e cancelamento em aparelho, com titular consentido. Capturas emuladas e testes locais não equivalem à validação operacional. Nenhum conteúdo, conta, conversa ou cobrança foi criado em produção.
 
 ## Atualização: banners fornecidos pelo titular
-O mesmo PR incorpora o carrossel entre busca e categorias, substituindo o convite textual redundante. [Rotas, comportamento, imagens e validação](home-banner-carousel.md). O total final passou a 943 testes. Sem migração ou alteração de regras financeiras.
+O mesmo PR incorpora o carrossel entre busca e categorias, substituindo o convite textual redundante. [Rotas, comportamento, imagens e validação](home-banner-carousel.md). O total final passou a 945 testes. Sem migração ou alteração de regras financeiras.

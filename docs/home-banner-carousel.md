@@ -25,7 +25,7 @@ O antigo convite textual da Home foi removido por redundância. Categorias, nome
 ## Comportamento
 
 - Rolagem horizontal nativa e snap, deslize nos dois sentidos, indicadores acessíveis de 44px com ponto ativo ciano; setas do teclado e links reais.
-- Alternância a cada 6 segundos, reiniciando o intervalo depois da interação. Pausa com dedo/drag, mouse sobre o banner, foco dentro da região ou documento em segundo plano.
+- Alternância a cada 6 segundos, somente após as duas imagens terminarem de carregar para evitar trocar para uma imagem vazia em rede lenta, reiniciando o intervalo depois da interação. Pausa com dedo/drag, mouse sobre o banner, foco dentro da região ou documento em segundo plano.
 - Movimento reduzido desliga a alternância automática e a rolagem animada, preservando navegação manual.
 - Deslocamento/cancelamento de gesto impede o clique gerado pelo arraste; um novo toque intencional funciona. Drag de mouse também suportado.
 - Timers, listener de visibilidade, listener de preferência e ResizeObserver são limpos na desmontagem.
@@ -33,8 +33,8 @@ O antigo convite textual da Home foi removido por redundância. Categorias, nome
 
 ## Validação executada
 
-- 14 testes novos: clique público, autenticação e retorno, cadastro de conta com `next`, titular sem negócio, negócio em draft/publicado, retomada de negócio lembrado, timers, limpeza, pausa, movimento reduzido, scroll, teclado e prevenção de navegação por swipe.
-- Suite final: **943 testes**, typecheck e build aprovados. SQL/RLS local completo aprovado, sem Docker. Não há comando de lint configurado no package.json; `git diff --check` passou.
+- 16 testes novos: clique público, autenticação e retorno, cadastro de conta com `next`, titular sem negócio, negócio em draft/publicado, retomada de negócio lembrado, timers, limpeza, pausa, movimento reduzido, scroll, teclado e prevenção de navegação por swipe.
+- Suite final: **945 testes**, typecheck e build aprovados. SQL/RLS local completo aprovado, sem Docker. Não há comando de lint configurado no package.json; `git diff --check` passou.
 - Chromium local com viewport/touch emulados: 320/360/375/390/393/430/768/1024/1280/1440px, frame 3:1 sem overflow e grade 4 × 3 preservada. Deslize nativo nos dois sentidos sem navegar, clique real da superfície para Buscar/login e alternância em 6s exercitados pelo motor do navegador.
 - Autenticação/cadastro nos testes usam adapters sintéticos locais. Não houve login, cadastro, gravação de negócio ou publicação em nome do titular.
 - A suíte existente de PWA e navegação permaneceu aprovada. **Safari físico e PWA instalada no iOS/Android não foram executados nesta rodada.** Emulação e mocks não são aceite em aparelho.

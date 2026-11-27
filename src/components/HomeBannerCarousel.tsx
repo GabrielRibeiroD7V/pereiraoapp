@@ -8,8 +8,9 @@ export const homeBanners = [
 ] as const;
 
 export function HomeBannerCarousel() {
-  const track=useRef<HTMLDivElement>(null),position=useRef(0);
+  const track=useRef<HTMLDivElement>(null),position=useRef(0),touchActive=useRef(false);
   const gesture=useRef<{x:number;y:number;scroll:number;mouse:boolean}|null>(null),swiped=useRef(false);
+  const [loaded,setLoaded]=useState([false,false]);
   const [active,setActive]=useState(0),[interacting,setInteracting]=useState(false),[hovered,setHovered]=useState(false),[focused,setFocused]=useState(false);
   const [visible,setVisible]=useState(()=>document.visibilityState!=='hidden');
   const [reduced,setReduced]=useState(()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false);
@@ -25,16 +26,16 @@ export function HomeBannerCarousel() {
     return()=>{media?.removeEventListener?.('change',motion);document.removeEventListener('visibilitychange',visibility);};
   },[]);
   useEffect(()=>{
-    if(reduced||interacting||hovered||focused||!visible)return;
+    if(reduced||interacting||hovered||focused||!visible||!loaded.every(Boolean))return;
     const timer=window.setTimeout(()=>move(position.current+1),6000);
     return()=>window.clearTimeout(timer);
-  },[active,reduced,interacting,hovered,focused,visible,move]);
+  },[active,reduced,interacting,hovered,focused,visible,loaded,move]);
   useEffect(()=>{
     const element=track.current;if(!element||!window.ResizeObserver)return;
     const observer=new ResizeObserver(()=>element.scrollTo?.({left:position.current*element.clientWidth,behavior:'auto'}));
     observer.observe(element);return()=>observer.disconnect();
   },[]);
-  function endGesture(){gesture.current=null;setInteracting(false);}
+  function endGesture(){gesture.current=null;if(!touchActive.current)setInteracting(false);}
   return <section className="home-banners" aria-label="Destaques do PEREIRÃO" aria-roledescription="carrossel"
     onPointerEnter={e=>{if(e.pointerType==='mouse')setHovered(true);}}
     onPointerLeave={e=>{if(e.pointerType==='mouse'){setHovered(false);if(!e.currentTarget.hasPointerCapture?.(e.pointerId))endGesture();}}}
@@ -44,13 +45,16 @@ export function HomeBannerCarousel() {
       onPointerDown={e=>{swiped.current=false;gesture.current={x:e.clientX,y:e.clientY,scroll:e.currentTarget.scrollLeft,mouse:e.pointerType==='mouse'};setInteracting(true);}}
       onPointerMove={e=>{const g=gesture.current;if(!g)return;const dx=e.clientX-g.x,dy=e.clientY-g.y;if(Math.abs(dx)>10||Math.abs(dy)>10)swiped.current=true;
         if(g.mouse&&Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)){e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.scrollLeft=g.scroll-dx;e.preventDefault();}}}
+      onTouchStart={()=>{touchActive.current=true;setInteracting(true);}}
+      onTouchEnd={e=>{touchActive.current=e.touches.length>0;if(!touchActive.current)endGesture();}}
+      onTouchCancel={e=>{swiped.current=true;touchActive.current=e.touches.length>0;if(!touchActive.current)endGesture();}}
       onPointerUp={endGesture} onPointerCancel={()=>{swiped.current=true;endGesture();}}
       onLostPointerCapture={endGesture}
       onClickCapture={e=>{if(swiped.current){e.preventDefault();e.stopPropagation();swiped.current=false;}}}
       onScroll={e=>{const element=e.currentTarget;if(gesture.current&&Math.abs(element.scrollLeft-gesture.current.scroll)>10)swiped.current=true;
         if(element.clientWidth){const next=Math.max(0,Math.min(homeBanners.length-1,Math.round(element.scrollLeft/element.clientWidth)));position.current=next;setActive(next);}}}>
       {homeBanners.map((banner,index)=><Link className="home-banners__slide" key={banner.id} to={banner.to} tabIndex={index===active?0:-1} aria-hidden={index!==active||undefined} draggable={false}>
-        <img src={banner.src} alt={banner.alt} width={2172} height={724} loading="eager" fetchPriority={index===0?'high':'low'} decoding="async" draggable={false}/>
+        <img src={banner.src} alt={banner.alt} width={2172} height={724} loading="eager" fetchPriority={index===0?'high':'low'} decoding="async" draggable={false} onLoad={()=>setLoaded(current=>current[index]?current:current.map((value,i)=>i===index||value))}/>
       </Link>)}
     </div>
     <div className="home-banners__indicators" role="group" aria-label="Escolher banner">
