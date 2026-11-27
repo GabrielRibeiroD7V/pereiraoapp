@@ -1,5 +1,11 @@
 # Monetização sob controle administrativo — 27/11/2026
 
+## Estado atual após a integração do #94
+
+Branch atualizada sobre `e3fce5ef91632ebf248a6d4f629108c3b8773976`. Conflito apenas no runner SQL, resolvido preservando os testes de categorias da main e os testes de política deste PR. Nenhum SQL alterado ou transportado de outro PR.
+
+**Aplicação remota bloqueada por divergência de identificador na main:** o Supabase registra as categorias como `20261127192706_marketplace_sixteen_categories`, mas o arquivo da main usa `20261127185515`. A leitura confirmou SQL integralmente igual ao desconsiderar espaços nas extremidades (SHA-256 `9df00800a675cafc8578f29526f85fd269ee6605c890d2bd369c7d3c6a103688`). O dry-run atual recusa a operação com `DbPushMissingLocalError`; o resultado exclusivo registrado abaixo é histórico, anterior a essa aplicação. Não reparar nem reaplicar o histórico remoto. A reconciliação do nome deve ser uma correção própria da main, fora deste PR financeiro; depois atualizar esta branch e refazer o dry-run exclusivo. O ID desta proposta (`20261127192500`) é anterior ao ID remoto de categorias: depois da reconciliação, verificar também a ordem com a ferramenta versionada, sem renumerar nem usar flags de inclusão silenciosamente.
+
 ## Estado comprovado e escopo desta entrega
 
 Leitura no projeto `yazdjiwaksamizrbqewq`: fase `initial_free`, checkout/enforcement falsos, zero assinaturas e ativações reais. Existe um contrato Sandbox histórico de 1.999 centavos. Não representa receita real. Nenhuma chave foi consultada, copiada ou criada e nenhuma operação Asaas foi executada nesta revisão.
