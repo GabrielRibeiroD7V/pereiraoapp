@@ -14,6 +14,16 @@ describe('admin monetization preparation',()=>{
   expect(screen.getByText('Confirmar alteração')).toBeDisabled();expect(repo.set).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('Cancelar'));expect(repo.set).not.toHaveBeenCalled();
  });
+ it('labels stored payment records without presenting them as Asaas API queries',async()=>{
+  const repo={status:vi.fn(async()=>({...state,productionReconciledPayments:7})),set:vi.fn()};
+  render(<MonetizationPanel repository={repo}/>);
+  const label=await screen.findByText('Pagamentos registrados no banco (Production)');
+  expect(label.parentElement).toHaveTextContent('7');
+  expect(screen.queryByText('Pagamentos consultados no Asaas Production')).not.toBeInTheDocument();
+  expect(screen.getByText(/não mede chamadas ou consultas efetivas/)).toBeVisible();
+  expect(screen.getByText(/não representa ativação operacional completa/)).toBeVisible();
+  expect(repo.set).not.toHaveBeenCalled();
+ });
  it('requires reason and confirmation to disable, passes concurrency revision and does not cancel contracts',async()=>{
   const repo={status:vi.fn(async()=>({...state,newContractsEnabled:true,revision:8,subscriptions:2})),set:vi.fn(async()=>state)};
   render(<MonetizationPanel repository={repo}/>);fireEvent.click(await screen.findByText('Desativar novas contratações'));

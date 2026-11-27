@@ -11,6 +11,7 @@ O provider Production só lê/reconcilia objetos vinculados com consentimento. C
 ## PR: política e painel administrativo
 
 - `/admin?sec=monetization`: estado, R$ 19,90/mês por negócio, contratos reais, vínculos, pendências conciliadas e contratos Sandbox separados. Zeros vêm das tabelas, falha não vira zero.
+- “Pagamentos registrados no banco (Production)” é contagem de linhas persistidas, não quantidade de consultas ou chamadas à API. Não há telemetria de chamadas neste indicador. Controle preparado e bloqueado pela fase gratuita não significa ativação operacional completa.
 - Presença de credenciais é somente configuração declarada pelo servidor, nunca comprovação de autenticação ou entrega. Sem GET automático ao abrir o painel.
 - RPC de decisão exige administrador habilitado, confirmação literal, motivo e revisão esperada. Lock serializa alterações; conflito exige atualizar. Alteração efetiva gera auditoria, repetição sem mudança não gera efeito repetido.
 - Habilitação é recusada durante a fase gratuita ou sem prontidão. Não existe API para declarar prontidão nem para encerrar a fase. O diálogo permite examinar a futura decisão, mas não habilitá-la agora.

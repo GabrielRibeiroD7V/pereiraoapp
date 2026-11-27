@@ -34,9 +34,11 @@ export function MonetizationPanel({repository=monetizationRepository}:{repositor
         <div><dt>Assinaturas reais</dt><dd>{data.subscriptions}</dd></div>
         <div><dt>Vínculos financeiros Production</dt><dd>{data.productionBindings}</dd></div>
         <div><dt>Pagamentos pendentes ou vencidos conciliados</dt><dd>{data.pendingPayments}</dd></div>
-        <div><dt>Pagamentos consultados no Asaas Production</dt><dd>{data.productionReconciledPayments}</dd></div>
+        <div><dt>Pagamentos registrados no banco (Production)</dt><dd>{data.productionReconciledPayments}</dd></div>
         <div><dt>Contratos de teste Sandbox (separados)</dt><dd>{data.sandboxContracts}</dd></div>
       </dl>
+      <p>Este indicador conta registros de pagamentos armazenados; não mede chamadas ou consultas efetivas à API do Asaas.</p>
+      <p>Controle administrativo preparado, mas bloqueado pela fase gratuita. Esta preparação não representa ativação operacional completa da cobrança.</p>
       <p>Asaas Production: {data.integration?.credentialsConfigured ? "credenciais presentes; homologação operacional não comprovada por esta consulta" : "configuração não confirmada"}. Receptor: {data.integration?.webhookEnabled ? "flag ligada; entrega não comprovada" : "desligado"}.</p>
       <p>Cartão recorrente: preparação Sandbox. Pix Automático e Pix mensal manual: homologação pendente. Débito: indisponível até comprovação de suporte.</p>
       <p>Habilitar novas contratações, exigir recursos pagos e executar recorrências consentidas são decisões distintas. Desligar contratações não cancela contratos existentes.</p>
