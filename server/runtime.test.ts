@@ -44,3 +44,17 @@ it.each(['asaas-production-webhook','production-billing-recovery'])('Production 
  const result=spawnSync(process.execPath,['--experimental-strip-types','--input-type=module','-e',code],{cwd:process.cwd(),env:{},encoding:'utf8'});
  expect(result.status,result.stderr).toBe(0);expect(JSON.parse(result.stdout)).toEqual({code:'DISABLED'});
 });
+
+it.each(['admin-oneoff-billing','asaas-admin-oneoff-webhook'])('Oneoff %s initializes without provisioning or activation',name=>{
+ const result=spawnSync(process.execPath,['--experimental-strip-types','--input-type=module','-e',`const {default:api}=await import('./api/${name}.ts');const r=await api.fetch(new Request('https://preview.example/api/${name}'));if(r.status!==405)throw Error('Unexpected status');`],{cwd:process.cwd(),encoding:'utf8',env:{...process.env}});
+ expect(result.status,result.stderr).toBe(0);
+});
+
+it('oneoff API routes precede the SPA fallback',()=>{
+ const v=JSON.parse(readFileSync('vercel.json','utf8'));
+ for(const name of ['admin-oneoff-billing','asaas-admin-oneoff-webhook']){
+  const route=v.rewrites.findIndex((r:{source:string})=>r.source==='/api/'+name);
+  expect(route).toBeGreaterThanOrEqual(0);expect(route).toBeLessThan(v.rewrites.findIndex((r:{source:string})=>r.source==='/(.*)'));
+  expect(v.rewrites[route].destination).toBe('/api/'+name);
+ }
+});

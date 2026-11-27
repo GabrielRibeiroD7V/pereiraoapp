@@ -8,7 +8,8 @@ export type AdminSection =
   | "audit"
   | "detail"
   | "subscriptions"
-  | "sandbox";
+  | "sandbox"
+  | "oneoff";
 export type SandboxState =
   | "connected"
   | "missing"
