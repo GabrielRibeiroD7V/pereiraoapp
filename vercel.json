@@ -8,7 +8,9 @@
     },
     "api/asaas-webhook.ts": { "maxDuration": 60 },
     "api/asaas-production-webhook.ts": { "maxDuration": 60 },
-    "api/production-billing-recovery.ts": { "maxDuration": 60 }
+    "api/production-billing-recovery.ts": { "maxDuration": 60 },
+    "api/admin-oneoff-billing.ts": { "maxDuration": 60 },
+    "api/asaas-admin-oneoff-webhook.ts": { "maxDuration": 60 }
   },
   "rewrites": [
     { "source": "/api/admin", "destination": "/api/admin" },
@@ -16,6 +18,8 @@
     { "source": "/api/asaas-webhook", "destination": "/api/asaas-webhook" },
     { "source": "/api/asaas-production-webhook", "destination": "/api/asaas-production-webhook" },
     { "source": "/api/production-billing-recovery", "destination": "/api/production-billing-recovery" },
+    { "source": "/api/admin-oneoff-billing", "destination": "/api/admin-oneoff-billing" },
+    { "source": "/api/asaas-admin-oneoff-webhook", "destination": "/api/asaas-admin-oneoff-webhook" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
