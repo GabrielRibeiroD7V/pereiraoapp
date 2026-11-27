@@ -34,7 +34,7 @@ Leitura do histórico identificou:
 | admin_monetization_policy | 20261127192500 | 20261127200456 | `0d25295a407dfde4835143a6f39eb21259ffa524400bb71132e832c434eecaad` |
 | sandbox_monthly_1990 | 20261127193500 (somente #96) | 20261127200512 | `dff75de045c21feb43f0532f9ebc35ed8e7e6d8c93c8448e5107493b1c7a7aea` |
 
-Não foi reescrito o histórico nem reaplicado SQL. O dry-run remoto do #99 foi executado com `--dry-run --skip-vault` e bloqueia por versões remotas ausentes localmente. Portanto **não existe lista exclusiva válida nem prontidão para aplicar a migração do #99** até reconciliação auditada desses nomes/IDs. Não se copia a migração do #96 para disfarçar a divergência.
+Não foi reescrito o histórico nem reaplicado SQL. O dry-run remoto do #99 foi executado com `--dry-run --skip-vault` e bloqueia por versões remotas ausentes localmente. Portanto **não existe lista exclusiva válida nem prontidão para aplicar a migração do #99** até reconciliação auditada desses nomes/IDs. Não se copia a migração do #96 para disfarçar a divergência. Após reconciliação auditada, o ID avulso anterior ao último remoto exige revisar a ordem e repetir o dry-run, eventualmente com `--include-all` explícito, aceitando somente esse arquivo.
 
 Único SQL novo do #99: `20261127193736_admin_oneoff_payment_tests.sql`, SHA-256 `7453e3f26ca0ee374191ca7dc4b5746f6280238bbd71e61d4546deb4a8b5620d`, inalterado pelo redesign e ainda proposto. Preflight/fluxo financeiro: [admin-oneoff-tests.md](admin-oneoff-tests.md).
 
@@ -54,6 +54,8 @@ Capturas da interface React real em Chromium local, fontes sintéticas identific
 | Configurações | [393px](../screenshots/admin-finance-pr99/settings-393.png) | [1440px](../screenshots/admin-finance-pr99/settings-1440.png) |
 
 Layout verificado em 320, 375, 393, 430, 768, 1024 e 1440px: seis telas por largura, sem overflow da página, sem erros JavaScript ou acesso ao Supabase. Menu mobile testado com abertura e Escape. Tabelas extensas mantêm rolagem contida. Testes de fontes indisponíveis, navegação sem escrita, separação de ambientes e preço legado incluídos.
+
+Validação final do código: typecheck e build aprovados, 936 testes automatizados e SQL/RLS nativo aprovados. Os checks verify/sql-rls e Vercel também passaram no head de implementação.
 
 ## Pendências de homologação
 

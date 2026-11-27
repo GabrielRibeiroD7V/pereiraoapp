@@ -4,7 +4,7 @@
 
 ## O que foi auditado
 
-Main `99e7de8dd7700b2c58ef287ad8e6ae72751a8f5b` contém #97, reconciliando as categorias com o ID remoto `20261127192706`. Atualizei #95 e #96 sobre essa main sem misturar seus SQLs. Ambos passaram em typecheck, build, testes, SQL/RLS, CI e Preview. No #95, a migração `20261127192500` é anterior ao último ID remoto: o dry-run padrão recusa a ordem; o dry-run versionado **com `--include-all`, somente leitura**, lista exclusivamente esse arquivo. No #96, o dry-run padrão lista exclusivamente `20261127193500`. Nenhum foi aplicado.
+Atualização final: main `fda704d45df99a3b6f4efb54d4c274cc47c9aebc` já contém #95. #96 permanece aberto em `4239884ab33e3ffe7aa53aa2cb5248a6bae9f049`, CI aprovado. Seus SQLs estão aplicados, **não devem ser reaplicados**, mas os IDs do histórico remoto diferem dos arquivos locais, com hashes de conteúdo iguais. O preflight anterior exclusivo ficou superado: veja o bloqueio atual abaixo e [a revisão administrativa](admin-finance-review.md).
 
 Supabase `yazdjiwaksamizrbqewq`, em leitura: `initial_free`, uma isenção preservada, zero assinaturas/ativações/vínculos/eventos/pagamentos Production. Há um contrato Sandbox legado de 1999 centavos; não foi alterado. Chaves existentes não foram lidas/exportadas nem recriadas.
 
@@ -48,22 +48,23 @@ O Preview está protegido. O relay Sandbox existente aponta para o receptor anti
 - Dependências DDL: fundação Auth/admin, `private.sandbox_same_bytes`, digests `sandbox_backend_keys` e `production_billing_keys` já previstos/aplicados. Não depende do esquema proposto de #95/#96; sua revisão/homologação continua pré-requisito operacional do issue. Não aplicar seus SQLs junto por inferência.
 - Cinco tabelas privadas com RLS/revokes; uma função interna de prontidão Sandbox sem permissão pública e uma RPC com prova HMAC. A RPC aceita anon/authenticated apenas como transporte assinado; isso não autoriza o cliente a usá-la sem segredo do servidor.
 - Não modifica tabelas/funções/políticas existentes, negócios, posts, contratos, isenção ou fase gratuita. Ambos os ambientes e suas janelas começam desabilitados, sem operações financeiras.
-- Dry-run remoto versionado desta branch executado: exclusivamente `20261127193736_admin_oneoff_payment_tests.sql`, sem seeds/roles. Histórico com 29 versões, última `20261127192706`; novas tabelas/RPC ausentes; helper de comparação e ambos os digests provisionados confirmados apenas como presença, sem ler valores. Não usar resultado de outra branch como autorização.
+- Dry-run remoto versionado desta branch reexecutado com `--dry-run --skip-vault`: **BLOQUEADO**, `DbPushMissingLocalError`, versões remotas `20261127200456` (admin_monetization_policy) e `20261127200512` (sandbox_monthly_1990). Hashes iguais aos SQLs locais de IDs `20261127192500` / `20261127193500`. Nenhum repair, pull de esquema ou SQL foi executado. Não existe lista exclusiva válida nesta revisão.
+- Antes de aplicação: reconciliar os identificadores em entrega auditada própria; #96 continua separado. Como o ID avulso é anterior aos últimos IDs remotos, reavaliar explicitamente a ordem e eventual `--include-all` em dry-run, exigindo lista de somente este arquivo. Não usar inclusão silenciosa nem reaplicar SQL de #95/#96.
 
 **Contenção:** falha SQL reverte transação. Depois de aplicado, manter dados/auditoria; não apagar tabelas para liberar cota. Desligar criação na flag e fechar janela impede novos checkouts, mas não cancela os já emitidos. Para impedir pagamento de link já emitido é necessário cancelar/expirar no Asaas, mediante decisão específica. Manter recepção/conciliação dos existentes enquanto necessário. Se o receptor apresentar falha, desligar o novo webhook na conta Asaas e a flag específica; preservar inbox para recuperação. Não desabilitar webhooks de outros projetos.
 
 ## Validação e sequência de implantação
 
 1. Rever este PR, SQL/hash e #95/#96. Nenhum merge automático.
-2. Autorizações específicas de cada SQL. Aplicar e validar somente o arquivo autorizado por vez. Não há autorização remota neste issue/prompt.
+2. Resolver a divergência de histórico sem reaplicar #95/#96; obter autorização específica do único SQL avulso após novo dry-run exclusivo. Não há autorização remota nesta rodada.
 3. Preview autorizado com credenciais Sandbox já existentes, novas flags somente nesse ambiente e entrega restrita do webhook. Sem copiar segredos para a máquina/chat.
 4. Administrador legítimo abre janela; escolhe pagador sintético consentido já existente no Sandbox. Autoriza Pix, confirma criação, abre checkout; depois repete crédito. Nunca capturar cartão no app.
 5. Homologar pagamento, webhook entregue de fato, conciliação, deduplicação, falhas/recuperação e estorno/cancelamento pelos procedimentos oficiais. Confirmar que nenhum vínculo/assinatura de profissional foi criado. Registros de teste permanecem auditáveis.
 6. Somente após Sandbox comprovado, revisão do código/CI e decisões específicas: integração, provisionamento/recepção Production, abertura de janela e cada cobrança real. São decisões distintas. Autorizar o PR não autoriza criar pagamento.
 
-**Resultados desta rodada:** 923 testes passaram na suíte completa inicial; uma regressão adicional de projeção segura da resposta foi adicionada e validada na rodada final; typecheck, build, histórico e SQL/RLS passaram. Testes automatizados de provider/serviço/rotas/interface e SQL/RLS em PostgreSQL17 descartável; não são chamadas reais ao Asaas. As fixtures cobrem ambiente, confirmação, duas contas/administradores, preço, quota, nonce/domínio, concorrência/idempotência, timeout, conciliação, não regressão, evento repetido/conflitante, persistência antes do ACK, estorno, cancelamento e isolamento de dados. Nenhum teste físico foi declarado.
+**Resultados finais com o frontend:** 936 testes passaram na suíte completa, incluindo projeção segura, fontes indisponíveis e separação financeira; typecheck, build, histórico e SQL/RLS passaram. Testes automatizados de provider/serviço/rotas/interface e SQL/RLS em PostgreSQL17 descartável; não são chamadas reais ao Asaas. As fixtures cobrem ambiente, confirmação, duas contas/administradores, preço, quota, nonce/domínio, concorrência/idempotência, timeout, conciliação, não regressão, evento repetido/conflitante, persistência antes do ACK, estorno, cancelamento e isolamento de dados. Nenhum teste físico foi declarado.
 
-**Sandbox real: NÃO EXECUTADO.** Bloqueio: migração nova e SQLs #95/#96 ainda propostos/não autorizados; Preview normal não tem a infraestrutura avulsa operacional nem entrega autenticada desse novo webhook. Não contornar usando armazenamento efêmero ou o contrato recorrente legado. Sem essas etapas não declarar o módulo homologado nem apto a cobrar dinheiro real.
+**Sandbox real: NÃO EXECUTADO.** Bloqueio: migração avulsa ainda proposta, histórico divergente e entrega restrita do webhook avulso ainda não configurada; Preview normal não tem a infraestrutura avulsa operacional nem entrega autenticada desse novo webhook. Não contornar usando armazenamento efêmero ou o contrato recorrente legado. Sem essas etapas não declarar o módulo homologado nem apto a cobrar dinheiro real.
 
 ## Fontes oficiais conferidas
 
