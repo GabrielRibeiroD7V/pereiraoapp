@@ -48,3 +48,7 @@ Sem SQL remoto, o Preview normal apresenta as 12 categorias reais; as quatro nov
 ## Contenção
 
 Uma falha na transação reverte os inserts e a definição da função. Depois de aplicada, preservar as categorias/áreas e seus vínculos: não apagar linhas ou desativá-las automaticamente. Conter revertendo o código e, se indispensável, propor restauração da definição anterior de `search_unified` em SQL específico revisado e autorizado. A restauração anterior perde o novo filtro de perfis sem ofertas; não realizar rollback cego. Não há janela planejada de indisponibilidade, nem alteração em mensagens, notificações, pagamentos ou assinaturas.
+
+## Reconciliação de histórico — 27/11/2026
+
+A migração foi aplicada no Supabase de produção com a versão registrada `20261127192706` e o nome `marketplace_sixteen_categories` (mesmo SQL e SHA-256 acima). O arquivo versionado foi renomeado de `20261127185515_marketplace_sixteen_categories.sql` para `20261127192706_marketplace_sixteen_categories.sql` para coincidir com o histórico remoto e impedir reaplicação pelo `db push`. O runner local usa o novo caminho. Esta correção não executa SQL e não altera migrações financeiras.
