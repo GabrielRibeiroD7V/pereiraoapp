@@ -28,10 +28,11 @@ export function OneoffPanel({repository=api}:{repository?:OneoffApi}){
  useEffect(()=>{let live=true;repository.call({action:'status'}).then(r=>{if(live){setData(r.data as Status);setWrite(r.writeEnabled===true);}}).catch(e=>{if(live)setError(errorText(e));});return()=>{live=false;};},[repository]);
  async function action(body:Record<string,unknown>){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await repository.call({...body,environment:data?.environment});await refresh();return true;}catch(e){setError(errorText(e));return false;}finally{lock.current=false;setBusy(false);}}
  const enabled=!!data?.enabledUntil&&new Date(data.enabledUntil).getTime()>Date.now();
- return <section aria-label="Testes avulsos Asaas">
+ return <section className="admin-oneoff" aria-label="Testes avulsos Asaas">
   <h3>Testes avulsos — Pix e cartão de crédito</h3>
   <p>Área administrativa. Dois testes únicos de R$ 19,90, teto total R$ 39,80 por ambiente. Não são assinaturas e não modificam a gratuidade dos profissionais.</p>
   <p>O cartão é informado exclusivamente no checkout hospedado do Asaas. Não informe cartão, CPF ou credenciais neste painel.</p>
+  <div className="finance-metrics"><div><span>Pix avulso planejado</span><strong>R$ 19,90</strong><small>Uma cobrança, sem recorrência</small></div><div><span>Crédito avulso planejado</span><strong>R$ 19,90</strong><small>Checkout hospedado Asaas</small></div><div><span>Teto por ambiente</span><strong>R$ 39,80</strong><small>Não representa valor recebido</small></div></div>
   {error&&<p role="alert">{error}</p>}
   {!data&&!error&&<p role="status">Carregando situação…</p>}
   <button className="button button--secondary" disabled={busy} onClick={()=>void action({action:'status'})}>Atualizar situação</button>
@@ -57,7 +58,7 @@ export function OneoffPanel({repository=api}:{repository?:OneoffApi}){
     </fieldset>
    </form>
    {!data.items.length&&<p>Nenhuma operação registrada neste ambiente.</p>}
-   {data.items.map(r=><article key={r.id} className="form-notice">
+   {data.items.map(r=><article key={r.id} className="form-notice" data-state={r.state}>
     <h4>{r.method==='PIX'?'Pix':'Cartão de crédito'} — {money(r.amount_cents)}</h4><p>{labels[r.state]??'Situação indisponível'}</p>
     {r.diagnostic&&<p role="alert">{r.diagnostic==='mismatch'?'Divergência: resultado exige revisão.':'Conciliação necessária; não repetir criação.'}</p>}
     <dl><dt>Operação</dt><dd style={{overflowWrap:'anywhere'}}>{r.id}</dd><dt>Checkout</dt><dd style={{overflowWrap:'anywhere'}}>{r.checkout_id??'Não confirmado'}</dd><dt>Pagamento</dt><dd style={{overflowWrap:'anywhere'}}>{r.payment_id??'Não identificado'}</dd><dt>Bruto do pagamento</dt><dd>{money(r.payment_id?r.amount_cents:null)}</dd><dt>Líquido observado na API</dt><dd>{money(r.net_cents)}</dd><dt>Descontos/taxas observados (bruto − líquido)</dt><dd>{money(r.net_cents==null?null:r.amount_cents-r.net_cents)}</dd><dt>Estorno confirmado</dt><dd>{money(r.refunded_cents)}</dd></dl>
