@@ -87,10 +87,10 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192706_marketplace_sixteen_categories.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_sixteen.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/registration_matrix.sql')]);
-  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192500_admin_monetization_policy.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127200456_admin_monetization_policy.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_monetization.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/sandbox_monthly_before.sql')],true);
-  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127193500_sandbox_monthly_1990.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127200512_sandbox_monthly_1990.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/sandbox_monthly_1990.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
