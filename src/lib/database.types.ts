@@ -193,6 +193,8 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      admin_monetization_status: { Args: Record<string, never>; Returns: Json };
+      admin_set_new_contracts: { Args: { enabled: boolean; expected_revision: number; confirmation: string; reason: string }; Returns: Json };
       set_post_offer:{Args:{post_kind:string;target_post:string;target_offer?:string;offer_source?:string};Returns:undefined};
       get_post_offer:{Args:{post_kind:string;target_post:string};Returns:Json};
       offers_catalog: {Args: Record<string,never>;Returns:Json};

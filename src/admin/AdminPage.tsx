@@ -1,4 +1,6 @@
 import { OneoffPanel } from "./OneoffPanel";
+import { MonetizationPanel } from "./MonetizationPanel";
+
 import { SocialPostBody } from "../social/SocialFeed";
 import type { SocialPost } from "../social/model";
 import { supabase } from "../lib/supabase";
@@ -52,6 +54,8 @@ const sections = [
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
   ["oneoff", "Testes avulsos Asaas"],
+  ["monetization", "Monetização"],
+
 ] as const;
 const sectionIcons = {
   personal_posts: Images,
@@ -64,6 +68,8 @@ const sectionIcons = {
   subscriptions: CalendarDays,
   sandbox: FlaskConical,
   oneoff: FlaskConical,
+  monetization: Activity,
+
 };
 const states: Record<string, string> = {
   draft: "Rascunho",
@@ -311,6 +317,9 @@ function AdminContent() {
         )}
         {section === "oneoff" ? (
           <OneoffPanel key={revision} />
+        ) : section === "monetization" ? (
+          <MonetizationPanel key={revision} />
+
         ) : section === "sandbox" ? (
           <SandboxFinancePanel key={revision} />
         ) : section === "subscriptions" ? (

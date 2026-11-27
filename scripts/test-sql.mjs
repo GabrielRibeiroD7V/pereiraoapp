@@ -29,6 +29,7 @@ try {
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
     if(file.endsWith('_admin_oneoff_payment_tests.sql'))continue;
     if(file.endsWith('_marketplace_sixteen_categories.sql'))continue; // Depende de offers_unified_search, aplicada abaixo.
+    if (file.endsWith('_admin_monetization_policy.sql')) continue;
     if (file.endsWith('_offers_unified_search.sql') || file.endsWith('_realtime_messaging_and_notifications.sql')) continue;
     if (file.endsWith('_owner_publication.sql') || file.endsWith('_personal_posts.sql') || file.endsWith('_account_conversations.sql')) continue;
     if (file === '20261124163000_initial_free_phase.sql') continue; // Testa atualização após a arquitetura anterior, abaixo.
@@ -85,6 +86,8 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192706_marketplace_sixteen_categories.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192706_marketplace_sixteen_categories.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_sixteen.sql')]);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192500_admin_monetization_policy.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_monetization.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127193736_admin_oneoff_payment_tests.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_oneoff.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');

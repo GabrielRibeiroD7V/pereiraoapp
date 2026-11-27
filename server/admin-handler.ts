@@ -77,6 +77,23 @@ export function createAdminHandler(
       if (!body || typeof body !== "object" || Array.isArray(body))
         return reply(400, { code: "INVALID_INPUT" });
       if (body.action === "access") return reply(200, { data: true });
+      if (body.action === "monetization_status") {
+        const result = await client.rpc("admin_monetization_status");
+        return result.error ? rpcFailure(result.error.code) : reply(200, {data: {
+          ...(result.data as Record<string, unknown>),
+          integration:{credentialsConfigured:!!env.ASAAS_API_KEY_PRODUCTION && !!env.ASAAS_PRODUCTION_WEBHOOK_TOKEN && !!env.BILLING_PRODUCTION_RPC_SIGNING_SECRET,
+          webhookEnabled:env.ASAAS_PRODUCTION_WEBHOOK_ENABLED === "true",validated:false}
+        }});
+      }
+      if (body.action === "monetization_policy") {
+        if (typeof body.enabled !== "boolean" || !Number.isSafeInteger(body.revision) || Number(body.revision)<0 ||
+            body.confirmation !== "CONFIRMAR NOVAS CONTRATACOES" || typeof body.reason !== "string" ||
+            body.reason.trim().length<5 || body.reason.length>500)
+          return reply(400, {code:"INVALID_INPUT"});
+        const result = await client.rpc("admin_set_new_contracts", {enabled:body.enabled,
+          expected_revision:Number(body.revision),confirmation:body.confirmation,reason:body.reason.trim()});
+        return result.error ? rpcFailure(result.error.code) : reply(200, {data:result.data});
+      }
       if (body.action === "sandbox")
         return reply(200, { data: await probe(env.ASSAS_API_KEY_SANDBOX) });
       if (body.action === "query") {

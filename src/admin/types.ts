@@ -9,7 +9,9 @@ export type AdminSection =
   | "detail"
   | "subscriptions"
   | "sandbox"
-  | "oneoff";
+  | "oneoff"
+  | "monetization"
+  | "finance";
 export type SandboxState =
   | "connected"
   | "missing"
