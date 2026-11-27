@@ -1,3 +1,4 @@
+import {PresenceSections} from '../businessPresence/PresenceSections';
 import {OffersSection} from '../offers/OfferViews';
 import {useOffers} from '../offers/OffersProvider';
 import {PostBackLink,validPostOrigin} from '../posts/PostBackLink';
@@ -61,7 +62,7 @@ function ProfileContent({ provider }: { provider: PublicProvider }) {
       {id:'servicos',label:'Serviços',icon:<Wrench size={16} aria-hidden="true" />,content:offers?<OffersSection business={provider.id} kind="service"/>:<PagedSection<PublicService> title="Serviços e preços" load={services} empty="Nenhum serviço disponível no momento." render={(items) => <ul className="public-services">{items.map((item) => <li key={item.id}><div><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div><strong className="service-price">{formatPrice(item.pricing_type, item.price_amount_cents)}</strong></li>)}</ul>} />},
       ...(offers?[{id:'produtos',label:'Produtos',content:<OffersSection business={provider.id} kind="product" featuredOnly/>}]:[]),
       { id: 'sobre', label: 'Sobre', content: <>
-    <PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
+    <PresenceSections businessId={provider.id} company={provider.type === 'empresa'}/><PresentationSections data={presentation.data} company={provider.type === 'empresa'} />
     <PagedSection<City> title="Área de atendimento" load={areas} empty="Consulte o prestador sobre as localidades atendidas." render={(items) => <ul className="public-areas">{items.map((item) => <li key={item.id}>{item.name}/{item.state}</li>)}</ul>} />
       </> },
     ]} />
