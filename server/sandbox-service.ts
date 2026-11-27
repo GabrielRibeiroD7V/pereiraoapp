@@ -1,3 +1,4 @@
+import { MONTHLY_AMOUNT_CENTS, SANDBOX_TERMS_VERSION } from "../src/billing/plan.ts";
 import type {
   PaymentMethod,
   AsaasPayment,
@@ -19,6 +20,7 @@ export interface SandboxContract {
   user_id: string;
   method: PaymentMethod;
   amount_cents: number;
+  consent_version: string;
   first_due_date: string;
   customer_id: string | null;
   subscription_id: string | null;
@@ -165,9 +167,12 @@ export class SandboxService {
       requestId,
       method,
       accepted: true,
-      termsVersion: "sandbox-v1",
-      amountCents: 1999,
+      termsVersion: SANDBOX_TERMS_VERSION,
+      amountCents: MONTHLY_AMOUNT_CENTS,
     });
+    // Não aceitar um consentimento novo para um contrato legado com outro preço.
+    if (reserved.contract.amount_cents !== MONTHLY_AMOUNT_CENTS || reserved.contract.consent_version !== SANDBOX_TERMS_VERSION)
+      throw new BillingError("CONFLICT");
     if (!reserved.claimed) return contractView(reserved.contract);
     let c = reserved.contract;
     try {

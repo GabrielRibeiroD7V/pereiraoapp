@@ -1,3 +1,4 @@
+import { MONTHLY_AMOUNT_CENTS, SANDBOX_TERMS_VERSION } from "../src/billing/plan.ts";
 import { timingSafeEqual } from "node:crypto";
 import { adminClient } from "./admin-handler.ts";
 import { SandboxProvider, ProviderError } from "./sandbox-provider.ts";
@@ -158,8 +159,8 @@ export function createSandboxBillingHandler(
       if (action === "start") {
         if (
           input.accepted !== true ||
-          input.amountCents !== 1999 ||
-          input.termsVersion !== "sandbox-v1" ||
+          input.amountCents !== MONTHLY_AMOUNT_CENTS ||
+          input.termsVersion !== SANDBOX_TERMS_VERSION ||
           !["PIX", "CREDIT_CARD"].includes(String(input.method))
         )
           throw new BillingError("INVALID_INPUT");

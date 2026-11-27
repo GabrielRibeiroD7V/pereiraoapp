@@ -1,3 +1,4 @@
+import { MONTHLY_AMOUNT_CENTS, SANDBOX_TERMS_VERSION } from "./plan";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../lib/database.types";
 import type { SandboxBillingRepository } from "./types";
@@ -36,8 +37,8 @@ export function createBillingRepository(
         requestId,
         method,
         accepted: true,
-        termsVersion: "sandbox-v1",
-        amountCents: 1999,
+        termsVersion: SANDBOX_TERMS_VERSION,
+        amountCents: MONTHLY_AMOUNT_CENTS,
       }),
     reconcile: async (requestId) => {
       await call({ action: "reconcile", requestId });
