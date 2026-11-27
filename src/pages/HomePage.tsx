@@ -1,11 +1,9 @@
 import { ArrowRight, BriefcaseBusiness } from "lucide-react";
-import { CategoryTile } from "../components/CategoryTile";
+import { HomeCategories } from "../categories/HomeCategories";
 import { SearchField } from "../components/SearchField";
 import { HomeProviders } from "../marketplace/HomeProviders";
 import { SocialFeed } from "../social/SocialFeed";
-import { categories } from "../config/categories";
 import { Link } from "react-router-dom";
-import { AllCategories } from '../categories/AllCategories';
 
 export function HomePage() {
   return (
@@ -26,17 +24,7 @@ export function HomePage() {
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </section>
-        <section className="home-section" aria-labelledby="categories-title">
-          <h2 id="categories-title">Categorias populares</h2>
-          <ul className="category-grid">
-            {categories.map((category) => (
-              <li key={category.id}>
-                <CategoryTile category={category} />
-              </li>
-            ))}
-          </ul>
-          <AllCategories />
-        </section>
+        <HomeCategories/>
         <section className="home-section" aria-labelledby="featured-title">
           <h2 id="featured-title">Profissionais cadastrados</h2>
           <HomeProviders />

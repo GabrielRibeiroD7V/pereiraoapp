@@ -44,6 +44,12 @@
   .home-content .category-grid { gap:.625rem; }
   .home-content .category-tile { min-height:5.5rem; padding:.375rem .25rem .5rem; border-radius:1rem; border:1px solid #d6e1f1; background:linear-gradient(145deg,#fff 40%,#eaf0fb); box-shadow:0 4px 10px #18365c0b, inset 0 1px 0 #fff; font-size:clamp(.75rem,3.3vw,.8125rem); font-weight:750; gap:.25rem; transition:background-color var(--motion-fast),border-color var(--motion-fast),box-shadow var(--motion-fast); }
   .home-content .category-tile__visual { height:3.125rem; }
+  .home-content .category-grid--twelve {grid-template-columns:repeat(4,minmax(0,1fr));gap:.375rem;align-items:stretch;}
+  .home-content .category-grid--twelve li {min-width:0;display:flex;}
+  .home-content .category-grid--twelve .category-tile {width:100%;min-height:4.8rem;padding:.3rem .15rem .4rem;gap:.15rem;border-radius:.8rem;font-size:clamp(.65625rem,2.7vw,.75rem);line-height:1.25;font-weight:650;letter-spacing:-.015em;justify-content:flex-start;}
+  .home-content .category-grid--twelve .category-tile__visual {height:2.65rem;width:100%;flex-shrink:0;}
+  .home-content .category-grid--twelve .category-tile>span:last-child {overflow-wrap:anywhere;hyphens:auto;max-width:100%;}
+  @media(min-width:768px){.home-content .category-grid--twelve {max-width:42rem;gap:.65rem;}.home-content .category-grid--twelve .category-tile {font-size:.8125rem;min-height:5rem;}.home-content .category-grid--twelve .category-tile__visual {height:2.75rem;}}
   .home-content .category-tile:hover { border-color:#748caf; box-shadow:0 5px 12px #18365c16; }
   .home-content .content-state { position:relative; overflow:hidden; isolation:isolate; margin:0; padding:1rem; gap:.75rem; background:linear-gradient(145deg,#fff,#edf2fb); border:1px solid #d9e3f1; border-radius:1.25rem; box-shadow:0 6px 18px #18365c0a; }
   .home-content .content-state::after { content:''; position:absolute; z-index:-1; pointer-events:none; width:9rem; height:6rem; right:-5rem; bottom:-5rem; border-radius:50%; background:#d2e1f4; transform:rotate(-20deg); }

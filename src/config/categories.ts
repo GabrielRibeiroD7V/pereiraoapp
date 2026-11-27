@@ -18,6 +18,13 @@ export const categoryById: Readonly<Record<CategoryId, Category>> = Object.fromE
 export function categoryImage(id:string):OfficialCategoryImage|null {
   const popular=categories.find(item=>item.id===id);
   if(popular)return popular.officialImage;
-  if(!['serralheria-metalurgica','mecanica-automotivo','jardinagem-paisagismo','beleza-estetica'].includes(id))return null;
+  if(!['seguranca-eletronica','energia-solar','hidraulica','eventos-decoracao','materiais-ferramentas','tecnologia','serralheria-metalurgica','mecanica-automotivo','jardinagem-paisagismo','beleza-estetica'].includes(id))return null;
   return {kind:'official-category',src:`/images/categories/illustrations/${id}.svg`,alt:'',width:160,height:112};
 }
+
+// Ordem editorial de destaque, nunca catálogo de opções: nomes/atividade vêm do Supabase.
+export const homeCategoryIds = [
+  'climatizacao','pintura','construcao','eletrica','marcenaria','limpeza',
+  'seguranca-eletronica','energia-solar','hidraulica','eventos-decoracao',
+  'materiais-ferramentas','tecnologia',
+] as const;

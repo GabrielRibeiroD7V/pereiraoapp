@@ -33,12 +33,12 @@ function repository(): ProfessionalRepository {
 function open(repo: ProfessionalRepository, path = '/conta/profissional/cadastro', auth = gateway()) {
   return render(<MemoryRouter initialEntries={[path]}><App authGateway={auth} professionalRepository={repo} /></MemoryRouter>);
 }
-async function details(company = false) {
+async function details(company = false, categoryName = 'Elétrica') {
   await screen.findByRole('radio', { name: 'Empresa' });
   if (company) fireEvent.click(screen.getByRole('radio', { name: 'Empresa' }));
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
   fireEvent.change(screen.getByLabelText(company ? 'Nome da empresa' : 'Nome profissional'), { target: { value: 'Nome de teste' } });
-  fireEvent.click(screen.getByRole('radio', { name: 'Elétrica' }));
+  fireEvent.click(screen.getByRole('radio', { name: categoryName }));
 }
 async function finalStep() {
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
@@ -323,4 +323,18 @@ describe('normalização e validação', () => {
   it('gera slug estável a partir do sufixo da tentativa', () => {
     expect(createRegistrationSlug('João & Cia', 'abc')).toBe('joao-cia-abc');
   });
+});
+
+// Matriz de interface local; persistência real/RLS são cobertas no PostgreSQL descartável.
+it.each(categoryCatalog16.flatMap(category=>[false,true].map(company=>({category,company}))))('cadastro completo: $category.id / empresa=$company',async({category,company})=>{
+  const repo=repository();repo.getCatalog=vi.fn(async()=>({...catalog,categories:categoryCatalog16}));
+  open(repo);await details(company,category.name);
+  fireEvent.change(screen.getByLabelText('Descrição'),{target:{value:'Descrição local para validação da matriz.'}});
+  const extra=categoryCatalog16.find(c=>c.id!==category.id)!;
+  fireEvent.click(screen.getByRole('checkbox',{name:extra.name}));
+  await finalStep();
+  fireEvent.change(screen.getByLabelText('WhatsApp'),{target:{value:'+55 (67) 99999-1234'}});
+  fireEvent.click(screen.getByRole('button',{name:'Salvar rascunho'}));
+  await waitFor(()=>expect(repo.saveDraft).toHaveBeenCalledWith(bid,expect.objectContaining({categoryId:category.id,type:company?'empresa':'autonomo',additionalCategoryIds:[extra.id]})));
+  expect(repo.createDraft).toHaveBeenCalledOnce();
 });
