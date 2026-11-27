@@ -39,7 +39,8 @@ const contract = (): SandboxContract => ({
   business_id: bid,
   user_id: uid,
   method: "PIX",
-  amount_cents: 1999,
+  amount_cents: 1990,
+  consent_version: "sandbox-v2-1990",
   first_due_date: "2026-11-21",
   customer_id: "cus_local",
   subscription_id: "sub_local",
@@ -52,7 +53,7 @@ const contract = (): SandboxContract => ({
 const subscription = (): AsaasSubscription => ({
   id: "sub_local",
   customer: "cus_local",
-  value: 19.99,
+  value: 19.90,
   cycle: "MONTHLY",
   billingType: "PIX",
   status: "ACTIVE",
@@ -64,7 +65,7 @@ const payment = (): AsaasPayment => ({
   customer: "cus_local",
   subscription: "sub_local",
   billingType: "PIX",
-  value: 19.99,
+  value: 19.90,
   status: "RECEIVED",
   dueDate: "2026-11-21",
   invoiceUrl: "https://sandbox.asaas.com/i/local",
@@ -162,7 +163,7 @@ describe("provider Sandbox: transporte e proteção de segredo", () => {
     expect(init.redirect).toBe("error");
     expect(JSON.parse(String(init.body))).toMatchObject({
       billingType: "PIX",
-      value: 19.99,
+      value: 19.90,
       pixAutomaticAuthorizationMode: "DISABLED",
     });
   });
@@ -185,6 +186,7 @@ describe("provider Sandbox: transporte e proteção de segredo", () => {
       billingTypes: ["CREDIT_CARD"],
       chargeTypes: ["RECURRENT"],
       subscription: { cycle: "MONTHLY" },
+      items: [{value:19.90,quantity:1}],
     });
     expect(JSON.stringify(request.mock.calls)).not.toContain('"creditCard"');
   });
@@ -218,7 +220,7 @@ describe("provider Sandbox: transporte e proteção de segredo", () => {
     "https://user@sandbox.asaas.com/i/a",
     "javascript:alert(1)",
   ])("bloqueia link externo %s", (url) => expect(sandboxLink(url)).toBeNull());
-  it.each([NaN, Infinity, 19.991, -1, "19.99"])(
+  it.each([NaN, Infinity, 19.901, -1, "19.90"])(
     "rejeita valor inválido %s",
     (value) => expect(() => cents(value)).toThrow(),
   );
@@ -286,7 +288,7 @@ describe("conciliação e operações idempotentes", () => {
     await svc(f.store, p).processEvent("evt_refund_after_cancel");
     expect(f.calls.find((x) => x[0] === "apply_payment")?.[1]).toMatchObject({
       status: "REFUNDED",
-      refundedCents: 1999,
+      refundedCents: 1990,
     });
     expect(f.calls.at(-1)?.[1]).toMatchObject({ outcome: "processed" });
   });
@@ -350,7 +352,7 @@ describe("conciliação e operações idempotentes", () => {
     expect(
       paymentSnapshot({ ...payment(), status: "REFUNDED" }, contract())
         .refundedCents,
-    ).toBe(1999);
+    ).toBe(1990);
   });
   it("replay de contratação não acessa fornecedor", async () => {
     const p = providerFixture(),
@@ -391,7 +393,7 @@ describe("conciliação e operações idempotentes", () => {
     await svc(f.store, p).processEvent("evt_old");
     expect(f.calls.find((x) => x[0] === "apply_payment")?.[1]).toMatchObject({
       status: "REFUNDED",
-      refundedCents: 1999,
+      refundedCents: 1990,
       leaseToken: uid,
     });
     expect(f.calls.at(-1)).toEqual([
@@ -523,8 +525,8 @@ describe("rotas: sessão normal, webhook e modo Preview", () => {
         requestId: rid,
         method: "PIX",
         accepted: true,
-        amountCents: 1999,
-        termsVersion: "sandbox-v1",
+        amountCents: 1990,
+        termsVersion: "sandbox-v2-1990",
       }),
     );
     expect(r.status).toBe(503);
@@ -621,8 +623,8 @@ describe("rotas: sessão normal, webhook e modo Preview", () => {
       requestId: rid,
       method: "PIX",
       accepted: true,
-      amountCents: 1999,
-      termsVersion: "sandbox-v1",
+      amountCents: 1990,
+      termsVersion: "sandbox-v2-1990",
     };
     expect((await h(req({ ...input, accepted: false }))).status).toBe(400);
     const r = await h(req(input));
@@ -717,4 +719,18 @@ describe("rotas: sessão normal, webhook e modo Preview", () => {
     );
     expect(JSON.stringify(args)).not.toContain(secret);
   });
+});
+
+
+describe("price migration preserves historic reconciliation",()=>{
+ it("rejects old consent returned by a reservation before contacting Asaas",async()=>{
+  const f=storeFixture({reserve:{claimed:false,contract:{...contract(),amount_cents:1999,consent_version:"sandbox-v1"}}}),p=providerFixture();
+  await expect(svc(f.store,p).start(uid,bid,rid,"CREDIT_CARD","https://preview.example/conta")).rejects.toMatchObject({code:"CONFLICT"});
+  expect(p.createCardCheckout).not.toHaveBeenCalled();expect(p.createCustomer).not.toHaveBeenCalled();
+ });
+ it("does not reprice a legacy payment on reconciliation",()=>{
+  const legacy={...contract(),amount_cents:1999,consent_version:"sandbox-v1"};
+  const result=paymentSnapshot({...payment(),value:19.99},legacy);
+  expect(result.amountCents).toBe(1999);
+ });
 });

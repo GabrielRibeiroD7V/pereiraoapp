@@ -106,7 +106,7 @@ export function SandboxBillingPage() {
                 </strong>
                 <p>
                   {c.method === "PIX"
-                    ? "Pix por cobrança mensal"
+                    ? "Pix mensal manual"
                     : "Cartão de crédito no Asaas"}{" "}
                   · {money(c.amountCents)}/mês — valor de teste
                 </p>
@@ -156,7 +156,7 @@ export function SandboxBillingPage() {
             >
               <h2>Simular plano profissional</h2>
               <p>
-                R$ 19,99/mês é um valor de homologação, sem oferta comercial
+                R$ 19,90/mês é um valor de homologação, sem oferta comercial
                 aprovada.
               </p>
               <label className="form-field">
@@ -169,7 +169,7 @@ export function SandboxBillingPage() {
                   }
                 >
                   <option value="PIX" disabled={!repo.pixAvailable}>
-                    Pix —{" "}
+                    Pix mensal manual —{" "}
                     {repo.pixAvailable
                       ? "pagamento a cada cobrança"
                       : "em validação"}
@@ -195,7 +195,7 @@ export function SandboxBillingPage() {
                   disabled={pending}
                   onChange={(e) => setAccepted(e.target.checked)}
                 />
-                Aceito simular a assinatura mensal por R$ 19,99 no Sandbox.
+                Aceito simular a assinatura mensal por R$ 19,90 no Sandbox.
                 Entendo que não é uma contratação real.
               </label>
               <button

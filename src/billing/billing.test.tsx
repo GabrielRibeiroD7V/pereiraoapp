@@ -139,8 +139,8 @@ describe("cliente HTTP financeiro", () => {
     });
     expect(JSON.parse(String(init?.body))).toMatchObject({
       accepted: true,
-      amountCents: 1999,
-      termsVersion: "sandbox-v1",
+      amountCents: 1990,
+      termsVersion: "sandbox-v2-1990",
     });
     expect(String(init?.body)).not.toMatch(
       /userId|owner|access_token|creditCard/,
