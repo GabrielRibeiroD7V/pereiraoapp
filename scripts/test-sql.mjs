@@ -1,7 +1,7 @@
 import {testFreeContainment} from './test-free-containment.mjs';
 import { testSpecialtyConcurrency } from './test-specialty-concurrency.mjs';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, readdirSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -66,6 +66,19 @@ try {
   }
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261125183249_offers_unified_search.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/offers_unified_search.sql')]);
+  // A migração depende de account_conversations. Antes ela era pulada e nunca aplicada.
+  // Infraestrutura de transporte é simulada explicitamente, sem rede ou segredos reais.
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/notifications_bootstrap.sql')],true);
+  const notificationSql=readFileSync('supabase/migrations/20261125131147_realtime_messaging_and_notifications.sql','utf8');
+  const extensionLine='create extension if not exists pg_net with schema extensions;';
+  if(notificationSql.split(extensionLine).length!==2)throw new Error('Revisar preparação local da extensão pg_net.');
+  const localNotificationSql=join(root,'notifications.sql');
+  writeFileSync(localNotificationSql,notificationSql.replace(extensionLine,'-- pg_net simulado no bootstrap local, sem HTTP.'));
+  run(executable('psql'), [...args,'-f',localNotificationSql],true);
+  // Revalidar os dois canais porque a migração substitui funções de ambos.
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/internal_messages.sql')]);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/account_conversations.sql')]);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/notifications.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);
