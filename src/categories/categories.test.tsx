@@ -20,10 +20,10 @@ function open(path:string, unified=false, delayed=false) {
   return {market,offers,resolve:(value:typeof catalog)=>resolve(value)};
 }
 
-it('mantém seis populares e revela as 16 em lista compacta ao abrir',async()=>{
+it('mantém doze populares e revela as 16 em lista compacta ao abrir',async()=>{
   open('/');
   const region=screen.getByRole('region',{name:'Categorias populares'});
-  expect(region.querySelectorAll('.category-tile')).toHaveLength(6);
+  await waitFor(()=>expect(region.querySelectorAll('.category-tile')).toHaveLength(12));
   const details=region.querySelector('details')!;
   expect(details).not.toHaveAttribute('open');
   fireEvent.click(within(region).getByText('Ver todas as categorias'));

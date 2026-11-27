@@ -166,7 +166,7 @@ describe('experiência pessoal e profissional', () => {
 
   it('oferece primeiro cadastro sem criar registros ao abrir o espaço vazio', async () => {
     const { repository } = setup('/conta/profissional', []);
-    expect(await screen.findByRole('link', { name: 'Cadastrar meu negócio' })).toBeInTheDocument();
+    expect(await screen.findByRole('radio', { name: 'Empresa' })).toBeInTheDocument();
     expect(repository.createDraft).not.toHaveBeenCalled();
     expect(repository.saveDraft).not.toHaveBeenCalled();
   });

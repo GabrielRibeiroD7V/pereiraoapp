@@ -1,0 +1,22 @@
+[
+  {
+    "filename": "encontrar-profissionais.webp",
+    "source": "Imagem anexada pelo titular: Profissionais para tudo na sua região.png",
+    "width": 2172,
+    "height": 724,
+    "conversion": "WebP sem perdas, sem recorte, redimensionamento ou sobreposição; pixels decodificados comparados com o PNG original",
+    "bytes": 1447942,
+    "sha256": "67676d5cefa29ab17443996ed9b4d251d9b41308a1f06bd79e47630a621793ae",
+    "decodedPixelsSha256": "38be32fa7a50b709f50fe9d94f5cbc998488292ee6b1adfaa0a36f97034d9726"
+  },
+  {
+    "filename": "divulgar-negocio.webp",
+    "source": "Imagem anexada pelo titular: Profissional em destaque no Pereirão.png",
+    "width": 2172,
+    "height": 724,
+    "conversion": "WebP sem perdas, sem recorte, redimensionamento ou sobreposição; pixels decodificados comparados com o PNG original",
+    "bytes": 1293052,
+    "sha256": "d4362ea2b4128071cfd61a00bbcfdca242069cd8809476ed57d023c2d17da9f7",
+    "decodedPixelsSha256": "f511f4268fd87126da4f0a57aef45078e31b2602c218bb21069f9f98e34b97c9"
+  }
+]

@@ -22,7 +22,7 @@ export function CategoryTile({ category }: { category: Category }) {
             loading="lazy" decoding="async" onError={() => setFailedImage(image.src)} />
         ) : <Icon size={28} strokeWidth={1.8} />}
       </span>
-      <span>{category.name}</span>
+      <span lang="pt-BR">{category.name}</span>
     </Link>
   );
 }
