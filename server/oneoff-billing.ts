@@ -20,8 +20,8 @@ export function oneoffConfig(env:Env,environment:Environment){
  if(environment==="production" && ["CHECKOUT","SUBSCRIPTIONS","CHARGES","ENFORCEMENT","PIX"].some(k=>env["ASAAS_PRODUCTION_"+k+"_ENABLED"]!==undefined && env["ASAAS_PRODUCTION_"+k+"_ENABLED"]!=="false"))throw new OneoffError("DISABLED");
  const prod=environment==="production",key=prod?env.ASAAS_API_KEY_PRODUCTION:env.ASSAS_API_KEY_SANDBOX,
   signing=prod?env.BILLING_PRODUCTION_RPC_SIGNING_SECRET:env.BILLING_RPC_SIGNING_SECRET,
-  token=prod?env.ASAAS_PRODUCTION_WEBHOOK_TOKEN:env.ASAAS_SANDBOX_WEBHOOK_TOKEN;
- if(token && token===signing || prod && token && token===env.ASAAS_SANDBOX_WEBHOOK_TOKEN || !key || !(prod?/^\$aact_prod_[\x21-\x7e]{1,2048}$/:/^\$aact_hmlg_[\x21-\x7e]{1,2048}$/).test(key) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) || prod && (signing===env.BILLING_RPC_SIGNING_SECRET || key===env.ASSAS_API_KEY_SANDBOX)) throw new OneoffError("SETUP_REQUIRED");
+  token=prod?env.ASAAS_PRODUCTION_WEBHOOK_TOKEN:env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN;
+ if(token && token===signing || token && token===env.ASAAS_SANDBOX_WEBHOOK_TOKEN || prod && token && token===env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN || !key || !(prod?/^\$aact_prod_[\x21-\x7e]{1,2048}$/:/^\$aact_hmlg_[\x21-\x7e]{1,2048}$/).test(key) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) || prod && (signing===env.BILLING_RPC_SIGNING_SECRET || key===env.ASSAS_API_KEY_SANDBOX)) throw new OneoffError("SETUP_REQUIRED");
  return {key,signing,token,host:prod?"https://api.asaas.com/v3":"https://api-sandbox.asaas.com/v3",
   writeEnabled:env[prod?"ASAAS_ADMIN_ONEOFF_PRODUCTION_ENABLED":"ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED"]==="true",
   webhookEnabled:env.ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED==="true" && !!token && /^[A-Za-z0-9_-]{32,200}$/.test(token)};
