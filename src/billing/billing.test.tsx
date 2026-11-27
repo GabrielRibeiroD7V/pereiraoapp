@@ -31,7 +31,7 @@ describe("contratação expressa de homologação", () => {
     open(f.repo);
     expect(await screen.findByRole("combobox")).toHaveValue("CREDIT_CARD");
     expect(
-      screen.getByRole("option", { name: "Pix — em validação" }),
+      screen.getByRole("option", { name: "Pix mensal manual — em validação" }),
     ).toBeDisabled();
     expect(
       screen.getByText(/contratação por Pix aguarda homologação/),
