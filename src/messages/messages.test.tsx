@@ -127,3 +127,32 @@ it('mostra mensagens não lidas na navegação e marca a conversa ao abrir', asy
   expect(await screen.findByLabelText('2 mensagens não lidas')).toHaveTextContent('2');
   await waitFor(() => expect(r.markRead).toHaveBeenCalledWith(conversationId));
 });
+
+it('não marca como lida uma resposta que chegou enquanto a aba estava oculta', async () => {
+  const r = fixture();
+  r.markRead = vi.fn(async () => {});
+  let finish!: (page: Awaited<ReturnType<MessageRepository['messages']>>) => void;
+  const page = await r.messages(conversationId);
+  vi.mocked(r.messages).mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+  try {
+    open(`/mensagens/${conversationId}`, r);
+    await waitFor(() => expect(finish).toBeDefined());
+    visibility.mockReturnValue('hidden');
+    const { act } = await import('@testing-library/react');
+    await act(async () => finish(page));
+    expect(r.markRead).not.toHaveBeenCalled();
+    vi.mocked(r.messages).mockResolvedValue(page);
+    visibility.mockReturnValue('visible');
+    fireEvent(document, new Event('visibilitychange'));
+    await waitFor(() => expect(r.markRead).toHaveBeenCalledWith(conversationId));
+  } finally { visibility.mockRestore(); }
+});
+
+it('reconsulta a caixa ao voltar online sem esperar o polling', async () => {
+  const r = open('/mensagens');
+  await screen.findByText('Pintor');
+  vi.mocked(r.list).mockClear();
+  fireEvent(window, new Event('online'));
+  await waitFor(() => expect(r.list).toHaveBeenCalled());
+});
