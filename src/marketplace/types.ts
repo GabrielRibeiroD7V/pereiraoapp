@@ -12,6 +12,7 @@ export interface PublicPhoto { id: string; caption: string | null; storagePath: 
 export interface PublicPage<T> { items: T[]; page: number; hasNext: boolean }
 export interface PublicFilters { query: string; categoryId: string; cityId: string; type: '' | ProviderType }
 export interface PublicMarketplace {
+  getCategories(signal?: AbortSignal): Promise<{ id: string; name: string }[]>;
   search(filters: PublicFilters, page: number, signal?: AbortSignal): Promise<PublicPage<PublicProvider>>;
   getProvider(slug: string, signal?: AbortSignal): Promise<PublicProvider | null>;
   getCities(signal?: AbortSignal): Promise<City[]>;

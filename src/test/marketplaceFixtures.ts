@@ -1,4 +1,5 @@
 import type { PublicMarketplace, PublicProvider } from '../marketplace/types';
+import { categories } from '../config/categories';
 // Somente testes/homologação local. Não representa prestador real e não é importado pelo app.
 export const publicProviderFixture: PublicProvider = {
   id: '00000000-0000-4000-8000-000000000001', slug: 'prestador-simulado', name: 'Prestador simulado', type: 'autonomo',
@@ -9,6 +10,7 @@ export const photoFixtureId = '00000000-0000-4000-8000-000000000101';
 export function marketplaceFixture(): PublicMarketplace {
   const p = publicProviderFixture;
   return {
+    getCategories: async () => categories.map(({id,name})=>({id,name})),
     search: async (_filters, page) => ({ items: page === 1 ? [p, { ...p, id: '00000000-0000-4000-8000-000000000002', slug: 'empresa-simulada', name: 'Empresa simulada', type: 'empresa' }] : [], page, hasNext: page === 1 }),
     getProvider: async (slug) => slug === p.slug ? p : null,
     getCities: async () => [p.city],

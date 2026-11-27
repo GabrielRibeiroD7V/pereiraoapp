@@ -1,4 +1,3 @@
-import { categories } from '../config/categories';
 import type { PublicFilters } from './types';
 export {validId,imagePath} from '../lib/mediaPath';
 
@@ -9,7 +8,9 @@ export function readFilters(params: URLSearchParams): PublicFilters {
   const city = params.get('cidade');
   const type = params.get('tipo');
   return { query: (params.get('q') ?? '').trim().slice(0, 200),
-    categoryId: categories.some((item) => item.id === category) ? category : '',
+    // Valida sintaxe; o catálogo ativo e a consulta ao banco decidem a existência.
+    // Nunca transforma um ID legítimo novo em uma busca sem filtro.
+    categoryId: validSlug(category) ? category : '',
     cityId: city === 'todas' ? '' : city && validSlug(city) ? city : 'mundo-novo-ms',
     type: type === 'autonomo' || type === 'empresa' ? type : '' };
 }

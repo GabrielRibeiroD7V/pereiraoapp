@@ -8,6 +8,7 @@ import type { ProfessionalCatalog, ProfessionalRepository, RegistrationInput } f
 import { emptyRegistration, normalizeRegistration, validateRegistration, createRegistrationSlug } from './validation';
 import { readCheckpoint, writeCheckpoint } from './checkpoint';
 import { regionalCityFixture } from '../test/regionalCities';
+import { categoryCatalog16 } from '../test/categoryCatalog';
 
 const bid = '00000000-0000-0000-0000-000000000004';
 const catalog: ProfessionalCatalog = {
@@ -44,6 +45,34 @@ async function finalStep() {
   await screen.findByLabelText('WhatsApp');
 }
 beforeEach(() => { sessionStorage.clear(); });
+
+it.each([false,true])('oferece as 16 categorias no primeiro cadastro (empresa=%s)',async company=>{
+  const repo=repository();
+  repo.getCatalog=vi.fn(async()=>({...catalog,categories:categoryCatalog16}));
+  open(repo);await details(company);
+  for(const category of categoryCatalog16){
+    fireEvent.click(screen.getByRole('radio',{name:category.name}));
+    expect(screen.getByRole('radio',{name:category.name})).toBeChecked();
+  }
+  fireEvent.click(screen.getByRole('radio',{name:'Climatização'}));
+  for(const category of categoryCatalog16.filter(c=>c.id!=='climatizacao'))expect(screen.getByRole('checkbox',{name:category.name})).toBeInTheDocument();
+  expect(repo.createDraft).not.toHaveBeenCalled();
+});
+
+it('edita categoria nova e adicionais com dados salvos, sem recriar o negócio',async()=>{
+  const repo=repository();
+  repo.getCatalog=vi.fn(async()=>({...catalog,categories:categoryCatalog16}));
+  repo.getEditable=vi.fn(async()=>({business:{...business,category_id:'serralheria-metalurgica'},input:{...input,categoryId:'serralheria-metalurgica',additionalCategoryIds:['jardinagem-paisagismo']}}));
+  open(repo,`/conta/profissional/${bid}/editar`);
+  const primary=await screen.findByLabelText('Categoria principal');
+  expect(primary).toHaveValue('serralheria-metalurgica');
+  expect(screen.getByRole('checkbox',{name:'Jardinagem e Paisagismo'})).toBeChecked();
+  fireEvent.change(primary,{target:{value:'mecanica-automotivo'}});
+  fireEvent.click(screen.getByRole('checkbox',{name:'Beleza e Estética'}));
+  fireEvent.click(screen.getByRole('button',{name:'Salvar alterações'}));
+  await waitFor(()=>expect(repo.saveDraft).toHaveBeenCalledWith(bid,expect.objectContaining({categoryId:'mecanica-automotivo',additionalCategoryIds:expect.arrayContaining(['jardinagem-paisagismo','beleza-estetica'])})));
+  expect(repo.createDraft).not.toHaveBeenCalled();
+});
 
 describe('cadastro progressivo e espaço profissional', () => {
   it('abre edição existente sem voltar ao cadastro em etapas', async () => {

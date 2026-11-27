@@ -29,6 +29,11 @@ function empty<T>(value: number): PublicPage<T> { return { items: [], page: page
 export function createPublicMarketplace(client: SupabaseClient<Database>): PublicMarketplace {
   let searchReady = true, profileSearchReady = true, relationReady = true, profileReady = true;
   return {
+    async getCategories(signal) {
+      const {data,error}=await client.from('categories').select('id,name').eq('active',true).order('name').abortSignal(signal ?? new AbortController().signal);
+      if(error)throw error;
+      return data ?? [];
+    },
     async search(filters, value, signal) {
       const current = pageNumber(value), term = searchTerm(filters.query);
       if (filters.query && !term) return empty(current);

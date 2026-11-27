@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { imagePath, instagramLink, pageNumber, readFilters, searchTerm, validSlug, whatsappLink } from './validation';
 describe('parâmetros e contatos públicos', () => {
   it('limita termos, páginas e enums da URL sem aceitar operadores como filtros', () => {
-    expect(readFilters(new URLSearchParams('q=%20pintura%20&categoria=nao-existe&tipo=admin&cidade=../secret'))).toEqual({ query: 'pintura', categoryId: '', cityId: 'mundo-novo-ms', type: '' });
+    expect(readFilters(new URLSearchParams('q=%20pintura%20&categoria=nao-existe&tipo=admin&cidade=../secret'))).toEqual({ query: 'pintura', categoryId: 'nao-existe', cityId: 'mundo-novo-ms', type: '' });
+    expect(readFilters(new URLSearchParams('categoria=../privado')).categoryId).toBe('');
     expect(readFilters(new URLSearchParams('cidade=todas&tipo=empresa&categoria=eletrica')).cityId).toBe('');
     expect(readFilters(new URLSearchParams({ q: 'a'.repeat(300) })).query).toHaveLength(200);
     expect([pageNumber('-8'), pageNumber('2.9'), pageNumber('Infinity')]).toEqual([1, 2, 1000]);

@@ -1,4 +1,4 @@
-import type { Category, CategoryId } from '../types/domain';
+import type { Category, CategoryId, OfficialCategoryImage } from '../types/domain';
 
 // Ilustrações SVG originais do PEREIRÃO; nunca representam trabalhos de prestadores.
 export const categories = [
@@ -13,3 +13,11 @@ export const categories = [
 export const categoryById: Readonly<Record<CategoryId, Category>> = Object.fromEntries(
   categories.map((category) => [category.id, category]),
 ) as Record<CategoryId, Category>;
+
+// Apenas identidade visual. Nomes e opções vêm do catálogo, nunca desta lista.
+export function categoryImage(id:string):OfficialCategoryImage|null {
+  const popular=categories.find(item=>item.id===id);
+  if(popular)return popular.officialImage;
+  if(!['serralheria-metalurgica','mecanica-automotivo','jardinagem-paisagismo','beleza-estetica'].includes(id))return null;
+  return {kind:'official-category',src:`/images/categories/illustrations/${id}.svg`,alt:'',width:160,height:112};
+}
