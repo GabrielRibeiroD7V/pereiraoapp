@@ -330,3 +330,25 @@ describe('catálogo da revisão administrativa',()=>{
   expect(r.status).toBe(403);expect(await r.json()).toEqual({code:'FORBIDDEN'});
  });
 });
+
+describe('monetization admin boundary',()=>{
+ it('denies ordinary accounts before querying policy',async()=>{
+  const f=fixture(false);expect((await f.handler(req({action:'monetization_status'}))).status).toBe(403);
+  expect(f.client.rpc).toHaveBeenCalledTimes(1);
+ });
+ it('returns safe server configuration metadata, not keys or a claim of homologation',async()=>{
+  const f=fixture();const r=await f.handler(req({action:'monetization_status'}));
+  expect(r.status).toBe(200);const body=await r.text();expect(body).toContain('"validated":false');expect(body).not.toContain('$aact_');
+  expect(r.headers.get('cache-control')).toBe('private, no-store');
+ });
+ it('requires explicit confirmation and does not call Asaas for policy changes',async()=>{
+  const f=fixture();expect((await f.handler(req({action:'monetization_policy',enabled:true,revision:0,reason:'Teste sem confirmacao'}))).status).toBe(400);
+  expect(f.probe).not.toHaveBeenCalled();expect(f.client.rpc).toHaveBeenCalledTimes(1);
+ });
+ it('passes expected revision to authenticated RPC, preserves fail-closed database refusal',async()=>{
+  const f=fixture();f.client.rpc.mockImplementation(async name=>name==='admin_access'?{data:true,error:null}:{data:null,error:{code:'55000'}});
+  expect((await f.handler(req({action:'monetization_policy',enabled:true,revision:0,reason:'Revisao explicita',confirmation:'CONFIRMAR NOVAS CONTRATACOES'}))).status).toBe(503);
+  expect(f.client.rpc).toHaveBeenLastCalledWith('admin_set_new_contracts',{enabled:true,expected_revision:0,reason:'Revisao explicita',confirmation:'CONFIRMAR NOVAS CONTRATACOES'});
+  expect(f.probe).not.toHaveBeenCalled();
+ });
+});
