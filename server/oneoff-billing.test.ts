@@ -4,7 +4,7 @@ import { OneoffProvider,OneoffService,oneoffConfig,oneoffSnapshot,checkoutUrl,cr
 import type { OneoffRequest,OneoffStore } from './oneoff-billing';
 import { adminClient } from './admin-handler';
 const id='00000000-0000-4000-8000-000000000981',checkout='00000000-0000-4000-8000-000000000982',actor='00000000-0000-4000-8000-000000000983';
-const env={VERCEL_ENV:'preview',VITE_SUPABASE_URL:'https://yazdjiwaksamizrbqewq.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',ASSAS_API_KEY_SANDBOX:'$aact_hmlg_fixture',BILLING_RPC_SIGNING_SECRET:'S'.repeat(64),ASAAS_SANDBOX_WEBHOOK_TOKEN:'T'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED:'true',ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'true'};
+const env={VERCEL_ENV:'preview',VITE_SUPABASE_URL:'https://yazdjiwaksamizrbqewq.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',ASSAS_API_KEY_SANDBOX:'$aact_hmlg_fixture',BILLING_RPC_SIGNING_SECRET:'S'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'T'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED:'true',ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'true'};
 const operation=(method:'PIX'|'CREDIT_CARD'='PIX'):OneoffRequest=>({id,environment:'sandbox',method,customer_id:'cus_consent',state:'pending',checkout_id:checkout,payment_id:null,amount_cents:1990,currency:'BRL',net_cents:null,refunded_cents:0,diagnostic:null,provider_status:null,consent_at:'2026-11-27T12:00:00Z',created_at:'2026-11-27T12:00:00Z'});
 const payment=()=>({id:'pay_fixture',customer:'cus_consent',checkoutSession:checkout,externalReference:id,billingType:'PIX',value:19.90,netValue:19.40,status:'RECEIVED',subscription:null,installment:null});
 const request=(body:unknown,headers:Record<string,string>={Authorization:'Bearer fixture'})=>new Request('https://preview.example/api/admin-oneoff-billing',{method:'POST',headers,body:JSON.stringify(body)});
@@ -33,6 +33,11 @@ describe('oneoff provider, fixed amount and isolation',()=>{
   await expect(new OneoffProvider(production,'production',fetcher).create(operation(),'https://pereirao.vercel.app/admin')).rejects.toThrow();
   // GET customer may be attempted; no successful preflight can reach POST when disabled.
   expect(fetcher.mock.calls.some(([,options])=>options?.method==='POST')).toBe(false);
+ });
+ it('requires a dedicated webhook token, never the subscription token or the HMAC secret',()=>{
+  expect(oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:undefined},'sandbox').webhookEnabled).toBe(false);
+  expect(()=>oneoffConfig({...env,ASAAS_SANDBOX_WEBHOOK_TOKEN:env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN},'sandbox')).toThrow('SETUP_REQUIRED');
+  expect(()=>oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:env.BILLING_RPC_SIGNING_SECRET},'sandbox')).toThrow('SETUP_REQUIRED');
  });
  it('rejects wrong environment/key and any general financial flag',()=>{
   expect(()=>oneoffConfig(env,'production')).toThrow('DISABLED');
@@ -125,7 +130,7 @@ describe('admin API authentication and disabled Production boundary',()=>{
 });
 describe('webhook authentication and durable ACK',()=>{
  const notice={id:'evt_fixture',event:'CHECKOUT_PAID',checkout:{id:checkout,externalReference:id}};
- const hookRequest=(headers:Record<string,string>={},body:unknown=notice)=>request(body,{'content-type':'application/json','asaas-access-token':env.ASAAS_SANDBOX_WEBHOOK_TOKEN,...headers});
+ const hookRequest=(headers:Record<string,string>={},body:unknown=notice)=>request(body,{'content-type':'application/json','asaas-access-token':env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN,...headers});
  it('disabled webhook and incorrect token do not persist or defer',async()=>{
   const f=fixture(),defer=vi.fn();expect((await createOneoffWebhook({...env,ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'false'},defer,f.factory)(hookRequest())).status).toBe(403);
   expect((await createOneoffWebhook(env,defer,f.factory)(hookRequest({'asaas-access-token':'wrong'}))).status).toBe(401);expect(f.factory).not.toHaveBeenCalled();expect(defer).not.toHaveBeenCalled();
@@ -158,7 +163,7 @@ describe('transport rejects recurring payload even inside server code',()=>{
   f.store.call.mockImplementation(async()=>{persisted=true;return {duplicate:false,requestId:id};});
   defer.mockImplementation(()=>expect(persisted).toBe(true));
   const hook=createOneoffWebhook(env,defer,f.factory);
-  const response=await hook(request({id:'evt_success',event:'CHECKOUT_PAID',checkout:{id:checkout,externalReference:id}},{'content-type':'application/json','asaas-access-token':env.ASAAS_SANDBOX_WEBHOOK_TOKEN}));
+  const response=await hook(request({id:'evt_success',event:'CHECKOUT_PAID',checkout:{id:checkout,externalReference:id}},{'content-type':'application/json','asaas-access-token':env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN}));
   expect(response.status).toBe(200);expect(process).toHaveBeenCalledExactlyOnceWith('evt_success');expect(defer).toHaveBeenCalledTimes(1);
  });
 });

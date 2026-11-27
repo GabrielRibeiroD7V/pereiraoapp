@@ -27,11 +27,13 @@ A infraestrutura de assinaturas usa HMAC/nonce, inbox privada e conciliação po
 
 ## Flags e segredos — nenhum provisionamento nesta rodada
 
+O receptor avulso Sandbox passa a exigir token próprio `ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN`, diferente do token legado das assinaturas e do HMAC. Não há fallback para o token antigo. [Preflight atualizado após aplicação da migração](oneoff-sandbox-preparation.md). Os relatos de dry-run bloqueado abaixo são históricos do PR #99, não o estado atual do banco.
+
 Somente no servidor:
 
 | Ambiente | Criação avulsa (padrão desligado) | Credenciais já previstas |
 |---|---|---|
-| Preview/Sandbox | `ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED` | `ASSAS_API_KEY_SANDBOX`, `BILLING_RPC_SIGNING_SECRET`, `ASAAS_SANDBOX_WEBHOOK_TOKEN` |
+| Preview/Sandbox | `ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED` | `ASSAS_API_KEY_SANDBOX`, `BILLING_RPC_SIGNING_SECRET`, `ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN` |
 | Production | `ASAAS_ADMIN_ONEOFF_PRODUCTION_ENABLED` | `ASAAS_API_KEY_PRODUCTION`, `BILLING_PRODUCTION_RPC_SIGNING_SECRET`, `ASAAS_PRODUCTION_WEBHOOK_TOKEN` |
 
 `ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED` também começa desligada e precisa de token válido, independente entre ambientes e do segredo HMAC. Nenhum segredo é enviado ao frontend, URL ou log. Usar os segredos existentes; não criar outra chave “pereirao - sandbox”.
