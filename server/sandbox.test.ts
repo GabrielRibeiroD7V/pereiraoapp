@@ -734,3 +734,16 @@ describe("price migration preserves historic reconciliation",()=>{
   expect(result.amountCents).toBe(1999);
  });
 });
+
+describe("conciliação por preço consentido, após expansão",()=>{
+ it.each([
+  {amount:1999,terms:"sandbox-v1",value:19.99,wrong:19.90},
+  {amount:1990,terms:"sandbox-v2-1990",value:19.90,wrong:19.99},
+ ])("renovação mantém o valor de $terms e rejeita outro valor",({amount,terms,value,wrong})=>{
+  const c={...contract(),amount_cents:amount,consent_version:terms};
+  for(const id of ["pay_original","pay_renewal"]){
+   expect(paymentSnapshot({...payment(),id,value},c).amountCents).toBe(amount);
+   expect(()=>paymentSnapshot({...payment(),id,value:wrong},c)).toThrow();
+  }
+ });
+});

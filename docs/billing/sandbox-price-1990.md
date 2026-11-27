@@ -37,3 +37,7 @@ Falha de preflight/transação não aplica nada. Após commit, não restaurar co
 - Typecheck e build executados. CI do PR deve estar aprovado antes de qualquer integração.
 - **Nenhum novo checkout, pagamento, renovação ou webhook real foi executado nesta rodada.** A nova homologação1990 está bloqueada pela migração não autorizada e pela necessidade de Preview financeiro autorizado com sessão legítima. Não instalar a migração por inferência deste relatório.
 - Cartão teve homologação histórica documentada no PR17; isso não substitui o ensaio novo1990. Pix Automático/manual e débito não estão homologados. Não declarar o módulo financeiro completo enquanto esses pontos estiverem pendentes.
+
+## Reconferência final — 27/11/2026
+
+Contrato e pagamento legados agora têm snapshots integrais antes/depois da expansão nos testes SQL. Testes de conciliação cobrem dois pagamentos (original/renovação) para cada versão de consentimento: 1999/v1 e 1990/v2; o valor da outra versão é rejeitado. Trata-se de fixtures locais, não renovação financeira real. SQL proposto e hash permanecem inalterados.

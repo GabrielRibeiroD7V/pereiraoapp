@@ -9,3 +9,7 @@ reset role;
 insert into private.sandbox_contracts(request_id,business_id,user_id,method,amount_cents,consent_version,first_due_date,provider_cancelled,state)
 values('00000000-0000-4000-8000-000000008899',:'legacy','00000000-0000-4000-8000-000000008801','CREDIT_CARD',1999,'sandbox-v1',current_date,true,'cancelled');
 create table test.price_legacy_snapshot as select to_jsonb(c) as snapshot from private.sandbox_contracts c where request_id='00000000-0000-4000-8000-000000008899';
+
+insert into private.sandbox_payments(payment_id,request_id,amount_cents,refunded_cents,status,due_date,settled)
+values('pay_legacy_price','00000000-0000-4000-8000-000000008899',1999,0,'PENDING',current_date,false);
+create table test.price_legacy_payment_snapshot as select to_jsonb(p) snapshot from private.sandbox_payments p where payment_id='pay_legacy_price';

@@ -1,4 +1,5 @@
 begin;
+select test.assert_true((select to_jsonb(p)=(select snapshot from test.price_legacy_payment_snapshot) from private.sandbox_payments p where payment_id='pay_legacy_price'),'price: legacy payment data and amount unchanged');
 select test.assert_true((select to_jsonb(c)=(select snapshot from test.price_legacy_snapshot) from private.sandbox_contracts c where request_id='00000000-0000-4000-8000-000000008899'),'price: legacy consent and data unchanged');
 insert into private.sandbox_backend_keys(key_digest) values(extensions.digest('PRICE-LOCAL-NOT-A-SECRET','sha256')) on conflict(id) do update set key_digest=excluded.key_digest;
 create function test.price_call(cmd text,p jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
