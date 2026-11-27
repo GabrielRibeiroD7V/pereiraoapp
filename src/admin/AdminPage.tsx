@@ -1,3 +1,4 @@
+import { MonetizationPanel } from "./MonetizationPanel";
 import { SocialPostBody } from "../social/SocialFeed";
 import type { SocialPost } from "../social/model";
 import { supabase } from "../lib/supabase";
@@ -50,6 +51,7 @@ const sections = [
   ["audit", "Histórico"],
   ["subscriptions", "Gratuidade e assinaturas"],
   ["sandbox", "Financeiro Sandbox"],
+  ["monetization", "Monetização"],
 ] as const;
 const sectionIcons = {
   personal_posts: Images,
@@ -61,6 +63,7 @@ const sectionIcons = {
   audit: History,
   subscriptions: CalendarDays,
   sandbox: FlaskConical,
+  monetization: Activity,
 };
 const states: Record<string, string> = {
   draft: "Rascunho",
@@ -306,7 +309,9 @@ function AdminContent() {
             </button>
           </form>
         )}
-        {section === "sandbox" ? (
+        {section === "monetization" ? (
+          <MonetizationPanel key={revision} />
+        ) : section === "sandbox" ? (
           <SandboxFinancePanel key={revision} />
         ) : section === "subscriptions" ? (
           <AdminSubscriptionsPanel revision={revision} />
