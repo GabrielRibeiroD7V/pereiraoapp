@@ -88,8 +88,10 @@ describe('cadastro progressivo e espaço profissional', () => {
   it('visitante é autenticado e retorna ao cadastro', async () => {
     const repo = repository();
     const auth = gateway(false);
+    repo.listMine=vi.fn(async()=>[]);
     open(repo, '/', auth);
-    fireEvent.click(screen.getByRole('link', { name: 'Anunciar meus serviços' }));
+    fireEvent.click(screen.getByRole('button',{name:/Mostrar banner 2/}));
+    fireEvent.click(screen.getByRole('link', { name: /Profissional, divulgue seu trabalho/ }));
     await screen.findByRole('heading', { level: 1, name: 'Entrar' });
     await waitFor(() => expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled());
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'test@example.invalid' } });

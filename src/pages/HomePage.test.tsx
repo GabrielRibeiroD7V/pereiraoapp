@@ -63,10 +63,10 @@ describe('Início', () => {
     const featured = screen.getByRole('region', { name: 'Profissionais cadastrados' });
     expect(within(featured).getByText('Novos profissionais em breve')).toBeInTheDocument();
     expect(within(featured).queryByRole('link')).not.toBeInTheDocument();
-    const invite = screen.getByRole('region', { name: 'É profissional ou tem uma empresa?' });
-    expect(within(invite).queryByRole('button')).not.toBeInTheDocument();
-    expect(within(invite).getByRole('link', { name: 'Anunciar meus serviços' })).toHaveAttribute('href', '/conta/profissional/cadastro');
-    expect(screen.getAllByRole('img')).toHaveLength(1); // Ilustrações decorativas têm alt vazio.
+    const invite = screen.getByRole('region', { name: 'Destaques do PEREIRÃO' });
+    fireEvent.click(within(invite).getByRole('button',{name:/Mostrar banner 2/}));
+    expect(within(invite).getByRole('link', { name: /Profissional, divulgue seu trabalho/ })).toHaveAttribute('href', '/conta/profissional');
+    expect(screen.getAllByRole('img')).toHaveLength(2); // Logo e banner ativo; ilustrações decorativas têm alt vazio.
   });
 
   it('reconhece parâmetros em acesso direto e ignora categoria desconhecida', () => {
