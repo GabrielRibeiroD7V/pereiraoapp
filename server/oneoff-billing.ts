@@ -118,6 +118,11 @@ export class OneoffService{
 const reply=(status:number,value:unknown)=>Response.json(value,{status,headers:{"Cache-Control":"private, no-store",Vary:"Authorization","X-Content-Type-Options":"nosniff"}});
 const failure=(e:unknown)=>{const code=e instanceof OneoffError?e.code:"UNAVAILABLE";return reply(({AUTH_REQUIRED:401,FORBIDDEN:403,DISABLED:403,INVALID_INPUT:400,CONFLICT:409,MISMATCH:409,BUSY:409,SETUP_REQUIRED:503} as Record<string,number>)[code]??503,{code});};
 export const oneoffService=(env:Env,e:Environment)=>new OneoffService(oneoffStore(env,e),new OneoffProvider(env,e));
+function publicOperation(value:unknown){
+ if(!value||typeof value!=='object'||Array.isArray(value))throw new OneoffError('UNAVAILABLE');
+ const row=value as Record<string,unknown>;
+ return Object.fromEntries(['id','environment','method','state','checkout_id','payment_id','amount_cents','currency','net_cents','refunded_cents','diagnostic','provider_status','consent_at','created_at'].map(k=>[k,row[k]]));
+}
 export function createOneoffHandler(env:Env,factory=oneoffService,clientFactory=adminClient){return async(req:Request)=>{
  if(req.method!=="POST")return reply(405,{code:"METHOD_NOT_ALLOWED"});
  try{
@@ -140,9 +145,9 @@ export function createOneoffHandler(env:Env,factory=oneoffService,clientFactory=
   if(!cfg.writeEnabled||!cfg.webhookEnabled||!cfg.token)throw new OneoffError('DISABLED');
   if(p.action==='authorize'){
    if(!customer(p.customerId)||!['PIX','CREDIT_CARD'].includes(String(p.method)))throw new OneoffError('INVALID_INPUT');
-   return reply(200,{data:await service.store.call('authorize',{actorId,requestId:p.requestId,method:p.method,customerId:p.customerId,payerConsent:p.payerConsent,confirmation:p.confirmation})});
+   return reply(200,{data:publicOperation(await service.store.call('authorize',{actorId,requestId:p.requestId,method:p.method,customerId:p.customerId,payerConsent:p.payerConsent,confirmation:p.confirmation}))});
   }
-  if(p.action==='create')return reply(200,{data:await service.create(actorId,p.requestId,p.confirmation as string,new URL('/admin?sec=oneoff',e==='production'?'https://pereirao.vercel.app':req.url).href)});
+  if(p.action==='create')return reply(200,{data:publicOperation(await service.create(actorId,p.requestId,p.confirmation as string,new URL('/admin?sec=oneoff',e==='production'?'https://pereirao.vercel.app':req.url).href))});
   throw new OneoffError('INVALID_INPUT');
  }catch(e){return failure(e);}
 };}

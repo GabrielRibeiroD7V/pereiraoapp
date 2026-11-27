@@ -162,3 +162,11 @@ describe('transport rejects recurring payload even inside server code',()=>{
   expect(response.status).toBe(200);expect(process).toHaveBeenCalledExactlyOnceWith('evt_success');expect(defer).toHaveBeenCalledTimes(1);
  });
 });
+
+
+it('admin create responses strip internal leases, actor and payer identifiers',async()=>{
+ const f=fixture();f.store.call.mockResolvedValue({create:false,request:{...operation(),lease:'internal-lease',actor_id:actor,customer_id:'cus_consent'}});
+ const response=await createOneoffHandler(env,f.factory,f.clientFactory)(request({action:'create',requestId:id,confirmation:'CRIAR CHECKOUT AVULSO 19,90'}));
+ expect(response.status).toBe(200);const result=await response.json();expect(result.data.id).toBe(id);
+ expect(result.data).not.toHaveProperty('lease');expect(result.data).not.toHaveProperty('actor_id');expect(result.data).not.toHaveProperty('customer_id');
+});

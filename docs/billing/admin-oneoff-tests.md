@@ -44,7 +44,7 @@ O Preview está protegido. O relay Sandbox existente aponta para o receptor anti
 
 - Projeto: `yazdjiwaksamizrbqewq`.
 - Arquivo: `20261127193736_admin_oneoff_payment_tests.sql`.
-- SHA-256: fb3994e38d2381ab4d6df9f5c16bfd04f624dd1a5a8657c67465e07658ef37d1.
+- SHA-256: 7453e3f26ca0ee374191ca7dc4b5746f6280238bbd71e61d4546deb4a8b5620d.
 - Dependências DDL: fundação Auth/admin, `private.sandbox_same_bytes`, digests `sandbox_backend_keys` e `production_billing_keys` já previstos/aplicados. Não depende do esquema proposto de #95/#96; sua revisão/homologação continua pré-requisito operacional do issue. Não aplicar seus SQLs junto por inferência.
 - Cinco tabelas privadas com RLS/revokes; uma função interna de prontidão Sandbox sem permissão pública e uma RPC com prova HMAC. A RPC aceita anon/authenticated apenas como transporte assinado; isso não autoriza o cliente a usá-la sem segredo do servidor.
 - Não modifica tabelas/funções/políticas existentes, negócios, posts, contratos, isenção ou fase gratuita. Ambos os ambientes e suas janelas começam desabilitados, sem operações financeiras.
@@ -61,7 +61,7 @@ O Preview está protegido. O relay Sandbox existente aponta para o receptor anti
 5. Homologar pagamento, webhook entregue de fato, conciliação, deduplicação, falhas/recuperação e estorno/cancelamento pelos procedimentos oficiais. Confirmar que nenhum vínculo/assinatura de profissional foi criado. Registros de teste permanecem auditáveis.
 6. Somente após Sandbox comprovado, revisão do código/CI e decisões específicas: integração, provisionamento/recepção Production, abertura de janela e cada cobrança real. São decisões distintas. Autorizar o PR não autoriza criar pagamento.
 
-**Resultados desta rodada:** 923 testes automatizados passaram na suíte completa; typecheck, build, histórico e SQL/RLS passaram. Testes automatizados de provider/serviço/rotas/interface e SQL/RLS em PostgreSQL17 descartável; não são chamadas reais ao Asaas. As fixtures cobrem ambiente, confirmação, duas contas/administradores, preço, quota, nonce/domínio, concorrência/idempotência, timeout, conciliação, não regressão, evento repetido/conflitante, persistência antes do ACK, estorno, cancelamento e isolamento de dados. Nenhum teste físico foi declarado.
+**Resultados desta rodada:** 923 testes passaram na suíte completa inicial; uma regressão adicional de projeção segura da resposta foi adicionada e validada na rodada final; typecheck, build, histórico e SQL/RLS passaram. Testes automatizados de provider/serviço/rotas/interface e SQL/RLS em PostgreSQL17 descartável; não são chamadas reais ao Asaas. As fixtures cobrem ambiente, confirmação, duas contas/administradores, preço, quota, nonce/domínio, concorrência/idempotência, timeout, conciliação, não regressão, evento repetido/conflitante, persistência antes do ACK, estorno, cancelamento e isolamento de dados. Nenhum teste físico foi declarado.
 
 **Sandbox real: NÃO EXECUTADO.** Bloqueio: migração nova e SQLs #95/#96 ainda propostos/não autorizados; Preview normal não tem a infraestrutura avulsa operacional nem entrega autenticada desse novo webhook. Não contornar usando armazenamento efêmero ou o contrato recorrente legado. Sem essas etapas não declarar o módulo homologado nem apto a cobrar dinheiro real.
 

@@ -59,6 +59,7 @@ select jsonb_build_object('environment','sandbox','requestId','00000000-0000-400
 select test.expect_error(format('select test.oneoff(''snapshot'',%L::jsonb||''{"amountCents":1999}''::jsonb)',:'snapshot'),'23514','oneoff: wrong value rejected by database');
 select test.expect_error(format('select test.oneoff(''snapshot'',%L::jsonb||''{"subscriptionId":"sub_forbidden"}''::jsonb)',:'snapshot'),'23514','oneoff: recurring payment rejected');
 select test.oneoff('snapshot',:'snapshot');
+select test.assert_true(not ((test.oneoff('status','{"environment":"sandbox","actorId":"00000000-0000-4000-8000-000000007801"}')->'items'->0) ?| array['lease','lease_until','customer_id','actor_id']),'oneoff: status never exposes internal leases or payer identifiers');
 select test.assert_true(test.oneoff('context','{"environment":"sandbox","actorId":"00000000-0000-4000-8000-000000007801","requestId":"00000000-0000-4000-8000-000000007811"}')->>'state'='paid','oneoff: reconciled payment persisted');
 select test.expect_error($q$select test.oneoff('context','{"environment":"production","actorId":"00000000-0000-4000-8000-000000007801","requestId":"00000000-0000-4000-8000-000000007811"}')$q$,'P0002','oneoff: environment isolation');
 select test.assert_true(test.oneoff('enqueue','{"environment":"sandbox","eventId":"evt_foreign","eventType":"PAYMENT_RECEIVED","objectId":"pay_foreign","checkoutId":null,"reference":null}')->'requestId'='null'::jsonb,'oneoff: unrelated event ignored without binding');
