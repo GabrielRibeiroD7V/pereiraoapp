@@ -81,8 +81,8 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/account_conversations.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/notifications.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_before.sql')],true);
-  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127185515_marketplace_sixteen_categories.sql')],true);
-  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127185515_marketplace_sixteen_categories.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192706_marketplace_sixteen_categories.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261127192706_marketplace_sixteen_categories.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/categories_sixteen.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
