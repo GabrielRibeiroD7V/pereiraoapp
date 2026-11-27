@@ -1,0 +1,287 @@
+{
+  "type": "Chromium local emulation; no physical devices, sessions or remote data",
+  "results": [
+    {
+      "width": 320,
+      "count": 0,
+      "scrollWidth": 320,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 320,
+      "count": 1,
+      "scrollWidth": 320,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 320,
+      "count": 3,
+      "scrollWidth": 320,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 320,
+      "count": 10,
+      "scrollWidth": 320,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 360,
+      "count": 0,
+      "scrollWidth": 360,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 360,
+      "count": 1,
+      "scrollWidth": 360,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 360,
+      "count": 3,
+      "scrollWidth": 360,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 360,
+      "count": 10,
+      "scrollWidth": 360,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 375,
+      "count": 0,
+      "scrollWidth": 375,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 375,
+      "count": 1,
+      "scrollWidth": 375,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 375,
+      "count": 3,
+      "scrollWidth": 375,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 375,
+      "count": 10,
+      "scrollWidth": 375,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 390,
+      "count": 0,
+      "scrollWidth": 390,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 390,
+      "count": 1,
+      "scrollWidth": 390,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 390,
+      "count": 3,
+      "scrollWidth": 390,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 390,
+      "count": 10,
+      "scrollWidth": 390,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 393,
+      "count": 0,
+      "scrollWidth": 393,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 393,
+      "count": 1,
+      "scrollWidth": 393,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 393,
+      "count": 3,
+      "scrollWidth": 393,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 393,
+      "count": 10,
+      "scrollWidth": 393,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 430,
+      "count": 0,
+      "scrollWidth": 430,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 430,
+      "count": 1,
+      "scrollWidth": 430,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 430,
+      "count": 3,
+      "scrollWidth": 430,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 430,
+      "count": 10,
+      "scrollWidth": 430,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 768,
+      "count": 0,
+      "scrollWidth": 768,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 768,
+      "count": 1,
+      "scrollWidth": 768,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 768,
+      "count": 3,
+      "scrollWidth": 768,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 768,
+      "count": 10,
+      "scrollWidth": 768,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 1024,
+      "count": 0,
+      "scrollWidth": 1024,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 1024,
+      "count": 1,
+      "scrollWidth": 1024,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 1024,
+      "count": 3,
+      "scrollWidth": 1024,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 1024,
+      "count": 10,
+      "scrollWidth": 1024,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 1280,
+      "count": 0,
+      "scrollWidth": 1280,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 1280,
+      "count": 1,
+      "scrollWidth": 1280,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 1280,
+      "count": 3,
+      "scrollWidth": 1280,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 1280,
+      "count": 10,
+      "scrollWidth": 1280,
+      "cards": 10,
+      "cuts": 0
+    },
+    {
+      "width": 1440,
+      "count": 0,
+      "scrollWidth": 1440,
+      "cards": 0,
+      "cuts": 0
+    },
+    {
+      "width": 1440,
+      "count": 1,
+      "scrollWidth": 1440,
+      "cards": 1,
+      "cuts": 0
+    },
+    {
+      "width": 1440,
+      "count": 3,
+      "scrollWidth": 1440,
+      "cards": 3,
+      "cuts": 0
+    },
+    {
+      "width": 1440,
+      "count": 10,
+      "scrollWidth": 1440,
+      "cards": 10,
+      "cuts": 0
+    }
+  ],
+  "errors": [],
+  "blocked": []
+}

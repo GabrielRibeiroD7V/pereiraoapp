@@ -112,6 +112,8 @@ const ServicesPage = lazy(() =>
   })),
 );
 
+const PresenceEditor = lazy(() => import('../businessPresence/PresenceEditor').then(m => ({default:m.PresenceEditor})));
+
 const PortfolioPage = lazy(() =>
   import("../pages/PortfolioPage").then((module) => ({
     default: module.PortfolioPage,
@@ -349,6 +351,7 @@ function AppRoutes() {
             path="/conta/profissional/cadastro"
             element={<ProfessionalRegistrationPage key="create" />}
           />
+          <Route path="/conta/profissional/:businessId/equipe-localizacao" element={<PresenceEditor key={pathname}/>}/>
           <Route
             path="/conta/profissional/:businessId/editar"
             element={<ProfessionalEditorPage key={pathname} />}

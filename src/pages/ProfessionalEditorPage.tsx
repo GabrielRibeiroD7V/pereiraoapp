@@ -147,7 +147,7 @@ export function ProfessionalEditorPage() {
           </fieldset></form> },
           { id: 'atendimento', label: 'Atendimento', content: <form id="profile-coverage-form" key={formVersion} onSubmit={save} noValidate><fieldset disabled={pending} className="profile-editor__fields"><legend className="visually-hidden">Cidades e contatos públicos</legend>
             <CitySelect id="edit-city" label="Cidade de origem" cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} value={input.cityId} required onChange={value => change('cityId', value)} />
-            <ServiceAreaPicker cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
+            <p><Link className="button button--secondary" to={`/conta/profissional/${businessId}/equipe-localizacao`}>{input.type === 'empresa' ? 'Equipe e endereço de atendimento' : 'Endereço e modo de atendimento'}</Link></p><ServiceAreaPicker cities={catalog.cities.map(value => ({ ...value, stateCode: value.state_code }))} originId={input.cityId} selectedIds={input.areaCityIds} onChange={ids => change('areaCityIds', ids)} />
             <FormField id="edit-whatsapp" label="WhatsApp" type="tel" value={input.whatsapp} maxLength={24} onChange={event => change('whatsapp', event.target.value)} />
             <p className="field-help">Informe país e DDD. Obrigatório antes de colocar o perfil no ar.</p>
             <FormField id="edit-instagram" label="Instagram (opcional)" value={input.instagram} maxLength={31} onChange={event => change('instagram', event.target.value)} />
