@@ -102,9 +102,18 @@ describe('atualização segura, concorrente e offline',()=>{
   it('não entra em loop se o navegador entregar novamente a mesma página antiga',async()=>{
     const f=pwaFixture({enabled:true,version:A});await vi.waitFor(()=>expect(f.browser.fetch).toHaveBeenCalledOnce());await f.controller.checkForUpdate();
     f.storage.set('pereirao.update.attempt',B);
+    f.storage.set('pereirao.update.attempt.at',String(Date.now()));
     f.browser.fetch.mockResolvedValue({ok:true,headers:new Headers({'Content-Type':'application/json'}),json:async()=>({version:B})});
     await f.controller.checkForUpdate(true);await f.controller.checkForUpdate(true);
     expect(f.controller.getSnapshot().refreshRequired).toBe(true);expect(f.browser.location.reload).not.toHaveBeenCalled();f.controller.dispose();
+  });
+  it('recupera marcador legado sem horário e tenta atualizar ao abrir o aplicativo instalado',async()=>{
+    const storage=new Map([['pereirao.update.attempt',B]]);
+    const f=pwaFixture({enabled:true,installed:true,version:A,published:B,storage});
+    await vi.waitFor(()=>expect(f.browser.location.reload).toHaveBeenCalledOnce());
+    expect(storage.get('pereirao.update.attempt')).toBe(B);
+    expect(Number(storage.get('pereirao.update.attempt.at'))).toBeGreaterThan(0);
+    f.controller.dispose();
   });
   it('não invalida a página em falha de rede e volta a verificar ao reconectar',async()=>{
     const f=pwaFixture({enabled:true,version:A});await vi.waitFor(()=>expect(f.browser.fetch).toHaveBeenCalledOnce());await f.controller.checkForUpdate();
