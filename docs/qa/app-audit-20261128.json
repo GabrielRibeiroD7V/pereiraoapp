@@ -45,7 +45,7 @@
       1440,
       1920
     ],
-    "visual": "WebKit do navegador integrado, dimensões emuladas; Home e Admin sem overflow. Não equivale a Safari físico ou Android.",
+    "visual": "Navegador integrado, dimensões emuladas; Home e Admin sem overflow. Não equivale a Safari físico ou Android.",
     "category_navigation": "16 links em Ver todas as categorias; filtro Beleza e Estética selecionado após navegação",
     "chat_accessibility": "Rótulo mantém nome acessível e área visual 1x1 px; navegação com quatro textos visíveis"
   },
