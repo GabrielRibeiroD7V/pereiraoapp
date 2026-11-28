@@ -1,5 +1,6 @@
 // Exclusivamente servidor: testes avulsos #98, sem criação de clientes/assinaturas.
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { oneoffNotice } from "../supabase/functions/_shared/oneoff-notice.ts";
 import { createClient } from "@supabase/supabase-js";
 import { adminClient } from "./admin-handler.ts";
 import { boundedJson } from "./production-billing-provider.ts";
@@ -159,11 +160,10 @@ export function createOneoffWebhook(env:Env,defer:(task:Promise<unknown>)=>void,
   const received=req.headers.get('asaas-access-token')??'';
   if(!cfg.token||!/^[A-Za-z0-9_-]{32,200}$/.test(cfg.token)||Buffer.byteLength(received)!==Buffer.byteLength(cfg.token)||!timingSafeEqual(Buffer.from(received),Buffer.from(cfg.token)))throw new OneoffError('AUTH_REQUIRED');
   if(!req.headers.get('content-type')?.includes('application/json'))throw new OneoffError('INVALID_INPUT');
-  const p=await boundedJson(req,65536),eventType=String(p.event??''),o=(eventType.startsWith('CHECKOUT_')?p.checkout:p.payment) as Record<string,unknown>|undefined;
-  if(typeof p.id!=='string'||!/^[A-Za-z0-9_&-]{3,200}$/.test(p.id)||!o||typeof o.id!=='string'||!(/^(CHECKOUT_(CREATED|PAID|CANCELED|EXPIRED)|PAYMENT_(CREATED|UPDATED|CONFIRMED|RECEIVED|OVERDUE|DELETED|REFUNDED|PARTIALLY_REFUNDED|REFUND_IN_PROGRESS|CREDIT_CARD_CAPTURE_REFUSED|REPROVED_BY_RISK_ANALYSIS|AWAITING_RISK_ANALYSIS|CHARGEBACK_REQUESTED|CHARGEBACK_DISPUTE|AWAITING_CHARGEBACK_REVERSAL))$/).test(eventType))throw new OneoffError('INVALID_INPUT');
-  const checkoutId=eventType.startsWith('CHECKOUT_')?o.id:o.checkoutSession,reference=o.externalReference;
-  const service=factory(env,e),result=await service.store.call<{duplicate:boolean;requestId:string|null}>('enqueue',{eventId:p.id,eventType,objectId:o.id,checkoutId:uuid(checkoutId)?checkoutId:null,reference:uuid(reference)?reference:null});
-  if(result.requestId)defer(service.event(p.id).catch(()=>{}));
+  const notice=oneoffNotice(await boundedJson(req,65536));
+  if(!notice)throw new OneoffError('INVALID_INPUT');
+  const service=factory(env,e),result=await service.store.call<{duplicate:boolean;requestId:string|null}>('enqueue',{...notice});
+  if(result.requestId)defer(service.event(notice.eventId).catch(()=>{}));
   return reply(200,{received:true,duplicate:result.duplicate}); // só depois da persistência
  }catch(e){return failure(e);}
 };}
