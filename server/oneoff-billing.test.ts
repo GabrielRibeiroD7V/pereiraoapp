@@ -6,26 +6,82 @@ import { adminClient } from './admin-handler';
 const id='00000000-0000-4000-8000-000000000981',checkout='00000000-0000-4000-8000-000000000982',actor='00000000-0000-4000-8000-000000000983';
 const env={VERCEL_ENV:'preview',VITE_SUPABASE_URL:'https://yazdjiwaksamizrbqewq.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',ASSAS_API_KEY_SANDBOX:'$aact_hmlg_fixture',BILLING_RPC_SIGNING_SECRET:'S'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'T'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED:'true',ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'true'};
 const operation=(method:'PIX'|'CREDIT_CARD'='PIX'):OneoffRequest=>({id,environment:'sandbox',method,customer_id:'cus_consent',state:'pending',checkout_id:checkout,payment_id:null,amount_cents:1990,currency:'BRL',net_cents:null,refunded_cents:0,diagnostic:null,provider_status:null,consent_at:'2026-11-27T12:00:00Z',created_at:'2026-11-27T12:00:00Z'});
+const payer=()=>({id:'cus_consent',phone:'4730000000',address:'Rua de teste',addressNumber:'1',postalCode:'01310000',province:'Bairro de teste',city:15873,notificationDisabled:true});
 const payment=()=>({id:'pay_fixture',customer:'cus_consent',checkoutSession:checkout,externalReference:id,billingType:'PIX',value:19.90,netValue:19.40,status:'RECEIVED',subscription:null,installment:null});
+describe('Sandbox Preview token compatibility with the direct inbox',()=>{
+ const token='fixture:Sandbox+'.repeat(3);
+ it('normalizes only outer ASCII whitespace in the configured Sandbox token',()=>{
+  const cfg=oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:' \t\r\n'+token+'\r\n '},'sandbox');
+  expect(cfg.token).toBe(token);expect(cfg.writeEnabled).toBe(true);expect(cfg.webhookEnabled).toBe(true);
+ });
+ it('keeps the gate valid for the documented 255-character visible ASCII token',()=>{
+  expect(oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'+'.repeat(255)},'sandbox').webhookEnabled).toBe(true);
+ });
+ it('reports write availability to a legitimate admin without creating any operation',async()=>{
+  const f=fixture();
+  const handler=createOneoffHandler({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},f.factory,f.clientFactory);
+  const response=await handler(request({action:'status'}));
+  expect(response.status).toBe(200);expect(await response.json()).toMatchObject({writeEnabled:true});
+  expect(f.store.call).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenCalledWith('status',{actorId:actor});
+  expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('reaches authentication and rejects a wrong token instead of returning DISABLED',async()=>{
+  const f=fixture();
+  const response=await createOneoffWebhook({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},vi.fn(),f.factory)(
+   new Request('https://preview.example/api/asaas-admin-oneoff-webhook',{method:'POST',headers:{'Content-Type':'application/json','asaas-access-token':'wrong-token'},body:'{}'}));
+  expect(response.status).toBe(401);expect(await response.json()).toEqual({code:'AUTH_REQUIRED'});expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it.each(['T'.repeat(31),'T'.repeat(256),'T'.repeat(32)+' inner','T'.repeat(32)+'\ninner','\u00a0'+'T'.repeat(40),'T'.repeat(32)+'\u007f'])('keeps invalid token formats disabled (%#)',value=>{
+  expect(oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:value},'sandbox').webhookEnabled).toBe(false);
+ });
+ it.each(['ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED','ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED'])('keeps an absent %s closed in admin status',async key=>{
+  const f=fixture(),response=await createOneoffHandler({...env,[key]:undefined},f.factory,f.clientFactory)(request({action:'status'}));
+  expect(await response.json()).toMatchObject({writeEnabled:false});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('compares the received token exactly and accepts valid authentication only before input validation',async()=>{
+  const f=fixture(),handler=createOneoffWebhook({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},vi.fn(),f.factory);
+  const send=(header:string)=>handler(new Request('https://preview.example/api/asaas-admin-oneoff-webhook',{method:'POST',headers:{'Content-Type':'application/json','asaas-access-token':header},body:'{}'}));
+  expect((await send(token+'x')).status).toBe(401);
+  expect((await send(token)).status).toBe(400);expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it('still rejects a normalized token equal to HMAC or legacy credentials',()=>{
+  expect(()=>oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\n'+env.BILLING_RPC_SIGNING_SECRET+'\n'},'sandbox')).toThrow('SETUP_REQUIRED');
+  expect(()=>oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\n'+token+'\n',ASAAS_SANDBOX_WEBHOOK_TOKEN:' '+token+' '},'sandbox')).toThrow('SETUP_REQUIRED');
+ });
+ it('does not normalize or widen Production token validation',()=>{
+  const production={...env,VERCEL_ENV:'production',ASAAS_API_KEY_PRODUCTION:'$aact_prod_fixture',BILLING_PRODUCTION_RPC_SIGNING_SECRET:'P'.repeat(64)};
+  for(const value of ['\n'+'V'.repeat(64)+'\n','+'.repeat(64),'V'.repeat(255)]){
+   const cfg=oneoffConfig({...production,ASAAS_PRODUCTION_WEBHOOK_TOKEN:value},'production');
+   expect(cfg.token).toBe(value);expect(cfg.webhookEnabled).toBe(false);expect(cfg.writeEnabled).toBe(false);
+  }
+ });
+});
 const request=(body:unknown,headers:Record<string,string>={Authorization:'Bearer fixture'})=>new Request('https://preview.example/api/admin-oneoff-billing',{method:'POST',headers,body:JSON.stringify(body)});
 function fixture(){
  const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:actor,email_confirmed_at:'2026-11-27'}},error:null}))},rpc:vi.fn(async()=>({data:true,error:null}))};
  const store={call:vi.fn(async(command:string):Promise<unknown>=>command==='status'?{items:[]}:command==='enqueue'?{duplicate:false,requestId:id}:command==='claim'?{request:operation(),lease:id}:{ok:true})};
- const provider={create:vi.fn(async()=>checkout),payments:vi.fn(async()=>[payment()])};
+ const provider={validatePayer:vi.fn(async()=>{}),payerReadiness:vi.fn(async()=>({ready:true,missing:[] as string[]})),create:vi.fn(async()=>checkout),payments:vi.fn(async()=>[payment()])};
  const service=new OneoffService(store as OneoffStore,provider as unknown as OneoffProvider);
  const factory=vi.fn(()=>service),clientFactory=vi.fn(()=>client as unknown as ReturnType<typeof adminClient>);
  return {client,store,provider,service,factory,clientFactory};
 }
 describe('oneoff provider, fixed amount and isolation',()=>{
  it.each(['PIX','CREDIT_CARD'] as const)('requests only hosted DETACHED %s, no subscription/card fields',async method=>{
-  const fetcher=vi.fn<typeof fetch>(async(_url,options)=>Response.json(options?.method==='POST'?{id:checkout}:{id:'cus_consent'}));
+  const fetcher=vi.fn<typeof fetch>(async(_url,options)=>Response.json(options?.method==='POST'?{id:checkout}:payer()));
   const provider=new OneoffProvider(env,'sandbox',fetcher);
   expect(await provider.create(operation(method),'https://preview.example/admin?sec=oneoff')).toBe(checkout);
   const calls=fetcher.mock.calls;expect(calls).toHaveLength(2);
   expect(calls[1]?.[0]).toBe('https://api-sandbox.asaas.com/v3/checkouts');
   const init=calls[1]?.[1];expect(init?.redirect).toBe('error');
   const body=JSON.parse(String(init?.body));expect(body).toMatchObject({customer:'cus_consent',billingTypes:[method],chargeTypes:['DETACHED'],items:[{quantity:1,value:19.90}],externalReference:id});
+  expect(body.items[0].name).toBe('PEREIRÃO — teste avulso');
+  expect(body.items[0].name.length).toBeLessThanOrEqual(30);
   expect(body).not.toHaveProperty('subscription');expect(body).not.toHaveProperty('installment');expect(JSON.stringify(body)).not.toMatch(/creditCard|cvv|ccv|holderName|cardToken/);
+ });
+ it('rejects an item name exceeding the real Asaas 30-character limit before POST',async()=>{
+  const fetcher=vi.fn<typeof fetch>(),provider=new OneoffProvider(env,'sandbox',fetcher);
+  await expect(provider.call('/checkouts',{customer:'cus_consent',billingTypes:['PIX'],chargeTypes:['DETACHED'],externalReference:id,items:[{name:'PEREIRÃO — teste administrativo avulso',quantity:1,value:19.90}]})).rejects.toThrow('INVALID_INPUT');
+  expect(fetcher).not.toHaveBeenCalled();
  });
  it('rejects production writes without new independent flag even with valid key',async()=>{
   const fetcher=vi.fn<typeof fetch>();const production={...env,VERCEL_ENV:'production',ASAAS_API_KEY_PRODUCTION:'$aact_prod_fixture',BILLING_PRODUCTION_RPC_SIGNING_SECRET:'P'.repeat(64)};
@@ -88,7 +144,7 @@ describe('idempotency, uncertain writes and recoverable reconciliation',()=>{
   await f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin');expect(f.provider.create).not.toHaveBeenCalled();
  });
  it('persists uncertainty on timeout; no automatic second creation',async()=>{
-  const f=fixture();f.store.call.mockResolvedValueOnce({create:true,request:operation()});f.provider.create.mockRejectedValue(Error('private-provider-detail'));
+  const f=fixture();f.store.call.mockImplementation(async cmd=>cmd==='context'?{...operation(),state:'authorized'}:cmd==='start'?{create:true,request:operation()}:{ok:true});f.provider.create.mockRejectedValue(Error('private-provider-detail'));
   await expect(f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin')).rejects.toThrow('RECONCILIATION_REQUIRED');
   expect(f.provider.create).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenLastCalledWith('uncertain',{requestId:id});
  });
@@ -174,4 +230,99 @@ it('admin create responses strip internal leases, actor and payer identifiers',a
  const response=await createOneoffHandler(env,f.factory,f.clientFactory)(request({action:'create',requestId:id,confirmation:'CRIAR CHECKOUT AVULSO 19,90'}));
  expect(response.status).toBe(200);const result=await response.json();expect(result.data.id).toBe(id);
  expect(result.data).not.toHaveProperty('lease');expect(result.data).not.toHaveProperty('actor_id');expect(result.data).not.toHaveProperty('customer_id');
+});
+
+describe('narrow audited recovery of the definitively rejected Sandbox checkout',()=>{
+ const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
+ const confirmation='RECUPERAR REJEICAO SANDBOX SEM CRIAR';
+ function recovery(){
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});
+  f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',diagnostic:'creation_uncertain',checkout_id:null,payment_id:null});
+  f.provider.payments.mockResolvedValue([]);return f;
+ }
+ it('checks the existing external reference, then requests a signed transition without creating checkout',async()=>{
+  const f=recovery();await f.service.recoverNameRejection(actor,historical,confirmation);
+  expect(f.provider.payments).toHaveBeenCalledWith(expect.objectContaining({id:historical,checkout_id:null}));
+  expect(f.store.call).toHaveBeenLastCalledWith('recover_name_rejection',expect.objectContaining({actorId:actor,requestId:historical,confirmation,paymentsEmpty:true,evidence:expect.objectContaining({httpStatus:400,logId:'108269826',reference:historical})}));
+  expect(f.provider.create).not.toHaveBeenCalled();expect(f.store.call.mock.calls.some(([x])=>x==='authorize'||x==='start')).toBe(false);
+ });
+ it('inspection does not transition or create anything',async()=>{
+  const f=recovery();expect(await f.service.checkNameRejection(actor,historical)).toMatchObject({paymentsEmpty:true});
+  expect(f.store.call).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenCalledWith('context',{actorId:actor,requestId:historical});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it.each(['timeout','ambiguous response'])('blocks recovery when the API read fails: %s',async message=>{
+  const f=recovery();f.provider.payments.mockRejectedValue(Error(message));
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow(message);
+  expect(f.store.call.mock.calls.some(([x])=>x==='recover_name_rejection')).toBe(false);
+ });
+ it('blocks any existing payment even if its status is not paid',async()=>{
+  const f=recovery();f.provider.payments.mockResolvedValue([{...payment(),status:'PENDING'}]);
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('MISMATCH');
+  expect(f.store.call).toHaveBeenCalledTimes(1);
+ });
+ it.each([{checkout_id:checkout},{payment_id:'pay_existing'},{state:'creating'},{state:'paid'},{environment:'production'}])('rejects incompatible context %j',async change=>{
+  const f=recovery();f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null,...change});
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('MISMATCH');expect(f.provider.payments).not.toHaveBeenCalled();
+ });
+ it('never opens recovery for a different request or Production',async()=>{
+  const f=recovery();await expect(f.service.recoverNameRejection(actor,id,confirmation)).rejects.toThrow('FORBIDDEN');
+  Object.assign(f.provider,{environment:'production'});await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('FORBIDDEN');expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it('requires separate confirmation and propagates missing migration safely',async()=>{
+  const f=recovery();await expect(f.service.recoverNameRejection(actor,historical,'')).rejects.toThrow('FORBIDDEN');
+  f.store.call.mockImplementation(async cmd=>{if(cmd==='recover_name_rejection')throw Error('SETUP_REQUIRED');return {...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null};});
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('SETUP_REQUIRED');expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('an ambiguous successful HTTP response never permits automatic creation retry',async()=>{
+  const fetcher=vi.fn<typeof fetch>(async(_u,opts)=>Response.json(opts?.method==='POST'?{}:payer()));
+  await expect(new OneoffProvider(env,'sandbox',fetcher).create(operation(),'https://preview.example/admin')).rejects.toThrow('RECONCILIATION_REQUIRED');
+  expect(fetcher.mock.calls.filter(([,o])=>o?.method==='POST')).toHaveLength(1);
+ });
+});
+
+describe('recovery endpoint authentication',()=>{
+ it('does not let anonymous callers reach recovery',async()=>{
+  const f=fixture();const response=await createOneoffHandler(env,f.factory,f.clientFactory)(request({action:'recover_name_rejection',requestId:'dd279b98-de7c-4eeb-8253-fd95e2564bc4'},{}));
+  expect(response.status).toBe(401);expect(f.factory).not.toHaveBeenCalled();
+ });
+ it('does not let an authenticated non-admin inspect or recover',async()=>{
+  const f=fixture();f.client.rpc.mockResolvedValue({data:false,error:null});
+  for(const action of ['check_name_rejection','recover_name_rejection'])expect((await createOneoffHandler(env,f.factory,f.clientFactory)(request({action,requestId:'dd279b98-de7c-4eeb-8253-fd95e2564bc4'}))).status).toBe(403);
+  expect(f.factory).not.toHaveBeenCalled();
+ });
+});
+
+describe('payer preflight and recovery of the customer-data rejection',()=>{
+ const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
+ it.each(['phone','address','addressNumber','postalCode','province','city','notificationDisabled'])('blocks missing %s before any checkout POST',async key=>{
+  const fetcher=vi.fn<typeof fetch>(async()=>Response.json({...payer(),[key]:undefined})),p=new OneoffProvider(env,'sandbox',fetcher);
+  expect(await p.payerReadiness(operation())).toMatchObject({ready:false,missing:[key]});
+  await expect(p.create(operation(),'https://preview.example/admin')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(fetcher.mock.calls.every(([,o])=>o?.method==='GET')).toBe(true);
+ });
+ it('does not claim creation when the payer preflight fails',async()=>{
+  const f=fixture();f.store.call.mockResolvedValue({...operation(),state:'authorized'});f.provider.validatePayer.mockRejectedValue(Error('PAYER_INCOMPLETE'));
+  await expect(f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(f.store.call).toHaveBeenCalledExactlyOnceWith('context',{actorId:actor,requestId:id});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('checks complete payer and empty payments without creating, then uses the new signed transition only',async()=>{
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null});f.provider.payments.mockResolvedValue([]);
+  const proof=await f.service.checkPayerRejection(actor,historical);expect(proof).toMatchObject({ready:true,payerValidated:true,paymentsEmpty:true,evidence:{logId:'108278750'}});
+  await f.service.recoverPayerRejection(actor,historical,'RECUPERAR REJEICAO SANDBOX SEM CRIAR');
+  expect(f.store.call).toHaveBeenLastCalledWith('recover_payer_rejection',expect.objectContaining({requestId:historical,payerValidated:true}));
+  expect(f.store.call.mock.calls.some(([c])=>c==='recover_name_rejection'||c==='authorize'||c==='start')).toBe(false);expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('incomplete payer never reaches recovery or even financial lookup',async()=>{
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null});f.provider.payerReadiness.mockResolvedValue({ready:false,missing:['phone']});
+  await expect(f.service.recoverPayerRejection(actor,historical,'RECUPERAR REJEICAO SANDBOX SEM CRIAR')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(f.provider.payments).not.toHaveBeenCalled();expect(f.store.call).toHaveBeenCalledTimes(1);
+ });
+ it('returns only readiness/field names, never customer data',async()=>{
+  const p=new OneoffProvider(env,'sandbox',async()=>Response.json({...payer(),cpfCnpj:'private',email:'private@example.invalid'}));
+  expect(await p.payerReadiness(operation())).toEqual({ready:true,missing:[]});
+ });
+ it.each([{}, {phone:'1'}, {postalCode:'bad'}, {city:0}, {notificationDisabled:false}])('validates malformed customer data %j',async change=>{
+  const body=Object.keys(change).length?{...payer(),...change}:{id:'cus_consent'};
+  expect((await new OneoffProvider(env,'sandbox',async()=>Response.json(body)).payerReadiness(operation())).ready).toBe(false);
+ });
 });
