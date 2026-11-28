@@ -40,7 +40,7 @@ export function createOneoffSandboxInbox(env: Env, databaseFetch: typeof fetch =
   if (request.method !== 'POST') return reply(405, {code: 'METHOD_NOT_ALLOWED'});
   // Normalize only ASCII whitespace accidentally added around the server-side Secret.
   // The HTTP header is never normalized: authentication still requires the exact token.
-  const token = env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN?.replace(/^[ \\t\\r\\n]+|[ \\t\\r\\n]+$/g, '');
+  const token = env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN?.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '');
   const signing = env.ASAAS_ADMIN_ONEOFF_SANDBOX_RPC_SIGNING_SECRET;
   const publishable = env.ASAAS_ADMIN_ONEOFF_SANDBOX_PUBLISHABLE_KEY;
   if (env.ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED !== 'true' || env.SUPABASE_URL !== projectUrl ||
