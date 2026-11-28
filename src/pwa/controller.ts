@@ -1,5 +1,8 @@
 import { workerVersion } from './workerVersion';
 import type { PwaDiagnostics } from './workerVersion';
+const UPDATE_ATTEMPT = 'pereirao.update.attempt';
+const UPDATE_ATTEMPT_AT = 'pereirao.update.attempt.at';
+const UPDATE_RETRY_MS = 30_000;
 export interface InstallPromptEvent extends Event {
   prompt(): Promise<unknown>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -270,14 +273,29 @@ export class PwaController {
     return !isSensitivePath(this.browser.location.pathname) && !this.hasEdits() && !this.busy()
       && !this.browser.document.querySelector('dialog[open], input:focus, textarea:focus, select:focus, [contenteditable="true"]:focus');
   }
+  private recentUpdateAttempt(version: string) {
+    const attempted = this.browser.sessionStorage.getItem(UPDATE_ATTEMPT);
+    const attemptedAt = Number(this.browser.sessionStorage.getItem(UPDATE_ATTEMPT_AT));
+    return attempted === version && Number.isFinite(attemptedAt) && attemptedAt > 0
+      && Date.now() - attemptedAt < UPDATE_RETRY_MS;
+  }
+  private recordUpdateAttempt(version: string) {
+    this.browser.sessionStorage.setItem(UPDATE_ATTEMPT, version);
+    this.browser.sessionStorage.setItem(UPDATE_ATTEMPT_AT, String(Date.now()));
+  }
+  private clearUpdateAttempt(version: string) {
+    if (this.browser.sessionStorage.getItem(UPDATE_ATTEMPT) !== version) return;
+    this.browser.sessionStorage.removeItem(UPDATE_ATTEMPT);
+    this.browser.sessionStorage.removeItem(UPDATE_ATTEMPT_AT);
+  }
   private reload(automatic: boolean) {
     if (this.reloading || !this.state.online || this.browser.document.visibilityState !== 'visible') return;
     if (automatic && !this.safeToReload()) return;
     const version = this.state.publishedVersion;
     if (automatic && !version) return;
     try {
-      if (automatic && this.browser.sessionStorage.getItem('pereirao.update.attempt') === version) return;
-      if (version) this.browser.sessionStorage.setItem('pereirao.update.attempt', version);
+      if (automatic && version && this.recentUpdateAttempt(version)) return;
+      if (version) this.recordUpdateAttempt(version);
     } catch { if (automatic) return; } // Sem storage, somente atualização explícita: impede loops.
     this.reloading = true;
     this.browser.location.reload(); // Mantém rota, query e hash; nunca redireciona à Home.
@@ -293,7 +311,7 @@ export class PwaController {
       || !this.state.online || this.state.sessionRefreshRequired || this.state.updating || this.reloading
       || this.browser.document.visibilityState !== 'visible' || !this.safeToReload()) return;
     try {
-      if (this.browser.sessionStorage.getItem('pereirao.update.attempt') === this.state.publishedVersion) return;
+      if (this.recentUpdateAttempt(this.state.publishedVersion)) return;
     } catch { return; }
     // Um waiting legado/desconhecido não deve bloquear indefinidamente a troca
     // do HTML público. A navegação busca HTML novo pela rede sem ativar esse worker.
@@ -325,8 +343,7 @@ export class PwaController {
           // Uma página antiga restaurada depois pelo histórico precisa poder atualizar de novo.
           if (version === this.state.runningVersion) {
             try {
-              if (this.browser.sessionStorage.getItem('pereirao.update.attempt') === version)
-                this.browser.sessionStorage.removeItem('pereirao.update.attempt');
+              this.clearUpdateAttempt(version);
             } catch { /* Storage opcional; não interfere na consulta. */ }
           }
           return true;
