@@ -6,7 +6,7 @@ const items = [
   { to: routes.home, label: 'Início', Icon: House, iconOnly: false },
   { to: routes.search, label: 'Buscar', Icon: Search, iconOnly: false },
   { to: routes.conversations, label: 'Conversas', Icon: MessageCircle, iconOnly: false },
-  { to: routes.account, label: 'Conta', Icon: UserRound, iconOnly: true },
+  { to: routes.account, label: 'Conta', Icon: UserRound, iconOnly: false },
 ] as const;
 
 export function MainNavigation() {

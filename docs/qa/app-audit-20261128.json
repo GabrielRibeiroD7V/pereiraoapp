@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-28",
+  "repository": "GabrielRibeiroD7V/pereiraoapp",
+  "audited_main": "6d5503ba81e2b347778405d9b5870d87f34a6777",
+  "scope": "Auditoria de código, testes locais e consultas remotas em leitura; sem dados operacionais alterados.",
+  "corrections": [
+    {
+      "cause": "Home: max-width de 42rem na grade interna sem centralização em telas largas.",
+      "fix": "Seis colunas a partir de 768px ocupam o contêiner central existente; quatro colunas compactas mantidas no celular."
+    },
+    {
+      "cause": "Controles do carrossel de profissionais posicionados fora do fluxo, com bottom negativo.",
+      "fix": "Controles no fluxo; poucos cards centralizados sem aumentar sua largura."
+    },
+    {
+      "cause": "Admin utilizava a versão antiga da marca em fundo branco.",
+      "fix": "Mesmo asset oficial e recortes do cabeçalho atual; fundo marinho, lettering branco e traço ciano."
+    },
+    {
+      "cause": "Classe sr-only usada no chat sem definição CSS.",
+      "fix": "Compartilha a regra de ocultação visual acessível; não duplica título e rótulo do compositor."
+    },
+    {
+      "cause": "Rótulo Conta oculto visualmente na navegação.",
+      "fix": "Quatro rótulos visíveis e destinos preservados."
+    },
+    {
+      "cause": "Aviso administrativo ainda citava 90 dias e revisão administrativa prévia.",
+      "fix": "Texto de gratuidade indefinida, contratação individual separada e moderação posterior; nenhum backend financeiro alterado."
+    }
+  ],
+  "validation": {
+    "unit_component_integration": "1065 testes em 93 arquivos, todos aprovados",
+    "typecheck": "aprovado",
+    "build": "aprovado; avisos existentes de importação dinâmica sem efeito",
+    "sql_rls": "PostgreSQL 17 isolado aprovado, sem conexão remota no runner",
+    "viewport_widths": [
+      320,
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1280,
+      1440,
+      1920
+    ],
+    "visual": "Navegador integrado, dimensões emuladas; Home e Admin sem overflow. Não equivale a Safari físico ou Android.",
+    "category_navigation": "16 links em Ver todas as categorias; filtro Beleza e Estética selecionado após navegação",
+    "chat_accessibility": "Rótulo mantém nome acessível e área visual 1x1 px; navegação com quatro textos visíveis"
+  },
+  "remote_read_only": {
+    "categories_active": 16,
+    "phase": "initial_free",
+    "subscriptions": 0,
+    "financial_windows": 0,
+    "private_table_grants_to_public_anon_authenticated": 0,
+    "production_html_worker_version": "67bb7b3f7796cf123792",
+    "html_version_json_worker_consistent": true,
+    "latest_remote_migrations": [
+      "20261128054927",
+      "20261128052010",
+      "20261127230000",
+      "20261127223630",
+      "20261127200512",
+      "20261127200456"
+    ],
+    "note": "As duas recuperações avulsas aplicadas e autorizadas pertencem ao PR #111; não copiadas nem reaplicadas neste PR."
+  },
+  "prior_existing": {
+    "open_publication": "Responsável publica; administrador modera posteriormente. Não restaurar aprovação prévia.",
+    "messages_push": "Homologação real anterior entre Chrome e iPhone relatada pelo usuário; nenhuma mensagem nova enviada nesta auditoria.",
+    "sandbox": "Pix e cartão avulsos conciliados anteriormente; não repetidos, zero operação financeira nesta rodada.",
+    "pwa": "Ícones v2 e worker versionado existentes; não limpar sessão/cache nem forçar reinstalação."
+  },
+  "remaining": [
+    {
+      "priority": "P1",
+      "item": "Proteção contra senhas vazadas desativada no Supabase Auth.",
+      "next": "Verificar disponibilidade do plano e habilitação administrativa; nenhum ajuste remoto feito.",
+      "reference": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+    },
+    {
+      "priority": "P1",
+      "item": "Horários de atendimento no PR #87 ainda aberto.",
+      "next": "Rebase, revisão e preflight próprios; não aplicar sua migração implicitamente."
+    },
+    {
+      "priority": "P1",
+      "item": "PR #111 financeiro permanece separado, head 6e9e1813c932ffa6ba1d30974b2f775483433c4e.",
+      "next": "Revisar recuperação auditada e compatibilidade antes de qualquer integração financeira; não mesclar com correções visuais."
+    },
+    {
+      "priority": "P2",
+      "item": "Advisor: 32 FKs sem índice, 2 auth_rls_initplan, 1 tabela sem PK, 19 índices sem uso e 15 políticas permissivas sobrepostas.",
+      "next": "Medir consultas e revisar caso a caso; não remover índices/políticas nem gerar SQL especulativo.",
+      "reference": "https://supabase.com/docs/guides/database/database-linter"
+    },
+    {
+      "priority": "P2",
+      "item": "Build aponta importações simultaneamente estáticas e dinâmicas.",
+      "next": "Otimização de chunks separada, baseada em medição."
+    },
+    {
+      "priority": "Homologação física",
+      "item": "Instalação, teclado, safe area, retomada e atualização no iPhone/Android após esta alteração visual.",
+      "next": "Depende de aparelho real; não declarar aprovado por CI."
+    }
+  ],
+  "security_note": "Advisories SECURITY DEFINER não comprovam vulnerabilidade isoladamente. RPCs de feed público e ponte HMAC precisam de acesso intencional. Wrappers de mensagens e composição delegam autorização a helpers; testes SQL/RLS verificam terceiros, anon e proprietário. Nenhuma permissão foi ampliada ou removida.",
+  "migration": "Nenhuma migração nova, nenhum SQL remoto aplicado."
+}

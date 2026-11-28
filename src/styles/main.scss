@@ -88,7 +88,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   &__description { margin-top: var(--space-3); color: var(--color-secondary); }
 }
 
-.visually-hidden {
+.visually-hidden, .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
