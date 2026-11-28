@@ -7,10 +7,12 @@ import { LoadingState } from './LoadingState';
 import { Brand } from './Brand';
 import { MainNavigation } from './MainNavigation';
 import { InstallInvitation, VersionDiagnostics } from '../pwa/PwaProvider';
+import { HomeHero } from './HomeHero';
 
 export function AppShell() {
   usePostScrollReturn();
   const { pathname, search } = useLocation();
+  const home = pathname === '/';
   const previousPath = useRef(pathname);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function AppShell() {
     previousPath.current = pathname;
     const main = document.getElementById('main-content');
     const focusTitle = () => {
-      const title = main?.querySelector<HTMLElement>('#page-title');
+      const title = document.getElementById('page-title');
       title?.focus();
       return Boolean(title);
     };
@@ -32,18 +34,21 @@ export function AppShell() {
   return (
     <>
       <a className="skip-link" href="#main-content">Pular para o conteúdo</a>
-      <header className={`app-header${pathname === '/' ? ' app-header--home' : ''}`}>
-        <div className="app-header__inner">
-          <Brand inverse />
-          <div className="app-header__actions">
-            <div className="location" aria-label="Cidade inicial: Mundo Novo, Mato Grosso do Sul">
-              <MapPin size={18} aria-hidden="true" /><span>Mundo Novo, MS</span>
+      <div className={home ? 'home-masthead' : undefined}>
+        <header className={`app-header${home ? ' app-header--home' : ''}`}>
+          <div className="app-header__inner">
+            <Brand inverse />
+            <div className="app-header__actions">
+              <div className="location" aria-label="Cidade inicial: Mundo Novo, Mato Grosso do Sul">
+                <MapPin size={18} aria-hidden="true" /><span>Mundo Novo, MS</span>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+        {home && <HomeHero />}
+      </div>
       <MainNavigation />
-      <main id="main-content" className={`page-container${pathname === '/' ? ' page-container--home' : ''}`} tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
+      <main id="main-content" className={`page-container${home ? ' page-container--home' : ''}`} tabIndex={-1}><RouteBoundary key={pathname}><Suspense fallback={<LoadingState>Carregando página…</LoadingState>}><Outlet /></Suspense></RouteBoundary></main>
       <InstallInvitation />
       {new URLSearchParams(search).get('pwa-diagnostico') === '1' && <VersionDiagnostics />}
     </>
