@@ -8,7 +8,7 @@ const reply = (status: number, value: unknown) => Response.json(value, {status, 
 const encoded = (value: string) => new TextEncoder().encode(value);
 const digest = (value: string) => crypto.subtle.digest('SHA-256', encoded(value));
 async function sameToken(expected: string, actual: string | null) {
- if (!actual || actual.length > 200) return false;
+ if (!actual || actual.length > 255) return false;
  const [a, b] = await Promise.all([expected, actual].map(async value => new Uint8Array(await digest(value))));
  let different = 0;
  for (let i = 0; i < 32; i++) different |= a![i]! ^ b![i]!;
@@ -42,7 +42,7 @@ export function createOneoffSandboxInbox(env: Env, databaseFetch: typeof fetch =
   const signing = env.ASAAS_ADMIN_ONEOFF_SANDBOX_RPC_SIGNING_SECRET;
   const publishable = env.ASAAS_ADMIN_ONEOFF_SANDBOX_PUBLISHABLE_KEY;
   if (env.ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED !== 'true' || env.SUPABASE_URL !== projectUrl ||
-      !token || !/^[A-Za-z0-9_-]{32,200}$/.test(token) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) ||
+      !token || !/^[\x21-\x7e]{32,255}$/.test(token) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) ||
       !publishable || !/^sb_publishable_[A-Za-z0-9_-]+$/.test(publishable) || token === signing ||
       token === env.ASAAS_SANDBOX_WEBHOOK_TOKEN || signing === env.BILLING_PRODUCTION_RPC_SIGNING_SECRET ||
       token === env.ASAAS_PRODUCTION_WEBHOOK_TOKEN) return reply(503, {code: 'SETUP_REQUIRED'});

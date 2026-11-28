@@ -30,7 +30,23 @@ describe('Sandbox direct durable inbox',()=>{
  it.each([{}, {...env,ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED:'false'}, {...env,ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED:undefined,ASAAS_ADMIN_ONEOFF_SANDBOX_RELAY_ENABLED:'true'}, {...env,SUPABASE_URL:'https://other.supabase.co'}, {...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:signing}, {...env,ASAAS_SANDBOX_WEBHOOK_TOKEN:token}, {...env,BILLING_PRODUCTION_RPC_SIGNING_SECRET:signing}, {...env,ASAAS_PRODUCTION_WEBHOOK_TOKEN:token}, {...env,ASAAS_ADMIN_ONEOFF_SANDBOX_PUBLISHABLE_KEY:'service_role_fixture'}])('fails closed on missing, reused or wrong configuration',async config=>{
   const db=vi.fn();expect((await createOneoffSandboxInbox(config,db)(req())).status).toBe(503);expect(db).not.toHaveBeenCalled();
  });
- it.each(['','wrong','X'.repeat(201)])('authenticates before reading or writing (%s)',async received=>{
+ it('accepts printable Asaas tokens up to 255 characters while keeping exact-match authentication',async()=>{
+  for(const accepted of ['A'.repeat(31)+'!', 'a'.repeat(252)+'!#%', 'x'.repeat(254)+'~']) {
+   const configured={...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:accepted};
+   const backend=vi.fn<typeof fetch>(async()=>ack());
+   const handler=createOneoffSandboxInbox(configured,backend);
+   const bad=await handler(req(notice,{'asaas-access-token':'Q'.repeat(64)}));
+   expect(bad.status).toBe(401);expect(backend).not.toHaveBeenCalled();
+   const good=await handler(req(notice,{'asaas-access-token':accepted}));
+   expect(good.status).toBe(200);expect(backend).toHaveBeenCalledOnce();
+  }
+ });
+ it.each(['A'.repeat(31),'A'.repeat(256),'A'.repeat(31)+' ','A'.repeat(31)+'\n','A'.repeat(31)+'\t','A'.repeat(31)+'\u007f'])('rejects invalid configured tokens before inbox',async configuredToken=>{
+  const backend=vi.fn();
+  const handler=createOneoffSandboxInbox({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:configuredToken},backend);
+  expect((await handler(req())).status).toBe(503);expect(backend).not.toHaveBeenCalled();
+ });
+ it.each(['','wrong','X'.repeat(256)])('authenticates before reading or writing (%s)',async received=>{
   const request=req(notice,{'asaas-access-token':received}),read=vi.spyOn(request.body!,'getReader'),db=vi.fn();
   expect((await createOneoffSandboxInbox(env,db)(request)).status).toBe(401);expect(read).not.toHaveBeenCalled();expect(db).not.toHaveBeenCalled();
  });
