@@ -1,9 +1,13 @@
-import { createOneoffSandboxRelay } from '../_shared/oneoff-sandbox-relay.ts';
-// Deploy separately only after the endpoint/secret preflight. Disabled without its own flag.
-// This function alone needs verify_jwt=false: Asaas uses the authenticated webhook header.
-Deno.serve(createOneoffSandboxRelay({
- ASAAS_ADMIN_ONEOFF_SANDBOX_RELAY_ENABLED: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_RELAY_ENABLED'),
+import { createOneoffSandboxInbox } from '../_shared/oneoff-sandbox-inbox.ts';
+// Deploy separately, disabled by default. Asaas authenticates with its own token.
+// No environment, secret or function deployment is performed by a Vercel Preview.
+Deno.serve(createOneoffSandboxInbox({
+ SUPABASE_URL: Deno.env.get('SUPABASE_URL'),
+ ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_RECEIVER_ENABLED'),
  ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN'),
- ASAAS_ADMIN_ONEOFF_SANDBOX_PREVIEW_BYPASS: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_PREVIEW_BYPASS'),
+ ASAAS_ADMIN_ONEOFF_SANDBOX_RPC_SIGNING_SECRET: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_RPC_SIGNING_SECRET'),
+ ASAAS_ADMIN_ONEOFF_SANDBOX_PUBLISHABLE_KEY: Deno.env.get('ASAAS_ADMIN_ONEOFF_SANDBOX_PUBLISHABLE_KEY'),
  ASAAS_SANDBOX_WEBHOOK_TOKEN: Deno.env.get('ASAAS_SANDBOX_WEBHOOK_TOKEN'),
+ ASAAS_PRODUCTION_WEBHOOK_TOKEN: Deno.env.get('ASAAS_PRODUCTION_WEBHOOK_TOKEN'),
+ BILLING_PRODUCTION_RPC_SIGNING_SECRET: Deno.env.get('BILLING_PRODUCTION_RPC_SIGNING_SECRET'),
 }));

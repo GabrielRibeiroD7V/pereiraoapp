@@ -63,6 +63,11 @@ select test.assert_true(not ((test.oneoff('status','{"environment":"sandbox","ac
 select test.assert_true(test.oneoff('context','{"environment":"sandbox","actorId":"00000000-0000-4000-8000-000000007801","requestId":"00000000-0000-4000-8000-000000007811"}')->>'state'='paid','oneoff: reconciled payment persisted');
 select test.expect_error($q$select test.oneoff('context','{"environment":"production","actorId":"00000000-0000-4000-8000-000000007801","requestId":"00000000-0000-4000-8000-000000007811"}')$q$,'P0002','oneoff: environment isolation');
 select test.assert_true(test.oneoff('enqueue','{"environment":"sandbox","eventId":"evt_foreign","eventType":"PAYMENT_RECEIVED","objectId":"pay_foreign","checkoutId":null,"reference":null}')->'requestId'='null'::jsonb,'oneoff: unrelated event ignored without binding');
+reset role;
+select test.assert_true((select state='ignored' and request_id is null from private.admin_oneoff_events where environment='sandbox' and event_id='evt_foreign'),'oneoff: direct Edge unbound notice is durably quarantined');
+select test.assert_true(test.oneoff('claim_event','{"environment":"sandbox","eventId":"evt_foreign"}') is null,'oneoff: quarantined notification never enters reconciliation');
+set local role anon;
+select test.expect_error($q$insert into private.admin_oneoff_events(environment,event_id,notice,state) values('sandbox','evt_forbidden','{}','pending')$q$,'42501','oneoff: publishable key alone cannot write inbox');
 select test.oneoff('enqueue','{"environment":"sandbox","eventId":"evt_known","eventType":"CHECKOUT_PAID","objectId":"00000000-0000-4000-8000-000000007821","checkoutId":"00000000-0000-4000-8000-000000007821","reference":null}');
 select test.assert_true(test.oneoff('enqueue','{"environment":"sandbox","eventId":"evt_known","eventType":"CHECKOUT_PAID","objectId":"00000000-0000-4000-8000-000000007821","checkoutId":"00000000-0000-4000-8000-000000007821","reference":null}')->>'duplicate'='true','oneoff: repeated event deduplicated');
 select test.expect_error($q$select test.oneoff('enqueue','{"environment":"sandbox","eventId":"evt_known","eventType":"CHECKOUT_EXPIRED","objectId":"00000000-0000-4000-8000-000000007821","checkoutId":"00000000-0000-4000-8000-000000007821","reference":null}')$q$,'23505','oneoff: conflicting event rejected');
