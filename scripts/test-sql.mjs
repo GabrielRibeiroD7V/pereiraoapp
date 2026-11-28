@@ -28,7 +28,7 @@ try {
   run(executable('psql'), [...args, '-f', resolve('supabase/tests/bootstrap.sql')], true);
   for (const file of readdirSync('supabase/migrations').filter((file) => file.endsWith('.sql')).sort()) {
     if(file.endsWith('_business_team_location.sql'))continue;
-    if(file.endsWith('_admin_oneoff_payment_tests.sql')||file.endsWith('_admin_oneoff_rejected_checkout_recovery.sql'))continue;
+    if(file.endsWith('_admin_oneoff_payment_tests.sql')||file.endsWith('_admin_oneoff_rejected_checkout_recovery.sql')||file.endsWith('_admin_oneoff_payer_rejection_recovery.sql'))continue;
     if(file.endsWith('_marketplace_sixteen_categories.sql'))continue; // Depende de offers_unified_search, aplicada abaixo.
     if (file.endsWith('_admin_monetization_policy.sql')) continue;
     if (file.endsWith('_sandbox_monthly_1990.sql')) continue;
@@ -100,6 +100,8 @@ try {
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_oneoff.sql')]);
   run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261128052010_admin_oneoff_rejected_checkout_recovery.sql')],true);
   run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_oneoff_recovery.sql')]);
+  run(executable('psql'), [...args,'-f',resolve('supabase/migrations/20261128054927_admin_oneoff_payer_rejection_recovery.sql')],true);
+  run(executable('psql'), [...args,'-f',resolve('supabase/tests/admin_oneoff_payer_recovery.sql')]);
   console.log('SQL e RLS: testes concluídos em PostgreSQL isolado; nenhum projeto remoto foi acessado.');
 } finally {
   if (started) run(executable('pg_ctl'), ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'], true);

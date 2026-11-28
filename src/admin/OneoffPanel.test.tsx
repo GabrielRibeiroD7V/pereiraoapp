@@ -26,20 +26,20 @@ describe('isolated oneoff admin panel',()=>{
  it('inspects the rejected request with creation disabled, without recovering or creating',async()=>{
   const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
   const data={...state,environment:'sandbox',items:[{id:historical,environment:'sandbox',method:'PIX',state:'uncertain',checkout_id:null,payment_id:null,amount_cents:1990,net_cents:null,refunded_cents:0,diagnostic:'creation_uncertain',provider_status:null}]};
-  const repo={call:vi.fn(async(p:Record<string,unknown>)=>({data:p.action==='check_name_rejection'?{paymentsEmpty:true}:data,writeEnabled:false}))};
-  render(<OneoffPanel repository={repo}/>);fireEvent.click(await screen.findByText('Verificar pagamentos da referência — sem criar'));
+  const repo={call:vi.fn(async(p:Record<string,unknown>)=>({data:p.action==='check_payer_rejection'?{paymentsEmpty:true,payerValidated:true}:data,writeEnabled:false}))};
+  render(<OneoffPanel repository={repo}/>);fireEvent.click(await screen.findByText('Validar pagador e pagamentos — sem criar'));
   expect(await screen.findByText(/Consulta oficial concluída/)).toBeVisible();
-  expect(repo.call).toHaveBeenCalledWith({action:'check_name_rejection',environment:'sandbox',requestId:historical});
-  expect(repo.call.mock.calls.some(([p])=>p.action==='create'||p.action==='authorize'||p.action==='recover_name_rejection')).toBe(false);
+  expect(repo.call).toHaveBeenCalledWith({action:'check_payer_rejection',environment:'sandbox',requestId:historical});
+  expect(repo.call.mock.calls.some(([p])=>p.action==='create'||p.action==='authorize'||p.action==='recover_payer_rejection')).toBe(false);
  });
  it('requires separate recovery consent with creation disabled and preserves the request ID',async()=>{
   const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
   const data={...state,environment:'sandbox',items:[{id:historical,environment:'sandbox',method:'PIX',state:'uncertain',checkout_id:null,payment_id:null,amount_cents:1990,net_cents:null,refunded_cents:0,diagnostic:'creation_uncertain',provider_status:null}]};
-  const repo={call:vi.fn(async(p:Record<string,unknown>)=>({data:p.action==='check_name_rejection'?{paymentsEmpty:true}:data,writeEnabled:false}))};
-  render(<OneoffPanel repository={repo}/>);fireEvent.click(await screen.findByText('Verificar pagamentos da referência — sem criar'));
+  const repo={call:vi.fn(async(p:Record<string,unknown>)=>({data:p.action==='check_payer_rejection'?{paymentsEmpty:true,payerValidated:true}:data,writeEnabled:false}))};
+  render(<OneoffPanel repository={repo}/>);fireEvent.click(await screen.findByText('Validar pagador e pagamentos — sem criar'));
   const recover=await screen.findByText('Recuperar esta rejeição — sem criar checkout');expect(recover).toBeDisabled();
   fireEvent.click(screen.getByLabelText(/Confirmo recuperar somente esta solicitação/));fireEvent.click(recover);
-  await waitFor(()=>expect(repo.call).toHaveBeenCalledWith({action:'recover_name_rejection',environment:'sandbox',requestId:historical,confirmation:'RECUPERAR REJEICAO SANDBOX SEM CRIAR'}));
+  await waitFor(()=>expect(repo.call).toHaveBeenCalledWith({action:'recover_payer_rejection',environment:'sandbox',requestId:historical,confirmation:'RECUPERAR REJEICAO SANDBOX SEM CRIAR'}));
   expect(repo.call.mock.calls.some(([p])=>['create','authorize','configure'].includes(String(p.action)))).toBe(false);
  });
  it('does not fabricate zero counters when setup is unavailable',async()=>{

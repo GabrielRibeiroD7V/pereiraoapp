@@ -6,6 +6,7 @@ import { adminClient } from './admin-handler';
 const id='00000000-0000-4000-8000-000000000981',checkout='00000000-0000-4000-8000-000000000982',actor='00000000-0000-4000-8000-000000000983';
 const env={VERCEL_ENV:'preview',VITE_SUPABASE_URL:'https://yazdjiwaksamizrbqewq.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',ASSAS_API_KEY_SANDBOX:'$aact_hmlg_fixture',BILLING_RPC_SIGNING_SECRET:'S'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'T'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED:'true',ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'true'};
 const operation=(method:'PIX'|'CREDIT_CARD'='PIX'):OneoffRequest=>({id,environment:'sandbox',method,customer_id:'cus_consent',state:'pending',checkout_id:checkout,payment_id:null,amount_cents:1990,currency:'BRL',net_cents:null,refunded_cents:0,diagnostic:null,provider_status:null,consent_at:'2026-11-27T12:00:00Z',created_at:'2026-11-27T12:00:00Z'});
+const payer=()=>({id:'cus_consent',phone:'4730000000',address:'Rua de teste',addressNumber:'1',postalCode:'01310000',province:'Bairro de teste',city:15873,notificationDisabled:true});
 const payment=()=>({id:'pay_fixture',customer:'cus_consent',checkoutSession:checkout,externalReference:id,billingType:'PIX',value:19.90,netValue:19.40,status:'RECEIVED',subscription:null,installment:null});
 describe('Sandbox Preview token compatibility with the direct inbox',()=>{
  const token='fixture:Sandbox+'.repeat(3);
@@ -59,14 +60,14 @@ const request=(body:unknown,headers:Record<string,string>={Authorization:'Bearer
 function fixture(){
  const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:actor,email_confirmed_at:'2026-11-27'}},error:null}))},rpc:vi.fn(async()=>({data:true,error:null}))};
  const store={call:vi.fn(async(command:string):Promise<unknown>=>command==='status'?{items:[]}:command==='enqueue'?{duplicate:false,requestId:id}:command==='claim'?{request:operation(),lease:id}:{ok:true})};
- const provider={create:vi.fn(async()=>checkout),payments:vi.fn(async()=>[payment()])};
+ const provider={validatePayer:vi.fn(async()=>{}),payerReadiness:vi.fn(async()=>({ready:true,missing:[] as string[]})),create:vi.fn(async()=>checkout),payments:vi.fn(async()=>[payment()])};
  const service=new OneoffService(store as OneoffStore,provider as unknown as OneoffProvider);
  const factory=vi.fn(()=>service),clientFactory=vi.fn(()=>client as unknown as ReturnType<typeof adminClient>);
  return {client,store,provider,service,factory,clientFactory};
 }
 describe('oneoff provider, fixed amount and isolation',()=>{
  it.each(['PIX','CREDIT_CARD'] as const)('requests only hosted DETACHED %s, no subscription/card fields',async method=>{
-  const fetcher=vi.fn<typeof fetch>(async(_url,options)=>Response.json(options?.method==='POST'?{id:checkout}:{id:'cus_consent'}));
+  const fetcher=vi.fn<typeof fetch>(async(_url,options)=>Response.json(options?.method==='POST'?{id:checkout}:payer()));
   const provider=new OneoffProvider(env,'sandbox',fetcher);
   expect(await provider.create(operation(method),'https://preview.example/admin?sec=oneoff')).toBe(checkout);
   const calls=fetcher.mock.calls;expect(calls).toHaveLength(2);
@@ -143,7 +144,7 @@ describe('idempotency, uncertain writes and recoverable reconciliation',()=>{
   await f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin');expect(f.provider.create).not.toHaveBeenCalled();
  });
  it('persists uncertainty on timeout; no automatic second creation',async()=>{
-  const f=fixture();f.store.call.mockResolvedValueOnce({create:true,request:operation()});f.provider.create.mockRejectedValue(Error('private-provider-detail'));
+  const f=fixture();f.store.call.mockImplementation(async cmd=>cmd==='context'?{...operation(),state:'authorized'}:cmd==='start'?{create:true,request:operation()}:{ok:true});f.provider.create.mockRejectedValue(Error('private-provider-detail'));
   await expect(f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin')).rejects.toThrow('RECONCILIATION_REQUIRED');
   expect(f.provider.create).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenLastCalledWith('uncertain',{requestId:id});
  });
@@ -273,7 +274,7 @@ describe('narrow audited recovery of the definitively rejected Sandbox checkout'
   await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('SETUP_REQUIRED');expect(f.provider.create).not.toHaveBeenCalled();
  });
  it('an ambiguous successful HTTP response never permits automatic creation retry',async()=>{
-  const fetcher=vi.fn<typeof fetch>(async(_u,opts)=>Response.json(opts?.method==='POST'?{}:{id:'cus_consent'}));
+  const fetcher=vi.fn<typeof fetch>(async(_u,opts)=>Response.json(opts?.method==='POST'?{}:payer()));
   await expect(new OneoffProvider(env,'sandbox',fetcher).create(operation(),'https://preview.example/admin')).rejects.toThrow('RECONCILIATION_REQUIRED');
   expect(fetcher.mock.calls.filter(([,o])=>o?.method==='POST')).toHaveLength(1);
  });
@@ -288,5 +289,40 @@ describe('recovery endpoint authentication',()=>{
   const f=fixture();f.client.rpc.mockResolvedValue({data:false,error:null});
   for(const action of ['check_name_rejection','recover_name_rejection'])expect((await createOneoffHandler(env,f.factory,f.clientFactory)(request({action,requestId:'dd279b98-de7c-4eeb-8253-fd95e2564bc4'}))).status).toBe(403);
   expect(f.factory).not.toHaveBeenCalled();
+ });
+});
+
+describe('payer preflight and recovery of the customer-data rejection',()=>{
+ const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
+ it.each(['phone','address','addressNumber','postalCode','province','city','notificationDisabled'])('blocks missing %s before any checkout POST',async key=>{
+  const fetcher=vi.fn<typeof fetch>(async()=>Response.json({...payer(),[key]:undefined})),p=new OneoffProvider(env,'sandbox',fetcher);
+  expect(await p.payerReadiness(operation())).toMatchObject({ready:false,missing:[key]});
+  await expect(p.create(operation(),'https://preview.example/admin')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(fetcher.mock.calls.every(([,o])=>o?.method==='GET')).toBe(true);
+ });
+ it('does not claim creation when the payer preflight fails',async()=>{
+  const f=fixture();f.store.call.mockResolvedValue({...operation(),state:'authorized'});f.provider.validatePayer.mockRejectedValue(Error('PAYER_INCOMPLETE'));
+  await expect(f.service.create(actor,id,'CRIAR CHECKOUT AVULSO 19,90','https://preview.example/admin')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(f.store.call).toHaveBeenCalledExactlyOnceWith('context',{actorId:actor,requestId:id});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('checks complete payer and empty payments without creating, then uses the new signed transition only',async()=>{
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null});f.provider.payments.mockResolvedValue([]);
+  const proof=await f.service.checkPayerRejection(actor,historical);expect(proof).toMatchObject({ready:true,payerValidated:true,paymentsEmpty:true,evidence:{logId:'108278750'}});
+  await f.service.recoverPayerRejection(actor,historical,'RECUPERAR REJEICAO SANDBOX SEM CRIAR');
+  expect(f.store.call).toHaveBeenLastCalledWith('recover_payer_rejection',expect.objectContaining({requestId:historical,payerValidated:true}));
+  expect(f.store.call.mock.calls.some(([c])=>c==='recover_name_rejection'||c==='authorize'||c==='start')).toBe(false);expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('incomplete payer never reaches recovery or even financial lookup',async()=>{
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null});f.provider.payerReadiness.mockResolvedValue({ready:false,missing:['phone']});
+  await expect(f.service.recoverPayerRejection(actor,historical,'RECUPERAR REJEICAO SANDBOX SEM CRIAR')).rejects.toThrow('PAYER_INCOMPLETE');
+  expect(f.provider.payments).not.toHaveBeenCalled();expect(f.store.call).toHaveBeenCalledTimes(1);
+ });
+ it('returns only readiness/field names, never customer data',async()=>{
+  const p=new OneoffProvider(env,'sandbox',async()=>Response.json({...payer(),cpfCnpj:'private',email:'private@example.invalid'}));
+  expect(await p.payerReadiness(operation())).toEqual({ready:true,missing:[]});
+ });
+ it.each([{}, {phone:'1'}, {postalCode:'bad'}, {city:0}, {notificationDisabled:false}])('validates malformed customer data %j',async change=>{
+  const body=Object.keys(change).length?{...payer(),...change}:{id:'cus_consent'};
+  expect((await new OneoffProvider(env,'sandbox',async()=>Response.json(body)).payerReadiness(operation())).ready).toBe(false);
  });
 });

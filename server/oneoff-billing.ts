@@ -37,7 +37,8 @@ export function oneoffStore(env:Env,environment:Environment):OneoffStore{
  const cfg=oneoffConfig(env,environment),client=createClient(env.VITE_SUPABASE_URL!,env.VITE_SUPABASE_PUBLISHABLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
  return {async call<T>(command:string,payload:Record<string,unknown>){
   const raw=JSON.stringify({...payload,environment}),nonce=randomUUID(),issuedAt=Math.floor(Date.now()/1000),signature=createHmac("sha256",createHash("sha256").update(cfg.signing).digest()).update("oneoff-v1\n"+command+"\n"+nonce+"\n"+issuedAt+"\n"+raw).digest("hex");
-  const {data,error}=await client.rpc(command==='recover_name_rejection'?"admin_oneoff_recover_name_rejection":"admin_oneoff_server",{...(command==='recover_name_rejection'?{}:{command}),raw_payload:raw,issued_at:issuedAt,nonce,signature});
+  const recovery=command==='recover_name_rejection'||command==='recover_payer_rejection';
+  const {data,error}=await client.rpc(recovery?'admin_oneoff_'+command:'admin_oneoff_server',{...(recovery?{}:{command}),raw_payload:raw,issued_at:issuedAt,nonce,signature});
   if(error)throw new OneoffError(["PGRST202","42883","42P01","55000"].includes(error.code)?"SETUP_REQUIRED":error.code==="42501"?"FORBIDDEN":["23505","40001"].includes(error.code)?"CONFLICT":error.code==="23514"?"MISMATCH":"UNAVAILABLE");
   return data as T;
  }};
@@ -59,10 +60,24 @@ export class OneoffProvider{
    return await boundedJson(r,131072);
   }catch{throw new OneoffError("PROVIDER_UNAVAILABLE");}
  }
+ async payerReadiness(r:OneoffRequest){
+  if(!customer(r.customer_id)||r.environment!==this.environment)throw new OneoffError('MISMATCH');
+  const payer=await this.call('/customers/'+r.customer_id);
+  if(payer.id!==r.customer_id||payer.deleted===true)throw new OneoffError('MISMATCH');
+  const text=(key:string)=>typeof payer[key]==='string'&&String(payer[key]).trim().length>0;
+  const missing:string[]=[];
+  if(!text('phone')||!/^\d{10,11}$/.test(String(payer.phone).replace(/\D/g,'')))missing.push('phone');
+  for(const key of ['address','addressNumber','province'])if(!text(key))missing.push(key);
+  if(!text('postalCode')||!/^\d{8}$/.test(String(payer.postalCode).replace(/\D/g,'')))missing.push('postalCode');
+  if(!Number.isSafeInteger(payer.city)||Number(payer.city)<=0)missing.push('city');
+  if(this.environment==='sandbox'&&payer.notificationDisabled!==true)missing.push('notificationDisabled');
+  return {ready:missing.length===0,missing};
+ }
+ async validatePayer(r:OneoffRequest){if(!(await this.payerReadiness(r)).ready)throw new OneoffError('PAYER_INCOMPLETE');}
  async create(r:OneoffRequest,returnUrl:string){
   if(!uuid(r.id)||!customer(r.customer_id)||r.amount_cents!==1990||!["PIX","CREDIT_CARD"].includes(r.method))throw new OneoffError("INVALID_INPUT");
   const u=new URL(returnUrl);if(u.protocol!=="https:"||u.username||u.password||u.hash)throw new OneoffError("INVALID_INPUT");
-  const payer=await this.call("/customers/"+r.customer_id);if(payer.id!==r.customer_id || payer.deleted===true)throw new OneoffError("MISMATCH");
+  await this.validatePayer(r);
   const value=await this.call("/checkouts",{customer:r.customer_id,billingTypes:[r.method],chargeTypes:["DETACHED"],minutesToExpire:60,externalReference:r.id,callback:{successUrl:returnUrl,cancelUrl:returnUrl,expiredUrl:returnUrl},items:[{name:"PEREIRÃO — teste avulso",description:"Teste único autorizado. Não é assinatura.",quantity:1,value:19.90}]});
   if(!uuid(value.id))throw new OneoffError("RECONCILIATION_REQUIRED");return value.id;
  }
@@ -96,6 +111,8 @@ export class OneoffService{
  public store:OneoffStore;private provider:OneoffProvider;
  constructor(store:OneoffStore,provider:OneoffProvider){this.store=store;this.provider=provider;}
  async create(actorId:string,requestId:string,confirmation:string,returnUrl:string){
+  const context=await this.store.call<OneoffRequest>('context',{actorId,requestId});
+  if(context.state==='authorized')await this.provider.validatePayer(context);
   const result=await this.store.call<{create:boolean;request:OneoffRequest}>("start",{actorId,requestId,confirmation});
   if(!result.create)return result.request;
   try{const checkoutId=await this.provider.create(result.request,returnUrl);return await this.store.call<OneoffRequest>("save_checkout",{requestId,checkoutId});}
@@ -116,6 +133,22 @@ export class OneoffService{
   if(confirmation!=='RECUPERAR REJEICAO SANDBOX SEM CRIAR')throw new OneoffError('FORBIDDEN');
   const proof=await this.checkNameRejection(actorId,requestId);
   return this.store.call<OneoffRequest>('recover_name_rejection',{actorId,requestId,confirmation,...proof});
+ }
+ async checkPayerRejection(actorId:string,requestId:string){
+  if(this.provider.environment!=='sandbox'||requestId!=='dd279b98-de7c-4eeb-8253-fd95e2564bc4')throw new OneoffError('FORBIDDEN');
+  const context=await this.store.call<OneoffRequest>('context',{actorId,requestId});
+  if(context.environment!=='sandbox'||context.checkout_id||context.payment_id||!['uncertain','authorized'].includes(context.state))throw new OneoffError('MISMATCH');
+  const payer=await this.provider.payerReadiness(context),payerCheckedAt=new Date().toISOString();
+  if(!payer.ready)return {...payer,payerValidated:false};
+  const payments=await this.provider.payments({...context,checkout_id:null});
+  if(payments.length)throw new OneoffError('MISMATCH');
+  return {...payer,payerValidated:true,payerCheckedAt,paymentsEmpty:true,paymentsCheckedAt:new Date().toISOString(),evidence:{source:'asaas_api_log',logId:'108278750',httpStatus:400,code:'invalid_object',fields:['phone','address','addressNumber','postalCode','province','city'],reference:requestId}};
+ }
+ async recoverPayerRejection(actorId:string,requestId:string,confirmation:string){
+  if(confirmation!=='RECUPERAR REJEICAO SANDBOX SEM CRIAR')throw new OneoffError('FORBIDDEN');
+  const proof=await this.checkPayerRejection(actorId,requestId);
+  if(!proof.payerValidated)throw new OneoffError('PAYER_INCOMPLETE');
+  return this.store.call<OneoffRequest>('recover_payer_rejection',{actorId,requestId,confirmation,...proof});
  }
  async reconcile(actorId:string,requestId:string,eventType?:string){
   const result=await this.store.call<{request:OneoffRequest;lease:string}|null>("claim",{actorId,requestId});
@@ -138,7 +171,7 @@ export class OneoffService{
  }
 }
 const reply=(status:number,value:unknown)=>Response.json(value,{status,headers:{"Cache-Control":"private, no-store",Vary:"Authorization","X-Content-Type-Options":"nosniff"}});
-const failure=(e:unknown)=>{const code=e instanceof OneoffError?e.code:"UNAVAILABLE";return reply(({AUTH_REQUIRED:401,FORBIDDEN:403,DISABLED:403,INVALID_INPUT:400,CONFLICT:409,MISMATCH:409,BUSY:409,SETUP_REQUIRED:503} as Record<string,number>)[code]??503,{code});};
+const failure=(e:unknown)=>{const code=e instanceof OneoffError?e.code:"UNAVAILABLE";return reply(({AUTH_REQUIRED:401,FORBIDDEN:403,DISABLED:403,INVALID_INPUT:400,PAYER_INCOMPLETE:400,CONFLICT:409,MISMATCH:409,BUSY:409,SETUP_REQUIRED:503} as Record<string,number>)[code]??503,{code});};
 export const oneoffService=(env:Env,e:Environment)=>new OneoffService(oneoffStore(env,e),new OneoffProvider(env,e));
 function publicOperation(value:unknown){
  if(!value||typeof value!=='object'||Array.isArray(value))throw new OneoffError('UNAVAILABLE');
@@ -163,6 +196,8 @@ export function createOneoffHandler(env:Env,factory=oneoffService,clientFactory=
    const ids=await service.store.call<string[]>('retry',{actorId});for(const id of ids)await service.event(id).catch(()=>{});return reply(200,{data:{scheduled:ids.length}});
   }
   if(!uuid(p.requestId))throw new OneoffError('INVALID_INPUT');
+  if(p.action==='check_payer_rejection')return reply(200,{data:await service.checkPayerRejection(actorId,p.requestId)});
+  if(p.action==='recover_payer_rejection')return reply(200,{data:publicOperation(await service.recoverPayerRejection(actorId,p.requestId,p.confirmation as string))});
   if(p.action==='check_name_rejection')return reply(200,{data:await service.checkNameRejection(actorId,p.requestId)});
   if(p.action==='recover_name_rejection')return reply(200,{data:publicOperation(await service.recoverNameRejection(actorId,p.requestId,p.confirmation as string))});
   if(p.action==='reconcile'){await service.reconcile(actorId,p.requestId);return reply(200,{data:{ok:true}});}
