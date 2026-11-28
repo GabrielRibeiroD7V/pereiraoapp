@@ -51,7 +51,7 @@ export class OneoffProvider{
   if(body && (!this.cfg.writeEnabled || !this.cfg.webhookEnabled || path!=="/checkouts" && !path.endsWith("/cancel")))throw new OneoffError("DISABLED");
   if(body && path==='/checkouts'){
    const items=body.items as Record<string,unknown>[]|undefined;
-   if(JSON.stringify(body.chargeTypes)!=='["DETACHED"]'||!Array.isArray(body.billingTypes)||body.billingTypes.length!==1||!['PIX','CREDIT_CARD'].includes(String(body.billingTypes[0]))||!customer(body.customer)||!uuid(body.externalReference)||!Array.isArray(items)||items.length!==1||items[0]?.value!==19.90||items[0]?.quantity!==1||Object.keys(body).some(k=>!['customer','billingTypes','chargeTypes','minutesToExpire','externalReference','callback','items'].includes(k)))throw new OneoffError('INVALID_INPUT');
+   if(JSON.stringify(body.chargeTypes)!=='["DETACHED"]'||!Array.isArray(body.billingTypes)||body.billingTypes.length!==1||!['PIX','CREDIT_CARD'].includes(String(body.billingTypes[0]))||!customer(body.customer)||!uuid(body.externalReference)||!Array.isArray(items)||items.length!==1||items[0]?.value!==19.90||items[0]?.quantity!==1||typeof items[0]?.name!=='string'||items[0].name.length<1||items[0].name.length>30||Object.keys(body).some(k=>!['customer','billingTypes','chargeTypes','minutesToExpire','externalReference','callback','items'].includes(k)))throw new OneoffError('INVALID_INPUT');
   }
   try{
    const r=await this.request(this.cfg.host+path,{method:body?"POST":"GET",redirect:"error",signal:AbortSignal.timeout(10000),headers:{access_token:this.cfg.key,"Content-Type":"application/json",accept:"application/json","User-Agent":"PereiraoAdminOneoff/1.0"},...(body?{body:JSON.stringify(body)}:{})});
@@ -63,7 +63,7 @@ export class OneoffProvider{
   if(!uuid(r.id)||!customer(r.customer_id)||r.amount_cents!==1990||!["PIX","CREDIT_CARD"].includes(r.method))throw new OneoffError("INVALID_INPUT");
   const u=new URL(returnUrl);if(u.protocol!=="https:"||u.username||u.password||u.hash)throw new OneoffError("INVALID_INPUT");
   const payer=await this.call("/customers/"+r.customer_id);if(payer.id!==r.customer_id || payer.deleted===true)throw new OneoffError("MISMATCH");
-  const value=await this.call("/checkouts",{customer:r.customer_id,billingTypes:[r.method],chargeTypes:["DETACHED"],minutesToExpire:60,externalReference:r.id,callback:{successUrl:returnUrl,cancelUrl:returnUrl,expiredUrl:returnUrl},items:[{name:"PEREIRÃO — teste administrativo avulso",description:"Teste único autorizado. Não é assinatura.",quantity:1,value:19.90}]});
+  const value=await this.call("/checkouts",{customer:r.customer_id,billingTypes:[r.method],chargeTypes:["DETACHED"],minutesToExpire:60,externalReference:r.id,callback:{successUrl:returnUrl,cancelUrl:returnUrl,expiredUrl:returnUrl},items:[{name:"PEREIRÃO — teste avulso",description:"Teste único autorizado. Não é assinatura.",quantity:1,value:19.90}]});
   if(!uuid(value.id))throw new OneoffError("RECONCILIATION_REQUIRED");return value.id;
  }
  async payments(r:OneoffRequest){

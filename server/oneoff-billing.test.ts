@@ -73,7 +73,14 @@ describe('oneoff provider, fixed amount and isolation',()=>{
   expect(calls[1]?.[0]).toBe('https://api-sandbox.asaas.com/v3/checkouts');
   const init=calls[1]?.[1];expect(init?.redirect).toBe('error');
   const body=JSON.parse(String(init?.body));expect(body).toMatchObject({customer:'cus_consent',billingTypes:[method],chargeTypes:['DETACHED'],items:[{quantity:1,value:19.90}],externalReference:id});
+  expect(body.items[0].name).toBe('PEREIRÃO — teste avulso');
+  expect(body.items[0].name.length).toBeLessThanOrEqual(30);
   expect(body).not.toHaveProperty('subscription');expect(body).not.toHaveProperty('installment');expect(JSON.stringify(body)).not.toMatch(/creditCard|cvv|ccv|holderName|cardToken/);
+ });
+ it('rejects an item name exceeding the real Asaas 30-character limit before POST',async()=>{
+  const fetcher=vi.fn<typeof fetch>(),provider=new OneoffProvider(env,'sandbox',fetcher);
+  await expect(provider.call('/checkouts',{customer:'cus_consent',billingTypes:['PIX'],chargeTypes:['DETACHED'],externalReference:id,items:[{name:'PEREIRÃO — teste administrativo avulso',quantity:1,value:19.90}]})).rejects.toThrow('INVALID_INPUT');
+  expect(fetcher).not.toHaveBeenCalled();
  });
  it('rejects production writes without new independent flag even with valid key',async()=>{
   const fetcher=vi.fn<typeof fetch>();const production={...env,VERCEL_ENV:'production',ASAAS_API_KEY_PRODUCTION:'$aact_prod_fixture',BILLING_PRODUCTION_RPC_SIGNING_SECRET:'P'.repeat(64)};
