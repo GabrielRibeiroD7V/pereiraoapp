@@ -230,3 +230,63 @@ it('admin create responses strip internal leases, actor and payer identifiers',a
  expect(response.status).toBe(200);const result=await response.json();expect(result.data.id).toBe(id);
  expect(result.data).not.toHaveProperty('lease');expect(result.data).not.toHaveProperty('actor_id');expect(result.data).not.toHaveProperty('customer_id');
 });
+
+describe('narrow audited recovery of the definitively rejected Sandbox checkout',()=>{
+ const historical='dd279b98-de7c-4eeb-8253-fd95e2564bc4';
+ const confirmation='RECUPERAR REJEICAO SANDBOX SEM CRIAR';
+ function recovery(){
+  const f=fixture();Object.assign(f.provider,{environment:'sandbox'});
+  f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',diagnostic:'creation_uncertain',checkout_id:null,payment_id:null});
+  f.provider.payments.mockResolvedValue([]);return f;
+ }
+ it('checks the existing external reference, then requests a signed transition without creating checkout',async()=>{
+  const f=recovery();await f.service.recoverNameRejection(actor,historical,confirmation);
+  expect(f.provider.payments).toHaveBeenCalledWith(expect.objectContaining({id:historical,checkout_id:null}));
+  expect(f.store.call).toHaveBeenLastCalledWith('recover_name_rejection',expect.objectContaining({actorId:actor,requestId:historical,confirmation,paymentsEmpty:true,evidence:expect.objectContaining({httpStatus:400,logId:'108269826',reference:historical})}));
+  expect(f.provider.create).not.toHaveBeenCalled();expect(f.store.call.mock.calls.some(([x])=>x==='authorize'||x==='start')).toBe(false);
+ });
+ it('inspection does not transition or create anything',async()=>{
+  const f=recovery();expect(await f.service.checkNameRejection(actor,historical)).toMatchObject({paymentsEmpty:true});
+  expect(f.store.call).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenCalledWith('context',{actorId:actor,requestId:historical});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it.each(['timeout','ambiguous response'])('blocks recovery when the API read fails: %s',async message=>{
+  const f=recovery();f.provider.payments.mockRejectedValue(Error(message));
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow(message);
+  expect(f.store.call.mock.calls.some(([x])=>x==='recover_name_rejection')).toBe(false);
+ });
+ it('blocks any existing payment even if its status is not paid',async()=>{
+  const f=recovery();f.provider.payments.mockResolvedValue([{...payment(),status:'PENDING'}]);
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('MISMATCH');
+  expect(f.store.call).toHaveBeenCalledTimes(1);
+ });
+ it.each([{checkout_id:checkout},{payment_id:'pay_existing'},{state:'creating'},{state:'paid'},{environment:'production'}])('rejects incompatible context %j',async change=>{
+  const f=recovery();f.store.call.mockResolvedValue({...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null,...change});
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('MISMATCH');expect(f.provider.payments).not.toHaveBeenCalled();
+ });
+ it('never opens recovery for a different request or Production',async()=>{
+  const f=recovery();await expect(f.service.recoverNameRejection(actor,id,confirmation)).rejects.toThrow('FORBIDDEN');
+  Object.assign(f.provider,{environment:'production'});await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('FORBIDDEN');expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it('requires separate confirmation and propagates missing migration safely',async()=>{
+  const f=recovery();await expect(f.service.recoverNameRejection(actor,historical,'')).rejects.toThrow('FORBIDDEN');
+  f.store.call.mockImplementation(async cmd=>{if(cmd==='recover_name_rejection')throw Error('SETUP_REQUIRED');return {...operation(),id:historical,state:'uncertain',checkout_id:null,payment_id:null};});
+  await expect(f.service.recoverNameRejection(actor,historical,confirmation)).rejects.toThrow('SETUP_REQUIRED');expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('an ambiguous successful HTTP response never permits automatic creation retry',async()=>{
+  const fetcher=vi.fn<typeof fetch>(async(_u,opts)=>Response.json(opts?.method==='POST'?{}:{id:'cus_consent'}));
+  await expect(new OneoffProvider(env,'sandbox',fetcher).create(operation(),'https://preview.example/admin')).rejects.toThrow('RECONCILIATION_REQUIRED');
+  expect(fetcher.mock.calls.filter(([,o])=>o?.method==='POST')).toHaveLength(1);
+ });
+});
+
+describe('recovery endpoint authentication',()=>{
+ it('does not let anonymous callers reach recovery',async()=>{
+  const f=fixture();const response=await createOneoffHandler(env,f.factory,f.clientFactory)(request({action:'recover_name_rejection',requestId:'dd279b98-de7c-4eeb-8253-fd95e2564bc4'},{}));
+  expect(response.status).toBe(401);expect(f.factory).not.toHaveBeenCalled();
+ });
+ it('does not let an authenticated non-admin inspect or recover',async()=>{
+  const f=fixture();f.client.rpc.mockResolvedValue({data:false,error:null});
+  for(const action of ['check_name_rejection','recover_name_rejection'])expect((await createOneoffHandler(env,f.factory,f.clientFactory)(request({action,requestId:'dd279b98-de7c-4eeb-8253-fd95e2564bc4'}))).status).toBe(403);
+  expect(f.factory).not.toHaveBeenCalled();
+ });
+});

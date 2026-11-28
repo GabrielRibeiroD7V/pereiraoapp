@@ -37,7 +37,7 @@ export function oneoffStore(env:Env,environment:Environment):OneoffStore{
  const cfg=oneoffConfig(env,environment),client=createClient(env.VITE_SUPABASE_URL!,env.VITE_SUPABASE_PUBLISHABLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
  return {async call<T>(command:string,payload:Record<string,unknown>){
   const raw=JSON.stringify({...payload,environment}),nonce=randomUUID(),issuedAt=Math.floor(Date.now()/1000),signature=createHmac("sha256",createHash("sha256").update(cfg.signing).digest()).update("oneoff-v1\n"+command+"\n"+nonce+"\n"+issuedAt+"\n"+raw).digest("hex");
-  const {data,error}=await client.rpc("admin_oneoff_server",{command,raw_payload:raw,issued_at:issuedAt,nonce,signature});
+  const {data,error}=await client.rpc(command==='recover_name_rejection'?"admin_oneoff_recover_name_rejection":"admin_oneoff_server",{...(command==='recover_name_rejection'?{}:{command}),raw_payload:raw,issued_at:issuedAt,nonce,signature});
   if(error)throw new OneoffError(["PGRST202","42883","42P01","55000"].includes(error.code)?"SETUP_REQUIRED":error.code==="42501"?"FORBIDDEN":["23505","40001"].includes(error.code)?"CONFLICT":error.code==="23514"?"MISMATCH":"UNAVAILABLE");
   return data as T;
  }};
@@ -101,6 +101,22 @@ export class OneoffService{
   try{const checkoutId=await this.provider.create(result.request,returnUrl);return await this.store.call<OneoffRequest>("save_checkout",{requestId,checkoutId});}
   catch{await this.store.call("uncertain",{requestId});throw new OneoffError("RECONCILIATION_REQUIRED");}
  }
+ async checkNameRejection(actorId:string,requestId:string){
+  if(this.provider.environment!=='sandbox'||requestId!=='dd279b98-de7c-4eeb-8253-fd95e2564bc4')throw new OneoffError('FORBIDDEN');
+  const context=await this.store.call<OneoffRequest>('context',{actorId,requestId});
+  if(context.environment!=='sandbox'||context.checkout_id||context.payment_id||!['uncertain','authorized'].includes(context.state))throw new OneoffError('MISMATCH');
+  // Empty payments alone never proves that a checkout was not created. This
+  // single historical recovery also requires the reviewed definitive 400 log,
+  // pinned in the database function. No generic retry/reset operation exists.
+  const payments=await this.provider.payments({...context,checkout_id:null});
+  if(payments.length!==0)throw new OneoffError('MISMATCH');
+  return {paymentsEmpty:true,paymentsCheckedAt:new Date().toISOString(),evidence:{source:'asaas_api_log',logId:'108269826',httpStatus:400,code:'invalid_object',field:'items.name',limit:30,reference:requestId}};
+ }
+ async recoverNameRejection(actorId:string,requestId:string,confirmation:string){
+  if(confirmation!=='RECUPERAR REJEICAO SANDBOX SEM CRIAR')throw new OneoffError('FORBIDDEN');
+  const proof=await this.checkNameRejection(actorId,requestId);
+  return this.store.call<OneoffRequest>('recover_name_rejection',{actorId,requestId,confirmation,...proof});
+ }
  async reconcile(actorId:string,requestId:string,eventType?:string){
   const result=await this.store.call<{request:OneoffRequest;lease:string}|null>("claim",{actorId,requestId});
   if(!result)throw new OneoffError("BUSY");
@@ -147,6 +163,8 @@ export function createOneoffHandler(env:Env,factory=oneoffService,clientFactory=
    const ids=await service.store.call<string[]>('retry',{actorId});for(const id of ids)await service.event(id).catch(()=>{});return reply(200,{data:{scheduled:ids.length}});
   }
   if(!uuid(p.requestId))throw new OneoffError('INVALID_INPUT');
+  if(p.action==='check_name_rejection')return reply(200,{data:await service.checkNameRejection(actorId,p.requestId)});
+  if(p.action==='recover_name_rejection')return reply(200,{data:publicOperation(await service.recoverNameRejection(actorId,p.requestId,p.confirmation as string))});
   if(p.action==='reconcile'){await service.reconcile(actorId,p.requestId);return reply(200,{data:{ok:true}});}
   if(!cfg.writeEnabled||!cfg.webhookEnabled||!cfg.token)throw new OneoffError('DISABLED');
   if(p.action==='authorize'){
