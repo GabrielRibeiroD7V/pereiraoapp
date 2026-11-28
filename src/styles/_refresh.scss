@@ -12,11 +12,14 @@
     .brand { border-radius:.5rem; }
     .brand:focus-visible { outline-color:var(--color-accent); }
     // Mesmos pixels/contorno do arquivo oficial, tratados no SVG para fundo escuro.
-    .brand__inverse-image { display:block; width:calc(9.5rem * var(--lettering-scale,1)); height:auto; overflow:visible; }
+    .brand__inverse-image { display:block; width:calc(9.5rem * var(--lettering-scale,1)); height:auto; overflow:hidden; }
 
   }
+  .home-masthead {
+    background:linear-gradient(150deg,#061a3c 0%,#123b67 100%);
+  }
   .app-header--home {
-    background:#061a3c;
+    background:transparent;
     box-shadow:none;
     &::before { content:none; }
   }
@@ -24,9 +27,7 @@
   .home-page { max-width:none; margin:0; }
   .home-hero {
     position:relative; isolation:isolate; overflow:hidden;
-    // O primeiro tom coincide com o cabeçalho para formar um único bloco, sem emenda luminosa.
-    background:linear-gradient(150deg,#061a3c 0%,#123b67 100%); color:#fff;
-    margin-top:-1px;
+    background:transparent; color:#fff;
     padding:.75rem 0 2.5rem;
     &::before { content:''; position:absolute; z-index:-1; pointer-events:none; width:24rem; height:11rem; right:-12rem; top:1rem; border-top:2px solid #00cfde9c; border-radius:50%; transform:rotate(-25deg); background:linear-gradient(180deg,#00cfde0c,transparent 32%); }
     &::after { content:''; position:absolute; z-index:-1; pointer-events:none; inset:auto 0 0; height:4rem; background:linear-gradient(transparent,#f6f9fe); }
