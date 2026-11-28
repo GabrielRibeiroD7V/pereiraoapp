@@ -16,16 +16,21 @@ export interface OneoffRequest {
 export class OneoffError extends Error {public code:string;constructor(code:string){super(code);this.code=code;}}
 const uuid=(v:unknown):v is string=>typeof v==="string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 const customer=(v:unknown):v is string=>typeof v==="string" && /^cus_[A-Za-z0-9_-]{1,150}$/.test(v);
+// Match the direct Sandbox inbox: normalize only accidental outer ASCII
+// whitespace in server configuration. Never normalize the received header.
+const sandboxToken=(value:string|undefined)=>value?.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g,'');
+const validWebhookToken=(value:string|undefined,environment:Environment):value is string=>!!value &&
+ (environment==='sandbox'?/^[\x21-\x7e]{32,255}$/:/^[A-Za-z0-9_-]{32,200}$/).test(value);
 export function oneoffConfig(env:Env,environment:Environment){
  if(!["sandbox","production"].includes(environment) || (environment==="production" ? env.VERCEL_ENV!=="production":env.VERCEL_ENV!=="preview") || env.VITE_SUPABASE_URL!=="https://yazdjiwaksamizrbqewq.supabase.co" || !env.VITE_SUPABASE_PUBLISHABLE_KEY?.startsWith("sb_publishable_")) throw new OneoffError("DISABLED");
  if(environment==="production" && ["CHECKOUT","SUBSCRIPTIONS","CHARGES","ENFORCEMENT","PIX"].some(k=>env["ASAAS_PRODUCTION_"+k+"_ENABLED"]!==undefined && env["ASAAS_PRODUCTION_"+k+"_ENABLED"]!=="false"))throw new OneoffError("DISABLED");
  const prod=environment==="production",key=prod?env.ASAAS_API_KEY_PRODUCTION:env.ASSAS_API_KEY_SANDBOX,
   signing=prod?env.BILLING_PRODUCTION_RPC_SIGNING_SECRET:env.BILLING_RPC_SIGNING_SECRET,
-  token=prod?env.ASAAS_PRODUCTION_WEBHOOK_TOKEN:env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN;
- if(token && token===signing || token && token===env.ASAAS_SANDBOX_WEBHOOK_TOKEN || prod && token && token===env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN || !key || !(prod?/^\$aact_prod_[\x21-\x7e]{1,2048}$/:/^\$aact_hmlg_[\x21-\x7e]{1,2048}$/).test(key) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) || prod && (signing===env.BILLING_RPC_SIGNING_SECRET || key===env.ASSAS_API_KEY_SANDBOX)) throw new OneoffError("SETUP_REQUIRED");
+  token=prod?env.ASAAS_PRODUCTION_WEBHOOK_TOKEN:sandboxToken(env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN);
+ if(token && token===signing || token && (token===env.ASAAS_SANDBOX_WEBHOOK_TOKEN || !prod && token===sandboxToken(env.ASAAS_SANDBOX_WEBHOOK_TOKEN)) || prod && token && token===env.ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN || !key || !(prod?/^\$aact_prod_[\x21-\x7e]{1,2048}$/:/^\$aact_hmlg_[\x21-\x7e]{1,2048}$/).test(key) || !signing || !/^[A-Za-z0-9_-]{48,200}$/.test(signing) || prod && (signing===env.BILLING_RPC_SIGNING_SECRET || key===env.ASSAS_API_KEY_SANDBOX)) throw new OneoffError("SETUP_REQUIRED");
  return {key,signing,token,host:prod?"https://api.asaas.com/v3":"https://api-sandbox.asaas.com/v3",
   writeEnabled:env[prod?"ASAAS_ADMIN_ONEOFF_PRODUCTION_ENABLED":"ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED"]==="true",
-  webhookEnabled:env.ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED==="true" && !!token && /^[A-Za-z0-9_-]{32,200}$/.test(token)};
+  webhookEnabled:env.ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED==="true" && validWebhookToken(token,environment)};
 }
 export interface OneoffStore {call<T=unknown>(command:string,payload:Record<string,unknown>):Promise<T>}
 export function oneoffStore(env:Env,environment:Environment):OneoffStore{
@@ -158,7 +163,7 @@ export function createOneoffWebhook(env:Env,defer:(task:Promise<unknown>)=>void,
   const e:Environment=env.VERCEL_ENV==='production'?'production':'sandbox',cfg=oneoffConfig(env,e);
   if(!cfg.webhookEnabled)throw new OneoffError('DISABLED');
   const received=req.headers.get('asaas-access-token')??'';
-  if(!cfg.token||!/^[A-Za-z0-9_-]{32,200}$/.test(cfg.token)||Buffer.byteLength(received)!==Buffer.byteLength(cfg.token)||!timingSafeEqual(Buffer.from(received),Buffer.from(cfg.token)))throw new OneoffError('AUTH_REQUIRED');
+  if(!validWebhookToken(cfg.token,e)||Buffer.byteLength(received)!==Buffer.byteLength(cfg.token)||!timingSafeEqual(Buffer.from(received),Buffer.from(cfg.token)))throw new OneoffError('AUTH_REQUIRED');
   if(!req.headers.get('content-type')?.includes('application/json'))throw new OneoffError('INVALID_INPUT');
   const notice=oneoffNotice(await boundedJson(req,65536));
   if(!notice)throw new OneoffError('INVALID_INPUT');

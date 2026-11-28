@@ -7,6 +7,54 @@ const id='00000000-0000-4000-8000-000000000981',checkout='00000000-0000-4000-800
 const env={VERCEL_ENV:'preview',VITE_SUPABASE_URL:'https://yazdjiwaksamizrbqewq.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',ASSAS_API_KEY_SANDBOX:'$aact_hmlg_fixture',BILLING_RPC_SIGNING_SECRET:'S'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'T'.repeat(64),ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED:'true',ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED:'true'};
 const operation=(method:'PIX'|'CREDIT_CARD'='PIX'):OneoffRequest=>({id,environment:'sandbox',method,customer_id:'cus_consent',state:'pending',checkout_id:checkout,payment_id:null,amount_cents:1990,currency:'BRL',net_cents:null,refunded_cents:0,diagnostic:null,provider_status:null,consent_at:'2026-11-27T12:00:00Z',created_at:'2026-11-27T12:00:00Z'});
 const payment=()=>({id:'pay_fixture',customer:'cus_consent',checkoutSession:checkout,externalReference:id,billingType:'PIX',value:19.90,netValue:19.40,status:'RECEIVED',subscription:null,installment:null});
+describe('Sandbox Preview token compatibility with the direct inbox',()=>{
+ const token='fixture:Sandbox+'.repeat(3);
+ it('normalizes only outer ASCII whitespace in the configured Sandbox token',()=>{
+  const cfg=oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:' \t\r\n'+token+'\r\n '},'sandbox');
+  expect(cfg.token).toBe(token);expect(cfg.writeEnabled).toBe(true);expect(cfg.webhookEnabled).toBe(true);
+ });
+ it('keeps the gate valid for the documented 255-character visible ASCII token',()=>{
+  expect(oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'+'.repeat(255)},'sandbox').webhookEnabled).toBe(true);
+ });
+ it('reports write availability to a legitimate admin without creating any operation',async()=>{
+  const f=fixture();
+  const handler=createOneoffHandler({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},f.factory,f.clientFactory);
+  const response=await handler(request({action:'status'}));
+  expect(response.status).toBe(200);expect(await response.json()).toMatchObject({writeEnabled:true});
+  expect(f.store.call).toHaveBeenCalledTimes(1);expect(f.store.call).toHaveBeenCalledWith('status',{actorId:actor});
+  expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('reaches authentication and rejects a wrong token instead of returning DISABLED',async()=>{
+  const f=fixture();
+  const response=await createOneoffWebhook({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},vi.fn(),f.factory)(
+   new Request('https://preview.example/api/asaas-admin-oneoff-webhook',{method:'POST',headers:{'Content-Type':'application/json','asaas-access-token':'wrong-token'},body:'{}'}));
+  expect(response.status).toBe(401);expect(await response.json()).toEqual({code:'AUTH_REQUIRED'});expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it.each(['T'.repeat(31),'T'.repeat(256),'T'.repeat(32)+' inner','T'.repeat(32)+'\ninner','\u00a0'+'T'.repeat(40),'T'.repeat(32)+'\u007f'])('keeps invalid token formats disabled (%#)',value=>{
+  expect(oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:value},'sandbox').webhookEnabled).toBe(false);
+ });
+ it.each(['ASAAS_ADMIN_ONEOFF_SANDBOX_ENABLED','ASAAS_ADMIN_ONEOFF_WEBHOOK_ENABLED'])('keeps an absent %s closed in admin status',async key=>{
+  const f=fixture(),response=await createOneoffHandler({...env,[key]:undefined},f.factory,f.clientFactory)(request({action:'status'}));
+  expect(await response.json()).toMatchObject({writeEnabled:false});expect(f.provider.create).not.toHaveBeenCalled();
+ });
+ it('compares the received token exactly and accepts valid authentication only before input validation',async()=>{
+  const f=fixture(),handler=createOneoffWebhook({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\r\n'+token+'\n'},vi.fn(),f.factory);
+  const send=(header:string)=>handler(new Request('https://preview.example/api/asaas-admin-oneoff-webhook',{method:'POST',headers:{'Content-Type':'application/json','asaas-access-token':header},body:'{}'}));
+  expect((await send(token+'x')).status).toBe(401);
+  expect((await send(token)).status).toBe(400);expect(f.store.call).not.toHaveBeenCalled();
+ });
+ it('still rejects a normalized token equal to HMAC or legacy credentials',()=>{
+  expect(()=>oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\n'+env.BILLING_RPC_SIGNING_SECRET+'\n'},'sandbox')).toThrow('SETUP_REQUIRED');
+  expect(()=>oneoffConfig({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:'\n'+token+'\n',ASAAS_SANDBOX_WEBHOOK_TOKEN:' '+token+' '},'sandbox')).toThrow('SETUP_REQUIRED');
+ });
+ it('does not normalize or widen Production token validation',()=>{
+  const production={...env,VERCEL_ENV:'production',ASAAS_API_KEY_PRODUCTION:'$aact_prod_fixture',BILLING_PRODUCTION_RPC_SIGNING_SECRET:'P'.repeat(64)};
+  for(const value of ['\n'+'V'.repeat(64)+'\n','+'.repeat(64),'V'.repeat(255)]){
+   const cfg=oneoffConfig({...production,ASAAS_PRODUCTION_WEBHOOK_TOKEN:value},'production');
+   expect(cfg.token).toBe(value);expect(cfg.webhookEnabled).toBe(false);expect(cfg.writeEnabled).toBe(false);
+  }
+ });
+});
 const request=(body:unknown,headers:Record<string,string>={Authorization:'Bearer fixture'})=>new Request('https://preview.example/api/admin-oneoff-billing',{method:'POST',headers,body:JSON.stringify(body)});
 function fixture(){
  const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:actor,email_confirmed_at:'2026-11-27'}},error:null}))},rpc:vi.fn(async()=>({data:true,error:null}))};
