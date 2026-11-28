@@ -23,7 +23,7 @@ describe('Início', () => {
   it('mostra a logo oficial proporcional e uma única busca acessível', () => {
     open();
     const logo = screen.getByRole('img', { name: 'PEREIRÃO' });
-    expect(logo).toHaveAttribute('viewBox', '20 151 345 87');
+    expect(logo).toHaveAttribute('viewBox', '20 151 338 87');
     expect(logo.querySelectorAll('image')).toHaveLength(2);
     for (const layer of logo.querySelectorAll('image')) {
       expect(layer).toHaveAttribute('href', '/images/brand/pereirao-384.png');
