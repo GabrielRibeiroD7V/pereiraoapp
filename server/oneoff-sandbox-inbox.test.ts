@@ -41,6 +41,24 @@ describe('Sandbox direct durable inbox',()=>{
    expect(good.status).toBe(200);expect(backend).toHaveBeenCalledOnce();
   }
  });
+ it('normalizes only outer ASCII whitespace in configured Secret, never incoming token',async()=>{
+  const known='a'.repeat(32)+'!#'+'b'.repeat(30);
+  for (const stored of ['\n'+known,known+'\n','\r\n'+known+'\r\n',' \t'+known+'\n ']) {
+   const backend=vi.fn<typeof fetch>(async()=>ack());
+   const handler=createOneoffSandboxInbox({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:stored},backend);
+   expect((await handler(req(notice,{'asaas-access-token':'Q'.repeat(64)}))).status).toBe(401);
+   expect(backend).not.toHaveBeenCalled();
+   expect((await handler(req(notice,{'asaas-access-token':known}))).status).toBe(200);
+   expect(backend).toHaveBeenCalledOnce();
+  }
+ });
+ it('still rejects internal whitespace and non-ASCII in stored secret',async()=>{
+  for (const stored of ['a'.repeat(32)+'\n'+'b'.repeat(32), 'a'.repeat(32)+' '+'b'.repeat(32), 'a'.repeat(32)+'é']) {
+   const backend=vi.fn();
+   expect((await createOneoffSandboxInbox({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:stored},backend)(req())).status).toBe(503);
+   expect(backend).not.toHaveBeenCalled();
+  }
+ });
  it.each(['A'.repeat(31),'A'.repeat(256),'A'.repeat(31)+' ','A'.repeat(31)+'\n','A'.repeat(31)+'\t','A'.repeat(31)+'\u007f'])('rejects invalid configured tokens before inbox',async configuredToken=>{
   const backend=vi.fn();
   const handler=createOneoffSandboxInbox({...env,ASAAS_ADMIN_ONEOFF_SANDBOX_WEBHOOK_TOKEN:configuredToken},backend);
