@@ -156,7 +156,7 @@ export function AdminPage() {
         Pular para administração
       </a>
       <header className="admin-header">
-        <Brand />
+        <Brand inverse />
         <span>Administração</span>
         <Link to="/conta">Voltar ao aplicativo</Link>
       </header>

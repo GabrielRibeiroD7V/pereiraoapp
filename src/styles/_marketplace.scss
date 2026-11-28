@@ -13,8 +13,9 @@
     .provider-item__details strong { font-size: var(--font-small); }
     .public-contacts { margin: 0; }
   }
-  .public-carousel-controls { position: absolute; bottom: -3.25rem; right: 0; display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: 0; .button { min-width: 2.75rem; padding: var(--space-2); } }
-  .home-section:has(.public-carousel) > .text-link { padding-right: 7rem; }
+  .public-carousel-controls { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); .button { min-width: 2.75rem; padding: var(--space-2); } }
+  .public-carousel .public-provider-list > li:first-child { margin-inline-start:auto; }
+  .public-carousel .public-provider-list > li:last-child { margin-inline-end:auto; }
   .public-provider-list > li { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2); }
   .public-provider-list .provider-item { flex: 1 1 18rem; min-width: 0; border: 0; }
   .public-provider-list .public-contacts { margin-left: 5.25rem; margin-bottom: var(--space-2); }

@@ -6,6 +6,7 @@ export function useInitialFreePhase(){
  useEffect(()=>{let live=true;setConfirmed(false);void repository?.accessStatus?.().then(status=>{if(live)setConfirmed(status?.phase==='initial_free');}).catch(()=>{if(live)setConfirmed(false);});return()=>{live=false;};},[repository]);
  return confirmed;
 }
-export function FreePhaseNotice(){return <section className="form-notice" aria-label="Fase inicial gratuita"><strong>Fase inicial gratuita</strong><p>Perfil básico, serviços, publicações e conversas são gratuitos nesta fase. Os 90 dias não estão correndo.</p><p>Uma assinatura futura será opcional, com benefícios e condições apresentados antes da sua decisão. Não há conversão ou cobrança automática. A publicação do perfil continua sujeita à revisão administrativa.</p></section>;}
+/** Informação administrativa; não é oferta ou prazo para o usuário. */
+export function FreePhaseNotice(){return <section className="form-notice" aria-label="Política comercial"><strong>Gratuidade por prazo indeterminado</strong><p>A plataforma permanece gratuita até uma decisão administrativa própria. Disponibilizar planos e contratar individualmente são etapas separadas; nenhuma conta é convertida automaticamente em assinatura.</p><p>A publicação é feita pelo responsável, com moderação posterior. Isenções e direitos existentes são preservados.</p></section>;}
 export function InitialFreeNotice(){return useInitialFreePhase()?<FreePhaseNotice/>:null;
 }

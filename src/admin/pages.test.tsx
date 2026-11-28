@@ -25,6 +25,13 @@ function open(path = "/admin", fixture = adminFixture(), visitor = false) {
   return fixture;
 }
 describe("administração protegida", () => {
+  it("usa os pixels da marca oficial na variante azul/ciano do aplicativo", async () => {
+    open();
+    const logo=await screen.findByRole('img',{name:'PEREIRÃO'});
+    expect(logo).toHaveAttribute('viewBox','20 151 345 87');
+    expect(logo.querySelectorAll('image')).toHaveLength(2);
+    for(const layer of logo.querySelectorAll('image')) expect(layer).toHaveAttribute('href','/images/brand/pereirao-384.png');
+  });
   it("exige login e preserva retorno para /admin", async () => {
     open("/admin", adminFixture(), true);
     expect(
