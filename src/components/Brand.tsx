@@ -6,7 +6,7 @@ export function Brand({ inverse = false }: { inverse?: boolean } = {}) {
   const id=`brand-${useId().replace(/[^a-zA-Z0-9_-]/g,'')}`;
   return (
     <Link className={`brand${inverse ? ' brand--inverse' : ''}`} to={routes.home} aria-label="PEREIRÃO — Início">
-      {inverse ? <svg className="brand__inverse-image" viewBox="20 151 345 87" width="345" height="87" role="img" aria-label="PEREIRÃO" focusable="false">
+      {inverse ? <svg className="brand__inverse-image" viewBox="20 151 338 87" width="338" height="87" role="img" aria-label="PEREIRÃO" focusable="false">
         <defs>
           <filter id={`${id}-white`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1 -1 -1 0 2.95"/></filter>
           <filter id={`${id}-color`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 .812  0 0 0 0 .871  -1 -1 -1 0 2.95"/></filter>
